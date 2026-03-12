@@ -8,107 +8,107 @@
 
 ### Core Plugin
 
-- [ ] Main plugin file with header, constants, autoloader
-- [ ] Core class (singleton, module loader, settings manager)
-- [ ] Activation / deactivation hooks
-- [ ] Uninstall script (clean all plugin data from database)
-- [ ] WordPress.org-compliant `readme.txt`
+- [x] Main plugin file with header, constants, autoloader
+- [x] Core class (singleton, module loader, settings manager)
+- [x] Activation / deactivation hooks
+- [x] Uninstall script (clean all plugin data from database)
+- [x] WordPress.org-compliant `readme.txt`
 
 ### SEO Manager
 
-- [ ] SEO title override with `pre_get_document_title` filter
-- [ ] Meta description tag output
-- [ ] Canonical URL with override support
-- [ ] Robots meta directives (noindex, nofollow)
-- [ ] Open Graph tags (title, description, image, type, URL, site name)
-- [ ] Twitter Card tags (card type, title, description, image)
-- [ ] Title separator setting
+- [x] SEO title override with `pre_get_document_title` filter
+- [x] Meta description tag output
+- [x] Canonical URL with override support
+- [x] Robots meta directives (noindex, nofollow)
+- [x] Open Graph tags (title, description, image, type, URL, site name)
+- [x] Twitter Card tags (card type, title, description, image)
+- [x] Title separator setting
 
 ### Schema Manager
 
-- [ ] JSON-LD `@graph` container in `wp_head`
-- [ ] Organization schema from settings
-- [ ] WebSite schema with search action
-- [ ] BreadcrumbList schema
-- [ ] Article schema for single posts
-- [ ] FAQPage schema (when FAQs exist)
-- [ ] HowTo schema (when enabled per-post)
-- [ ] SpeakableSpecification schema
+- [x] JSON-LD `@graph` container in `wp_head`
+- [x] Organization schema from settings
+- [x] WebSite schema with search action
+- [x] BreadcrumbList schema
+- [x] Article schema for single posts
+- [x] FAQPage schema (when FAQs exist)
+- [x] HowTo schema (when enabled per-post)
+- [x] SpeakableSpecification schema
 
 ### AEO Manager
 
-- [ ] FAQ auto-detection from heading patterns
-- [ ] FAQ repeater field (manual Q&A entry)
-- [ ] HowTo schema builder
-- [ ] Speakable markup for article intro
-- [ ] AEO scoring algorithm
-- [ ] `[search_intel_faq]` shortcode
-- [ ] `[search_intel_howto]` shortcode
+- [x] FAQ auto-detection from heading patterns
+- [x] FAQ repeater field (manual Q&A entry)
+- [x] HowTo schema builder
+- [x] Speakable markup for article intro
+- [x] AEO scoring algorithm
+- [x] `[search_intel_faq]` shortcode
+- [x] `[search_intel_howto]` shortcode
 
 ### GEO Manager
 
-- [ ] AI meta tags (`ai-summary`, `ai-topics`, `ai-content-type`)
-- [ ] `llms.txt` endpoint (summary version)
-- [ ] `llms-full.txt` endpoint (detailed version)
-- [ ] Entity markup repeater
-- [ ] E-E-A-T signals (author credentials in schema)
-- [ ] Content freshness tracking (`dateModified`, fact-check date)
-- [ ] AI crawl directives meta tags
-- [ ] GEO scoring algorithm
+- [x] AI meta tags (`ai-summary`, `ai-topics`, `ai-content-type`)
+- [x] `llms.txt` endpoint (summary version)
+- [x] `llms-full.txt` endpoint (detailed version)
+- [x] Entity markup repeater
+- [x] E-E-A-T signals (author credentials in schema)
+- [x] Content freshness tracking (`dateModified`, fact-check date)
+- [x] AI crawl directives meta tags
+- [x] GEO scoring algorithm
 
 ### Content Analyzer
 
-- [ ] Readability scoring (Flesch-Kincaid)
-- [ ] Keyword density analysis
-- [ ] Word count check
-- [ ] SEO score calculation
-- [ ] AEO score calculation
-- [ ] GEO score calculation
-- [ ] AJAX endpoint for live analysis
-- [ ] Character counter for title and description
+- [x] Readability scoring (Flesch-Kincaid)
+- [x] Keyword density analysis
+- [x] Word count check
+- [x] SEO score calculation
+- [x] AEO score calculation
+- [x] GEO score calculation
+- [x] AJAX endpoint for live analysis
+- [x] Character counter for title and description
 
 ### Sitemap
 
-- [ ] XML sitemap index at `/sitemap.xml`
-- [ ] Post type sitemaps with pagination
-- [ ] Taxonomy sitemaps (categories)
-- [ ] Automatic noindex exclusion
-- [ ] `lastmod` support per URL
-- [ ] Search engine ping on publish
-- [ ] Disable WordPress default sitemap
+- [x] XML sitemap index at `/sitemap.xml`
+- [x] Post type sitemaps with pagination
+- [x] Taxonomy sitemaps (categories)
+- [x] Automatic noindex exclusion
+- [x] `lastmod` support per URL
+- [x] Search engine ping on publish
+- [x] Disable WordPress default sitemap
 
 ### Admin Interface
 
-- [ ] Top-level admin menu with sub-pages
-- [ ] General settings page (site identity, modules, post types)
-- [ ] SEO settings page (OG, Twitter, canonical, robots)
-- [ ] AEO settings page (FAQ, HowTo, Speakable config)
-- [ ] GEO settings page (AI meta, llms.txt, entities, E-E-A-T)
-- [ ] Sitemap settings page (post types, max URLs)
-- [ ] Social profiles settings page
-- [ ] Post editor metabox with tabbed UI (SEO, AEO, GEO, Advanced, Analysis)
-- [ ] SERP preview in metabox
-- [ ] FAQ repeater UI
-- [ ] Entity repeater UI
-- [ ] Custom columns in post list (SEO/AEO/GEO scores)
-- [ ] User profile E-E-A-T fields (credentials, expertise, social)
-- [ ] Admin CSS and JS assets
+- [x] Top-level admin menu with sub-pages
+- [x] General settings page (site identity, modules, post types)
+- [x] SEO settings page (OG, Twitter, canonical, robots)
+- [x] AEO settings page (FAQ, HowTo, Speakable config)
+- [x] GEO settings page (AI meta, llms.txt, entities, E-E-A-T)
+- [x] Sitemap settings page (post types, max URLs)
+- [x] Social profiles settings page
+- [x] Post editor metabox with tabbed UI (SEO, AEO, GEO, Advanced, Analysis)
+- [x] SERP preview in metabox
+- [x] FAQ repeater UI
+- [x] Entity repeater UI
+- [x] Custom columns in post list (SEO/AEO/GEO scores)
+- [x] User profile E-E-A-T fields (credentials, expertise, social)
+- [x] Admin CSS and JS assets
 
 ### Security (Baseline)
 
-- [ ] Input sanitization on all saved fields
-- [ ] Output escaping on all rendered values
-- [ ] Nonce verification on all forms and AJAX
-- [ ] Capability checks on all admin actions
-- [ ] `ABSPATH` guards on all PHP files
-- [ ] Zero frontend JavaScript or CSS
+- [x] Input sanitization on all saved fields
+- [x] Output escaping on all rendered values
+- [x] Nonce verification on all forms and AJAX
+- [x] Capability checks on all admin actions
+- [x] `ABSPATH` guards on all PHP files
+- [x] Zero frontend JavaScript or CSS
 
 ### Documentation
 
-- [ ] `LICENSE.md` (GPL-2.0-or-later)
-- [ ] `README.md` with architecture overview
-- [ ] `CHANGELOG.md` with v1.0 release notes
-- [ ] `ROADMAP.md` (this file)
+- [x] `LICENSE.md` (GPL-2.0-or-later)
+- [x] `README.md` with architecture overview
+- [x] `CHANGELOG.md` with v1.0 release notes
+- [x] `ROADMAP.md` (this file)
 
 ---
 

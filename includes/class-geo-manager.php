@@ -71,7 +71,7 @@ class GEO_Manager {
 
         if ( $ai_summary ) {
             printf(
-                '<meta name="description" property="og:description" content="%s" />' . "\n",
+                '<meta name="ai-summary" content="%s" />' . "\n",
                 esc_attr( $ai_summary )
             );
         }
