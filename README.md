@@ -6,6 +6,8 @@
 [![WordPress: 6.0+](https://img.shields.io/badge/WordPress-6.0%2B-21759b.svg)](https://wordpress.org/)
 [![PHP: 7.4+](https://img.shields.io/badge/PHP-7.4%2B-777bb4.svg)](https://php.net/)
 
+**[Roadmap](ROADMAP.md)** · **[Changelog](CHANGELOG.md)** · **[License](LICENSE.md)**
+
 ---
 
 ## Table of Contents
