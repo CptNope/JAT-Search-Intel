@@ -129,6 +129,106 @@ $settings = wp_parse_args( $settings, \Search_Intel\Core::get_default_settings()
             </table>
         </div>
 
+        <div class="si-settings-card">
+            <h2><?php esc_html_e( 'Default Open Graph Image', 'search-intel' ); ?></h2>
+            <table class="form-table">
+                <tr>
+                    <th><label for="si_default_og_image"><?php esc_html_e( 'Fallback OG Image URL', 'search-intel' ); ?></label></th>
+                    <td>
+                        <input type="url" id="si_default_og_image" name="search_intel_settings[default_og_image]" value="<?php echo esc_url( $settings['default_og_image'] ); ?>" class="regular-text" />
+                        <p class="description"><?php esc_html_e( 'Used when a post has no featured image or custom social image.', 'search-intel' ); ?></p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="si-settings-card">
+            <h2><?php esc_html_e( 'Meta Description', 'search-intel' ); ?></h2>
+            <table class="form-table">
+                <tr>
+                    <th><label for="si_description_fallback"><?php esc_html_e( 'Fallback Behavior', 'search-intel' ); ?></label></th>
+                    <td>
+                        <select id="si_description_fallback" name="search_intel_settings[description_fallback]">
+                            <option value="excerpt" <?php selected( $settings['description_fallback'], 'excerpt' ); ?>><?php esc_html_e( 'Use excerpt, then trim content', 'search-intel' ); ?></option>
+                            <option value="content" <?php selected( $settings['description_fallback'], 'content' ); ?>><?php esc_html_e( 'Trim content directly', 'search-intel' ); ?></option>
+                            <option value="empty" <?php selected( $settings['description_fallback'], 'empty' ); ?>><?php esc_html_e( 'Leave empty if not set', 'search-intel' ); ?></option>
+                        </select>
+                        <p class="description"><?php esc_html_e( 'How to generate the meta description when none is manually set.', 'search-intel' ); ?></p>
+                    </td>
+                </tr>
+                <tr>
+                    <th><label for="si_description_max_length"><?php esc_html_e( 'Max Length', 'search-intel' ); ?></label></th>
+                    <td>
+                        <input type="number" id="si_description_max_length" name="search_intel_settings[description_max_length]" value="<?php echo esc_attr( $settings['description_max_length'] ); ?>" min="50" max="320" step="1" class="small-text" />
+                        <span class="description"><?php esc_html_e( 'characters (recommended: 150-160)', 'search-intel' ); ?></span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="si-settings-card">
+            <h2><?php esc_html_e( 'Robots Defaults', 'search-intel' ); ?></h2>
+            <table class="form-table">
+                <tr>
+                    <th><label for="si_robots_default"><?php esc_html_e( 'Default for New Posts', 'search-intel' ); ?></label></th>
+                    <td>
+                        <select id="si_robots_default" name="search_intel_settings[robots_default]">
+                            <option value="index" <?php selected( $settings['robots_default'], 'index' ); ?>><?php esc_html_e( 'Index (default)', 'search-intel' ); ?></option>
+                            <option value="noindex" <?php selected( $settings['robots_default'], 'noindex' ); ?>><?php esc_html_e( 'Noindex', 'search-intel' ); ?></option>
+                        </select>
+                        <p class="description"><?php esc_html_e( 'Default robots directive for newly created posts. Can be overridden per-post.', 'search-intel' ); ?></p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="si-settings-card">
+            <h2><?php esc_html_e( 'Search Engine Ping', 'search-intel' ); ?></h2>
+            <table class="form-table">
+                <tr>
+                    <th><?php esc_html_e( 'Ping on Publish', 'search-intel' ); ?></th>
+                    <td>
+                        <label>
+                            <input type="checkbox" name="search_intel_settings[ping_search_engines]" value="1" <?php checked( $settings['ping_search_engines'] ); ?> />
+                            <?php esc_html_e( 'Notify Google and Bing when new content is published', 'search-intel' ); ?>
+                        </label>
+                        <p class="description"><?php esc_html_e( 'Sends a ping to search engine sitemap submission endpoints.', 'search-intel' ); ?></p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="si-settings-card">
+            <h2><?php esc_html_e( 'Title Templates', 'search-intel' ); ?></h2>
+            <p class="description" style="margin-bottom:12px;">
+                <?php esc_html_e( 'Customize the title format for each page type. Available variables:', 'search-intel' ); ?>
+                <code>%title%</code> <code>%sitename%</code> <code>%sep%</code> <code>%category%</code> <code>%tag%</code> <code>%date%</code> <code>%author%</code> <code>%page%</code> <code>%excerpt%</code>
+            </p>
+            <?php
+            $templates = $settings['title_templates'] ?? \Search_Intel\Title_Engine::get_default_templates();
+            $contexts  = [
+                'single'   => __( 'Single Posts', 'search-intel' ),
+                'page'     => __( 'Pages', 'search-intel' ),
+                'category' => __( 'Category Archives', 'search-intel' ),
+                'tag'      => __( 'Tag Archives', 'search-intel' ),
+                'author'   => __( 'Author Archives', 'search-intel' ),
+                'search'   => __( 'Search Results', 'search-intel' ),
+                '404'      => __( '404 Page', 'search-intel' ),
+                'homepage' => __( 'Homepage', 'search-intel' ),
+            ];
+            ?>
+            <table class="form-table">
+                <?php foreach ( $contexts as $key => $label ) : ?>
+                    <tr>
+                        <th><label for="si_title_tpl_<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $label ); ?></label></th>
+                        <td>
+                            <input type="text" id="si_title_tpl_<?php echo esc_attr( $key ); ?>" name="search_intel_settings[title_templates][<?php echo esc_attr( $key ); ?>]" value="<?php echo esc_attr( $templates[ $key ] ?? '' ); ?>" class="regular-text" />
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </table>
+        </div>
+
         <?php submit_button( __( 'Save SEO Settings', 'search-intel' ) ); ?>
     </form>
 </div>

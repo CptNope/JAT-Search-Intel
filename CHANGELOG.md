@@ -117,10 +117,93 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [1.1.0] — 2026-03-12
+
+### Added
+
+#### Post Panel — New Fields
+- Social share title override (separate from SEO title) for Open Graph and Twitter Cards
+- Social share description override (separate from meta description)
+- Social image override with WordPress media library picker
+- Secondary keywords field (comma-separated) with content usage tracking
+- Direct-answer field for featured snippet targeting ("What is this post answering?")
+- Citation / source references repeater with source name, URL, date, and quote fields
+- Per-post author expertise notes (`knowsAbout` in JSON-LD)
+- Content intent label (informational, navigational, transactional, commercial investigation)
+- Audience label (beginner, intermediate, advanced, professional, general)
+- Local relevance toggle with location field (`contentLocation` in JSON-LD, `geo.placename` meta)
+
+#### Title Template Engine
+- Variable resolver: `%title%`, `%sitename%`, `%sep%`, `%category%`, `%tag%`, `%date%`, `%author%`, `%page%`, `%excerpt%`
+- Per-context templates: single posts, pages, categories, tags, author archives, search, 404, homepage
+- Title template settings UI on the SEO settings page
+- `pre_get_document_title` integration at priority 25 (above SEO Manager's priority 20)
+
+#### Analysis-on-Save
+- Automatic content analysis on `wp_after_insert_post` hook
+- Score storage in post meta (`_search_intel_seo_score`, `_search_intel_aeo_score`, `_search_intel_geo_score`, `_search_intel_readability_score`)
+- Admin notice via transients when critical issues detected (any score below 30)
+
+#### New Analysis Checks (11 items)
+- H1 presence detection (exactly one H1 or post title as H1)
+- Heading hierarchy validation (no skipped levels, e.g., H2→H4)
+- Internal link opportunity suggestions (scaled to word count, minimum 2)
+- External citation/link presence scoring
+- Answer block opportunity detection (concise paragraphs, definitions, lists)
+- Entity clarity scoring (3+ entities recommended)
+- AI summary presence and substantiveness check (10+ words)
+- Schema completeness check (schema type + FAQs + entities)
+- Secondary keyword usage tracking in content body
+- Social metadata completeness check (title + description + image = 3/3)
+- Image alt text presence check with per-image detail
+
+#### AEO Additions
+- Direct-answer field rendered as `<meta name="direct-answer">` tag
+- Direct-answer added as `abstract` property in Article JSON-LD schema
+- Q&A style detection: bold question patterns (`<strong>Q?</strong>`) and `Q:/A:` prefix patterns
+- Answer snippet recommendation score (concise blocks, lists, definitions, tables — 4 checks, 25 pts each)
+- Auto-generate lead summary from first 2-3 sentences when no excerpt exists (`get_the_excerpt` filter)
+
+#### GEO Additions
+- Citations rendered in Article JSON-LD as `citation` array with `@type: CreativeWork` objects
+- Content intent label output as `<meta name="content-intent">` and `creativeWorkStatus` in JSON-LD
+- Audience label output as `<meta name="target-audience">` and `schema.org/Audience` in JSON-LD
+- Author expertise notes output as `<meta name="author-expertise">` and `knowsAbout` on author entity
+- Local relevance rendered as `contentLocation` with `@type: Place` in schema and `geo.placename` meta tag
+
+#### Expanded Settings
+- Default OG image URL setting (fallback when no featured image or social image is set)
+- Meta description fallback behavior: excerpt → content trim → empty (3 modes)
+- Meta description max length setting (50-320 characters, truncates with ellipsis)
+- Global robots default for new posts (index or noindex)
+- AI summary default target word count setting (20-200, shown as guidance)
+- Default content intent selection (pre-filled for new posts)
+- Default audience selection (pre-filled for new posts)
+- Search engine ping toggle (opt-in, sends sitemap URL to Google and Bing on publish)
+
+#### Sitemap Improvements
+- Transient-based sitemap caching with 12-hour TTL for faster responses
+- Automatic cache invalidation on post save, delete, and term create/edit/delete
+- Configurable taxonomy sitemap toggles (category, post_tag, and any custom taxonomy)
+- Custom post type sitemap support (all public CPTs selectable in settings)
+- Search engine ping respects the new `ping_search_engines` setting toggle
+
+### Changed
+- `SEO_Manager::get_description()` now respects `description_fallback` and `description_max_length` settings
+- `SEO_Manager::get_og_image()` now checks `default_og_image` setting before knowledge logo fallback
+- `Sitemap::ping_search_engines()` only hooks when `ping_search_engines` setting is enabled
+- Taxonomy sitemaps now driven by `sitemap_taxonomies` setting instead of hardcoded `['category', 'post_tag']`
+- Sitemap `generate_sitemap()` taxonomy detection uses settings array instead of hardcoded list
+
+### New Files
+- `includes/class-title-engine.php` — Title Template Engine class
+
+---
+
 ## [Unreleased]
 
 ### Planned
-- See [ROADMAP.md](ROADMAP.md) for upcoming features
+- See [ROADMAP.md](ROADMAP.md) for v1.2+ features (security audit, unit tests, REST API, dashboard)
 
 ---
 

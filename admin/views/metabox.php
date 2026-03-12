@@ -28,6 +28,12 @@ if ( ! defined( 'ABSPATH' ) ) {
         </div>
 
         <div class="si-field">
+            <label for="si_secondary_keywords"><?php esc_html_e( 'Secondary Keywords', 'search-intel' ); ?></label>
+            <input type="text" id="si_secondary_keywords" name="si_secondary_keywords" value="<?php echo esc_attr( $meta['secondary_keywords'] ); ?>" placeholder="<?php esc_attr_e( 'keyword two, keyword three, keyword four...', 'search-intel' ); ?>" class="widefat" />
+            <p class="description"><?php esc_html_e( 'Comma-separated secondary keywords to track in content analysis.', 'search-intel' ); ?></p>
+        </div>
+
+        <div class="si-field">
             <label for="si_title"><?php esc_html_e( 'SEO Title', 'search-intel' ); ?></label>
             <input type="text" id="si_title" name="si_title" value="<?php echo esc_attr( $meta['title'] ); ?>" placeholder="<?php echo esc_attr( get_the_title( $post->ID ) ); ?>" class="widefat" />
             <div class="si-char-count">
@@ -65,6 +71,41 @@ if ( ! defined( 'ABSPATH' ) ) {
                 <input type="checkbox" name="si_nofollow" value="1" <?php checked( $meta['nofollow'], '1' ); ?> />
                 <?php esc_html_e( 'nofollow (don\'t follow links on this page)', 'search-intel' ); ?>
             </label>
+        </div>
+
+        <hr />
+        <h3><?php esc_html_e( 'Social Sharing', 'search-intel' ); ?></h3>
+        <p class="description"><?php esc_html_e( 'Override how this post appears when shared on social networks. Leave blank to use the SEO title and description.', 'search-intel' ); ?></p>
+
+        <div class="si-field">
+            <label for="si_social_title"><?php esc_html_e( 'Social Title', 'search-intel' ); ?></label>
+            <input type="text" id="si_social_title" name="si_social_title" value="<?php echo esc_attr( $meta['social_title'] ); ?>" placeholder="<?php esc_attr_e( 'Custom title for social sharing...', 'search-intel' ); ?>" class="widefat" />
+        </div>
+
+        <div class="si-field">
+            <label for="si_social_description"><?php esc_html_e( 'Social Description', 'search-intel' ); ?></label>
+            <textarea id="si_social_description" name="si_social_description" rows="2" class="widefat" placeholder="<?php esc_attr_e( 'Custom description for social sharing...', 'search-intel' ); ?>"><?php echo esc_textarea( $meta['social_description'] ); ?></textarea>
+        </div>
+
+        <div class="si-field">
+            <label><?php esc_html_e( 'Social Image', 'search-intel' ); ?></label>
+            <div class="si-image-picker">
+                <input type="hidden" id="si_social_image" name="si_social_image" value="<?php echo esc_url( $meta['social_image'] ); ?>" />
+                <?php if ( $meta['social_image'] ) : ?>
+                    <div id="si-social-image-preview" class="si-image-preview">
+                        <img src="<?php echo esc_url( $meta['social_image'] ); ?>" alt="" style="max-width:300px; height:auto; border-radius:4px;" />
+                    </div>
+                <?php else : ?>
+                    <div id="si-social-image-preview" class="si-image-preview" style="display:none;">
+                        <img src="" alt="" style="max-width:300px; height:auto; border-radius:4px;" />
+                    </div>
+                <?php endif; ?>
+                <div style="margin-top:8px;">
+                    <button type="button" class="button" id="si-select-social-image"><?php esc_html_e( 'Select Image', 'search-intel' ); ?></button>
+                    <button type="button" class="button si-remove-image" id="si-remove-social-image" <?php echo $meta['social_image'] ? '' : 'style="display:none;"'; ?>><?php esc_html_e( 'Remove', 'search-intel' ); ?></button>
+                </div>
+                <p class="description"><?php esc_html_e( 'Recommended: 1200x630px. Overrides featured image for OG/Twitter cards.', 'search-intel' ); ?></p>
+            </div>
         </div>
     </div>
 
@@ -111,6 +152,39 @@ if ( ! defined( 'ABSPATH' ) ) {
                 <option value="ContactPage" <?php selected( $meta['schema_type'], 'ContactPage' ); ?>><?php esc_html_e( 'Contact Page', 'search-intel' ); ?></option>
             </select>
         </div>
+
+        <hr />
+        <h3><?php esc_html_e( 'Direct Answer', 'search-intel' ); ?></h3>
+        <div class="si-field">
+            <label for="si_direct_answer"><?php esc_html_e( 'What is this post answering?', 'search-intel' ); ?></label>
+            <textarea id="si_direct_answer" name="si_direct_answer" rows="2" class="widefat" placeholder="<?php esc_attr_e( 'A concise, direct answer to the main question this post addresses...', 'search-intel' ); ?>"><?php echo esc_textarea( $meta['direct_answer'] ); ?></textarea>
+            <p class="description"><?php esc_html_e( 'This is rendered as a meta tag and included in Article schema for featured snippet targeting.', 'search-intel' ); ?></p>
+        </div>
+
+        <hr />
+        <h3><?php esc_html_e( 'Citations / Sources', 'search-intel' ); ?></h3>
+        <p class="description"><?php esc_html_e( 'Add source references to strengthen credibility and enable citation schema output.', 'search-intel' ); ?></p>
+
+        <div id="si-citation-repeater">
+            <?php
+            $citations = get_post_meta( $post->ID, '_search_intel_citations', true );
+            if ( ! empty( $citations ) && is_array( $citations ) ) :
+                foreach ( $citations as $i => $cite ) :
+                    ?>
+                    <div class="si-citation-row" data-index="<?php echo esc_attr( $i ); ?>">
+                        <input type="text" class="si-citation-source" placeholder="<?php esc_attr_e( 'Source name', 'search-intel' ); ?>" value="<?php echo esc_attr( $cite['source'] ); ?>" />
+                        <input type="url" class="si-citation-url" placeholder="<?php esc_attr_e( 'URL', 'search-intel' ); ?>" value="<?php echo esc_url( $cite['url'] ); ?>" />
+                        <input type="date" class="si-citation-date" value="<?php echo esc_attr( $cite['date'] ); ?>" />
+                        <input type="text" class="si-citation-quote" placeholder="<?php esc_attr_e( 'Key quote (optional)', 'search-intel' ); ?>" value="<?php echo esc_attr( $cite['quote'] ); ?>" />
+                        <button type="button" class="button si-remove-citation"><?php esc_html_e( 'Remove', 'search-intel' ); ?></button>
+                    </div>
+                    <?php
+                endforeach;
+            endif;
+            ?>
+        </div>
+        <button type="button" class="button" id="si-add-citation"><?php esc_html_e( '+ Add Citation', 'search-intel' ); ?></button>
+        <input type="hidden" name="si_citations" id="si_citations" value="<?php echo esc_attr( wp_json_encode( $citations ?: [] ) ); ?>" />
     </div>
 
     <!-- GEO Tab -->
@@ -155,6 +229,38 @@ if ( ! defined( 'ABSPATH' ) ) {
         </div>
 
         <div class="si-field">
+            <label for="si_content_intent"><?php esc_html_e( 'Content Intent', 'search-intel' ); ?></label>
+            <select id="si_content_intent" name="si_content_intent" class="widefat">
+                <option value=""><?php esc_html_e( '— Select —', 'search-intel' ); ?></option>
+                <option value="informational" <?php selected( $meta['content_intent'], 'informational' ); ?>><?php esc_html_e( 'Informational', 'search-intel' ); ?></option>
+                <option value="commercial" <?php selected( $meta['content_intent'], 'commercial' ); ?>><?php esc_html_e( 'Commercial', 'search-intel' ); ?></option>
+                <option value="navigational" <?php selected( $meta['content_intent'], 'navigational' ); ?>><?php esc_html_e( 'Navigational', 'search-intel' ); ?></option>
+                <option value="educational" <?php selected( $meta['content_intent'], 'educational' ); ?>><?php esc_html_e( 'Educational', 'search-intel' ); ?></option>
+                <option value="transactional" <?php selected( $meta['content_intent'], 'transactional' ); ?>><?php esc_html_e( 'Transactional', 'search-intel' ); ?></option>
+            </select>
+            <p class="description"><?php esc_html_e( 'The primary search intent this content addresses. Used in meta tags and JSON-LD.', 'search-intel' ); ?></p>
+        </div>
+
+        <div class="si-field">
+            <label for="si_audience"><?php esc_html_e( 'Target Audience', 'search-intel' ); ?></label>
+            <select id="si_audience" name="si_audience" class="widefat">
+                <option value=""><?php esc_html_e( '— Select —', 'search-intel' ); ?></option>
+                <option value="beginner" <?php selected( $meta['audience'], 'beginner' ); ?>><?php esc_html_e( 'Beginner', 'search-intel' ); ?></option>
+                <option value="intermediate" <?php selected( $meta['audience'], 'intermediate' ); ?>><?php esc_html_e( 'Intermediate', 'search-intel' ); ?></option>
+                <option value="advanced" <?php selected( $meta['audience'], 'advanced' ); ?>><?php esc_html_e( 'Advanced', 'search-intel' ); ?></option>
+                <option value="professional" <?php selected( $meta['audience'], 'professional' ); ?>><?php esc_html_e( 'Professional', 'search-intel' ); ?></option>
+                <option value="general" <?php selected( $meta['audience'], 'general' ); ?>><?php esc_html_e( 'General', 'search-intel' ); ?></option>
+            </select>
+            <p class="description"><?php esc_html_e( 'Who this content is written for. Rendered in schema.org/audience.', 'search-intel' ); ?></p>
+        </div>
+
+        <div class="si-field">
+            <label for="si_author_expertise_notes"><?php esc_html_e( 'Author Expertise Notes', 'search-intel' ); ?></label>
+            <textarea id="si_author_expertise_notes" name="si_author_expertise_notes" rows="2" class="widefat" placeholder="<?php esc_attr_e( 'Why is the author qualified to write this? e.g., 10 years in SEO, certified Google Ads specialist...', 'search-intel' ); ?>"><?php echo esc_textarea( $meta['author_expertise_notes'] ); ?></textarea>
+            <p class="description"><?php esc_html_e( 'Per-post author authority context. Supplements the global E-E-A-T author profile.', 'search-intel' ); ?></p>
+        </div>
+
+        <div class="si-field">
             <label for="si_fact_checked"><?php esc_html_e( 'Fact-Check Date', 'search-intel' ); ?></label>
             <input type="date" id="si_fact_checked" name="si_fact_checked" value="<?php echo esc_attr( $meta['fact_checked'] ); ?>" class="widefat" />
             <p class="description"><?php esc_html_e( 'Date this content was last fact-checked. Signals trust to AI engines.', 'search-intel' ); ?></p>
@@ -189,6 +295,21 @@ if ( ! defined( 'ABSPATH' ) ) {
         </div>
         <button type="button" class="button" id="si-add-entity"><?php esc_html_e( '+ Add Entity', 'search-intel' ); ?></button>
         <input type="hidden" name="si_entities" id="si_entities" value="<?php echo esc_attr( wp_json_encode( $entities ?: [] ) ); ?>" />
+
+        <hr />
+        <h3><?php esc_html_e( 'Local Relevance', 'search-intel' ); ?></h3>
+        <div class="si-field si-field-inline">
+            <label>
+                <input type="checkbox" name="si_local_relevance" id="si_local_relevance" value="1" <?php checked( $meta['local_relevance'], '1' ); ?> />
+                <?php esc_html_e( 'This content has local/geographic relevance', 'search-intel' ); ?>
+            </label>
+        </div>
+
+        <div class="si-field" id="si-local-location-field" <?php echo empty( $meta['local_relevance'] ) ? 'style="display:none;"' : ''; ?>>
+            <label for="si_local_location"><?php esc_html_e( 'Location', 'search-intel' ); ?></label>
+            <input type="text" id="si_local_location" name="si_local_location" value="<?php echo esc_attr( $meta['local_location'] ); ?>" placeholder="<?php esc_attr_e( 'e.g., New York, NY or London, UK', 'search-intel' ); ?>" class="widefat" />
+            <p class="description"><?php esc_html_e( 'Outputs contentLocation with @type: Place in JSON-LD schema.', 'search-intel' ); ?></p>
+        </div>
     </div>
 
     <!-- Advanced Tab -->

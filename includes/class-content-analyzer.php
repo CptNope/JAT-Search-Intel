@@ -23,6 +23,88 @@ class Content_Analyzer {
 
         // AJAX endpoint for live analysis
         add_action( 'wp_ajax_search_intel_analyze', [ $this, 'ajax_analyze' ] );
+
+        // Analysis-on-Save
+        add_action( 'wp_after_insert_post', [ $this, 'analyze_on_save' ], 20, 2 );
+        add_action( 'admin_notices', [ $this, 'render_save_notice' ] );
+    }
+
+    /**
+     * Run analysis when a post is saved and store scores in post meta.
+     */
+    public function analyze_on_save( int $post_id, $post ): void {
+        if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+            return;
+        }
+
+        if ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) ) {
+            return;
+        }
+
+        $allowed_types = $this->settings['enabled_post_types'] ?? [ 'post', 'page' ];
+        if ( ! in_array( $post->post_type, $allowed_types, true ) ) {
+            return;
+        }
+
+        if ( ! current_user_can( 'edit_post', $post_id ) ) {
+            return;
+        }
+
+        $content     = $post->post_content;
+        $title       = get_post_meta( $post_id, '_search_intel_title', true ) ?: $post->post_title;
+        $keyword     = get_post_meta( $post_id, '_search_intel_focus_keyword', true );
+        $description = get_post_meta( $post_id, '_search_intel_description', true );
+
+        $results = $this->analyze( $post_id, $content, $title, $keyword, $description );
+
+        update_post_meta( $post_id, '_search_intel_seo_score', $results['seo_score']['score'] ?? 0 );
+        update_post_meta( $post_id, '_search_intel_aeo_score', $results['aeo_score']['score'] ?? 0 );
+        update_post_meta( $post_id, '_search_intel_geo_score', $results['geo_score']['score'] ?? 0 );
+        update_post_meta( $post_id, '_search_intel_readability_score', $results['readability']['score'] ?? 0 );
+
+        // Flag critical issues for admin notice
+        $critical = [];
+        if ( ( $results['seo_score']['score'] ?? 0 ) < 30 ) {
+            $critical[] = __( 'SEO score is critically low', 'search-intel' );
+        }
+        if ( empty( $keyword ) ) {
+            $critical[] = __( 'No focus keyword set', 'search-intel' );
+        }
+        if ( ( $results['word_count'] ?? 0 ) < 100 ) {
+            $critical[] = __( 'Content is very thin (under 100 words)', 'search-intel' );
+        }
+
+        if ( ! empty( $critical ) ) {
+            set_transient( "search_intel_notice_{$post_id}_{$post->post_author}", $critical, 60 );
+        }
+    }
+
+    /**
+     * Display admin notice after save if critical issues were found.
+     */
+    public function render_save_notice(): void {
+        $screen = get_current_screen();
+        if ( ! $screen || 'post' !== $screen->base ) {
+            return;
+        }
+
+        $post_id = get_the_ID();
+        $user_id = get_current_user_id();
+        if ( ! $post_id || ! $user_id ) {
+            return;
+        }
+
+        $issues = get_transient( "search_intel_notice_{$post_id}_{$user_id}" );
+        if ( empty( $issues ) ) {
+            return;
+        }
+
+        delete_transient( "search_intel_notice_{$post_id}_{$user_id}" );
+
+        echo '<div class="notice notice-warning is-dismissible"><p>';
+        echo '<strong>' . esc_html__( 'Search Intel:', 'search-intel' ) . '</strong> ';
+        echo esc_html( implode( ' · ', $issues ) );
+        echo '</p></div>';
     }
 
     /**
@@ -50,12 +132,13 @@ class Content_Analyzer {
         $word_count = str_word_count( $text );
 
         return [
-            'seo_score'    => $this->get_seo_score( $post_id, $content, $title, $keyword, $description, $text, $word_count ),
-            'aeo_score'    => $this->get_aeo_score( $post_id, $content, $text, $word_count ),
-            'geo_score'    => $this->get_geo_score( $post_id, $content, $text, $word_count ),
-            'readability'  => $this->get_readability_score( $text ),
-            'word_count'   => $word_count,
-            'keyword_data' => $keyword ? $this->get_keyword_analysis( $text, $content, $title, $keyword, $description ) : null,
+            'seo_score'       => $this->get_seo_score( $post_id, $content, $title, $keyword, $description, $text, $word_count ),
+            'aeo_score'       => $this->get_aeo_score( $post_id, $content, $text, $word_count ),
+            'geo_score'       => $this->get_geo_score( $post_id, $content, $text, $word_count ),
+            'readability'     => $this->get_readability_score( $text ),
+            'word_count'      => $word_count,
+            'keyword_data'    => $keyword ? $this->get_keyword_analysis( $text, $content, $title, $keyword, $description ) : null,
+            'content_checks'  => $this->get_content_checks( $post_id, $content, $text, $word_count ),
         ];
     }
 
@@ -468,5 +551,173 @@ class Content_Analyzer {
         }
 
         return $total;
+    }
+
+    /**
+     * v1.1 Content Checks — additional quality and completeness checks.
+     */
+    private function get_content_checks( int $post_id, string $content, string $text, int $word_count ): array {
+        $checks = [];
+
+        // 1. H1 presence detection (exactly one H1 or post title as H1)
+        $h1_count = preg_match_all( '/<h1/i', $content );
+        if ( $h1_count === 0 ) {
+            $checks[] = [ 'pass' => true, 'label' => __( 'No H1 in content (post title used as H1)', 'search-intel' ), 'group' => 'structure' ];
+        } elseif ( $h1_count === 1 ) {
+            $checks[] = [ 'pass' => true, 'label' => __( 'Exactly one H1 heading found', 'search-intel' ), 'group' => 'structure' ];
+        } else {
+            $checks[] = [ 'pass' => false, 'label' => sprintf( __( 'Multiple H1 tags found (%d) — use only one', 'search-intel' ), $h1_count ), 'group' => 'structure' ];
+        }
+
+        // 2. Heading hierarchy validation (no skipped levels)
+        $heading_levels = [];
+        if ( preg_match_all( '/<h([1-6])/i', $content, $h_matches ) ) {
+            $heading_levels = array_map( 'intval', $h_matches[1] );
+        }
+        $hierarchy_ok = true;
+        for ( $i = 1; $i < count( $heading_levels ); $i++ ) {
+            if ( $heading_levels[ $i ] > $heading_levels[ $i - 1 ] + 1 ) {
+                $hierarchy_ok = false;
+                break;
+            }
+        }
+        if ( ! empty( $heading_levels ) ) {
+            if ( $hierarchy_ok ) {
+                $checks[] = [ 'pass' => true, 'label' => __( 'Heading hierarchy is correct (no skipped levels)', 'search-intel' ), 'group' => 'structure' ];
+            } else {
+                $checks[] = [ 'pass' => false, 'label' => __( 'Heading levels are skipped — use sequential order (H2→H3→H4)', 'search-intel' ), 'group' => 'structure' ];
+            }
+        }
+
+        // 3. Internal link opportunity suggestions
+        $internal_links = 0;
+        $external_links = 0;
+        if ( preg_match_all( '/<a\s+[^>]*href=["\']([^"\']*)["\'][^>]*>/i', $content, $link_matches ) ) {
+            $site_url = home_url();
+            foreach ( $link_matches[1] as $href ) {
+                if ( strpos( $href, $site_url ) === 0 || ( strpos( $href, '/' ) === 0 && strpos( $href, '//' ) !== 0 ) ) {
+                    $internal_links++;
+                } elseif ( strpos( $href, 'http' ) === 0 ) {
+                    $external_links++;
+                }
+            }
+        }
+        $recommended_internal = max( 2, intval( $word_count / 500 ) );
+        if ( $internal_links >= $recommended_internal ) {
+            $checks[] = [ 'pass' => true, 'label' => sprintf( __( '%d internal links (recommended: %d+)', 'search-intel' ), $internal_links, $recommended_internal ), 'group' => 'links' ];
+        } else {
+            $checks[] = [ 'pass' => false, 'label' => sprintf( __( 'Add more internal links (%d found, recommend %d+)', 'search-intel' ), $internal_links, $recommended_internal ), 'group' => 'links' ];
+        }
+
+        // 4. External citation presence scoring
+        if ( $external_links >= 1 ) {
+            $checks[] = [ 'pass' => true, 'label' => sprintf( __( '%d external citations/links found', 'search-intel' ), $external_links ), 'group' => 'credibility' ];
+        } else {
+            $checks[] = [ 'pass' => false, 'label' => __( 'Add external links to authoritative sources', 'search-intel' ), 'group' => 'credibility' ];
+        }
+
+        // 5. Answer block opportunity detection
+        $has_answer_block = false;
+        if ( preg_match_all( '/<p[^>]*>(.*?)<\/p>/is', $content, $paras ) ) {
+            foreach ( $paras[1] as $p ) {
+                $p_text = wp_strip_all_tags( $p );
+                $p_words = str_word_count( $p_text );
+                if ( $p_words >= 20 && $p_words <= 50 ) {
+                    $has_answer_block = true;
+                    break;
+                }
+            }
+        }
+        $has_definition = (bool) preg_match( '/(is defined as|refers to|is a |is the )/i', $text );
+        $has_list_block = (bool) preg_match( '/<[ou]l[^>]*>.*?<\/[ou]l>/is', $content );
+        if ( $has_answer_block || $has_definition || $has_list_block ) {
+            $checks[] = [ 'pass' => true, 'label' => __( 'Content contains answer-friendly blocks (definitions, lists, or concise paragraphs)', 'search-intel' ), 'group' => 'aeo' ];
+        } else {
+            $checks[] = [ 'pass' => false, 'label' => __( 'Add a concise answer block (20-50 words), definition, or list for snippet targeting', 'search-intel' ), 'group' => 'aeo' ];
+        }
+
+        // 6. Entity clarity scoring (key entities in repeater)
+        $entities = get_post_meta( $post_id, '_search_intel_entities', true );
+        $entity_count = is_array( $entities ) ? count( $entities ) : 0;
+        if ( $entity_count >= 3 ) {
+            $checks[] = [ 'pass' => true, 'label' => sprintf( __( '%d entities defined for semantic clarity', 'search-intel' ), $entity_count ), 'group' => 'geo' ];
+        } elseif ( $entity_count > 0 ) {
+            $checks[] = [ 'pass' => false, 'label' => sprintf( __( 'Only %d entity defined — aim for 3+ key entities', 'search-intel' ), $entity_count ), 'group' => 'geo' ];
+        } else {
+            $checks[] = [ 'pass' => false, 'label' => __( 'Define key entities (people, organizations, concepts) in the GEO tab', 'search-intel' ), 'group' => 'geo' ];
+        }
+
+        // 7. AI summary presence check
+        $ai_summary = get_post_meta( $post_id, '_search_intel_ai_summary', true );
+        if ( $ai_summary && str_word_count( $ai_summary ) >= 10 ) {
+            $checks[] = [ 'pass' => true, 'label' => __( 'AI summary is set and substantive', 'search-intel' ), 'group' => 'geo' ];
+        } else {
+            $checks[] = [ 'pass' => false, 'label' => __( 'Add an AI summary (10+ words) in the GEO tab', 'search-intel' ), 'group' => 'geo' ];
+        }
+
+        // 8. Schema completeness check
+        $schema_type = get_post_meta( $post_id, '_search_intel_schema_type', true );
+        $faqs        = get_post_meta( $post_id, '_search_intel_faqs', true );
+        $schema_score = 0;
+        if ( $schema_type ) { $schema_score++; }
+        if ( ! empty( $faqs ) ) { $schema_score++; }
+        if ( ! empty( $entities ) ) { $schema_score++; }
+        if ( $schema_score >= 2 ) {
+            $checks[] = [ 'pass' => true, 'label' => __( 'Schema data is well-configured', 'search-intel' ), 'group' => 'schema' ];
+        } else {
+            $checks[] = [ 'pass' => false, 'label' => __( 'Improve schema: set schema type, FAQs, or entities', 'search-intel' ), 'group' => 'schema' ];
+        }
+
+        // 9. Secondary keyword usage in content
+        $secondary_kw = get_post_meta( $post_id, '_search_intel_secondary_keywords', true );
+        if ( $secondary_kw ) {
+            $keywords_arr = array_filter( array_map( 'trim', explode( ',', $secondary_kw ) ) );
+            $found = 0;
+            foreach ( $keywords_arr as $kw ) {
+                if ( stripos( $text, $kw ) !== false ) {
+                    $found++;
+                }
+            }
+            $total_kw = count( $keywords_arr );
+            if ( $found === $total_kw ) {
+                $checks[] = [ 'pass' => true, 'label' => sprintf( __( 'All %d secondary keywords found in content', 'search-intel' ), $total_kw ), 'group' => 'seo' ];
+            } else {
+                $checks[] = [ 'pass' => false, 'label' => sprintf( __( '%d of %d secondary keywords found — add missing ones', 'search-intel' ), $found, $total_kw ), 'group' => 'seo' ];
+            }
+        }
+
+        // 10. Social metadata completeness check
+        $social_title = get_post_meta( $post_id, '_search_intel_social_title', true );
+        $social_desc  = get_post_meta( $post_id, '_search_intel_social_description', true );
+        $social_image = get_post_meta( $post_id, '_search_intel_social_image', true );
+        $social_count = ( $social_title ? 1 : 0 ) + ( $social_desc ? 1 : 0 ) + ( $social_image ? 1 : 0 );
+        if ( $social_count === 3 ) {
+            $checks[] = [ 'pass' => true, 'label' => __( 'Social sharing metadata is complete', 'search-intel' ), 'group' => 'social' ];
+        } elseif ( $social_count > 0 ) {
+            $checks[] = [ 'pass' => false, 'label' => sprintf( __( 'Social metadata partially set (%d/3) — add title, description, and image', 'search-intel' ), $social_count ), 'group' => 'social' ];
+        } else {
+            $checks[] = [ 'pass' => false, 'label' => __( 'Set custom social sharing title, description, and image in the SEO tab', 'search-intel' ), 'group' => 'social' ];
+        }
+
+        // 11. Image alt text presence check (detailed)
+        $total_imgs = 0;
+        $missing_alt = 0;
+        if ( preg_match_all( '/<img[^>]*>/i', $content, $img_tags ) ) {
+            $total_imgs = count( $img_tags[0] );
+            foreach ( $img_tags[0] as $img ) {
+                if ( ! preg_match( '/alt=["\']([^"\']+)["\']/i', $img ) ) {
+                    $missing_alt++;
+                }
+            }
+        }
+        if ( $total_imgs > 0 ) {
+            if ( $missing_alt === 0 ) {
+                $checks[] = [ 'pass' => true, 'label' => sprintf( __( 'All %d images have alt text', 'search-intel' ), $total_imgs ), 'group' => 'accessibility' ];
+            } else {
+                $checks[] = [ 'pass' => false, 'label' => sprintf( __( '%d of %d images missing alt text', 'search-intel' ), $missing_alt, $total_imgs ), 'group' => 'accessibility' ];
+            }
+        }
+
+        return $checks;
     }
 }

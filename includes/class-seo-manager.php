@@ -58,15 +58,37 @@ class SEO_Manager {
         if ( $post_id ) {
             $custom = get_post_meta( $post_id, '_search_intel_description', true );
             if ( $custom ) {
-                return $custom;
+                return $this->truncate_description( $custom );
             }
-            $post = get_post( $post_id );
+
+            $fallback = $this->settings['description_fallback'] ?? 'excerpt';
+            $post     = get_post( $post_id );
+
+            if ( 'empty' === $fallback ) {
+                return '';
+            }
+
             if ( $post ) {
-                $excerpt = $post->post_excerpt ?: wp_trim_words( wp_strip_all_tags( $post->post_content ), 30, '...' );
-                return $excerpt;
+                if ( 'excerpt' === $fallback ) {
+                    $desc = $post->post_excerpt ?: wp_trim_words( wp_strip_all_tags( $post->post_content ), 30, '...' );
+                } else {
+                    $desc = wp_trim_words( wp_strip_all_tags( $post->post_content ), 30, '...' );
+                }
+                return $this->truncate_description( $desc );
             }
         }
         return get_bloginfo( 'description' );
+    }
+
+    /**
+     * Truncate description to the configured max length.
+     */
+    private function truncate_description( string $desc ): string {
+        $max = absint( $this->settings['description_max_length'] ?? 160 );
+        if ( $max > 0 && mb_strlen( $desc ) > $max ) {
+            $desc = mb_substr( $desc, 0, $max - 3 ) . '...';
+        }
+        return $desc;
     }
 
     /**
@@ -216,8 +238,10 @@ class SEO_Manager {
             $post    = get_post( $post_id );
 
             $tags['og:type']        = ( 'post' === $post->post_type ) ? 'article' : 'website';
-            $tags['og:title']       = $this->get_title( $post_id );
-            $tags['og:description'] = $this->get_description( $post_id );
+            $social_title = get_post_meta( $post_id, '_search_intel_social_title', true );
+            $social_desc  = get_post_meta( $post_id, '_search_intel_social_description', true );
+            $tags['og:title']       = $social_title ?: $this->get_title( $post_id );
+            $tags['og:description'] = $social_desc ?: $this->get_description( $post_id );
             $tags['og:url']         = get_permalink( $post_id );
 
             // Featured image
@@ -287,8 +311,10 @@ class SEO_Manager {
         if ( is_singular() ) {
             $post_id = get_queried_object_id();
 
-            $tags['twitter:title']       = $this->get_title( $post_id );
-            $tags['twitter:description'] = $this->get_description( $post_id );
+            $social_title = get_post_meta( $post_id, '_search_intel_social_title', true );
+            $social_desc  = get_post_meta( $post_id, '_search_intel_social_description', true );
+            $tags['twitter:title']       = $social_title ?: $this->get_title( $post_id );
+            $tags['twitter:description'] = $social_desc ?: $this->get_description( $post_id );
 
             $image = $this->get_og_image( $post_id );
             if ( $image ) {
@@ -319,8 +345,11 @@ class SEO_Manager {
      * Get Open Graph image data for a post.
      */
     private function get_og_image( int $post_id ): array {
-        // Check for custom OG image
-        $custom_image = get_post_meta( $post_id, '_search_intel_og_image', true );
+        // Check for social image override (v1.1), then legacy OG image
+        $custom_image = get_post_meta( $post_id, '_search_intel_social_image', true );
+        if ( ! $custom_image ) {
+            $custom_image = get_post_meta( $post_id, '_search_intel_og_image', true );
+        }
         if ( $custom_image ) {
             $attachment_id = attachment_url_to_postid( $custom_image );
             $meta          = wp_get_attachment_metadata( $attachment_id );
@@ -344,6 +373,16 @@ class SEO_Manager {
                     'alt'    => get_post_meta( $thumbnail_id, '_wp_attachment_image_alt', true ) ?: $this->get_title( $post_id ),
                 ];
             }
+        }
+
+        // Fallback to default OG image setting (v1.1)
+        if ( ! empty( $this->settings['default_og_image'] ) ) {
+            return [
+                'url'    => $this->settings['default_og_image'],
+                'width'  => 1200,
+                'height' => 630,
+                'alt'    => $this->settings['site_name'] ?: get_bloginfo( 'name' ),
+            ];
         }
 
         // Fallback to knowledge logo

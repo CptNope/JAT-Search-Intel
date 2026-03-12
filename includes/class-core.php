@@ -31,6 +31,9 @@ class Core {
     /** @var Sitemap */
     public $sitemap;
 
+    /** @var Title_Engine */
+    public $title_engine;
+
     /** @var Admin */
     public $admin;
 
@@ -52,12 +55,13 @@ class Core {
 
         $settings = $this->get_settings();
 
-        $this->seo      = new SEO_Manager( $settings );
-        $this->schema   = new Schema_Manager( $settings );
-        $this->aeo      = new AEO_Manager( $settings );
-        $this->geo      = new GEO_Manager( $settings );
-        $this->analyzer = new Content_Analyzer( $settings );
-        $this->sitemap  = new Sitemap( $settings );
+        $this->seo          = new SEO_Manager( $settings );
+        $this->title_engine  = new Title_Engine( $settings );
+        $this->schema        = new Schema_Manager( $settings );
+        $this->aeo           = new AEO_Manager( $settings );
+        $this->geo           = new GEO_Manager( $settings );
+        $this->analyzer      = new Content_Analyzer( $settings );
+        $this->sitemap       = new Sitemap( $settings );
 
         if ( is_admin() ) {
             $this->admin = new Admin( $settings, $this );
@@ -116,6 +120,13 @@ class Core {
             'enable_speakable'       => true,
             'speakable_selectors'    => [ '.entry-title', '.entry-content p:first-of-type' ],
 
+            // SEO — expanded
+            'default_og_image'       => '',
+            'description_fallback'   => 'excerpt',
+            'description_max_length' => 160,
+            'robots_default'         => 'index',
+            'ping_search_engines'    => true,
+
             // GEO
             'enable_geo'             => true,
             'enable_llms_txt'        => true,
@@ -123,15 +134,22 @@ class Core {
             'enable_entity_markup'   => true,
             'author_expertise'       => '',
             'content_freshness'      => true,
+            'ai_summary_word_count'  => 50,
+            'default_content_intent' => '',
+            'default_audience'       => '',
 
             // Sitemap
             'enable_sitemap'         => true,
             'sitemap_post_types'     => [ 'post', 'page' ],
+            'sitemap_taxonomies'     => [ 'category' ],
             'sitemap_max_urls'       => 2000,
 
             // Content Analyzer
             'enable_analyzer'        => true,
             'target_readability'     => 60,
+
+            // Title Templates
+            'title_templates'        => Title_Engine::get_default_templates(),
 
             // Post types to enable on
             'enabled_post_types'     => [ 'post', 'page' ],

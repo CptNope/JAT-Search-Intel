@@ -14,7 +14,7 @@ $settings = wp_parse_args( $settings, \Search_Intel\Core::get_default_settings()
 
         <?php
         // Preserve all non-GEO settings as hidden
-        $geo_keys = [ 'enable_llms_txt', 'enable_ai_meta', 'enable_entity_markup', 'content_freshness', 'author_expertise' ];
+        $geo_keys = [ 'enable_llms_txt', 'enable_ai_meta', 'enable_entity_markup', 'content_freshness', 'author_expertise', 'ai_summary_word_count', 'default_content_intent', 'default_audience' ];
         foreach ( $settings as $key => $val ) :
             if ( in_array( $key, $geo_keys, true ) ) continue;
             if ( is_array( $val ) ) :
@@ -108,6 +108,39 @@ $settings = wp_parse_args( $settings, \Search_Intel\Core::get_default_settings()
                     <td>
                         <input type="text" id="si_author_expertise" name="search_intel_settings[author_expertise]" value="<?php echo esc_attr( $settings['author_expertise'] ); ?>" class="regular-text" placeholder="<?php esc_attr_e( 'e.g., Digital Marketing, Software Engineering', 'search-intel' ); ?>" />
                         <p class="description"><?php esc_html_e( 'Fallback expertise area when authors don\'t have individual E-E-A-T data configured. Set per-author data in user profiles.', 'search-intel' ); ?></p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="si-settings-card">
+            <h2><?php esc_html_e( 'Content Defaults', 'search-intel' ); ?></h2>
+            <table class="form-table">
+                <tr>
+                    <th><label for="si_ai_summary_word_count"><?php esc_html_e( 'AI Summary Target Words', 'search-intel' ); ?></label></th>
+                    <td>
+                        <input type="number" id="si_ai_summary_word_count" name="search_intel_settings[ai_summary_word_count]" value="<?php echo esc_attr( $settings['ai_summary_word_count'] ); ?>" min="20" max="200" step="5" class="small-text" />
+                        <span class="description"><?php esc_html_e( 'words (shown as guidance in the post editor)', 'search-intel' ); ?></span>
+                    </td>
+                </tr>
+                <tr>
+                    <th><label for="si_default_content_intent"><?php esc_html_e( 'Default Content Intent', 'search-intel' ); ?></label></th>
+                    <td>
+                        <select id="si_default_content_intent" name="search_intel_settings[default_content_intent]">
+                            <option value="" <?php selected( $settings['default_content_intent'], '' ); ?>><?php esc_html_e( '— None —', 'search-intel' ); ?></option>
+                            <option value="informational" <?php selected( $settings['default_content_intent'], 'informational' ); ?>><?php esc_html_e( 'Informational', 'search-intel' ); ?></option>
+                            <option value="navigational" <?php selected( $settings['default_content_intent'], 'navigational' ); ?>><?php esc_html_e( 'Navigational', 'search-intel' ); ?></option>
+                            <option value="transactional" <?php selected( $settings['default_content_intent'], 'transactional' ); ?>><?php esc_html_e( 'Transactional', 'search-intel' ); ?></option>
+                            <option value="commercial" <?php selected( $settings['default_content_intent'], 'commercial' ); ?>><?php esc_html_e( 'Commercial Investigation', 'search-intel' ); ?></option>
+                        </select>
+                        <p class="description"><?php esc_html_e( 'Pre-selected content intent for new posts. Can be overridden per-post.', 'search-intel' ); ?></p>
+                    </td>
+                </tr>
+                <tr>
+                    <th><label for="si_default_audience"><?php esc_html_e( 'Default Audience', 'search-intel' ); ?></label></th>
+                    <td>
+                        <input type="text" id="si_default_audience" name="search_intel_settings[default_audience]" value="<?php echo esc_attr( $settings['default_audience'] ); ?>" class="regular-text" placeholder="<?php esc_attr_e( 'e.g., Developers, Small Business Owners', 'search-intel' ); ?>" />
+                        <p class="description"><?php esc_html_e( 'Pre-filled audience for new posts. Can be overridden per-post.', 'search-intel' ); ?></p>
                     </td>
                 </tr>
             </table>

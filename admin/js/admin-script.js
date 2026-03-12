@@ -133,6 +133,85 @@
         updateEntitiesJson();
     });
 
+    /* ========== Citation Repeater ========== */
+
+    function updateCitationsJson() {
+        const citations = [];
+        $('.si-citation-row').each(function () {
+            const source = $(this).find('.si-citation-source').val();
+            const url = $(this).find('.si-citation-url').val();
+            const date = $(this).find('.si-citation-date').val();
+            const quote = $(this).find('.si-citation-quote').val();
+            if (source || url) {
+                citations.push({ source: source, url: url, date: date, quote: quote });
+            }
+        });
+        $('#si_citations').val(JSON.stringify(citations));
+    }
+
+    $(document).on('click', '#si-add-citation', function () {
+        const index = $('.si-citation-row').length;
+        const html = `
+            <div class="si-citation-row" data-index="${index}">
+                <input type="text" class="si-citation-source" placeholder="Source name" value="" />
+                <input type="url" class="si-citation-url" placeholder="URL" value="" />
+                <input type="date" class="si-citation-date" value="" />
+                <input type="text" class="si-citation-quote" placeholder="Key quote (optional)" value="" />
+                <button type="button" class="button si-remove-citation">Remove</button>
+            </div>
+        `;
+        $('#si-citation-repeater').append(html);
+    });
+
+    $(document).on('click', '.si-remove-citation', function () {
+        $(this).closest('.si-citation-row').remove();
+        updateCitationsJson();
+    });
+
+    $(document).on('input change', '.si-citation-source, .si-citation-url, .si-citation-date, .si-citation-quote', function () {
+        updateCitationsJson();
+    });
+
+    /* ========== Social Image Picker ========== */
+
+    $(document).on('click', '#si-select-social-image', function (e) {
+        e.preventDefault();
+
+        var frame = wp.media({
+            title: 'Select Social Share Image',
+            button: { text: 'Use this image' },
+            multiple: false,
+            library: { type: 'image' }
+        });
+
+        frame.on('select', function () {
+            var attachment = frame.state().get('selection').first().toJSON();
+            $('#si_social_image').val(attachment.url);
+            var $preview = $('#si-social-image-preview');
+            $preview.find('img').attr('src', attachment.url);
+            $preview.show();
+            $('#si-remove-social-image').show();
+        });
+
+        frame.open();
+    });
+
+    $(document).on('click', '#si-remove-social-image', function () {
+        $('#si_social_image').val('');
+        $('#si-social-image-preview').hide();
+        $(this).hide();
+    });
+
+    /* ========== Local Relevance Toggle ========== */
+
+    $(document).on('change', '#si_local_relevance', function () {
+        if ($(this).is(':checked')) {
+            $('#si-local-location-field').slideDown(200);
+        } else {
+            $('#si-local-location-field').slideUp(200);
+        }
+    });
+
     /* ========== Content Analysis ========== */
 
     function getEditorContent() {

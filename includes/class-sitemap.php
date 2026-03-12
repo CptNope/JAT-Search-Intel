@@ -13,6 +13,9 @@ class Sitemap {
     /** @var array */
     private $settings;
 
+    /** @var int Cache TTL in seconds (12 hours) */
+    private const CACHE_TTL = 43200;
+
     public function __construct( array $settings ) {
         $this->settings = $settings;
 
@@ -26,9 +29,28 @@ class Sitemap {
         // Disable WP core sitemaps to avoid conflicts
         add_filter( 'wp_sitemaps_enabled', '__return_false' );
 
-        // Ping search engines on post publish
-        add_action( 'publish_post', [ $this, 'ping_search_engines' ] );
-        add_action( 'publish_page', [ $this, 'ping_search_engines' ] );
+        // Ping search engines on post publish (respect setting)
+        if ( ! empty( $settings['ping_search_engines'] ) ) {
+            add_action( 'publish_post', [ $this, 'ping_search_engines' ] );
+            add_action( 'publish_page', [ $this, 'ping_search_engines' ] );
+        }
+
+        // Cache invalidation on content changes
+        add_action( 'save_post', [ $this, 'invalidate_cache' ] );
+        add_action( 'delete_post', [ $this, 'invalidate_cache' ] );
+        add_action( 'created_term', [ $this, 'invalidate_cache' ] );
+        add_action( 'edited_term', [ $this, 'invalidate_cache' ] );
+        add_action( 'delete_term', [ $this, 'invalidate_cache' ] );
+    }
+
+    /**
+     * Invalidate all sitemap transient caches.
+     */
+    public function invalidate_cache(): void {
+        global $wpdb;
+        $wpdb->query(
+            "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_si_sitemap_%' OR option_name LIKE '_transient_timeout_si_sitemap_%'"
+        );
     }
 
     /**
@@ -59,10 +81,19 @@ class Sitemap {
         header( 'Content-Type: application/xml; charset=utf-8' );
         header( 'X-Robots-Tag: noindex, follow' );
 
-        if ( 'index' === $type ) {
-            echo $this->generate_sitemap_index();
+        $cache_key = 'si_sitemap_' . $type . '_' . $page;
+        $cached    = get_transient( $cache_key );
+
+        if ( false !== $cached ) {
+            echo $cached;
+        } elseif ( 'index' === $type ) {
+            $output = $this->generate_sitemap_index();
+            set_transient( $cache_key, $output, self::CACHE_TTL );
+            echo $output;
         } else {
-            echo $this->generate_sitemap( $type, $page );
+            $output = $this->generate_sitemap( $type, $page );
+            set_transient( $cache_key, $output, self::CACHE_TTL );
+            echo $output;
         }
 
         exit;
@@ -92,9 +123,12 @@ class Sitemap {
             }
         }
 
-        // Taxonomy sitemaps
-        $taxonomies = [ 'category', 'post_tag' ];
-        foreach ( $taxonomies as $tax ) {
+        // Taxonomy sitemaps (v1.1: configurable via settings)
+        $sitemap_taxonomies = $this->settings['sitemap_taxonomies'] ?? [ 'category' ];
+        foreach ( $sitemap_taxonomies as $tax ) {
+            if ( ! taxonomy_exists( $tax ) ) {
+                continue;
+            }
             $terms = get_terms( [ 'taxonomy' => $tax, 'hide_empty' => true, 'number' => 1 ] );
             if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
                 $xml .= '<sitemap>' . "\n";
@@ -118,7 +152,8 @@ class Sitemap {
         $xml .= ' xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">' . "\n";
 
         // Check if it's a taxonomy
-        if ( in_array( $type, [ 'category', 'post_tag' ], true ) ) {
+        $sitemap_taxonomies = $this->settings['sitemap_taxonomies'] ?? [ 'category' ];
+        if ( in_array( $type, $sitemap_taxonomies, true ) || taxonomy_exists( $type ) ) {
             $xml .= $this->get_taxonomy_urls( $type );
         } else {
             $xml .= $this->get_post_type_urls( $type, $page );

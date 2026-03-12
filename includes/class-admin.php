@@ -226,6 +226,8 @@ class Admin {
                 SEARCH_INTEL_VERSION
             );
 
+            wp_enqueue_media();
+
             wp_enqueue_script(
                 'search-intel-admin',
                 SEARCH_INTEL_URL . 'admin/js/admin-script.js',
@@ -273,18 +275,28 @@ class Admin {
         wp_nonce_field( 'search_intel_metabox', 'search_intel_metabox_nonce' );
 
         $meta = [
-            'title'             => get_post_meta( $post->ID, '_search_intel_title', true ),
-            'description'       => get_post_meta( $post->ID, '_search_intel_description', true ),
-            'focus_keyword'     => get_post_meta( $post->ID, '_search_intel_focus_keyword', true ),
-            'canonical'         => get_post_meta( $post->ID, '_search_intel_canonical', true ),
-            'noindex'           => get_post_meta( $post->ID, '_search_intel_noindex', true ),
-            'nofollow'          => get_post_meta( $post->ID, '_search_intel_nofollow', true ),
-            'schema_type'       => get_post_meta( $post->ID, '_search_intel_schema_type', true ),
-            'ai_summary'        => get_post_meta( $post->ID, '_search_intel_ai_summary', true ),
-            'ai_noindex'        => get_post_meta( $post->ID, '_search_intel_ai_noindex', true ),
-            'expertise_level'   => get_post_meta( $post->ID, '_search_intel_expertise_level', true ),
-            'content_type'      => get_post_meta( $post->ID, '_search_intel_content_type', true ),
-            'fact_checked'      => get_post_meta( $post->ID, '_search_intel_fact_checked', true ),
+            'title'                 => get_post_meta( $post->ID, '_search_intel_title', true ),
+            'description'           => get_post_meta( $post->ID, '_search_intel_description', true ),
+            'focus_keyword'         => get_post_meta( $post->ID, '_search_intel_focus_keyword', true ),
+            'canonical'             => get_post_meta( $post->ID, '_search_intel_canonical', true ),
+            'noindex'               => get_post_meta( $post->ID, '_search_intel_noindex', true ),
+            'nofollow'              => get_post_meta( $post->ID, '_search_intel_nofollow', true ),
+            'schema_type'           => get_post_meta( $post->ID, '_search_intel_schema_type', true ),
+            'ai_summary'            => get_post_meta( $post->ID, '_search_intel_ai_summary', true ),
+            'ai_noindex'            => get_post_meta( $post->ID, '_search_intel_ai_noindex', true ),
+            'expertise_level'       => get_post_meta( $post->ID, '_search_intel_expertise_level', true ),
+            'content_type'          => get_post_meta( $post->ID, '_search_intel_content_type', true ),
+            'fact_checked'          => get_post_meta( $post->ID, '_search_intel_fact_checked', true ),
+            'social_title'          => get_post_meta( $post->ID, '_search_intel_social_title', true ),
+            'social_description'    => get_post_meta( $post->ID, '_search_intel_social_description', true ),
+            'social_image'          => get_post_meta( $post->ID, '_search_intel_social_image', true ),
+            'secondary_keywords'    => get_post_meta( $post->ID, '_search_intel_secondary_keywords', true ),
+            'direct_answer'         => get_post_meta( $post->ID, '_search_intel_direct_answer', true ),
+            'author_expertise_notes'=> get_post_meta( $post->ID, '_search_intel_author_expertise_notes', true ),
+            'content_intent'        => get_post_meta( $post->ID, '_search_intel_content_intent', true ),
+            'audience'              => get_post_meta( $post->ID, '_search_intel_audience', true ),
+            'local_relevance'       => get_post_meta( $post->ID, '_search_intel_local_relevance', true ),
+            'local_location'        => get_post_meta( $post->ID, '_search_intel_local_location', true ),
         ];
 
         include SEARCH_INTEL_DIR . 'admin/views/metabox.php';
@@ -315,6 +327,10 @@ class Admin {
             '_search_intel_title', '_search_intel_description', '_search_intel_focus_keyword',
             '_search_intel_canonical', '_search_intel_schema_type', '_search_intel_ai_summary',
             '_search_intel_expertise_level', '_search_intel_content_type', '_search_intel_fact_checked',
+            '_search_intel_social_title', '_search_intel_social_description', '_search_intel_social_image',
+            '_search_intel_secondary_keywords', '_search_intel_direct_answer',
+            '_search_intel_author_expertise_notes', '_search_intel_content_intent',
+            '_search_intel_audience', '_search_intel_local_location',
         ];
 
         foreach ( $text_fields as $field ) {
@@ -325,7 +341,7 @@ class Admin {
         }
 
         // Checkboxes
-        $checkboxes = [ '_search_intel_noindex', '_search_intel_nofollow', '_search_intel_ai_noindex' ];
+        $checkboxes = [ '_search_intel_noindex', '_search_intel_nofollow', '_search_intel_ai_noindex', '_search_intel_local_relevance' ];
         foreach ( $checkboxes as $field ) {
             $key = str_replace( '_search_intel_', 'si_', $field );
             update_post_meta( $post_id, $field, ! empty( $_POST[ $key ] ) ? '1' : '' );
@@ -363,6 +379,22 @@ class Admin {
                     ];
                 }, $entities );
                 update_post_meta( $post_id, '_search_intel_entities', $sanitized );
+            }
+        }
+
+        // Citations (JSON from repeater)
+        if ( isset( $_POST['si_citations'] ) ) {
+            $citations = json_decode( stripslashes( $_POST['si_citations'] ), true );
+            if ( is_array( $citations ) ) {
+                $sanitized_citations = array_map( function ( $cite ) {
+                    return [
+                        'source' => sanitize_text_field( $cite['source'] ?? '' ),
+                        'url'    => esc_url_raw( $cite['url'] ?? '' ),
+                        'date'   => sanitize_text_field( $cite['date'] ?? '' ),
+                        'quote'  => sanitize_text_field( $cite['quote'] ?? '' ),
+                    ];
+                }, $citations );
+                update_post_meta( $post_id, '_search_intel_citations', $sanitized_citations );
             }
         }
     }

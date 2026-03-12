@@ -93,6 +93,7 @@ graph TD
     
     BOOT --> CORE
 
+    CORE --> TITLE["Title Engine"]
     CORE --> SEO["SEO Manager"]
     CORE --> SCHEMA["Schema Manager"]
     CORE --> AEO["AEO Manager"]
@@ -100,6 +101,9 @@ graph TD
     CORE --> ANALYZER["Content Analyzer"]
     CORE --> SITEMAP["Sitemap"]
     CORE --> ADMIN["Admin<br/><i>only in wp-admin</i>"]
+
+    TITLE --> TVAR["Variable Resolver"]
+    TITLE --> TCTX["Per-Context Templates"]
 
     SEO --> META["Meta Tags"]
     SEO --> OG["Open Graph"]
@@ -116,6 +120,9 @@ graph TD
     AEO --> HOWTO["HowTo Schema"]
     AEO --> SPEAK["Speakable"]
     AEO --> AUTODETECT["Auto-detect FAQs"]
+    AEO --> DIRECTANS["Direct Answer Meta"]
+    AEO --> QAPAT["Q&A Detection"]
+    AEO --> SNIPPET["Snippet Scoring"]
 
     GEO --> AIMETA["AI Meta Tags"]
     GEO --> LLMS["llms.txt Endpoint"]
@@ -123,6 +130,8 @@ graph TD
     GEO --> EEAT["E-E-A-T Schema"]
     GEO --> FRESH["Freshness Signals"]
     GEO --> AIBOT["AI Crawl Directives"]
+    GEO --> INTENT["Intent & Audience Meta"]
+    GEO --> LOCAL["Local Relevance"]
 
     ADMIN --> SETTINGS["Settings Pages x6"]
     ADMIN --> METABOX["Post Metabox"]
@@ -133,6 +142,7 @@ graph TD
     style SEO fill:#16a34a,color:#fff
     style AEO fill:#d97706,color:#fff
     style GEO fill:#9333ea,color:#fff
+    style TITLE fill:#0d9488,color:#fff
     style ANALYZER fill:#0891b2,color:#fff
     style ADMIN fill:#dc2626,color:#fff
 ```
@@ -143,6 +153,7 @@ graph TD
 classDiagram
     class Core {
         -instance : Core
+        +title_engine : Title_Engine
         +seo : SEO_Manager
         +schema : Schema_Manager
         +aeo : AEO_Manager
@@ -153,6 +164,13 @@ classDiagram
         +get_instance() Core
         +get_settings() array
         +get_default_settings() array
+    }
+
+    class Title_Engine {
+        -settings : array
+        +resolve_title() string
+        +resolve_variables(template, context) string
+        +get_default_templates() array
     }
 
     class SEO_Manager {
@@ -180,6 +198,10 @@ classDiagram
         +get_faq_schema(post_id) array
         +get_howto_schema(post_id) array
         +render_speakable() void
+        +render_direct_answer_meta() void
+        +detect_qa_patterns(content) array
+        +get_snippet_score(content) array
+        +auto_lead_summary(excerpt, post) string
         +get_aeo_score(post_id) array
         -auto_detect_faqs(post_id) array
     }
@@ -199,6 +221,8 @@ classDiagram
         +analyze(post_id, content, title, keyword, desc) array
         +get_readability_score(text) array
         +ajax_analyze() void
+        +analyze_on_save(post_id, post) void
+        -get_content_checks(post_id, content, text, word_count) array
         -count_syllables(text) int
     }
 
@@ -207,6 +231,7 @@ classDiagram
         +register_endpoints() void
         +serve_sitemap() void
         +ping_search_engines(post_id) void
+        +invalidate_cache() void
         -generate_sitemap_index() string
         -generate_sitemap(type, page) string
     }
@@ -220,6 +245,7 @@ classDiagram
         +render_user_eeat_fields(user) void
     }
 
+    Core --> Title_Engine
     Core --> SEO_Manager
     Core --> Schema_Manager
     Core --> AEO_Manager
@@ -260,10 +286,11 @@ flowchart TD
         S1 --> S5["@graph: Article/WebPage"]
     end
 
-    subgraph AEO_OUT["AEO Manager Output (priority 11-12)"]
+    subgraph AEO_OUT["AEO Manager Output (priority 11-13)"]
         A1["FAQPage JSON-LD"]
         A2["HowTo JSON-LD"]
         A3["Speakable JSON-LD"]
+        A4["Direct-answer meta"]
     end
 
     subgraph GEO_OUT["GEO Manager Output (priority 3-13)"]
@@ -271,6 +298,8 @@ flowchart TD
         G2["AI meta tags"]
         G3["Freshness meta"]
         G4["Author E-E-A-T JSON-LD"]
+        G5["Intent & audience meta"]
+        G6["Local relevance meta"]
     end
 
     style SEO_OUT fill:#d1fae5,stroke:#16a34a
@@ -291,11 +320,11 @@ flowchart LR
     METABOX --> TAB_ADV["Advanced Tab"]
     METABOX --> TAB_ANALYSIS["Analysis Tab"]
 
-    TAB_SEO --> |"save_post"| PM_SEO["Post Meta<br/>_search_intel_title<br/>_search_intel_description<br/>_search_intel_focus_keyword<br/>_search_intel_canonical<br/>_search_intel_noindex<br/>_search_intel_nofollow"]
+    TAB_SEO --> |"save_post"| PM_SEO["Post Meta<br/>_search_intel_title<br/>_search_intel_description<br/>_search_intel_focus_keyword<br/>_search_intel_canonical<br/>_search_intel_noindex<br/>_search_intel_nofollow<br/>_search_intel_social_title<br/>_search_intel_social_description<br/>_search_intel_social_image<br/>_search_intel_secondary_keywords"]
 
-    TAB_AEO --> |"save_post"| PM_AEO["Post Meta<br/>_search_intel_faqs<br/>_search_intel_schema_type"]
+    TAB_AEO --> |"save_post"| PM_AEO["Post Meta<br/>_search_intel_faqs<br/>_search_intel_schema_type<br/>_search_intel_direct_answer<br/>_search_intel_citations"]
 
-    TAB_GEO --> |"save_post"| PM_GEO["Post Meta<br/>_search_intel_ai_summary<br/>_search_intel_topics<br/>_search_intel_entities<br/>_search_intel_expertise_level<br/>_search_intel_content_type<br/>_search_intel_fact_checked"]
+    TAB_GEO --> |"save_post"| PM_GEO["Post Meta<br/>_search_intel_ai_summary<br/>_search_intel_topics<br/>_search_intel_entities<br/>_search_intel_expertise_level<br/>_search_intel_content_type<br/>_search_intel_fact_checked<br/>_search_intel_content_intent<br/>_search_intel_audience<br/>_search_intel_author_expertise_notes<br/>_search_intel_local_relevance<br/>_search_intel_local_location"]
 
     TAB_ANALYSIS --> |"AJAX"| ANALYZER["Content Analyzer"]
     ANALYZER --> |"JSON response"| SCORES["SEO: 0-100<br/>AEO: 0-100<br/>GEO: 0-100<br/>Readability: 0-100"]
@@ -311,11 +340,18 @@ sequenceDiagram
 
     Bot->>WP: GET /sitemap.xml
     WP->>SM: query_var = search_intel_sitemap
-    SM->>SM: generate_sitemap_index()
-    SM-->>Bot: XML Sitemap Index
+    SM->>SM: Check transient cache
+    alt Cache hit
+        SM-->>Bot: Cached XML Sitemap Index
+    else Cache miss
+        SM->>SM: generate_sitemap_index()
+        SM->>SM: Store in transient (12h TTL)
+        SM-->>Bot: XML Sitemap Index
+    end
 
     Bot->>WP: GET /sitemap-post1.xml
     WP->>SM: type=post, page=1
+    SM->>SM: Check transient cache
     SM->>WP: get_posts(published, not noindex)
     WP-->>SM: Post data + images
     SM->>SM: Build URL entries + image:image
@@ -504,11 +540,11 @@ Every post and page gets a **Search Intel** metabox with five tabs:
 
 | Tab | Fields |
 |-----|--------|
-| **SEO** | Title, description, focus keyword, canonical URL, noindex/nofollow, SERP preview |
-| **AEO** | FAQ items (repeater), schema type override |
-| **GEO** | AI summary, topics, expertise level, content type, fact-check date, entities |
+| **SEO** | Title, description, focus keyword, canonical URL, noindex/nofollow, SERP preview, social title/description/image, secondary keywords |
+| **AEO** | FAQ items (repeater), schema type override, direct-answer field, citation/source references repeater |
+| **GEO** | AI summary, topics, expertise level, content type, fact-check date, entities, content intent, audience, author expertise notes, local relevance toggle + location |
 | **Advanced** | AI crawler blocking |
-| **Analysis** | Live SEO/AEO/GEO/Readability scores with actionable checks |
+| **Analysis** | Live SEO/AEO/GEO/Readability scores with actionable checks + 11 content quality checks |
 
 ---
 
@@ -547,14 +583,17 @@ All output hooks fire on `wp_head` with the following priorities:
 | 1 | SEO Manager | Meta description, author |
 | 2 | SEO Manager | Canonical URL |
 | 3 | SEO Manager / GEO | Robots meta, AI crawl directives |
-| 4 | SEO Manager | Open Graph tags |
-| 5 | SEO Manager | Twitter Card tags |
-| 6 | GEO Manager | AI meta tags |
+| 4 | SEO Manager | Open Graph tags (with social overrides) |
+| 5 | SEO Manager | Twitter Card tags (with social overrides) |
+| 6 | GEO Manager | AI meta tags + intent, audience, expertise, local relevance |
 | 7 | GEO Manager | Freshness meta |
-| 10 | Schema Manager | JSON-LD @graph |
+| 10 | Schema Manager | JSON-LD @graph (with citations, audience, contentLocation) |
 | 11 | AEO Manager | FAQ / HowTo schema |
 | 12 | AEO Manager | Speakable schema |
+| 13 | AEO Manager | Direct-answer meta tag |
 | 13 | GEO Manager | Author E-E-A-T schema |
+| 20 | SEO Manager | Document title filter |
+| 25 | Title Engine | Template-based title resolution |
 
 ---
 
@@ -572,12 +611,13 @@ search-intel/
 │
 ├── includes/
 │   ├── class-core.php            # Singleton orchestrator + default settings
+│   ├── class-title-engine.php    # Title template engine with variable resolver
 │   ├── class-seo-manager.php     # Meta, OG, Twitter, canonical, robots
-│   ├── class-schema-manager.php  # JSON-LD structured data
-│   ├── class-aeo-manager.php     # FAQ, HowTo, Speakable, AEO scoring
-│   ├── class-geo-manager.php     # AI meta, llms.txt, entities, E-E-A-T
-│   ├── class-content-analyzer.php# Readability, keyword, scoring engine
-│   ├── class-sitemap.php         # XML sitemap with images
+│   ├── class-schema-manager.php  # JSON-LD structured data (+ citations, audience, location)
+│   ├── class-aeo-manager.php     # FAQ, HowTo, Speakable, direct-answer, Q&A detection
+│   ├── class-geo-manager.php     # AI meta, llms.txt, entities, E-E-A-T, intent, local
+│   ├── class-content-analyzer.php# Scoring engine + analysis-on-save + 11 content checks
+│   ├── class-sitemap.php         # XML sitemap with images + transient caching
 │   └── class-admin.php           # Settings, metaboxes, user fields
 │
 ├── admin/
@@ -586,12 +626,12 @@ search-intel/
 │   ├── js/
 │   │   └── admin-script.js       # Tabs, SERP preview, repeaters, AJAX analysis
 │   └── views/
-│       ├── metabox.php           # Post editor metabox template
+│       ├── metabox.php           # Post editor metabox (SEO, AEO, GEO, Advanced, Analysis)
 │       ├── settings-general.php  # General settings page
-│       ├── settings-seo.php      # SEO settings page
+│       ├── settings-seo.php      # SEO settings (+ OG defaults, descriptions, robots, titles)
 │       ├── settings-aeo.php      # AEO settings page
-│       ├── settings-geo.php      # GEO settings page
-│       ├── settings-sitemap.php  # Sitemap settings page
+│       ├── settings-geo.php      # GEO settings (+ content defaults, intent, audience)
+│       ├── settings-sitemap.php  # Sitemap settings (+ taxonomy toggles)
 │       └── settings-social.php   # Social profiles page
 │
 └── languages/                    # Translation files (i18n ready)

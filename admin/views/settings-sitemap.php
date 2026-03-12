@@ -12,7 +12,7 @@ $settings = wp_parse_args( $settings, \Search_Intel\Core::get_default_settings()
         <?php settings_fields( 'search_intel_settings_group' ); ?>
 
         <?php
-        $sitemap_keys = [ 'sitemap_post_types', 'sitemap_max_urls' ];
+        $sitemap_keys = [ 'sitemap_post_types', 'sitemap_taxonomies', 'sitemap_max_urls' ];
         foreach ( $settings as $key => $val ) :
             if ( in_array( $key, $sitemap_keys, true ) ) continue;
             if ( is_array( $val ) ) :
@@ -64,6 +64,27 @@ $settings = wp_parse_args( $settings, \Search_Intel\Core::get_default_settings()
                     </td>
                 </tr>
                 <tr>
+                    <th><?php esc_html_e( 'Include Taxonomies', 'search-intel' ); ?></th>
+                    <td>
+                        <?php
+                        $public_taxonomies = get_taxonomies( [ 'public' => true ], 'objects' );
+                        $active_taxonomies = $settings['sitemap_taxonomies'] ?? [ 'category' ];
+                        foreach ( $public_taxonomies as $tax ) :
+                            ?>
+                            <label style="display:block; margin-bottom:6px;">
+                                <input type="checkbox" name="search_intel_settings[sitemap_taxonomies][]" value="<?php echo esc_attr( $tax->name ); ?>" <?php checked( in_array( $tax->name, $active_taxonomies, true ) ); ?> />
+                                <?php echo esc_html( $tax->label ); ?>
+                                <?php
+                                $term_count = wp_count_terms( [ 'taxonomy' => $tax->name, 'hide_empty' => true ] );
+                                if ( ! is_wp_error( $term_count ) ) :
+                                    printf( '<span class="description">(%d %s)</span>', (int) $term_count, esc_html__( 'terms', 'search-intel' ) );
+                                endif;
+                                ?>
+                            </label>
+                        <?php endforeach; ?>
+                    </td>
+                </tr>
+                <tr>
                     <th><label for="si_sitemap_max_urls"><?php esc_html_e( 'Max URLs per Sitemap', 'search-intel' ); ?></label></th>
                     <td>
                         <input type="number" id="si_sitemap_max_urls" name="search_intel_settings[sitemap_max_urls]" value="<?php echo esc_attr( $settings['sitemap_max_urls'] ); ?>" min="100" max="50000" step="100" class="small-text" />
@@ -78,8 +99,9 @@ $settings = wp_parse_args( $settings, \Search_Intel\Core::get_default_settings()
             <ul>
                 <li><?php esc_html_e( '✓ Sitemap index with pagination for large sites', 'search-intel' ); ?></li>
                 <li><?php esc_html_e( '✓ Image sitemap support for better image indexing', 'search-intel' ); ?></li>
-                <li><?php esc_html_e( '✓ Taxonomy sitemaps (categories, tags)', 'search-intel' ); ?></li>
-                <li><?php esc_html_e( '✓ Automatic search engine pinging on publish', 'search-intel' ); ?></li>
+                <li><?php esc_html_e( '✓ Configurable taxonomy sitemaps (categories, tags, custom)', 'search-intel' ); ?></li>
+                <li><?php esc_html_e( '✓ Transient-based caching with automatic invalidation', 'search-intel' ); ?></li>
+                <li><?php esc_html_e( '✓ Automatic search engine pinging on publish (optional)', 'search-intel' ); ?></li>
                 <li><?php esc_html_e( '✓ Posts marked as noindex are automatically excluded', 'search-intel' ); ?></li>
             </ul>
         </div>

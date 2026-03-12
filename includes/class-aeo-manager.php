@@ -25,10 +25,152 @@ class AEO_Manager {
 
         add_action( 'wp_head', [ $this, 'render_aeo_schema' ], 11 );
         add_action( 'wp_head', [ $this, 'render_speakable' ], 12 );
+        add_action( 'wp_head', [ $this, 'render_direct_answer_meta' ], 13 );
 
         // Register FAQ / HowTo shortcodes for easy content creation
         add_shortcode( 'search_intel_faq', [ $this, 'faq_shortcode' ] );
         add_shortcode( 'search_intel_howto', [ $this, 'howto_shortcode' ] );
+
+        // Auto-generate lead summary when no excerpt exists
+        add_filter( 'get_the_excerpt', [ $this, 'auto_lead_summary' ], 10, 2 );
+    }
+
+    /**
+     * Render direct-answer meta tag for featured snippet targeting.
+     */
+    public function render_direct_answer_meta(): void {
+        if ( ! is_singular() ) {
+            return;
+        }
+
+        $post_id       = get_queried_object_id();
+        $direct_answer = get_post_meta( $post_id, '_search_intel_direct_answer', true );
+
+        if ( $direct_answer ) {
+            printf(
+                '<meta name="direct-answer" content="%s" />' . "\n",
+                esc_attr( $direct_answer )
+            );
+        }
+    }
+
+    /**
+     * Auto-generate a lead summary from the first 2-3 sentences when no excerpt exists.
+     */
+    public function auto_lead_summary( string $excerpt, $post ): string {
+        if ( $excerpt || ! $post ) {
+            return $excerpt;
+        }
+
+        $content = $post->post_content;
+        if ( empty( $content ) ) {
+            return $excerpt;
+        }
+
+        $text = wp_strip_all_tags( $content );
+        // Split into sentences and take first 3
+        $sentences = preg_split( '/(?<=[.!?])\s+/', $text, 4 );
+        if ( count( $sentences ) > 3 ) {
+            $sentences = array_slice( $sentences, 0, 3 );
+        }
+
+        return implode( ' ', $sentences );
+    }
+
+    /**
+     * Detect Q&A-style patterns beyond headings (inline question-answer pairs).
+     */
+    public function detect_qa_patterns( string $content ): array {
+        $patterns = [];
+
+        // Pattern 1: Bold question followed by answer text
+        // e.g., <strong>What is SEO?</strong> SEO is...
+        if ( preg_match_all( '/<strong>(.*?\?)<\/strong>\s*(.*?)(?=<strong>|<h[2-6]|<\/div|$)/is', $content, $matches, PREG_SET_ORDER ) ) {
+            foreach ( $matches as $m ) {
+                $answer = wp_strip_all_tags( trim( $m[2] ) );
+                if ( strlen( $answer ) > 20 ) {
+                    $patterns[] = [
+                        'question' => wp_strip_all_tags( $m[1] ),
+                        'answer'   => $answer,
+                        'type'     => 'bold_qa',
+                    ];
+                }
+            }
+        }
+
+        // Pattern 2: "Q:" / "A:" pattern
+        if ( preg_match_all( '/(?:Q|Question):\s*(.*?\?)\s*(?:A|Answer):\s*(.*?)(?=(?:Q|Question):|<h[2-6]|$)/is', wp_strip_all_tags( $content ), $matches, PREG_SET_ORDER ) ) {
+            foreach ( $matches as $m ) {
+                if ( strlen( trim( $m[2] ) ) > 20 ) {
+                    $patterns[] = [
+                        'question' => trim( $m[1] ),
+                        'answer'   => trim( $m[2] ),
+                        'type'     => 'qa_prefix',
+                    ];
+                }
+            }
+        }
+
+        return $patterns;
+    }
+
+    /**
+     * Calculate answer snippet recommendation score.
+     * Checks for 40-word blocks, lists, and definitions suitable for featured snippets.
+     */
+    public function get_snippet_score( string $content ): array {
+        $score  = 0;
+        $max    = 100;
+        $checks = [];
+        $text   = wp_strip_all_tags( $content );
+
+        // 1. Concise answer blocks (20-50 words) — 25 pts
+        $has_concise_block = false;
+        if ( preg_match_all( '/<p[^>]*>(.*?)<\/p>/is', $content, $paras ) ) {
+            foreach ( $paras[1] as $p ) {
+                $wc = str_word_count( wp_strip_all_tags( $p ) );
+                if ( $wc >= 20 && $wc <= 50 ) {
+                    $has_concise_block = true;
+                    break;
+                }
+            }
+        }
+        if ( $has_concise_block ) {
+            $score += 25;
+            $checks[] = [ 'pass' => true, 'label' => __( 'Contains concise answer block (20-50 words)', 'search-intel' ) ];
+        } else {
+            $checks[] = [ 'pass' => false, 'label' => __( 'Add a 20-50 word paragraph as a direct answer block', 'search-intel' ) ];
+        }
+
+        // 2. Ordered/unordered lists — 25 pts
+        if ( preg_match( '/<[ou]l/i', $content ) ) {
+            $score += 25;
+            $checks[] = [ 'pass' => true, 'label' => __( 'Contains structured lists for list snippets', 'search-intel' ) ];
+        } else {
+            $checks[] = [ 'pass' => false, 'label' => __( 'Add lists (steps, items, features) for list snippet eligibility', 'search-intel' ) ];
+        }
+
+        // 3. Definition patterns — 25 pts
+        if ( preg_match( '/(is defined as|refers to|is a type of|is the process of|means that)/i', $text ) ) {
+            $score += 25;
+            $checks[] = [ 'pass' => true, 'label' => __( 'Contains definition patterns for definition snippets', 'search-intel' ) ];
+        } else {
+            $checks[] = [ 'pass' => false, 'label' => __( 'Include "X is defined as..." or "X refers to..." patterns', 'search-intel' ) ];
+        }
+
+        // 4. Table data — 25 pts
+        if ( preg_match( '/<table/i', $content ) ) {
+            $score += 25;
+            $checks[] = [ 'pass' => true, 'label' => __( 'Contains tables for table snippet eligibility', 'search-intel' ) ];
+        } else {
+            $checks[] = [ 'pass' => false, 'label' => __( 'Add data tables for table snippet opportunities', 'search-intel' ) ];
+        }
+
+        return [
+            'score'  => min( $score, $max ),
+            'max'    => $max,
+            'checks' => $checks,
+        ];
     }
 
     /**

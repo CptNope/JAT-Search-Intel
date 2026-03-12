@@ -303,6 +303,73 @@ class Schema_Manager {
             }
         }
 
+        // v1.1: Direct answer as abstract
+        $direct_answer = get_post_meta( $post_id, '_search_intel_direct_answer', true );
+        if ( $direct_answer ) {
+            $schema['abstract'] = sanitize_text_field( $direct_answer );
+        }
+
+        // v1.1: Citations as CreativeWork references
+        $citations = get_post_meta( $post_id, '_search_intel_citations', true );
+        if ( ! empty( $citations ) && is_array( $citations ) ) {
+            $cite_schemas = [];
+            foreach ( $citations as $cite ) {
+                if ( empty( $cite['source'] ) && empty( $cite['url'] ) ) {
+                    continue;
+                }
+                $cite_schema = [
+                    '@type' => 'CreativeWork',
+                ];
+                if ( ! empty( $cite['source'] ) ) {
+                    $cite_schema['name'] = sanitize_text_field( $cite['source'] );
+                }
+                if ( ! empty( $cite['url'] ) ) {
+                    $cite_schema['url'] = esc_url( $cite['url'] );
+                }
+                if ( ! empty( $cite['date'] ) ) {
+                    $cite_schema['datePublished'] = sanitize_text_field( $cite['date'] );
+                }
+                if ( ! empty( $cite['quote'] ) ) {
+                    $cite_schema['text'] = sanitize_text_field( $cite['quote'] );
+                }
+                $cite_schemas[] = $cite_schema;
+            }
+            if ( ! empty( $cite_schemas ) ) {
+                $schema['citation'] = $cite_schemas;
+            }
+        }
+
+        // v1.1: Content intent
+        $content_intent = get_post_meta( $post_id, '_search_intel_content_intent', true );
+        if ( $content_intent ) {
+            $schema['creativeWorkStatus'] = sanitize_text_field( $content_intent );
+        }
+
+        // v1.1: Audience
+        $audience = get_post_meta( $post_id, '_search_intel_audience', true );
+        if ( $audience ) {
+            $schema['audience'] = [
+                '@type'         => 'Audience',
+                'audienceType'  => sanitize_text_field( $audience ),
+            ];
+        }
+
+        // v1.1: Author expertise notes
+        $expertise_notes = get_post_meta( $post_id, '_search_intel_author_expertise_notes', true );
+        if ( $expertise_notes && isset( $schema['author'] ) ) {
+            $schema['author']['knowsAbout'] = sanitize_text_field( $expertise_notes );
+        }
+
+        // v1.1: Local relevance — contentLocation
+        $local_relevance = get_post_meta( $post_id, '_search_intel_local_relevance', true );
+        $local_location  = get_post_meta( $post_id, '_search_intel_local_location', true );
+        if ( $local_relevance && $local_location ) {
+            $schema['contentLocation'] = [
+                '@type' => 'Place',
+                'name'  => sanitize_text_field( $local_location ),
+            ];
+        }
+
         // Breadcrumb reference
         if ( ! empty( $this->settings['enable_breadcrumbs'] ) ) {
             $schema['breadcrumb'] = [

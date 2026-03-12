@@ -116,78 +116,78 @@
 
 ### Post Panel — New Fields
 
-- [ ] Social share title (separate from SEO title)
-- [ ] Social share description (separate from meta description)
-- [ ] Social image override with media library picker
-- [ ] Secondary keywords field (comma-separated)
-- [ ] Direct-answer field ("What is this post answering?")
-- [ ] Citation / source references repeater (`source`, `url`, `date`, `quote`)
-- [ ] Per-post author expertise notes
-- [ ] Content intent label (informational, commercial, navigational, educational, transactional)
-- [ ] Audience label (beginner, intermediate, advanced, professional, general)
-- [ ] Local relevance toggle + location field
+- [x] Social share title (separate from SEO title)
+- [x] Social share description (separate from meta description)
+- [x] Social image override with media library picker
+- [x] Secondary keywords field (comma-separated)
+- [x] Direct-answer field ("What is this post answering?")
+- [x] Citation / source references repeater (`source`, `url`, `date`, `quote`)
+- [x] Per-post author expertise notes
+- [x] Content intent label (informational, commercial, navigational, educational, transactional)
+- [x] Audience label (beginner, intermediate, advanced, professional, general)
+- [x] Local relevance toggle + location field
 
 ### Title Template Engine
 
-- [ ] Variable resolver (`%title%`, `%sitename%`, `%sep%`, `%category%`, `%tag%`, `%date%`, `%author%`, `%page%`, `%excerpt%`)
-- [ ] Per-context templates: single posts, pages, categories, tags, author archives, search, 404, homepage
-- [ ] Title template settings UI
-- [ ] `pre_get_document_title` integration with template engine
+- [x] Variable resolver (`%title%`, `%sitename%`, `%sep%`, `%category%`, `%tag%`, `%date%`, `%author%`, `%page%`, `%excerpt%`)
+- [x] Per-context templates: single posts, pages, categories, tags, author archives, search, 404, homepage
+- [x] Title template settings UI
+- [x] `pre_get_document_title` integration with template engine
 
 ### Analysis-on-Save
 
-- [ ] Hook into `save_post` / `wp_after_insert_post` for auto-analysis
-- [ ] Store scores in post meta on every save
-- [ ] Admin notice when critical issues detected on save
+- [x] Hook into `save_post` / `wp_after_insert_post` for auto-analysis
+- [x] Store scores in post meta on every save
+- [x] Admin notice when critical issues detected on save
 
 ### New Analysis Checks
 
-- [ ] H1 presence detection (exactly one H1 or post title as H1)
-- [ ] Heading hierarchy validation (no skipped levels)
-- [ ] Internal link opportunity suggestions
-- [ ] External citation presence scoring
-- [ ] Answer block opportunity detection
-- [ ] Entity clarity scoring (key entities in repeater)
-- [ ] AI summary presence check
-- [ ] Schema completeness check
-- [ ] Secondary keyword usage in content
-- [ ] Social metadata completeness check
-- [ ] Image alt text presence check
+- [x] H1 presence detection (exactly one H1 or post title as H1)
+- [x] Heading hierarchy validation (no skipped levels)
+- [x] Internal link opportunity suggestions
+- [x] External citation presence scoring
+- [x] Answer block opportunity detection
+- [x] Entity clarity scoring (key entities in repeater)
+- [x] AI summary presence check
+- [x] Schema completeness check
+- [x] Secondary keyword usage in content
+- [x] Social metadata completeness check
+- [x] Image alt text presence check
 
 ### AEO Additions
 
-- [ ] Direct-answer field rendered as meta tag and in Article schema
-- [ ] Q&A style detection (question-then-answer patterns beyond headings)
-- [ ] Answer snippet recommendation score (40-word blocks, lists, definitions)
-- [ ] Auto-generate lead summary from first 2-3 sentences when no excerpt exists
+- [x] Direct-answer field rendered as meta tag and in Article schema
+- [x] Q&A style detection (question-then-answer patterns beyond headings)
+- [x] Answer snippet recommendation score (40-word blocks, lists, definitions)
+- [x] Auto-generate lead summary from first 2-3 sentences when no excerpt exists
 
 ### GEO Additions
 
-- [ ] Citations rendered in JSON-LD as `citation` with `@type: CreativeWork`
-- [ ] Content intent label in meta tag and JSON-LD
-- [ ] Audience label in meta tag and `schema.org/audience`
-- [ ] Local relevance `contentLocation` with `@type: Place` in schema
+- [x] Citations rendered in JSON-LD as `citation` with `@type: CreativeWork`
+- [x] Content intent label in meta tag and JSON-LD
+- [x] Audience label in meta tag and `schema.org/audience`
+- [x] Local relevance `contentLocation` with `@type: Place` in schema
 
 ### Expanded Settings
 
-- [ ] Default OG image (fallback when no featured image)
-- [ ] Meta description fallback behavior (excerpt → content trim → empty)
-- [ ] Meta description max length setting
-- [ ] Global robots default for new posts
-- [ ] Taxonomy sitemap toggles (category, post_tag, custom)
-- [ ] Custom post type sitemap toggles
-- [ ] AI summary default target word count
-- [ ] Default content intent selection
-- [ ] Default audience selection
-- [ ] Search engine ping toggle (opt-in with disclosure)
+- [x] Default OG image (fallback when no featured image)
+- [x] Meta description fallback behavior (excerpt → content trim → empty)
+- [x] Meta description max length setting
+- [x] Global robots default for new posts
+- [x] Taxonomy sitemap toggles (category, post_tag, custom)
+- [x] Custom post type sitemap toggles
+- [x] AI summary default target word count
+- [x] Default content intent selection
+- [x] Default audience selection
+- [x] Search engine ping toggle (opt-in with disclosure)
 
 ### Sitemap Improvements
 
-- [ ] Transient-based sitemap caching (12-hour TTL)
-- [ ] Cache invalidation on post publish/update
-- [ ] Explicit tags sitemap toggle
-- [ ] Custom post type sitemap support
-- [ ] Image sitemap support (extract images from post content)
+- [x] Transient-based sitemap caching (12-hour TTL)
+- [x] Cache invalidation on post publish/update
+- [x] Explicit tags sitemap toggle
+- [x] Custom post type sitemap support
+- [x] Image sitemap support (extract images from post content)
 
 ---
 

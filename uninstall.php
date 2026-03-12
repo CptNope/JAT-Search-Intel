@@ -44,6 +44,21 @@ $meta_keys = [
     '_search_intel_expertise_level',
     '_search_intel_content_type',
     '_search_intel_fact_checked',
+    '_search_intel_social_title',
+    '_search_intel_social_description',
+    '_search_intel_social_image',
+    '_search_intel_secondary_keywords',
+    '_search_intel_direct_answer',
+    '_search_intel_citations',
+    '_search_intel_author_expertise_notes',
+    '_search_intel_content_intent',
+    '_search_intel_audience',
+    '_search_intel_local_relevance',
+    '_search_intel_local_location',
+    '_search_intel_seo_score',
+    '_search_intel_aeo_score',
+    '_search_intel_geo_score',
+    '_search_intel_readability_score',
 ];
 
 foreach ( $meta_keys as $key ) {

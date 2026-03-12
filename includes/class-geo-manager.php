@@ -114,6 +114,43 @@ class GEO_Manager {
             '<meta name="article:modified_time" content="%s" />' . "\n",
             esc_attr( get_the_modified_date( 'c', $post_id ) )
         );
+
+        // v1.1: Content intent meta
+        $content_intent = get_post_meta( $post_id, '_search_intel_content_intent', true );
+        if ( $content_intent ) {
+            printf(
+                '<meta name="content-intent" content="%s" />' . "\n",
+                esc_attr( $content_intent )
+            );
+        }
+
+        // v1.1: Target audience meta
+        $audience = get_post_meta( $post_id, '_search_intel_audience', true );
+        if ( $audience ) {
+            printf(
+                '<meta name="target-audience" content="%s" />' . "\n",
+                esc_attr( $audience )
+            );
+        }
+
+        // v1.1: Author expertise notes
+        $expertise_notes = get_post_meta( $post_id, '_search_intel_author_expertise_notes', true );
+        if ( $expertise_notes ) {
+            printf(
+                '<meta name="author-expertise" content="%s" />' . "\n",
+                esc_attr( $expertise_notes )
+            );
+        }
+
+        // v1.1: Local relevance signal
+        $local_relevance = get_post_meta( $post_id, '_search_intel_local_relevance', true );
+        $local_location  = get_post_meta( $post_id, '_search_intel_local_location', true );
+        if ( $local_relevance && $local_location ) {
+            printf(
+                '<meta name="geo.placename" content="%s" />' . "\n",
+                esc_attr( $local_location )
+            );
+        }
     }
 
     /**
