@@ -310,7 +310,7 @@ class Admin {
             return;
         }
 
-        if ( ! wp_verify_nonce( $_POST['search_intel_metabox_nonce'], 'search_intel_metabox' ) ) {
+        if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['search_intel_metabox_nonce'] ) ), 'search_intel_metabox' ) ) {
             return;
         }
 
@@ -336,7 +336,7 @@ class Admin {
         foreach ( $text_fields as $field ) {
             $key = str_replace( '_search_intel_', 'si_', $field );
             if ( isset( $_POST[ $key ] ) ) {
-                update_post_meta( $post_id, $field, sanitize_text_field( $_POST[ $key ] ) );
+                update_post_meta( $post_id, $field, sanitize_text_field( wp_unslash( $_POST[ $key ] ) ) );
             }
         }
 
@@ -349,7 +349,7 @@ class Admin {
 
         // FAQs (JSON from repeater)
         if ( isset( $_POST['si_faqs'] ) ) {
-            $faqs = json_decode( stripslashes( $_POST['si_faqs'] ), true );
+            $faqs = json_decode( wp_unslash( $_POST['si_faqs'] ), true );
             if ( is_array( $faqs ) ) {
                 $sanitized_faqs = array_map( function ( $faq ) {
                     return [
@@ -363,13 +363,13 @@ class Admin {
 
         // Topics (comma-separated)
         if ( isset( $_POST['si_topics'] ) ) {
-            $topics = array_filter( array_map( 'sanitize_text_field', explode( ',', $_POST['si_topics'] ) ) );
+            $topics = array_filter( array_map( 'sanitize_text_field', explode( ',', wp_unslash( $_POST['si_topics'] ) ) ) );
             update_post_meta( $post_id, '_search_intel_topics', $topics );
         }
 
         // Entities (JSON)
         if ( isset( $_POST['si_entities'] ) ) {
-            $entities = json_decode( stripslashes( $_POST['si_entities'] ), true );
+            $entities = json_decode( wp_unslash( $_POST['si_entities'] ), true );
             if ( is_array( $entities ) ) {
                 $sanitized = array_map( function ( $entity ) {
                     return [
@@ -384,7 +384,7 @@ class Admin {
 
         // Citations (JSON from repeater)
         if ( isset( $_POST['si_citations'] ) ) {
-            $citations = json_decode( stripslashes( $_POST['si_citations'] ), true );
+            $citations = json_decode( wp_unslash( $_POST['si_citations'] ), true );
             if ( is_array( $citations ) ) {
                 $sanitized_citations = array_map( function ( $cite ) {
                     return [
@@ -460,6 +460,7 @@ class Admin {
     public function render_user_eeat_fields( $user ): void {
         ?>
         <h2><?php esc_html_e( 'Search Intel — E-E-A-T Author Data', 'search-intel' ); ?></h2>
+        <?php wp_nonce_field( 'search_intel_user_eeat', 'search_intel_user_eeat_nonce' ); ?>
         <p class="description"><?php esc_html_e( 'This information enhances your author authority signals for search engines and AI systems.', 'search-intel' ); ?></p>
         <table class="form-table">
             <tr>
@@ -497,30 +498,35 @@ class Admin {
      * Save user E-E-A-T fields.
      */
     public function save_user_eeat_fields( int $user_id ): void {
+        if ( ! isset( $_POST['search_intel_user_eeat_nonce'] ) ||
+             ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['search_intel_user_eeat_nonce'] ) ), 'search_intel_user_eeat' ) ) {
+            return;
+        }
+
         if ( ! current_user_can( 'edit_user', $user_id ) ) {
             return;
         }
 
         // Credentials
         if ( isset( $_POST['si_credentials'] ) ) {
-            $creds = array_filter( array_map( 'sanitize_text_field', explode( "\n", $_POST['si_credentials'] ) ) );
+            $creds = array_filter( array_map( 'sanitize_text_field', explode( "\n", wp_unslash( $_POST['si_credentials'] ) ) ) );
             update_user_meta( $user_id, 'search_intel_credentials', $creds );
         }
 
         // Expertise areas
         if ( isset( $_POST['si_expertise_areas'] ) ) {
-            $areas = array_filter( array_map( 'sanitize_text_field', explode( "\n", $_POST['si_expertise_areas'] ) ) );
+            $areas = array_filter( array_map( 'sanitize_text_field', explode( "\n", wp_unslash( $_POST['si_expertise_areas'] ) ) ) );
             update_user_meta( $user_id, 'search_intel_expertise_areas', $areas );
         }
 
         // Years experience
         if ( isset( $_POST['si_years_experience'] ) ) {
-            update_user_meta( $user_id, 'search_intel_years_experience', absint( $_POST['si_years_experience'] ) );
+            update_user_meta( $user_id, 'search_intel_years_experience', absint( wp_unslash( $_POST['si_years_experience'] ) ) );
         }
 
         // Social profiles
         if ( isset( $_POST['si_social_profiles'] ) ) {
-            $profiles = array_filter( array_map( 'esc_url_raw', explode( "\n", $_POST['si_social_profiles'] ) ) );
+            $profiles = array_filter( array_map( 'esc_url_raw', explode( "\n", wp_unslash( $_POST['si_social_profiles'] ) ) ) );
             update_user_meta( $user_id, 'search_intel_social_profiles', $profiles );
         }
     }

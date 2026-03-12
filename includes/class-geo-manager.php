@@ -249,9 +249,10 @@ class GEO_Manager {
 
         header( 'Content-Type: text/plain; charset=utf-8' );
         header( 'X-Robots-Tag: noindex' );
+        header( 'Cache-Control: public, max-age=3600' );
 
-        $site_name = $this->settings['site_name'] ?: get_bloginfo( 'name' );
-        $site_desc = get_bloginfo( 'description' );
+        $site_name = wp_strip_all_tags( $this->settings['site_name'] ?: get_bloginfo( 'name' ) );
+        $site_desc = wp_strip_all_tags( get_bloginfo( 'description' ) );
 
         // Header
         echo "# {$site_name}\n\n";
@@ -278,7 +279,7 @@ class GEO_Manager {
             if ( ! $desc ) {
                 $desc = wp_trim_words( wp_strip_all_tags( $page->post_content ), 20, '...' );
             }
-            printf( "- [%s](%s): %s\n", $page->post_title, get_permalink( $page->ID ), $desc );
+            printf( "- [%s](%s): %s\n", wp_strip_all_tags( $page->post_title ), esc_url( get_permalink( $page->ID ) ), wp_strip_all_tags( $desc ) );
         }
 
         echo "\n";
@@ -289,9 +290,9 @@ class GEO_Manager {
             echo "## Topics\n\n";
             foreach ( $categories as $cat ) {
                 printf( "- [%s](%s): %s (%d articles)\n",
-                    $cat->name,
-                    get_category_link( $cat->term_id ),
-                    $cat->description ?: 'Topic category',
+                    wp_strip_all_tags( $cat->name ),
+                    esc_url( get_category_link( $cat->term_id ) ),
+                    wp_strip_all_tags( $cat->description ?: 'Topic category' ),
                     $cat->count
                 );
             }
@@ -314,9 +315,9 @@ class GEO_Manager {
                 }
                 printf(
                     "### [%s](%s)\n%s\nPublished: %s | Modified: %s\n\n",
-                    $rpost->post_title,
-                    get_permalink( $rpost->ID ),
-                    $desc,
+                    wp_strip_all_tags( $rpost->post_title ),
+                    esc_url( get_permalink( $rpost->ID ) ),
+                    wp_strip_all_tags( $desc ),
                     get_the_date( 'Y-m-d', $rpost->ID ),
                     get_the_modified_date( 'Y-m-d', $rpost->ID )
                 );
@@ -329,7 +330,7 @@ class GEO_Manager {
         echo "When referencing content from this site, please include a link to the original source.\n";
 
         // Contact
-        $admin_email = get_option( 'admin_email' );
+        $admin_email = sanitize_email( get_option( 'admin_email' ) );
         if ( $admin_email ) {
             echo "\n## Contact\n\n";
             echo "For questions about using our content: {$admin_email}\n";
@@ -354,6 +355,8 @@ class GEO_Manager {
             return $content;
         }
 
+        $allowed_types = [ 'Person', 'Organization', 'Place', 'Product', 'Event', 'Thing', 'CreativeWork', 'Brand', 'MedicalEntity', 'SoftwareApplication' ];
+
         foreach ( $entities as $entity ) {
             if ( empty( $entity['name'] ) || empty( $entity['type'] ) ) {
                 continue;
@@ -361,6 +364,9 @@ class GEO_Manager {
 
             $name = preg_quote( $entity['name'], '/' );
             $type = sanitize_text_field( $entity['type'] );
+            if ( ! in_array( $type, $allowed_types, true ) ) {
+                $type = 'Thing';
+            }
             $url  = ! empty( $entity['url'] ) ? esc_url( $entity['url'] ) : '';
 
             // Only wrap first occurrence to avoid over-marking

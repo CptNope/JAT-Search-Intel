@@ -114,10 +114,24 @@ class Content_Analyzer {
         check_ajax_referer( 'search_intel_nonce', 'nonce' );
 
         $post_id = absint( $_POST['post_id'] ?? 0 );
-        $content = wp_kses_post( $_POST['content'] ?? '' );
-        $title   = sanitize_text_field( $_POST['title'] ?? '' );
-        $keyword = sanitize_text_field( $_POST['focus_keyword'] ?? '' );
-        $description = sanitize_text_field( $_POST['description'] ?? '' );
+
+        if ( $post_id && ! current_user_can( 'edit_post', $post_id ) ) {
+            wp_send_json_error( [ 'message' => __( 'You do not have permission to analyze this post.', 'search-intel' ) ], 403 );
+        }
+
+        // Rate limiting: max 10 analysis requests per minute per user
+        $user_id   = get_current_user_id();
+        $rate_key  = 'si_analyze_rate_' . $user_id;
+        $rate_count = (int) get_transient( $rate_key );
+        if ( $rate_count >= 10 ) {
+            wp_send_json_error( [ 'message' => __( 'Too many requests. Please wait a moment.', 'search-intel' ) ], 429 );
+        }
+        set_transient( $rate_key, $rate_count + 1, MINUTE_IN_SECONDS );
+
+        $content = wp_kses_post( wp_unslash( $_POST['content'] ?? '' ) );
+        $title   = sanitize_text_field( wp_unslash( $_POST['title'] ?? '' ) );
+        $keyword = sanitize_text_field( wp_unslash( $_POST['focus_keyword'] ?? '' ) );
+        $description = sanitize_text_field( wp_unslash( $_POST['description'] ?? '' ) );
 
         $results = $this->analyze( $post_id, $content, $title, $keyword, $description );
 

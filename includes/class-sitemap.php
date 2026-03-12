@@ -48,8 +48,14 @@ class Sitemap {
      */
     public function invalidate_cache(): void {
         global $wpdb;
+        $like        = $wpdb->esc_like( '_transient_si_sitemap_' ) . '%';
+        $like_timeout = $wpdb->esc_like( '_transient_timeout_si_sitemap_' ) . '%';
         $wpdb->query(
-            "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_si_sitemap_%' OR option_name LIKE '_transient_timeout_si_sitemap_%'"
+            $wpdb->prepare(
+                "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
+                $like,
+                $like_timeout
+            )
         );
     }
 
@@ -80,6 +86,7 @@ class Sitemap {
 
         header( 'Content-Type: application/xml; charset=utf-8' );
         header( 'X-Robots-Tag: noindex, follow' );
+        header( 'Cache-Control: public, max-age=3600' );
 
         $cache_key = 'si_sitemap_' . $type . '_' . $page;
         $cached    = get_transient( $cache_key );
