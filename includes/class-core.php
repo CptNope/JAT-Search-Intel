@@ -66,6 +66,82 @@ class Core {
         if ( is_admin() ) {
             $this->admin = new Admin( $settings, $this );
         }
+
+        // Prefetch all post meta on singular pages to avoid N+1 queries
+        add_action( 'wp', [ $this, 'prefetch_post_meta' ] );
+
+        // Compatibility checks
+        add_action( 'admin_init', [ $this, 'check_compatibility' ] );
+    }
+
+    /**
+     * Prime the WP post meta cache for the current singular post.
+     *
+     * On a typical singular page, SEO_Manager, Schema_Manager, AEO_Manager,
+     * and GEO_Manager each call get_post_meta() for 5-10 different keys.
+     * WordPress caches meta per-post after the first call, but only if the
+     * full meta for that post has been loaded. update_meta_cache() ensures
+     * a single SELECT loads all meta keys at once — saving ~20 individual
+     * queries down to 1.
+     */
+    public function prefetch_post_meta(): void {
+        if ( is_singular() ) {
+            $post_id = get_queried_object_id();
+            if ( $post_id ) {
+                update_meta_cache( 'post', [ $post_id ] );
+            }
+        }
+    }
+
+    /**
+     * Run compatibility checks and show admin notices for conflicts.
+     */
+    public function check_compatibility(): void {
+        // Only show to admins
+        if ( ! current_user_can( 'manage_options' ) ) {
+            return;
+        }
+
+        $conflicts = $this->get_conflicting_plugins();
+        if ( ! empty( $conflicts ) ) {
+            add_action( 'admin_notices', function () use ( $conflicts ) {
+                echo '<div class="notice notice-warning is-dismissible"><p>';
+                echo '<strong>' . esc_html__( 'Search Intel:', 'search-intel' ) . '</strong> ';
+                printf(
+                    /* translators: %s: comma-separated list of plugin names */
+                    esc_html__( 'Potential SEO plugin conflicts detected: %s. Consider disabling overlapping features to avoid duplicate meta tags.', 'search-intel' ),
+                    '<strong>' . esc_html( implode( ', ', $conflicts ) ) . '</strong>'
+                );
+                echo '</p></div>';
+            } );
+        }
+    }
+
+    /**
+     * Detect active plugins that may conflict with Search Intel.
+     *
+     * @return string[] Names of conflicting plugins.
+     */
+    private function get_conflicting_plugins(): array {
+        $known = [
+            'wordpress-seo/wp-seo.php'              => 'Yoast SEO',
+            'all-in-one-seo-pack/all_in_one_seo_pack.php' => 'All in One SEO',
+            'seo-by-rank-math/rank-math.php'         => 'Rank Math',
+            'autodescription/autodescription.php'     => 'The SEO Framework',
+            'flavor/flavor.php'                       => 'flavor',
+        ];
+
+        $conflicts = [];
+
+        if ( function_exists( 'is_plugin_active' ) ) {
+            foreach ( $known as $slug => $name ) {
+                if ( is_plugin_active( $slug ) ) {
+                    $conflicts[] = $name;
+                }
+            }
+        }
+
+        return $conflicts;
     }
 
     /**

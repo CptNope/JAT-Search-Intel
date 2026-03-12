@@ -216,9 +216,10 @@ class Admin {
             );
         }
 
-        // Post editor
+        // Post editor — only on post.php / post-new.php for enabled post types
         $screen = get_current_screen();
-        if ( $screen && in_array( $screen->post_type, $this->settings['enabled_post_types'] ?? [ 'post', 'page' ], true ) ) {
+        if ( $screen && in_array( $screen->base, [ 'post', 'post-new' ], true )
+            && in_array( $screen->post_type, $this->settings['enabled_post_types'] ?? [ 'post', 'page' ], true ) ) {
             wp_enqueue_style(
                 'search-intel-admin',
                 SEARCH_INTEL_URL . 'admin/css/admin-style.css',

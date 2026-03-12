@@ -628,6 +628,24 @@ function get_current_screen() {
     return null;
 }
 
+function is_plugin_active( string $plugin ): bool {
+    global $si_test_state;
+    return in_array( $plugin, $si_test_state['active_plugins'] ?? [], true );
+}
+
+function update_meta_cache( string $meta_type, array $object_ids ): bool {
+    // In tests the meta is already in $si_test_state — this is a no-op.
+    return true;
+}
+
+function attachment_url_to_postid( string $url ): int {
+    return 0;
+}
+
+function wp_get_attachment_metadata( int $attachment_id ): array {
+    return [ 'width' => 1200, 'height' => 630 ];
+}
+
 // ── Global $wp stub ──────────────────────────────────────────────────────
 
 global $wp;
