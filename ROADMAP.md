@@ -1,1022 +1,560 @@
 # Search Intel — Development Roadmap
 
-> A phased plan covering feature completion, security, privacy, testing, Full Site Editing (FSE) compatibility, classic theme support, bulk tools, REST API, and long-term vision.
+> A version-by-version checklist for building Search Intel from v1.0 through v3.0.
 
 ---
 
-## Table of Contents
+## v1.0 — Core Launch
 
-- [Spec Gap Analysis](#spec-gap-analysis)
-- [Roadmap Overview](#roadmap-overview)
-- [Phase 1 — Feature Completion (v1.1)](#phase-1--feature-completion-v11)
-- [Phase 2 — Hardening & Testing (v1.2)](#phase-2--hardening--testing-v12)
-- [Phase 3 — Bulk Tools & REST API (v1.3)](#phase-3--bulk-tools--rest-api-v13)
-- [Phase 4 — FSE & Block Editor Native (v1.4)](#phase-4--fse--block-editor-native-v14)
-- [Phase 5 — Privacy & Compliance (v1.5)](#phase-5--privacy--compliance-v15)
-- [Phase 6 — Advanced SEO (v2.0)](#phase-6--advanced-seo-v20)
-- [Phase 7 — Advanced AEO (v2.1)](#phase-7--advanced-aeo-v21)
-- [Phase 8 — Advanced GEO (v2.5)](#phase-8--advanced-geo-v25)
-- [Phase 9 — Enterprise & Scale (v3.0)](#phase-9--enterprise--scale-v30)
-- [Long-Term Vision](#long-term-vision)
-- [Compatibility Matrix](#compatibility-matrix)
-- [Security Roadmap](#security-roadmap)
-- [Privacy Roadmap](#privacy-roadmap)
-- [Testing Strategy](#testing-strategy)
+### Core Plugin
 
----
+- [ ] Main plugin file with header, constants, autoloader
+- [ ] Core class (singleton, module loader, settings manager)
+- [ ] Activation / deactivation hooks
+- [ ] Uninstall script (clean all plugin data from database)
+- [ ] WordPress.org-compliant `readme.txt`
 
-## Spec Gap Analysis
+### SEO Manager
 
-Features from the full specification that are **not yet implemented** in v1.0 and must be addressed:
+- [ ] SEO title override with `pre_get_document_title` filter
+- [ ] Meta description tag output
+- [ ] Canonical URL with override support
+- [ ] Robots meta directives (noindex, nofollow)
+- [ ] Open Graph tags (title, description, image, type, URL, site name)
+- [ ] Twitter Card tags (card type, title, description, image)
+- [ ] Title separator setting
 
-### Post-Level Panel — Missing Fields
+### Schema Manager
 
-| Field | Status | Target |
-|-------|--------|--------|
-| Social share title (separate from SEO title) | Missing | v1.1 |
-| Social share description | Missing | v1.1 |
-| Social image override (UI in metabox) | Missing UI | v1.1 |
-| Secondary keywords | Missing | v1.1 |
-| Per-post author expertise notes | Missing | v1.1 |
-| Citation / source references (structured) | Missing | v1.1 |
-| Direct-answer field ("What is this post answering?") | Missing | v1.1 |
-| Local relevance toggle | Missing | v1.1 |
-| Content intent label (informational, commercial, navigational, educational) | Missing | v1.1 |
-| Audience label (beginner, professional, general, etc.) | Missing | v1.1 |
+- [ ] JSON-LD `@graph` container in `wp_head`
+- [ ] Organization schema from settings
+- [ ] WebSite schema with search action
+- [ ] BreadcrumbList schema
+- [ ] Article schema for single posts
+- [ ] FAQPage schema (when FAQs exist)
+- [ ] HowTo schema (when enabled per-post)
+- [ ] SpeakableSpecification schema
 
-### Automated Analysis — Missing Checks
+### AEO Manager
 
-| Check | Status | Target |
-|-------|--------|--------|
-| Auto-analyze on save (not just on-demand) | Missing | v1.1 |
-| H1 presence / missing H1 pattern detection | Missing | v1.1 |
-| Internal link opportunity suggestions | Partial (count only) | v1.1 |
-| External citation presence scoring | Missing | v1.1 |
-| Answer block opportunity detection | Missing | v1.1 |
-| Entity clarity scoring | Missing | v1.1 |
-| Summary/AI-summary presence check | Missing | v1.1 |
-| Schema completeness check | Missing | v1.1 |
+- [ ] FAQ auto-detection from heading patterns
+- [ ] FAQ repeater field (manual Q&A entry)
+- [ ] HowTo schema builder
+- [ ] Speakable markup for article intro
+- [ ] AEO scoring algorithm
+- [ ] `[search_intel_faq]` shortcode
+- [ ] `[search_intel_howto]` shortcode
 
-### AEO Output — Missing
+### GEO Manager
 
-| Feature | Status | Target |
-|---------|--------|--------|
-| Excerpt / summary block auto-generation | Missing | v1.1 |
-| Q&A style detection (separate from FAQ) | Missing | v1.1 |
-| Answer snippet recommendation score | Missing | v1.1 |
-| Direct-answer field in structured data | Missing | v1.1 |
+- [ ] AI meta tags (`ai-summary`, `ai-topics`, `ai-content-type`)
+- [ ] `llms.txt` endpoint (summary version)
+- [ ] `llms-full.txt` endpoint (detailed version)
+- [ ] Entity markup repeater
+- [ ] E-E-A-T signals (author credentials in schema)
+- [ ] Content freshness tracking (`dateModified`, fact-check date)
+- [ ] AI crawl directives meta tags
+- [ ] GEO scoring algorithm
 
-### GEO Output — Missing
+### Content Analyzer
 
-| Feature | Status | Target |
-|---------|--------|--------|
-| Source references / citations in JSON-LD | Missing | v1.1 |
-| Content intent label in meta/schema | Missing | v1.1 |
-| Audience label in meta/schema | Missing | v1.1 |
-| REST API endpoint for GEO metadata | Missing | v1.3 |
+- [ ] Readability scoring (Flesch-Kincaid)
+- [ ] Keyword density analysis
+- [ ] Word count check
+- [ ] SEO score calculation
+- [ ] AEO score calculation
+- [ ] GEO score calculation
+- [ ] AJAX endpoint for live analysis
+- [ ] Character counter for title and description
 
-### Sitemap — Missing
+### Sitemap
 
-| Feature | Status | Target |
-|---------|--------|--------|
-| Transient-cached sitemap output | Missing | v1.1 |
-| Explicit tags sitemap toggle | Implicit only | v1.1 |
-| Custom post type sitemap toggle in settings | Partial | v1.1 |
+- [ ] XML sitemap index at `/sitemap.xml`
+- [ ] Post type sitemaps with pagination
+- [ ] Taxonomy sitemaps (categories)
+- [ ] Automatic noindex exclusion
+- [ ] `lastmod` support per URL
+- [ ] Search engine ping on publish
+- [ ] Disable WordPress default sitemap
 
-### Global Settings — Missing
+### Admin Interface
 
-| Setting | Status | Target |
-|---------|--------|--------|
-| Default OG image | Missing | v1.1 |
-| Title template patterns (`%title% %sep% %sitename%`) | Missing | v1.1 |
-| Meta description fallback behavior config | Missing | v1.1 |
-| AI summary generation defaults | Missing | v1.1 |
-| REST endpoint toggle for GEO metadata | Missing | v1.3 |
-| Taxonomy inclusion settings | Missing | v1.1 |
-| Global robots defaults | Missing | v1.1 |
+- [ ] Top-level admin menu with sub-pages
+- [ ] General settings page (site identity, modules, post types)
+- [ ] SEO settings page (OG, Twitter, canonical, robots)
+- [ ] AEO settings page (FAQ, HowTo, Speakable config)
+- [ ] GEO settings page (AI meta, llms.txt, entities, E-E-A-T)
+- [ ] Sitemap settings page (post types, max URLs)
+- [ ] Social profiles settings page
+- [ ] Post editor metabox with tabbed UI (SEO, AEO, GEO, Advanced, Analysis)
+- [ ] SERP preview in metabox
+- [ ] FAQ repeater UI
+- [ ] Entity repeater UI
+- [ ] Custom columns in post list (SEO/AEO/GEO scores)
+- [ ] User profile E-E-A-T fields (credentials, expertise, social)
+- [ ] Admin CSS and JS assets
 
-### Bulk Tools — Missing (Entire Feature)
+### Security (Baseline)
 
-| Tool | Status | Target |
-|------|--------|--------|
-| Bulk regenerate metadata | Missing | v1.3 |
-| Bulk rescore content | Missing | v1.3 |
-| Bulk generate sitemap cache | Missing | v1.3 |
-| Export/import settings as JSON | Missing | v1.3 |
+- [ ] Input sanitization on all saved fields
+- [ ] Output escaping on all rendered values
+- [ ] Nonce verification on all forms and AJAX
+- [ ] Capability checks on all admin actions
+- [ ] `ABSPATH` guards on all PHP files
+- [ ] Zero frontend JavaScript or CSS
 
----
+### Documentation
 
-## Roadmap Overview
-
-```mermaid
-gantt
-    title Search Intel Development Roadmap
-    dateFormat YYYY-MM
-    axisFormat %b %Y
-
-    section v1.1 Feature Completion
-    Post panel new fields (social, citations, intent) :a1, 2026-04, 3w
-    Title template engine                              :a2, 2026-04, 2w
-    Analysis-on-save + new checks                      :a3, 2026-04, 3w
-    Settings expansion (default OG, robots, taxonomy)  :a4, 2026-05, 2w
-    AEO: direct-answer, Q&A detection, summary gen     :a5, 2026-05, 3w
-    GEO: citations JSON-LD, intent, audience labels    :a6, 2026-05, 2w
-    Sitemap: transient caching, CPT/taxonomy toggles   :a7, 2026-05, 2w
-
-    section v1.2 Hardening & Testing
-    Security audit and input hardening     :b1, 2026-06, 4w
-    PHPUnit test suite (150+ tests)        :b2, 2026-06, 6w
-    WPCS linting and CI pipeline           :b3, 2026-06, 3w
-    Classic theme compatibility QA         :b4, 2026-07, 3w
-    Performance profiling and optimization :b5, 2026-07, 2w
-    Page builder compatibility QA          :b6, 2026-07, 2w
-
-    section v1.3 Bulk Tools & REST API
-    Bulk metadata regeneration             :c1, 2026-08, 3w
-    Bulk content rescoring                 :c2, 2026-08, 2w
-    Settings export/import JSON            :c3, 2026-08, 2w
-    REST API for GEO metadata              :c4, 2026-08, 4w
-    Bulk sitemap cache generation          :c5, 2026-09, 2w
-    WP-CLI commands                        :c6, 2026-09, 2w
-
-    section v1.4 FSE & Blocks
-    Gutenberg sidebar panel (PluginDocumentSettingPanel) :d1, 2026-10, 4w
-    Custom blocks: FAQ, HowTo, TOC, Breadcrumbs          :d2, 2026-10, 6w
-    FSE template part integration                        :d3, 2026-11, 3w
-    Real-time analysis via wp.data subscribe             :d4, 2026-11, 3w
-    Classic Editor backward compat layer                 :d5, 2026-11, 2w
-
-    section v1.5 Privacy
-    GDPR compliance audit                :e1, 2026-12, 3w
-    Data export/erasure hooks            :e2, 2026-12, 3w
-    Privacy policy template              :e3, 2027-01, 1w
-    Consent UX for author E-E-A-T data   :e4, 2027-01, 2w
-
-    section v2.0 Advanced SEO
-    Redirect manager (301/302/307)       :f1, 2027-02, 4w
-    IndexNow API integration             :f2, 2027-02, 3w
-    WooCommerce Product schema           :f3, 2027-03, 4w
-    Local Business schema                :f4, 2027-03, 3w
-    Robots.txt visual editor             :f5, 2027-03, 2w
-    Broken link checker                  :f6, 2027-04, 3w
-
-    section v2.1 Advanced AEO
-    VideoObject schema (auto-detect)     :g1, 2027-05, 3w
-    Recipe, Event, Review schema         :g2, 2027-05, 4w
-    Course, SoftwareApp, JobPosting      :g3, 2027-06, 3w
-    AI-assisted FAQ generation           :g4, 2027-06, 4w
-
-    section v2.5 Advanced GEO
-    AI visibility analytics dashboard    :h1, 2027-07, 6w
-    Citation graph builder               :h2, 2027-07, 4w
-    Topical authority map                :h3, 2027-08, 4w
-    Multimodal AI optimization           :h4, 2027-09, 4w
-
-    section v3.0 Enterprise
-    Multisite network settings           :i1, 2027-10, 4w
-    Plugin migration (Yoast, Rank Math)  :i2, 2027-10, 4w
-    Role-based access control            :i3, 2027-11, 3w
-    White-label support                  :i4, 2027-11, 3w
-    Multi-language (WPML, Polylang)      :i5, 2027-12, 4w
-```
+- [ ] `LICENSE.md` (GPL-2.0-or-later)
+- [ ] `README.md` with architecture overview
+- [ ] `CHANGELOG.md` with v1.0 release notes
+- [ ] `ROADMAP.md` (this file)
 
 ---
 
-## Phase 1 — Feature Completion (v1.1)
+## v1.1 — Feature Completion
 
-**Target: 2026 Q2 | Focus: Fill every gap from the full specification**
+### Post Panel — New Fields
 
-### Post-Level Panel Expansion
-
-```mermaid
-flowchart TD
-    subgraph Current["v1.0 — Current Metabox Fields"]
-        SEO_C["SEO Tab: title, description,<br/>focus keyword, canonical,<br/>noindex, nofollow"]
-        AEO_C["AEO Tab: FAQ repeater,<br/>schema type"]
-        GEO_C["GEO Tab: AI summary, topics,<br/>entities, expertise level,<br/>content type, fact-check date"]
-    end
-
-    subgraph New["v1.1 — New Fields"]
-        SOCIAL["Social Tab (NEW):<br/>social title, social description,<br/>social image picker"]
-        SEO_N["SEO Tab additions:<br/>secondary keywords"]
-        AEO_N["AEO Tab additions:<br/>direct-answer field,<br/>HowTo toggle"]
-        GEO_N["GEO Tab additions:<br/>citation references repeater,<br/>author expertise notes (per-post),<br/>content intent label,<br/>audience label,<br/>local relevance toggle"]
-    end
-
-    Current -->|"expand"| New
-
-    style New fill:#2563eb,color:#fff
-```
-
-#### New Post Meta Fields
-
-| Meta Key | Tab | Type | Description |
-|----------|-----|------|-------------|
-| `_search_intel_social_title` | Social | text | Override title for OG/Twitter (falls back to SEO title) |
-| `_search_intel_social_description` | Social | textarea | Override description for social sharing |
-| `_search_intel_social_image` | Social | image picker | Custom OG image with media library integration |
-| `_search_intel_secondary_keywords` | SEO | text (CSV) | Secondary keyword targets for LSI analysis |
-| `_search_intel_direct_answer` | AEO | textarea | "What is this post answering?" — concise direct answer |
-| `_search_intel_citations` | GEO | repeater | `[{source, url, date, quote}]` — structured source references |
-| `_search_intel_author_notes` | GEO | textarea | Per-post author expertise/experience notes |
-| `_search_intel_content_intent` | GEO | select | informational, commercial, navigational, educational, transactional |
-| `_search_intel_audience` | GEO | select | beginner, intermediate, advanced, professional, general |
-| `_search_intel_local_relevance` | GEO | checkbox + text | Toggle + location/region string |
+- [ ] Social share title (separate from SEO title)
+- [ ] Social share description (separate from meta description)
+- [ ] Social image override with media library picker
+- [ ] Secondary keywords field (comma-separated)
+- [ ] Direct-answer field ("What is this post answering?")
+- [ ] Citation / source references repeater (`source`, `url`, `date`, `quote`)
+- [ ] Per-post author expertise notes
+- [ ] Content intent label (informational, commercial, navigational, educational, transactional)
+- [ ] Audience label (beginner, intermediate, advanced, professional, general)
+- [ ] Local relevance toggle + location field
 
 ### Title Template Engine
 
-```mermaid
-flowchart LR
-    TEMPLATE["Title Template<br/>%title% %sep% %sitename%"]
-    VARS["Variable Resolver"]
-    OUTPUT["Rendered Title"]
-
-    TEMPLATE --> VARS --> OUTPUT
-
-    subgraph Variables["Supported Variables"]
-        V1["%title% — Post title"]
-        V2["%sitename% — Site name"]
-        V3["%sep% — Separator"]
-        V4["%category% — Primary category"]
-        V5["%tag% — Primary tag"]
-        V6["%date% — Publish date"]
-        V7["%author% — Author name"]
-        V8["%page% — Page number (archives)"]
-        V9["%excerpt% — Auto excerpt"]
-    end
-```
-
-#### Title Template Settings
-
-| Context | Default Template | Configurable |
-|---------|-----------------|--------------|
-| Single posts | `%title% %sep% %sitename%` | Yes |
-| Pages | `%title% %sep% %sitename%` | Yes |
-| Categories | `%category% Archives %sep% %sitename%` | Yes |
-| Tags | `%tag% %sep% %sitename%` | Yes |
-| Author archives | `%author% %sep% %sitename%` | Yes |
-| Search results | `Search: %search_query% %sep% %sitename%` | Yes |
-| 404 | `Page Not Found %sep% %sitename%` | Yes |
-| Homepage | `%sitename% %sep% %tagline%` | Yes |
+- [ ] Variable resolver (`%title%`, `%sitename%`, `%sep%`, `%category%`, `%tag%`, `%date%`, `%author%`, `%page%`, `%excerpt%`)
+- [ ] Per-context templates: single posts, pages, categories, tags, author archives, search, 404, homepage
+- [ ] Title template settings UI
+- [ ] `pre_get_document_title` integration with template engine
 
 ### Analysis-on-Save
 
-```mermaid
-sequenceDiagram
-    participant Author as Content Author
-    participant WP as WordPress
-    participant SI as Search Intel
-    participant DB as Database
+- [ ] Hook into `save_post` / `wp_after_insert_post` for auto-analysis
+- [ ] Store scores in post meta on every save
+- [ ] Admin notice when critical issues detected on save
 
-    Author->>WP: Saves/publishes post
-    WP->>SI: save_post hook fires
-    SI->>SI: Run full analysis (SEO + AEO + GEO)
-    SI->>DB: Store scores as post meta
-    Note over DB: _search_intel_seo_score<br/>_search_intel_aeo_score<br/>_search_intel_geo_score<br/>_search_intel_readability_score<br/>_search_intel_last_analyzed
-    SI->>SI: Check for critical issues
-    SI-->>Author: Admin notice if critical issues found
-```
+### New Analysis Checks
 
-#### New Analysis Checks (v1.1)
-
-| Check | Module | Points | Description |
-|-------|--------|--------|-------------|
-| H1 presence | SEO | 5 | Verify exactly one H1 exists (or post title serves as H1) |
-| H1/H2 hierarchy | SEO | 5 | No heading level skips (H2 before H3, etc.) |
-| Internal link suggestions | SEO | — | Suggest related posts to link to (informational, not scored) |
-| External citation count | GEO | 10 | At least 1 external authority link |
-| Answer block opportunity | AEO | 10 | Detect if content could use a direct-answer block |
-| Entity clarity | GEO | 10 | Key entities defined in entities repeater |
-| AI summary present | GEO | 15 | Has a custom AI summary been written? |
-| Schema completeness | All | 10 | All applicable schema fields filled |
-| Secondary keyword usage | SEO | 5 | Secondary keywords appear in content |
-| Social metadata filled | SEO | 5 | Social title + description + image set |
-
-### Expanded Global Settings
-
-| Setting | Section | Type | Description |
-|---------|---------|------|-------------|
-| `default_og_image` | SEO | image URL | Fallback OG image when no featured image exists |
-| `title_templates` | SEO | array of templates | Per-context title templates with variable support |
-| `description_fallback` | SEO | select | Fallback behavior: excerpt → content trim → empty |
-| `description_max_length` | SEO | number | Auto-trim length (default 160) |
-| `global_robots_default` | SEO | select | Default robots for new posts (index,follow / noindex / etc.) |
-| `taxonomy_sitemaps` | Sitemap | checkboxes | Which taxonomies to include (category, post_tag, custom) |
-| `cpt_sitemaps` | Sitemap | checkboxes | Which custom post types to include |
-| `ai_summary_default_length` | GEO | number | Target word count for AI summaries |
-| `default_content_intent` | GEO | select | Default intent when not set per-post |
-| `default_audience` | GEO | select | Default audience when not set per-post |
-| `rest_api_enabled` | GEO | toggle | Enable/disable the REST API GEO endpoint |
-| `ping_on_publish` | Sitemap | toggle | Enable/disable search engine pinging |
-
-### Sitemap Caching
-
-```mermaid
-flowchart TD
-    REQ["Bot requests /sitemap.xml"] --> CACHE{"Transient<br/>exists?"}
-    CACHE -->|Yes| SERVE["Serve cached XML<br/>(< 1ms)"]
-    CACHE -->|No| GENERATE["Generate sitemap"]
-    GENERATE --> STORE["Store in transient<br/>(12-hour TTL)"]
-    STORE --> SERVE
-
-    PUBLISH["Post published/updated"] --> INVALIDATE["Delete sitemap transients"]
-    INVALIDATE --> |"Next request"| GENERATE
-
-    style SERVE fill:#16a34a,color:#fff
-```
+- [ ] H1 presence detection (exactly one H1 or post title as H1)
+- [ ] Heading hierarchy validation (no skipped levels)
+- [ ] Internal link opportunity suggestions
+- [ ] External citation presence scoring
+- [ ] Answer block opportunity detection
+- [ ] Entity clarity scoring (key entities in repeater)
+- [ ] AI summary presence check
+- [ ] Schema completeness check
+- [ ] Secondary keyword usage in content
+- [ ] Social metadata completeness check
+- [ ] Image alt text presence check
 
 ### AEO Additions
 
-| Feature | Implementation |
-|---------|----------------|
-| **Direct-answer field** | New meta field rendered as a `<meta name="answer" content="...">` tag and included in Article schema as `description` |
-| **Q&A style detection** | Regex scan for question-then-answer patterns beyond just headings; detect `<strong>Q:</strong>` and similar inline patterns |
-| **Answer snippet score** | New sub-score in AEO analysis: rates how well content is formatted for featured snippet selection (40-word answer blocks, definition patterns, list formatting) |
-| **Summary block generation** | Auto-generate a lead summary from first 2-3 sentences if no manual excerpt exists; store as `_search_intel_auto_excerpt` |
+- [ ] Direct-answer field rendered as meta tag and in Article schema
+- [ ] Q&A style detection (question-then-answer patterns beyond headings)
+- [ ] Answer snippet recommendation score (40-word blocks, lists, definitions)
+- [ ] Auto-generate lead summary from first 2-3 sentences when no excerpt exists
 
 ### GEO Additions
 
-| Feature | Implementation |
-|---------|----------------|
-| **Citations in JSON-LD** | Render `citation` property in Article schema with `@type: CreativeWork` for each source reference |
-| **Content intent meta** | `<meta name="content-intent" content="informational">` + included in JSON-LD as `educationalUse` or custom property |
-| **Audience meta** | `<meta name="audience" content="professional">` + `schema.org/audience` property |
-| **Local relevance** | When enabled, add `contentLocation` to schema with `@type: Place` |
+- [ ] Citations rendered in JSON-LD as `citation` with `@type: CreativeWork`
+- [ ] Content intent label in meta tag and JSON-LD
+- [ ] Audience label in meta tag and `schema.org/audience`
+- [ ] Local relevance `contentLocation` with `@type: Place` in schema
+
+### Expanded Settings
+
+- [ ] Default OG image (fallback when no featured image)
+- [ ] Meta description fallback behavior (excerpt → content trim → empty)
+- [ ] Meta description max length setting
+- [ ] Global robots default for new posts
+- [ ] Taxonomy sitemap toggles (category, post_tag, custom)
+- [ ] Custom post type sitemap toggles
+- [ ] AI summary default target word count
+- [ ] Default content intent selection
+- [ ] Default audience selection
+- [ ] Search engine ping toggle (opt-in with disclosure)
+
+### Sitemap Improvements
+
+- [ ] Transient-based sitemap caching (12-hour TTL)
+- [ ] Cache invalidation on post publish/update
+- [ ] Explicit tags sitemap toggle
+- [ ] Custom post type sitemap support
+- [ ] Image sitemap support (extract images from post content)
 
 ---
 
-## Phase 2 — Hardening & Testing (v1.2)
+## v1.2 — Hardening & Testing
 
-**Target: 2026 Q3 | Focus: Security audit, automated tests, CI/CD, performance, compatibility QA**
+### Security Audit
 
-### Security Hardening
+- [ ] Full input sanitization audit (all `$_POST`, `$_GET`, `$_REQUEST`)
+- [ ] Full output escaping audit (every `echo`/`printf` uses `esc_html`/`esc_attr`/`esc_url`)
+- [ ] Nonce coverage check (every form and AJAX handler)
+- [ ] SQL injection review (all `$wpdb` calls use prepared statements)
+- [ ] CSRF protection verification (nonces + capabilities on all state changes)
+- [ ] File upload validation (social image: MIME type, file size, dimensions)
+- [ ] Rate limiting on content analysis AJAX
+- [ ] Security headers on sitemap, llms.txt, and REST responses (`X-Content-Type-Options: nosniff`)
+- [ ] Add PHPStan + Psalm to CI for static analysis
 
-| Task | Priority | Description |
-|------|----------|-------------|
-| Input sanitization audit | Critical | Review all `$_POST`, `$_GET`, `$_REQUEST` — ensure 100% sanitization |
-| Output escaping audit | Critical | Verify every `echo`/`printf` uses `esc_html`, `esc_attr`, `esc_url` |
-| Nonce coverage check | Critical | Every form submission and AJAX handler must verify nonces |
-| SQL injection review | Critical | All `$wpdb` calls use prepared statements exclusively |
-| CSRF protection | High | All state-changing operations check nonces + capabilities |
-| File upload validation | High | Social image picker: validate MIME types, file sizes, dimensions |
-| Rate limiting on AJAX | Medium | Throttle content analysis AJAX to prevent abuse |
-| Security headers | Medium | `X-Content-Type-Options: nosniff` on sitemap, llms.txt, REST endpoints |
-| Automated SAST scanning | Medium | Add PHPStan + Psalm to CI for static analysis |
+### Unit Tests (PHPUnit — ~150 tests)
 
-### Automated Test Suite
+- [ ] SEO Manager: title generation, description fallback, template engine, separator
+- [ ] SEO Manager: social meta output (OG title, OG description, OG image)
+- [ ] Schema Manager: knowledge graph, breadcrumbs, article assembly
+- [ ] Schema Manager: citation schema, audience/intent properties
+- [ ] AEO Manager: FAQ auto-detect regex, HowTo builder, Q&A detection
+- [ ] AEO Manager: AEO scoring, snippet recommendation score
+- [ ] GEO Manager: topic extraction, content type detection, intent classification
+- [ ] GEO Manager: GEO scoring, citation output, audience detection
+- [ ] Content Analyzer: readability scoring, syllable counting, keyword density
+- [ ] Content Analyzer: all new checks (H1, hierarchy, citations, entity clarity, etc.)
+- [ ] Sitemap: URL building, changefreq logic, image extraction, cache logic
+- [ ] Title Engine: variable resolution, fallback chain, context detection
 
-```mermaid
-flowchart TD
-    subgraph Unit["Unit Tests — PHPUnit (~150 tests)"]
-        UT1["SEO: title generation, description fallback, template engine"]
-        UT2["Schema: knowledge graph, breadcrumbs, article assembly"]
-        UT3["AEO: FAQ auto-detect, HowTo builder, Q&A detection, scoring"]
-        UT4["GEO: topic extraction, content type detection, intent classification"]
-        UT5["Analyzer: readability, syllable count, keyword density"]
-        UT6["Sitemap: URL building, changefreq, image extraction"]
-        UT7["Templates: variable resolver, fallback chain"]
-    end
+### Integration Tests (WP Test Suite — ~80 tests)
 
-    subgraph Integration["Integration Tests — WP Test Suite (~80 tests)"]
-        IT1["wp_head output: meta tags, OG, Twitter, canonical, robots"]
-        IT2["Schema JSON-LD: validity, @graph structure, citations"]
-        IT3["Sitemap XML: validity, pagination, noindex exclusion, caching"]
-        IT4["llms.txt: content accuracy, full vs summary"]
-        IT5["Metabox: save/load cycle for all fields"]
-        IT6["Settings: save/load, sanitization, defaults"]
-        IT7["AJAX: analysis endpoint, nonce check, response format"]
-        IT8["REST API: GEO endpoint authentication, response schema"]
-        IT9["Auto-analysis: save_post hook triggers scoring"]
-    end
+- [ ] `wp_head` meta tag output validation
+- [ ] OG / Twitter / canonical rendering
+- [ ] Schema JSON-LD validity and `@graph` structure
+- [ ] Citation schema in JSON-LD
+- [ ] Sitemap XML validity, pagination, noindex exclusion
+- [ ] Sitemap transient caching behavior
+- [ ] `llms.txt` content accuracy (summary and full)
+- [ ] Metabox save/load cycle (all fields including new v1.1 fields)
+- [ ] Settings save/load with sanitization and defaults
+- [ ] AJAX analysis endpoint (nonce check, response format)
+- [ ] Auto-analysis on `save_post` hook
 
-    subgraph E2E["E2E Tests — Playwright (~30 tests)"]
-        E1["Metabox: all tabs, SERP preview, char counters"]
-        E2["Repeaters: FAQ add/remove, entity add/remove, citation add/remove"]
-        E3["Analysis: score rendering, check list display"]
-        E4["Settings: all 6 pages save correctly"]
-        E5["Social tab: image picker, title/desc preview"]
-        E6["Bulk tools: regenerate, rescore, export/import"]
-    end
+### E2E Tests (Playwright — ~30 tests)
 
-    subgraph CI["CI Pipeline — GitHub Actions"]
-        CI1["PHP 7.4 / 8.0 / 8.1 / 8.2 / 8.3"]
-        CI2["WordPress 6.0 / 6.2 / 6.4 / 6.6 / 6.7"]
-        CI3["WPCS lint + PHPStan level 6"]
-        CI4["ESLint + Stylelint"]
-    end
+- [ ] Metabox: all tabs navigate correctly
+- [ ] SERP preview updates live
+- [ ] Character counters for title and description
+- [ ] FAQ repeater: add, edit, remove items
+- [ ] Entity repeater: add, edit, remove items
+- [ ] Citation repeater: add, edit, remove items
+- [ ] Social tab: image picker, title/description preview
+- [ ] Analysis: "Run Analysis" button, score display, check list
+- [ ] Settings: all settings pages save correctly
+- [ ] Post list: custom score columns render
 
-    Unit --> CI
-    Integration --> CI
-    E2E --> CI
-```
+### CI/CD Pipeline
 
-### Performance Targets
+- [ ] GitHub Actions workflow
+- [ ] PHP_CodeSniffer with WordPress-Core standard (0 errors)
+- [ ] PHPStan level 6 (0 errors)
+- [ ] Psalm level 4
+- [ ] ESLint for admin JS
+- [ ] Stylelint for admin CSS
+- [ ] Test matrix: PHP 7.4 + WP 6.0, PHP 8.1 + WP 6.5, PHP 8.3 + WP 6.7
+- [ ] 100% unit and integration test pass rate gate
+- [ ] 95%+ E2E test pass rate gate
+- [ ] Performance regression check (< 10% degradation)
 
-| Metric | Target | Method |
-|--------|--------|--------|
-| `wp_head` total added time | < 5ms | Profile with Query Monitor |
-| Schema JSON generation | < 2ms | Benchmark `render_schema()` |
-| Sitemap (1000 posts, cached) | < 5ms | Transient cache hit |
-| Sitemap (1000 posts, cold) | < 500ms | Generate + cache |
-| Admin page load impact | < 50ms | Lazy-load metabox JS/CSS |
-| Frontend JS/CSS | 0 KB | No public-facing assets |
-| Database queries per page | < 6 added | Batch `get_post_meta()` calls |
-| Analysis-on-save overhead | < 200ms | Async via `wp_after_insert_post` |
+### Performance
 
-### Compatibility QA Matrix
+- [ ] `wp_head` added time < 5ms
+- [ ] Schema JSON generation < 2ms
+- [ ] Sitemap (cached, 1000 posts) < 5ms
+- [ ] Sitemap (cold, 1000 posts) < 500ms
+- [ ] Admin page load impact < 50ms (lazy-load metabox assets)
+- [ ] Database queries per page < 6 added (batch `get_post_meta`)
+- [ ] Analysis-on-save overhead < 200ms
 
-| Environment | Test Method | Acceptance Criteria |
-|-------------|------------|---------------------|
-| Classic themes (TwentyTwelve–TwentyTwentyOne) | Manual + E2E | All meta tags render in `wp_head` |
-| Block themes (TwentyTwentyTwo+) | Manual + E2E | All meta tags render, blocks available |
-| Hybrid themes (Astra, GeneratePress, Kadence) | Manual | No conflicts with theme SEO features |
-| Page builders (Elementor, Beaver Builder, Divi) | Manual | `wp_head` fires, metabox accessible |
-| Theme frameworks (Genesis, developer themes) | Manual | Test `genesis_meta` and similar hooks |
-| Classic Editor plugin | E2E | TinyMCE content extraction works |
-| Block Editor (Gutenberg) | E2E | `wp.data` content extraction works |
-| WooCommerce (basic) | Manual | No fatal errors, product pages work |
-| WPML / Polylang | Manual | No conflicts, translatable strings |
-| Custom themes without `wp_head` | Admin notice | Warning displayed if hook missing |
+### Compatibility QA
+
+- [ ] Classic themes (Twenty Twelve through Twenty Twenty-One)
+- [ ] Block themes (Twenty Twenty-Two+)
+- [ ] Hybrid themes (Astra, GeneratePress, Kadence)
+- [ ] Page builders (Elementor, Beaver Builder, Divi)
+- [ ] Theme frameworks (Genesis, developer themes)
+- [ ] Classic Editor plugin (TinyMCE content extraction)
+- [ ] Block Editor / Gutenberg (`wp.data` content extraction)
+- [ ] WooCommerce (no fatal errors, product pages work)
+- [ ] WPML / Polylang (no conflicts, translatable strings)
+- [ ] Custom themes without `wp_head` (admin notice warning)
 
 ---
 
-## Phase 3 — Bulk Tools & REST API (v1.3)
-
-**Target: 2026 Q3-Q4 | Focus: Bulk operations, REST endpoints, WP-CLI, import/export**
+## v1.3 — Bulk Tools & REST API
 
 ### Bulk Tools Admin Page
 
-```mermaid
-flowchart TD
-    MENU["Search Intel > Bulk Tools"] --> TOOLS
+- [ ] "Search Intel > Bulk Tools" admin page
+- [ ] Bulk regenerate metadata (re-run title templates, description fallbacks, auto-excerpts)
+- [ ] Bulk rescore content (run SEO + AEO + GEO analysis on all posts)
+- [ ] Bulk generate sitemap cache (pre-warm all transients)
+- [ ] Export settings as JSON download
+- [ ] Import settings from JSON upload with validation
+- [ ] `WP_Background_Process` for long-running operations
+- [ ] AJAX progress bar for bulk operations
+- [ ] Merge vs overwrite option on settings import
 
-    subgraph TOOLS["Available Operations"]
-        BT1["Bulk Regenerate Metadata<br/><i>Re-run title templates, description fallbacks,<br/>auto-excerpt generation for all posts</i>"]
-        BT2["Bulk Rescore Content<br/><i>Run SEO + AEO + GEO analysis on all posts,<br/>store scores in post meta</i>"]
-        BT3["Bulk Generate Sitemap Cache<br/><i>Pre-warm all sitemap transient caches</i>"]
-        BT4["Export Settings<br/><i>Download all plugin settings as JSON</i>"]
-        BT5["Import Settings<br/><i>Upload JSON to restore settings</i>"]
-    end
+### REST API
 
-    BT1 --> CRON["WP-Cron Background<br/>Processing Queue"]
-    BT2 --> CRON
-    BT3 --> CRON
-
-    CRON --> PROGRESS["AJAX Progress Bar<br/>Processed: 150/500"]
-
-    style TOOLS fill:#2563eb,color:#fff
-```
-
-#### Bulk Processing Architecture
-
-| Operation | Method | Batch Size | Estimated Speed |
-|-----------|--------|------------|-----------------|
-| Regenerate metadata | `WP_Background_Process` | 50 posts/batch | ~500 posts/min |
-| Rescore content | `WP_Background_Process` | 20 posts/batch | ~200 posts/min |
-| Sitemap cache | Direct transient writes | All at once | < 5 seconds |
-| Export settings | JSON download | Single operation | Instant |
-| Import settings | JSON upload + validate | Single operation | Instant |
-
-### REST API for GEO Metadata
-
-```mermaid
-sequenceDiagram
-    participant Client as External Client / AI Agent
-    participant WP as WordPress REST API
-    participant SI as Search Intel
-
-    Client->>WP: GET /wp-json/search-intel/v1/geo/{post_id}
-    WP->>WP: Authentication check (app password / API key)
-    WP->>SI: Collect GEO metadata
-    SI-->>WP: JSON response
-    WP-->>Client: 200 OK + GEO payload
-
-    Note over Client,SI: Response includes:<br/>ai_summary, entities, topics,<br/>citations, content_intent, audience,<br/>freshness, author_eeat, scores
-```
-
-#### REST API Endpoints
-
-| Endpoint | Method | Auth | Description |
-|----------|--------|------|-------------|
-| `/search-intel/v1/geo/{id}` | GET | Optional | Full GEO metadata for a post |
-| `/search-intel/v1/scores/{id}` | GET | Optional | SEO + AEO + GEO scores |
-| `/search-intel/v1/meta/{id}` | GET/PUT | Required | Read/write SEO meta fields |
-| `/search-intel/v1/analyze/{id}` | POST | Required | Trigger analysis and return results |
-| `/search-intel/v1/bulk/rescore` | POST | Required | Queue bulk rescore job |
-| `/search-intel/v1/settings` | GET/PUT | Admin | Read/write plugin settings |
-| `/search-intel/v1/sitemap/invalidate` | POST | Admin | Clear sitemap cache |
+- [ ] `GET /search-intel/v1/geo/{id}` — full GEO metadata for a post
+- [ ] `GET /search-intel/v1/scores/{id}` — SEO + AEO + GEO scores
+- [ ] `GET/PUT /search-intel/v1/meta/{id}` — read/write SEO meta fields
+- [ ] `POST /search-intel/v1/analyze/{id}` — trigger analysis, return results
+- [ ] `POST /search-intel/v1/bulk/rescore` — queue bulk rescore job
+- [ ] `GET/PUT /search-intel/v1/settings` — read/write plugin settings (admin only)
+- [ ] `POST /search-intel/v1/sitemap/invalidate` — clear sitemap cache (admin only)
+- [ ] REST endpoint toggle in GEO settings
+- [ ] Authentication via WordPress app passwords
+- [ ] Proper permission callbacks on all endpoints
 
 ### WP-CLI Commands
 
-| Command | Description |
-|---------|-------------|
-| `wp search-intel analyze <post_id>` | Run full analysis on a single post |
-| `wp search-intel rescore --all` | Rescore all published posts |
-| `wp search-intel regenerate --all` | Regenerate metadata for all posts |
-| `wp search-intel sitemap cache` | Pre-warm sitemap caches |
-| `wp search-intel export > settings.json` | Export settings to JSON |
-| `wp search-intel import < settings.json` | Import settings from JSON |
-| `wp search-intel scores --format=table` | Show scores for all posts |
-| `wp search-intel migrate --from=yoast` | Migrate data from another SEO plugin |
-
-### Settings Import/Export Schema
-
-```mermaid
-flowchart LR
-    subgraph Export["Export Payload"]
-        E1["search_intel_settings"]
-        E2["search_intel_social_profiles"]
-        E3["search_intel_ai_permissions"]
-        E4["Plugin version"]
-        E5["Export timestamp"]
-    end
-
-    Export -->|"JSON download"| FILE["settings.json"]
-    FILE -->|"JSON upload"| Import
-
-    subgraph Import["Import Process"]
-        I1["Validate JSON structure"]
-        I2["Check version compatibility"]
-        I3["Sanitize all values"]
-        I4["Merge or overwrite (user choice)"]
-        I5["Flush rewrite rules"]
-    end
-```
+- [ ] `wp search-intel analyze <post_id>` — analyze a single post
+- [ ] `wp search-intel rescore --all` — rescore all published posts
+- [ ] `wp search-intel regenerate --all` — regenerate metadata for all posts
+- [ ] `wp search-intel sitemap cache` — pre-warm sitemap caches
+- [ ] `wp search-intel export > settings.json` — export settings
+- [ ] `wp search-intel import < settings.json` — import settings
+- [ ] `wp search-intel scores --format=table` — show all post scores
+- [ ] `wp search-intel migrate --from=yoast` — migrate from another SEO plugin
 
 ---
 
-## Phase 4 — FSE & Block Editor Native (v1.4)
+## v1.4 — FSE & Block Editor Native
 
-**Target: 2026 Q4 | Focus: Gutenberg blocks, sidebar panel, FSE template integration**
+### Gutenberg Sidebar Panel
 
-### Block Editor Migration Strategy
+- [ ] `PluginDocumentSettingPanel` React component
+- [ ] `@wordpress/data` store (`search-intel/editor`)
+- [ ] Real-time analysis via `subscribe` to editor changes
+- [ ] SEO fields in sidebar (title, description, keyword, canonical, robots)
+- [ ] Social fields in sidebar (title, description, image)
+- [ ] AEO fields in sidebar (direct-answer, FAQ toggle)
+- [ ] GEO fields in sidebar (AI summary, intent, audience)
+- [ ] Score display in sidebar
+- [ ] Keep PHP metabox as fallback for Classic Editor
 
-```mermaid
-flowchart TD
-    subgraph Current["v1.0-1.3 — Current"]
-        MB["PHP Metabox<br/>(jQuery + AJAX)"]
-    end
+### Custom Gutenberg Blocks
 
-    subgraph V14["v1.4 — Block Editor Native"]
-        SIDEBAR["PluginDocumentSettingPanel<br/>(React sidebar)"]
-        BLOCKS["Custom Blocks"]
-        STORE["@wordpress/data Store<br/>search-intel/editor"]
-        REALTIME["Real-time Analysis<br/>(subscribe to editor changes)"]
-    end
+- [ ] `search-intel/faq` — visual FAQ editor with live schema preview
+- [ ] `search-intel/howto` — step editor with image support per step
+- [ ] `search-intel/toc` — auto-generated table of contents from headings
+- [ ] `search-intel/breadcrumbs` — theme-aware breadcrumb navigation
+- [ ] `search-intel/answer-box` — direct-answer formatting block
+- [ ] `search-intel/citation` — inline source citation block
+- [ ] Block previews in editor
+- [ ] Schema output deduplication (block + wp_head don't double-output)
 
-    subgraph Blocks["Custom Gutenberg Blocks"]
-        B_FAQ["search-intel/faq<br/><i>Visual FAQ editor with live schema preview</i>"]
-        B_HOWTO["search-intel/howto<br/><i>Step editor with image support</i>"]
-        B_TOC["search-intel/toc<br/><i>Auto-generated table of contents</i>"]
-        B_BREAD["search-intel/breadcrumbs<br/><i>Theme-aware breadcrumb nav</i>"]
-        B_ANSWER["search-intel/answer-box<br/><i>Direct-answer formatting block</i>"]
-        B_CITATION["search-intel/citation<br/><i>Inline source citation block</i>"]
-    end
+### FSE Template Integration
 
-    Current -->|"Migration path<br/>(metabox kept as fallback)"| V14
-    V14 --> SIDEBAR
-    V14 --> BLOCKS
-
-    style V14 fill:#2563eb,color:#fff
-```
-
-### FSE Theme Compatibility
-
-| Feature | Classic Themes | FSE Themes | Implementation |
-|---------|---------------|------------|----------------|
-| Meta tags | `wp_head` hook | `wp_head` hook | Already works |
-| Schema JSON-LD | `wp_head` hook | `wp_head` hook | Already works |
-| Breadcrumbs | Shortcode / `si_breadcrumbs()` | Block + template part | Add block v1.4 |
-| FAQ display | Shortcode | Block | Add block v1.4 |
-| HowTo display | Shortcode | Block | Add block v1.4 |
-| Answer box | Shortcode | Block | New in v1.4 |
-| SERP preview | Metabox | Sidebar panel | Migrate v1.4 |
-| Score display | Metabox tab | Sidebar panel | Migrate v1.4 |
-| Settings pages | admin.php | admin.php | Universal |
+- [ ] Breadcrumbs block usable in FSE `header.html` template part
+- [ ] TOC block usable in FSE `single.html` template
+- [ ] FAQ block usable in FSE templates
+- [ ] Read `theme.json` color palette for admin score ring UI
 
 ### Backward Compatibility
 
-| Scenario | Behavior |
-|----------|----------|
-| Classic Editor active | PHP metabox (unchanged from v1.0) |
-| Block Editor, sidebar loaded | React sidebar panel (primary) + metabox (hidden) |
-| FSE theme, no blocks used | `wp_head` output only (unchanged) |
-| FSE theme, blocks inserted | Block renders + `wp_head` output (deduplicated) |
-| Shortcodes in block content | Rendered via `do_shortcode` + deprecation notice |
-| `theme.json` present | Read color palette for admin score ring UI |
+- [ ] Classic Editor: PHP metabox unchanged
+- [ ] Block Editor without sidebar: metabox fallback
+- [ ] Shortcodes in block content: rendered + deprecation notice
+- [ ] FSE theme with no blocks inserted: `wp_head` output only
 
 ---
 
-## Phase 5 — Privacy & Compliance (v1.5)
+## v1.5 — Privacy & Compliance
 
-**Target: 2027 Q1 | Focus: GDPR, CCPA, privacy-by-design**
+### GDPR
 
-### Privacy Architecture
+- [ ] Register `wp_privacy_personal_data_exporters` for author user meta
+- [ ] Register `wp_privacy_personal_data_erasers` for author user meta
+- [ ] Privacy policy suggested text via `wp_add_privacy_policy_content()`
+- [ ] Explicit consent checkbox on user profile E-E-A-T section
+- [ ] Data minimization audit (review all stored fields for necessity)
+- [ ] Document data processing inventory
 
-```mermaid
-flowchart TD
-    subgraph Data["Data Search Intel Stores"]
-        OPT["wp_options<br/>Site settings — no PII"]
-        PM["wp_postmeta<br/>SEO/AEO/GEO content data — no PII"]
-        UM["wp_usermeta<br/>Author E-E-A-T data — contains PII"]
-    end
+### General Privacy
 
-    subgraph Compliance["Compliance Frameworks"]
-        GDPR["GDPR (EU)"]
-        CCPA["CCPA (California)"]
-        PIPEDA["PIPEDA (Canada)"]
-    end
-
-    subgraph Actions["Implementation"]
-        EXPORT["wp_privacy_personal_data_exporters<br/>Export author credentials, expertise, social URLs"]
-        ERASE["wp_privacy_personal_data_erasers<br/>Delete all user meta on request"]
-        POLICY["wp_add_privacy_policy_content<br/>Suggested privacy policy text"]
-        COOKIE["Cookie-free verification<br/>No cookies set by plugin"]
-        CONSENT["Explicit consent checkbox<br/>on user profile E-E-A-T section"]
-    end
-
-    UM -->|"Contains PII"| Compliance
-    Compliance --> Actions
-
-    style UM fill:#fef3c7,stroke:#d97706
-```
-
-### Privacy Checklist
-
-| Requirement | Status | Target |
-|-------------|--------|--------|
-| No frontend cookies | Done v1.0 | Verified |
-| No external API calls (default) | Done v1.0 | Only optional pinging |
-| No tracking scripts | Done v1.0 | Zero frontend JS/CSS |
-| No third-party data sharing | Done v1.0 | All data local |
-| Personal data export (Art. 15) | Planned | v1.5 — register exporter for user meta |
-| Personal data erasure (Art. 17) | Planned | v1.5 — register eraser for user meta |
-| Privacy policy text | Planned | v1.5 — `wp_add_privacy_policy_content()` |
-| Consent for E-E-A-T data | Planned | v1.5 — checkbox on user profile |
-| Data minimization audit | Planned | v1.5 — review all stored fields |
-| Ping opt-in disclosure | Planned | v1.5 — clear setting description |
-
-### Data Inventory
-
-| Data Type | Storage | PII? | Basis | Retention |
-|-----------|---------|------|-------|-----------|
-| Site settings | `wp_options` | No | Legitimate interest | Until uninstall |
-| Social profile URLs | `wp_options` | Possibly | Legitimate interest | Until uninstall |
-| Post SEO meta | `wp_postmeta` | No | Legitimate interest | Until post deletion |
-| Post AEO data | `wp_postmeta` | No | Legitimate interest | Until post deletion |
-| Post GEO data | `wp_postmeta` | No | Legitimate interest | Until post deletion |
-| Post citations | `wp_postmeta` | No | Legitimate interest | Until post deletion |
-| Post scores | `wp_postmeta` | No | Legitimate interest | Until post deletion |
-| Author credentials | `wp_usermeta` | Yes | Consent | Until erasure request |
-| Author expertise | `wp_usermeta` | Yes | Consent | Until erasure request |
-| Author social profiles | `wp_usermeta` | Yes | Consent | Until erasure request |
+- [ ] Verify no frontend cookies set by plugin
+- [ ] Verify no external API calls by default
+- [ ] Make search engine pinging opt-in with clear disclosure
+- [ ] Verify no tracking scripts
+- [ ] Verify all data stays in local database
+- [ ] CCPA compliance review
+- [ ] PIPEDA compliance review
 
 ---
 
-## Phase 6 — Advanced SEO (v2.0)
-
-**Target: 2027 Q1-Q2 | Focus: Redirects, IndexNow, WooCommerce, local SEO, robots.txt**
-
-### Feature Set
-
-| Feature | Description | Standard |
-|---------|-------------|----------|
-| Redirect manager | 301/302/307 rules with regex, import from CSV, change detection | HTTP status |
-| IndexNow integration | Instant indexing ping to Bing/Yandex/Naver on publish | IndexNow protocol |
-| WooCommerce Product schema | Product, Offer, AggregateRating, Review with auto-detection | schema.org/Product |
-| Local Business schema | LocalBusiness with address, hours, geo coordinates, service area | schema.org/LocalBusiness |
-| Robots.txt visual editor | Edit robots.txt from admin with syntax validation | REP |
-| Broken link checker | Background scan for 404 internal/external links | HTTP HEAD |
-| Internal linking suggestions | AI-powered related content suggestions on save | Content analysis |
-
-### WooCommerce Integration
-
-```mermaid
-flowchart TD
-    WOO{"WooCommerce<br/>active?"}
-    WOO -->|Yes| DETECT["Auto-detect product pages"]
-    WOO -->|No| SKIP["Skip — no WC features loaded"]
-
-    DETECT --> PRODUCT["Product Schema<br/>name, description, image,<br/>sku, brand, gtin, mpn"]
-    DETECT --> OFFER["Offer Schema<br/>price, currency, availability,<br/>validUntil, seller, condition"]
-    DETECT --> REVIEW["AggregateRating<br/>from WC product reviews"]
-    DETECT --> BREAD["Product Breadcrumbs<br/>Home > Shop > Category > Product"]
-    DETECT --> SM["Product Sitemap<br/>sitemap-product-{page}.xml"]
-    DETECT --> META["Product Meta Box<br/>Additional SEO fields for products"]
-
-    style WOO fill:#7c3aed,color:#fff
-```
+## v2.0 — Advanced SEO
 
 ### Redirect Manager
 
-```mermaid
-flowchart LR
-    subgraph Sources["Redirect Sources"]
-        S1["Manual rule entry"]
-        S2["404 log auto-detection"]
-        S3["CSV import"]
-        S4["Slug change detection"]
-    end
+- [ ] 301, 302, 307, 410 redirect rules
+- [ ] Exact match, prefix match, regex match
+- [ ] Admin table with search, filter, sort
+- [ ] Hit counter and last-hit date per redirect
+- [ ] 404 log with auto-suggest redirect targets
+- [ ] CSV import/export for redirects
+- [ ] Slug change auto-redirect detection
+- [ ] Redirect loop detection and prevention
 
-    subgraph Engine["Redirect Engine"]
-        R1["Pattern matching<br/>(exact, prefix, regex)"]
-        R2["Status codes<br/>(301, 302, 307, 410)"]
-        R3["Condition checks<br/>(user agent, referrer)"]
-    end
+### IndexNow Integration
 
-    subgraph Output["Execution"]
-        O1["wp_redirect at template_redirect"]
-        O2["Hit counter + last-hit date"]
-        O3["Admin table with search/filter"]
-    end
+- [ ] IndexNow API ping on post publish/update
+- [ ] Support for Bing, Yandex, Naver
+- [ ] API key management in settings
+- [ ] Ping log with success/failure status
 
-    Sources --> Engine --> Output
-```
+### WooCommerce Support
+
+- [ ] Auto-detect WooCommerce product pages
+- [ ] Product schema (name, description, image, SKU, brand, GTIN, MPN)
+- [ ] Offer schema (price, currency, availability, condition, seller)
+- [ ] AggregateRating from WooCommerce product reviews
+- [ ] Product breadcrumbs (Home > Shop > Category > Product)
+- [ ] Product sitemap (`sitemap-product-{page}.xml`)
+- [ ] Product-specific metabox fields
+
+### Local Business Schema
+
+- [ ] LocalBusiness schema type with address, phone, hours
+- [ ] Geo coordinates (latitude, longitude)
+- [ ] Service area support
+- [ ] Multiple locations support
+- [ ] Opening hours specification
+
+### Additional SEO Tools
+
+- [ ] Robots.txt visual editor with syntax validation
+- [ ] Broken link checker (background HTTP HEAD scan)
+- [ ] Internal linking suggestions (AI-powered related content)
+- [ ] Content Security Policy headers on plugin endpoints
+- [ ] Subresource Integrity for admin assets
+- [ ] Audit logging for settings changes
 
 ---
 
-## Phase 7 — Advanced AEO (v2.1)
-
-**Target: 2027 Q2-Q3 | Focus: Additional schema types, AI-assisted content**
+## v2.1 — Advanced AEO
 
 ### Additional Schema Types
 
-| Schema Type | Use Case | Detection | Input |
-|-------------|----------|-----------|-------|
-| VideoObject | YouTube/Vimeo embeds | Auto-detect `<iframe>` | Auto + manual override |
-| Recipe | Food/cooking content | Manual toggle | Block or metabox |
-| Event | Conferences, webinars | Manual entry | Date, location, price |
-| Review / Rating | Product/service reviews | Manual toggle | Star rating, pros/cons |
-| Course | Educational content | Manual entry | Provider, duration, price |
-| SoftwareApplication | App/tool pages | Manual entry | OS, price, rating |
-| JobPosting | Job listings | Manual entry | Salary, location, type |
+- [ ] VideoObject (auto-detect YouTube/Vimeo iframes)
+- [ ] Recipe (ingredients, steps, cook time, nutrition)
+- [ ] Event (date, location, price, performer, organizer)
+- [ ] Review / Rating (star rating, pros/cons, itemReviewed)
+- [ ] Course (provider, duration, price, description)
+- [ ] SoftwareApplication (OS, price, rating, category)
+- [ ] JobPosting (salary, location, employment type, company)
 
 ### AI-Assisted FAQ Generation
 
-```mermaid
-sequenceDiagram
-    participant Author as Content Author
-    participant SI as Search Intel
-    participant AI as AI Service (optional)
-
-    Author->>SI: Clicks "Generate FAQs"
-    SI->>SI: Analyze post content
-    SI->>SI: Extract key topics + question patterns
-
-    alt Local Analysis (default — no API key needed)
-        SI->>SI: Pattern-match question structures
-        SI->>SI: Extract Q&A from headings + first paragraphs
-        SI-->>Author: Suggested FAQ items (editable)
-    else AI-Enhanced (opt-in — user provides API key)
-        SI->>AI: Send content summary (max 2000 tokens)
-        AI-->>SI: Generated Q&A pairs
-        SI-->>Author: AI-suggested FAQ items (editable)
-    end
-
-    Author->>SI: Review, edit, approve
-    SI->>SI: Save to _search_intel_faqs post meta
-    SI->>SI: Update AEO score
-```
+- [ ] Local pattern-matching FAQ generator (no API key needed)
+- [ ] Extract Q&A from headings + following paragraphs
+- [ ] Optional AI-enhanced generation (user provides API key)
+- [ ] Suggested FAQs are editable before saving
+- [ ] Auto-update AEO score after FAQ changes
 
 ### Q&A Detection Engine
 
-```mermaid
-flowchart TD
-    CONTENT["Post Content"] --> SCAN["Pattern Scanner"]
-
-    SCAN --> P1["H2/H3 ending with ?"]
-    SCAN --> P2["Bold Q: / A: patterns"]
-    SCAN --> P3["Definition patterns<br/>'X is defined as...'"]
-    SCAN --> P4["Numbered step patterns<br/>'Step 1:', '1.'"]
-    SCAN --> P5["Comparison patterns<br/>'X vs Y', 'difference between'"]
-
-    P1 --> CLASSIFY["Classify Content Type"]
-    P2 --> CLASSIFY
-    P3 --> CLASSIFY
-    P4 --> CLASSIFY
-    P5 --> CLASSIFY
-
-    CLASSIFY --> FAQ_OUT["FAQPage eligible"]
-    CLASSIFY --> HOWTO_OUT["HowTo eligible"]
-    CLASSIFY --> QA_OUT["Q&A formatting score"]
-    CLASSIFY --> DEF_OUT["Definition snippet eligible"]
-
-    style CLASSIFY fill:#d97706,color:#fff
-```
+- [ ] Detect H2/H3 headings ending with `?`
+- [ ] Detect bold `Q:` / `A:` inline patterns
+- [ ] Detect definition patterns ("X is defined as...")
+- [ ] Detect numbered step patterns ("Step 1:", "1.")
+- [ ] Detect comparison patterns ("X vs Y", "difference between")
+- [ ] Classify content as FAQPage, HowTo, Q&A, or Definition eligible
+- [ ] Surface classification in AEO analysis tab
 
 ---
 
-## Phase 8 — Advanced GEO (v2.5)
-
-**Target: 2027 Q3-Q4 | Focus: AI visibility analytics, citation optimization, topical authority**
+## v2.5 — Advanced GEO
 
 ### AI Visibility Dashboard
 
-```mermaid
-flowchart TD
-    subgraph Inputs["Data Sources"]
-        GSC["Google Search Console API"]
-        BING_API["Bing Webmaster API"]
-        CONTENT["Content Database + Scores"]
-        LLMS_LOG["llms.txt access logs"]
-    end
-
-    subgraph Processing["Analysis Engine"]
-        QUERY["Query intent classification"]
-        CITATION["Citation tracking<br/>(are AI engines citing you?)"]
-        AUTHORITY["Topical authority mapping"]
-        COMPETITOR["Competitor GEO benchmarking"]
-        COVERAGE["Topic coverage analysis"]
-    end
-
-    subgraph Dashboard["AI Visibility Dashboard"]
-        OVERVIEW["Site-wide GEO Health Score"]
-        TRENDS["Visibility Trends over Time"]
-        RECS["Prioritized Recommendations"]
-        CONTENT_MAP["Content Gap Map"]
-        AI_TRAFFIC["AI Referral Traffic Tracking"]
-    end
-
-    Inputs --> Processing --> Dashboard
-
-    style Dashboard fill:#9333ea,color:#fff
-```
+- [ ] Site-wide GEO health score
+- [ ] Google Search Console API integration
+- [ ] Bing Webmaster API integration
+- [ ] `llms.txt` access log tracking
+- [ ] AI referral traffic identification and tracking
+- [ ] Visibility trends over time chart
+- [ ] Prioritized recommendation list
+- [ ] Content gap map
 
 ### Citation Graph Builder
 
-```mermaid
-graph TD
-    subgraph Your_Site["Your Site Content"]
-        P1["Post: What is SEO?"]
-        P2["Post: SEO vs AEO"]
-        P3["Post: GEO Guide"]
-        P4["Post: E-E-A-T Explained"]
-    end
-
-    subgraph External["External Citations"]
-        W1["Wikipedia: SEO"]
-        M1["Moz: Domain Authority"]
-        G1["Google: Search Central"]
-    end
-
-    P1 -->|"links to"| P2
-    P2 -->|"links to"| P3
-    P3 -->|"links to"| P4
-    P4 -->|"links to"| P1
-
-    P1 -->|"cites"| W1
-    P2 -->|"cites"| M1
-    P3 -->|"cites"| G1
-
-    subgraph Analysis["Authority Analysis"]
-        CLUSTER["Topic clusters detected"]
-        GAPS["Missing internal links"]
-        ORPHAN["Orphaned content"]
-        PILLAR["Pillar page candidates"]
-    end
-```
+- [ ] Internal link graph visualization
+- [ ] External citation tracking per post
+- [ ] Topic cluster auto-detection (shared entities, categories, semantic similarity)
+- [ ] Pillar page identification and suggestions
+- [ ] Missing internal link detection
+- [ ] Orphaned content detection
+- [ ] Internal linking score per cluster
 
 ### Topical Authority Map
 
-| Feature | Description |
-|---------|-------------|
-| Topic cluster detection | Auto-group posts by shared entities, categories, and semantic similarity |
-| Pillar page identification | Suggest comprehensive hub pages per cluster |
-| Content gap analysis | Identify missing subtopics vs competitor coverage |
-| Internal linking score | Rate interconnectedness within and across clusters |
-| Authority score per topic | Estimate topical depth based on content volume, freshness, and E-E-A-T signals |
-| Multimodal optimization | Analyze image alt text, video transcripts, and structured data completeness for AI |
+- [ ] Authority score per topic (based on content volume, freshness, E-E-A-T)
+- [ ] Content gap analysis vs competitor coverage
+- [ ] Topic cluster dashboard with drill-down
+- [ ] Multimodal optimization analysis (image alt text, video transcripts, structured data)
 
 ---
 
-## Phase 9 — Enterprise & Scale (v3.0)
+## v3.0 — Enterprise & Scale
 
-**Target: 2027 Q4+ | Focus: Multisite, migration, RBAC, white-label, multi-language**
+### Multisite
 
-### Enterprise Features
+- [ ] Network-level default settings
+- [ ] Per-site setting overrides
+- [ ] Centralized reporting across network
+- [ ] Network admin menu page
 
-```mermaid
-flowchart TD
-    subgraph Enterprise["Enterprise Capabilities"]
-        MS["Multisite Network Settings<br/>Network-level defaults<br/>Per-site overrides<br/>Centralized reporting"]
-        IMPORT["Plugin Migration<br/>Yoast SEO, Rank Math,<br/>AIOSEO, SEOPress,<br/>The SEO Framework"]
-        RBAC["Role-Based Access Control<br/>SEO Editor role<br/>Per-module permissions<br/>View-only for authors"]
-        WL["White-Label<br/>Custom branding<br/>Remove Search Intel name<br/>Reseller support"]
-        I18N["Multi-Language<br/>WPML integration<br/>Polylang integration<br/>Per-language meta"]
-    end
+### Plugin Migration
 
-    subgraph Scale["Scale Features"]
-        CACHE["Object caching support<br/>Redis / Memcached aware"]
-        QUEUE["Background processing<br/>WP-Cron queue for bulk ops"]
-        BULK_ED["Bulk editor table<br/>Mass edit title/desc/keyword"]
-        CDN["CDN-friendly<br/>No query string dependencies"]
-        HEADLESS["Headless WP support<br/>REST API serves all SEO data"]
-    end
+- [ ] Yoast SEO (titles, descriptions, keywords, robots, canonical, OG, schema, redirects, breadcrumbs)
+- [ ] Rank Math (titles, descriptions, keywords, robots, canonical, schema, redirects, 404 monitor)
+- [ ] All in One SEO (titles, descriptions, robots, OG, Twitter, canonical, local SEO)
+- [ ] SEOPress (titles, descriptions, robots, OG, Twitter, canonical, redirects, schemas)
+- [ ] The SEO Framework (titles, descriptions, robots, canonical)
+- [ ] Dry-run mode (preview what will be migrated before committing)
 
-    Enterprise --> Scale
-```
+### Role-Based Access Control
 
-### Migration Tool
-
-| Source Plugin | Data Migrated |
-|---------------|---------------|
-| Yoast SEO | Titles, descriptions, focus keywords, robots, canonical, OG, schema, redirects, breadcrumb settings |
-| Rank Math | Titles, descriptions, focus keywords, robots, canonical, schema, redirects, 404 monitor data |
-| All in One SEO | Titles, descriptions, robots, OG, Twitter, canonical, local SEO |
-| SEOPress | Titles, descriptions, robots, OG, Twitter, canonical, redirects, schemas |
-| The SEO Framework | Titles, descriptions, robots, canonical |
+- [ ] Custom "SEO Editor" role
+- [ ] Per-module permissions (SEO, AEO, GEO, Sitemap, Settings)
+- [ ] View-only mode for authors (can see scores, can't change settings)
+- [ ] Settings lock (prevent non-admins from changing global config)
 
 ### Multi-Language Support
 
-| Feature | WPML | Polylang |
-|---------|------|----------|
-| Per-language SEO title | Translatable string | Translatable string |
-| Per-language meta description | Translatable string | Translatable string |
-| Per-language OG image | Per translation | Per translation |
-| hreflang tags | Auto-generated | Auto-generated |
-| Sitemap per language | Separate or combined | Separate or combined |
-| llms.txt per language | Language parameter | Language parameter |
+- [ ] WPML integration (per-language SEO title, description, OG image)
+- [ ] Polylang integration (per-language SEO title, description, OG image)
+- [ ] Auto-generate hreflang tags
+- [ ] Per-language sitemap (separate or combined)
+- [ ] Per-language `llms.txt`
+
+### White-Label
+
+- [ ] Custom plugin name
+- [ ] Custom branding (logo, colors)
+- [ ] Remove "Search Intel" references
+- [ ] Reseller support
+
+### Scale
+
+- [ ] Object caching support (Redis / Memcached aware)
+- [ ] Background processing queue for all heavy operations
+- [ ] Bulk editor table (mass edit title/description/keyword)
+- [ ] CDN-friendly (no query string dependencies)
+- [ ] Headless WordPress support (REST API serves all SEO/AEO/GEO data)
 
 ---
 
-## Long-Term Vision
+## Reference
 
-```mermaid
-timeline
-    title Search Intel Evolution
-    2026 Q2 : v1.0 Launch
-             : SEO + AEO + GEO core
-             : Admin UI + Content Analyzer
-    2026 Q2 : v1.1 Feature Completion
-            : Post panel expansion
-            : Title templates, citations
-            : Analysis-on-save
-    2026 Q3 : v1.2 Hardening
-            : Security audit
-            : 150+ unit tests + CI
-            : Compatibility QA
-    2026 Q3-Q4 : v1.3 Bulk Tools + REST
-               : Bulk rescore/regenerate
-               : REST API, WP-CLI
-               : Settings export/import
-    2026 Q4 : v1.4 FSE + Blocks
-            : 6 Gutenberg blocks
-            : Sidebar panel
-            : FSE template parts
-    2027 Q1 : v1.5 Privacy
-            : GDPR compliance
-            : Data export/erasure
-    2027 Q1-Q2 : v2.0 Advanced SEO
-               : Redirects, IndexNow
-               : WooCommerce, Local SEO
-    2027 Q2-Q3 : v2.1 Advanced AEO
-               : Video, Recipe, Event schema
-               : AI FAQ generation
-    2027 Q3-Q4 : v2.5 Advanced GEO
-               : AI visibility dashboard
-               : Citation graph
-               : Topical authority
-    2027 Q4+ : v3.0 Enterprise
-             : Multisite, RBAC
-             : Migration, multi-language
-             : Predictive SEO
-```
-
----
-
-## Compatibility Matrix
-
-### WordPress Version Support
-
-```mermaid
-flowchart LR
-    subgraph Supported["Tested WordPress Versions"]
-        WP60["6.0"]
-        WP62["6.2"]
-        WP64["6.4"]
-        WP65["6.5"]
-        WP66["6.6"]
-        WP67["6.7"]
-    end
-
-    subgraph EditorCompat["Editor Compatibility"]
-        CE["Classic Editor Plugin ✓"]
-        BE["Block Editor (Gutenberg) ✓"]
-        FSE_T["FSE Themes ✓"]
-    end
-
-    subgraph ThemeCompat["Theme Compatibility"]
-        T_CLASSIC["Classic Themes (TwentyTwelve–TwentyTwentyOne) ✓"]
-        T_BLOCK["Block Themes (TwentyTwentyTwo+) ✓"]
-        T_HYBRID["Hybrid Themes (Astra, GeneratePress, Kadence) ✓"]
-        T_BUILDER["Page Builders (Elementor, Beaver, Divi) ✓"]
-    end
-
-    Supported --> EditorCompat
-    Supported --> ThemeCompat
-```
-
-### PHP & Server Matrix
+### Compatibility Targets
 
 | Component | Minimum | Recommended |
 |-----------|---------|-------------|
@@ -1026,164 +564,30 @@ flowchart LR
 | MariaDB | 10.3 | 10.6+ |
 | Web Server | Apache 2.4 / Nginx 1.18 | Latest stable |
 | Memory | 64 MB | 128 MB+ |
-| HTTPS | Recommended | Required for full schema |
 
 ### Plugin Compatibility
 
 | Plugin | Status | Notes |
 |--------|--------|-------|
-| Classic Editor | Full support | PHP metabox, TinyMCE content extraction |
-| WooCommerce | Basic v1.0, full v2.0 | Product schema auto-detect in v2.0 |
-| WPML | Tested v1.2, integrated v3.0 | hreflang, per-language meta in v3.0 |
+| Classic Editor | Full support | PHP metabox, TinyMCE extraction |
+| WooCommerce | Basic v1.0, full v2.0 | Product schema in v2.0 |
+| WPML | Tested v1.2, integrated v3.0 | hreflang, per-language meta |
 | Polylang | Tested v1.2, integrated v3.0 | Same as WPML |
 | Elementor | Compatible | `wp_head` fires normally |
 | Beaver Builder | Compatible | `wp_head` fires normally |
 | Divi | Compatible | `wp_head` fires normally |
 | ACF | Compatible | No conflicts |
-| WP Rocket | Compatible | Cache-friendly, no query strings |
-
----
-
-## Security Roadmap
-
-### Security Milestones
-
-```mermaid
-flowchart TD
-    subgraph V10["v1.0 — Baseline"]
-        S1["Input sanitization"]
-        S2["Output escaping"]
-        S3["Nonce verification"]
-        S4["Capability checks"]
-        S5["ABSPATH guards"]
-        S6["No frontend assets"]
-    end
-
-    subgraph V12["v1.2 — Hardened"]
-        S7["Full security audit"]
-        S8["Prepared statements review"]
-        S9["CSRF on every form"]
-        S10["Rate limiting on AJAX"]
-        S11["Security headers on endpoints"]
-        S12["Automated SAST (PHPStan/Psalm)"]
-    end
-
-    subgraph V20["v2.0 — Extended"]
-        S13["Content Security Policy headers"]
-        S14["Subresource Integrity for assets"]
-        S15["Redirect loop detection"]
-        S16["Audit logging for settings changes"]
-    end
-
-    subgraph V30["v3.0 — Enterprise"]
-        S17["Role-based access control"]
-        S18["REST API auth (app passwords)"]
-        S19["Encryption for sensitive settings"]
-        S20["Penetration testing report"]
-    end
-
-    V10 --> V12 --> V20 --> V30
-```
+| WP Rocket | Compatible | Cache-friendly |
 
 ### Security Principles
 
-| Principle | Implementation |
-|-----------|----------------|
-| **Defense in depth** | Sanitize input AND escape output — never rely on one alone |
-| **Least privilege** | Each action checks minimum required capability |
-| **Secure defaults** | All features safe out-of-the-box; advanced features opt-in |
-| **No trust of client data** | All POST/GET/REQUEST data treated as hostile |
-| **Minimal attack surface** | Zero frontend JS/CSS; no external API keys required by default |
-| **Fail closed** | Security check failure = action denied silently |
-| **Audit trail** | Settings changes logged (v3.0) |
-| **Dependency hygiene** | No third-party PHP libraries; minimal JS dependencies |
-
----
-
-## Privacy Roadmap
-
-### Privacy-by-Design Principles
-
-| Principle | Status | Target |
-|-----------|--------|--------|
-| Data minimization | Only necessary metadata stored | Audit v1.5 |
-| Purpose limitation | Each field has clear SEO/AEO/GEO purpose | Document v1.5 |
-| Consent | User meta requires profile edit action | Explicit checkbox v1.5 |
-| Right to access | Not yet implemented | GDPR exporter v1.5 |
-| Right to erasure | Uninstall cleans all data | GDPR eraser v1.5 |
-| Data portability | Not yet implemented | JSON export v1.3 |
-| Privacy by default | No PII collected on frontend | Verified v1.0 |
-| Cookie-free | No cookies set | Verified v1.0 |
-| No external requests by default | Only optional pinging | Verified v1.0 |
-| Transparent data processing | Not yet documented | Privacy policy text v1.5 |
-
----
-
-## Testing Strategy
-
-### Test Pyramid
-
-```mermaid
-flowchart TD
-    subgraph Pyramid["Test Pyramid"]
-        E2E_L["E2E Tests — Playwright<br/>~30 tests<br/>UI flows, metabox, settings, bulk tools"]
-        INT_L["Integration Tests — WP Test Suite<br/>~80 tests<br/>Hooks, DB, AJAX, REST API, save/load"]
-        UNIT_L["Unit Tests — PHPUnit<br/>~150 tests<br/>Pure logic, scoring, templates, detection"]
-    end
-
-    E2E_L -->|"Headless Chrome"| BROWSER["Browser"]
-    INT_L -->|"WordPress test framework"| WPTEST["WP + MySQL"]
-    UNIT_L -->|"No WP dependencies"| PHPUNIT["PHPUnit 9/10"]
-
-    style UNIT_L fill:#16a34a,color:#fff
-    style INT_L fill:#d97706,color:#fff
-    style E2E_L fill:#dc2626,color:#fff
-```
-
-### Test Coverage by Module
-
-| Module | Unit Tests | Integration Tests | E2E Tests |
-|--------|-----------|-------------------|-----------|
-| SEO Manager | Title templates, description fallback, separator, social meta | wp_head output, OG/Twitter/canonical rendering | SERP preview, char counters |
-| Schema Manager | KG, breadcrumbs, article, citation schema assembly | JSON-LD validity, @graph structure | N/A |
-| AEO Manager | FAQ auto-detect, HowTo builder, Q&A detection, snippet scoring | FAQ/HowTo JSON-LD, Speakable | FAQ repeater UI |
-| GEO Manager | Topic extraction, intent classification, audience detect, scoring | llms.txt, AI meta, entity markup, REST endpoint | Entity/citation repeater UI |
-| Content Analyzer | Readability, syllables, keyword density, all check functions | AJAX endpoint, auto-analysis on save | Run Analysis button, scores |
-| Sitemap | URL build, changefreq, image extraction, cache logic | XML validity, pagination, transient caching | N/A |
-| Admin | Sanitization, meta save/load, settings validation | Menu registration, metabox rendering, user fields | All tabs, settings pages |
-| Title Engine | Variable resolution, fallback chain, context detection | `pre_get_document_title` integration | N/A |
-| Bulk Tools | Queue processing logic, batch sizing | Background process, progress tracking | Regenerate/rescore UI |
-| REST API | Response schema validation | Auth, endpoint routing, CORS | N/A |
-
-### CI/CD Pipeline
-
-```mermaid
-flowchart LR
-    PUSH["Git Push"] --> LINT["Lint"]
-    LINT --> UNIT["Unit Tests"]
-    UNIT --> INTEGRATION["Integration Tests"]
-    INTEGRATION --> E2E["E2E Tests"]
-    E2E --> BUILD["Build"]
-    BUILD --> RELEASE["Release"]
-
-    subgraph Lint
-        PHPCS["PHP_CodeSniffer<br/>WordPress-Core"]
-        PHPSTAN["PHPStan Level 6"]
-        PSALM["Psalm Level 4"]
-        ESLINT["ESLint"]
-        STYLELINT["Stylelint"]
-    end
-
-    subgraph Matrix["Test Matrix"]
-        PHP74["PHP 7.4 + WP 6.0"]
-        PHP81["PHP 8.1 + WP 6.5"]
-        PHP83["PHP 8.3 + WP 6.7"]
-    end
-
-    LINT --> Lint
-    UNIT --> Matrix
-    INTEGRATION --> Matrix
-```
+- **Defense in depth** — sanitize input AND escape output
+- **Least privilege** — check minimum required capability per action
+- **Secure defaults** — safe out-of-the-box, advanced features opt-in
+- **No trust of client data** — all POST/GET/REQUEST treated as hostile
+- **Minimal attack surface** — zero frontend assets, no API keys required by default
+- **Fail closed** — security check failure = action denied
+- **Dependency hygiene** — no third-party PHP libraries, minimal JS deps
 
 ### Quality Gates
 
@@ -1191,14 +595,14 @@ flowchart LR
 |------|-----------|-----------------|
 | WPCS lint | 0 errors | Yes |
 | PHPStan level 6 | 0 errors | Yes |
-| Unit test pass rate | 100% | Yes |
-| Integration test pass rate | 100% | Yes |
-| E2E test pass rate | 95%+ | Yes |
-| Code coverage (unit) | > 80% | No (advisory) |
-| Code coverage (integration) | > 60% | No (advisory) |
-| Performance regression | < 10% degradation | Yes |
+| Unit test pass | 100% | Yes |
+| Integration test pass | 100% | Yes |
+| E2E test pass | 95%+ | Yes |
+| Code coverage (unit) | > 80% | Advisory |
+| Code coverage (integration) | > 60% | Advisory |
+| Performance regression | < 10% | Yes |
 
 ---
 
 _Last updated: March 2026_
-_This roadmap is a living document and will be updated as priorities evolve._
+_This roadmap is a living document. Check off items as they are completed._
