@@ -1,0 +1,45 @@
+# ── Dependencies ──────────────────────────────────────────────────────────────
+vendor/
+node_modules/
+
+# ── Build / Cache ─────────────────────────────────────────────────────────────
+.phpunit.result.cache
+.phpunit.cache/
+.php-cs-fixer.cache
+phpstan-baseline.neon
+
+# ── IDE & OS ──────────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Playwright ────────────────────────────────────────────────────────────────
+test-results/
+playwright-report/
+blob-report/
+.auth/
+
+# ── WordPress (local dev) ────────────────────────────────────────────────────
+wp-config.php
+wp-content/uploads/
+wp-content/upgrade/
+
+# ── Environment / Secrets ────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Logs ─────────────────────────────────────────────────────────────────────
+*.log
+debug.log
+error_log
+
+# ── Distribution archives ───────────────────────────────────────────────────
+*.zip
+*.tar.gz
+dist/
