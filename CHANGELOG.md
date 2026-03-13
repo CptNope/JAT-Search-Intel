@@ -200,6 +200,58 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [1.3.0] — 2026-03-12
+
+### Added
+
+#### REST API (`class-rest-api.php`)
+- `GET /search-intel/v1/scores/{id}` — retrieve SEO, AEO, GEO, and readability scores
+- `GET /search-intel/v1/geo/{id}` — full GEO metadata (AI summary, topics, entities, intent, audience)
+- `GET /search-intel/v1/meta/{id}` — read SEO meta fields (title, description, keyword, canonical, robots)
+- `PUT /search-intel/v1/meta/{id}` — update SEO meta fields with sanitization
+- `POST /search-intel/v1/analyze/{id}` — trigger content analysis and save scores
+- `POST /search-intel/v1/bulk/rescore` — batch rescore with offset pagination
+- `GET /search-intel/v1/settings` — read all plugin settings (admin only)
+- `PUT /search-intel/v1/settings` — update plugin settings with type validation (admin only)
+- `POST /search-intel/v1/sitemap/invalidate` — clear sitemap transient caches (admin only)
+- Permission callbacks: `can_read_post`, `can_edit_post`, `can_manage_options`
+- `enable_rest_api` toggle in GEO settings page (default: enabled)
+- REST API routes guarded by toggle — routes not registered when disabled
+
+#### Bulk Tools (`class-bulk-tools.php`)
+- "Search Intel > Bulk Tools" admin page under main menu
+- Bulk rescore — re-run SEO/AEO/GEO/readability analysis on all published posts (batched AJAX, 20/request)
+- Bulk regenerate metadata — auto-fill empty descriptions, AI summaries, and content types (non-destructive)
+- Sitemap cache clear & warm — invalidate all sitemap transients and queue regeneration
+- Export settings — download all plugin settings + social profiles as timestamped JSON
+- Import settings — upload JSON with merge (keep current, overlay) or overwrite (reset to defaults, overlay) mode
+- AJAX progress bar UI with real-time batch progress (done/total, percentage)
+- Client-side JSON validation before import submission
+
+#### WP-CLI (`class-cli.php`)
+- `wp search-intel analyze <post_id> [--save]` — analyze a single post with score table output
+- `wp search-intel rescore --all [--post_type=] [--batch_size=]` — bulk rescore with progress bar
+- `wp search-intel regenerate --all [--post_type=]` — bulk regenerate empty metadata fields
+- `wp search-intel sitemap cache|clear` — manage sitemap transient caches
+- `wp search-intel export` — output settings as JSON (pipe to file)
+- `wp search-intel import <file> [--mode=merge|overwrite]` — import settings from JSON file
+- `wp search-intel scores [--format=table|csv|json|yaml] [--orderby=seo|aeo|geo|readability] [--limit=]` — display score table
+
+#### Testing
+- 32 new unit tests: `RestApiTest` (28 tests) and `BulkToolsTest` (12 tests)
+- Total suite: **225 tests, 441 assertions** — all passing
+- `WP_REST_Request` and `WP_REST_Response` class stubs for isolated unit testing
+- `$wpdb` stub for sitemap cache invalidation tests
+- Enhanced `get_posts` stub: respects `fields`, `post_type`, `post_status`, `offset`, `limit`
+
+### Changed
+- `class-core.php`: Added `$rest_api` and `$bulk_tools` properties to singleton
+- `class-admin.php`: Added Bulk Tools submenu page and asset enqueueing
+- `admin/css/admin-style.css`: Added progress bar and bulk tools result styles
+- `search-intel.php`: WP-CLI command registration (conditional on `WP_CLI`)
+
+---
+
 ## [1.2.1] — 2026-03-12
 
 ### Fixed
@@ -276,7 +328,7 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 ## [Unreleased]
 
 ### Planned
-- See [ROADMAP.md](ROADMAP.md) for v1.3 features (Bulk Tools, REST API, Dashboard widgets)
+- See [ROADMAP.md](ROADMAP.md) for v1.4 features (FSE & Block Editor Native, Gutenberg sidebar, custom blocks)
 
 ---
 
