@@ -97,7 +97,7 @@ class IndexNow {
 	 * Submit a URL to all enabled IndexNow providers.
 	 *
 	 * @param string $url The URL to submit.
-	 * @return array<string,array{success: bool, status: int, message: string}>
+	 * @return array
 	 */
 	public function submit_url( string $url ): array {
 		$api_key = $this->settings['indexnow_api_key'] ?? '';
@@ -105,7 +105,6 @@ class IndexNow {
 			return [];
 		}
 
-		$host      = wp_parse_url( home_url(), PHP_URL_HOST );
 		$providers = $this->settings['indexnow_providers'] ?? array_keys( self::ENDPOINTS );
 		$results   = [];
 

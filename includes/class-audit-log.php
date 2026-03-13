@@ -49,7 +49,7 @@ class Audit_Log {
 			return;
 		}
 
-		$changes = $this->diff_settings( (array) $old_value, (array) $new_value );
+		$changes = $this->diff_settings( $old_value, $new_value );
 		if ( empty( $changes ) ) {
 			return;
 		}
