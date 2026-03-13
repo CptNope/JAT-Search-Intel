@@ -1084,6 +1084,21 @@ function get_object_taxonomies( $object_type, string $output = 'names' ): array 
 	return [ 'category', 'post_tag' ];
 }
 
+function wp_remote_post( string $url, array $args = [] ): array {
+	global $si_test_state;
+	return $si_test_state['remote_post_response'] ?? [
+		'response' => [ 'code' => 200, 'message' => 'OK' ],
+		'body'     => '',
+	];
+}
+
+function wp_remote_retrieve_body( $response ): string {
+	if ( is_array( $response ) && isset( $response['body'] ) ) {
+		return (string) $response['body'];
+	}
+	return '';
+}
+
 // ── Autoloader ───────────────────────────────────────────────────────────────
 
 spl_autoload_register( function ( string $class ) {

@@ -131,6 +131,9 @@
       <code><![CDATA[$internal_linker]]></code>
       <code><![CDATA[$csp_headers]]></code>
       <code><![CDATA[$sri]]></code>
+      <code><![CDATA[$schema_types]]></code>
+      <code><![CDATA[$qa_detector]]></code>
+      <code><![CDATA[$faq_generator]]></code>
       <code><![CDATA[$rest_api]]></code>
       <code><![CDATA[$schema]]></code>
       <code><![CDATA[$title_engine]]></code>

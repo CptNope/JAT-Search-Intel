@@ -6,6 +6,47 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [2.1.0] — 2026-03-13
+
+### Added
+
+#### Additional Schema Types (`class-schema-types.php`)
+- VideoObject with auto-detect YouTube/Vimeo iframes from post content
+- Recipe schema (name, ingredients, steps, cook time, prep time, servings, nutrition)
+- Event schema (name, date, location, performer, organizer, price)
+- Review schema (star rating, pros/cons lists, itemReviewed with type)
+- Course schema (provider, duration, price, description)
+- SoftwareApplication schema (OS, category, price, aggregate rating)
+- JobPosting schema (title, company, location, employment type, salary)
+- Schema type injection into singular graph via `search_intel_singular_schema` filter
+
+#### Q&A Detection Engine (`class-qa-detector.php`)
+- Detect H2/H3 headings ending with `?` and extract answers
+- Detect bold `Q:` / `A:` inline patterns
+- Detect definition patterns ("X is defined as...", "X refers to...", etc.)
+- Detect numbered step patterns ("Step 1:", ordered lists)
+- Detect comparison patterns ("X vs Y", "difference between X and Y")
+- Classify content as FAQPage, HowTo, QAPage, or DefinedTerm eligible
+- Auto-inject detected FAQ into schema via filter
+
+#### AI-Assisted FAQ Generation (`class-faq-generator.php`)
+- Local pattern-matching FAQ generator (no API key needed)
+- Extract Q&A from headings + following paragraphs
+- Generate implicit questions from informational headings
+- Optional AI-enhanced generation via OpenAI API (user provides API key)
+- Editable FAQ suggestions with admin metabox
+- AJAX save/generate endpoints with nonce verification
+- Deduplication by question similarity
+
+### Changed
+- Core: added `$schema_types`, `$qa_detector`, `$faq_generator` properties
+- Default settings: `enable_schema_types`, `enable_qa_detector`, `enable_faq_generator`, `faq_ai_api_key`
+
+### Tests
+- 509 unit tests, 1,153 assertions (up from 437/987)
+
+---
+
 ## [2.0.1] — 2026-03-13
 
 ### Added
