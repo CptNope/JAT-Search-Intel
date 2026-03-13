@@ -97,6 +97,24 @@ class Core {
     /** @var Authority_Map */
     public $authority_map;
 
+    /** @var Multisite */
+    public $multisite;
+
+    /** @var Migration */
+    public $migration;
+
+    /** @var RBAC */
+    public $rbac;
+
+    /** @var Multilang */
+    public $multilang;
+
+    /** @var White_Label */
+    public $white_label;
+
+    /** @var Scale */
+    public $scale;
+
     /**
      * Get singleton instance.
      */
@@ -184,6 +202,24 @@ class Core {
 
         // Topical Authority Map — authority scoring, content gaps, multimodal analysis.
         $this->authority_map = new Authority_Map( $settings );
+
+        // Multisite — network defaults, per-site overrides, centralized reporting.
+        $this->multisite = new Multisite( $settings );
+
+        // Plugin Migration — Yoast, Rank Math, AIOSEO, SEOPress, TSF.
+        $this->migration = new Migration( $settings );
+
+        // Role-Based Access Control — SEO Editor role, per-module permissions.
+        $this->rbac = new RBAC( $settings );
+
+        // Multi-Language — WPML, Polylang, hreflang, per-language sitemap/llms.txt.
+        $this->multilang = new Multilang( $settings );
+
+        // White-Label — custom branding, reseller support.
+        $this->white_label = new White_Label( $settings );
+
+        // Scale — object cache, background queue, bulk editor, headless REST.
+        $this->scale = new Scale( $settings );
 
         // Auto-redirect on slug change.
         add_action( 'post_updated', [ $this->redirects, 'detect_slug_change' ], 10, 3 );
@@ -404,6 +440,27 @@ class Core {
 
             // Topical Authority Map (v2.5)
             'enable_authority_map'   => false,
+
+            // Role-Based Access Control (v3.0)
+            'enable_rbac'            => false,
+            'enable_settings_lock'   => false,
+
+            // Multi-Language Support (v3.0)
+            'enable_multilang'       => false,
+
+            // White-Label (v3.0)
+            'enable_white_label'     => false,
+            'wl_plugin_name'         => '',
+            'wl_plugin_uri'          => '',
+            'wl_author_name'         => '',
+            'wl_author_uri'          => '',
+            'wl_description'         => '',
+            'wl_logo_url'            => '',
+            'wl_brand_color'         => '#2271b1',
+            'wl_hide_branding'       => false,
+
+            // Scale (v3.0)
+            'enable_scale'           => false,
         ];
     }
 }

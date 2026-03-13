@@ -6,6 +6,62 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.0.0] — 2026-03-13
+
+### Added
+
+#### Multisite Support (`class-multisite.php`)
+- Network-level default settings with `get_site_option` storage
+- Per-site setting overrides with explicit override tracking
+- Centralized reporting across all network sites (scores, features, overrides)
+- Network admin menu page under Settings
+- Auto-apply network defaults to newly created sites
+
+#### Plugin Migration Engine (`class-migration.php`)
+- Yoast SEO migration (titles, descriptions, keywords, robots, canonical, OG, redirects)
+- Rank Math migration (titles, descriptions, keywords, robots, canonical, schema, redirects, 404 log)
+- All in One SEO migration (titles, descriptions, robots, OG, Twitter, canonical)
+- SEOPress migration (titles, descriptions, robots, canonical, OG, Twitter, redirects)
+- The SEO Framework migration (titles, descriptions, robots, canonical)
+- Dry-run mode with per-field preview and sample data
+- Merge vs overwrite import mode
+- Redirect migration with deduplication
+
+#### Role-Based Access Control (`class-rbac.php`)
+- Custom "SEO Editor" role with module-specific capabilities
+- Per-module permissions (SEO, AEO, GEO, Sitemap, Settings)
+- View-only mode for authors (can see scores, can't change settings)
+- Settings lock (prevent non-admins from changing global config)
+- Grant/revoke individual module capabilities per user
+- Permissions summary report
+
+#### Multi-Language Support (`class-multilang.php`)
+- WPML integration (language detection, translations, hreflang)
+- Polylang integration (language detection, translations, hreflang)
+- Auto-generate hreflang tags on singular pages with x-default
+- Per-language SEO meta fields (title, description, OG image)
+- Per-language sitemap URLs with xhtml:link alternates
+- Per-language `llms.txt` content generation
+
+#### White-Label (`class-white-label.php`)
+- Custom plugin name, URI, author, and description
+- Custom branding (logo URL, brand color)
+- Remove "Search Intel" references via `all_plugins` filter
+- Admin CSS injection for branded pages
+- Reseller config export/import
+
+#### Scale & Performance (`class-scale.php`)
+- Object caching support (Redis / Memcached aware via `wp_using_ext_object_cache`)
+- Background processing queue with batch execution and auto-cleanup
+- Bulk editor table (mass edit title/description/keyword)
+- CDN-friendly asset URLs (file-mod-time versioning, no query strings)
+- Headless WordPress REST API: `/search-intel/v1/seo/{id}`, `/aeo/{id}`, `/scores/{id}`, `/meta/{id}`
+
+### Tests
+- 665 unit tests, 1,533 assertions (up from 574/1,381)
+
+---
+
 ## [2.5.0] — 2026-03-13
 
 ### Added
