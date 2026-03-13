@@ -597,15 +597,15 @@
 - [x] Smoke test: Bulk Editor table loads and saves (`bulk-editor.spec.ts`)
 - [x] Smoke test: Migration wizard detects sources and runs dry-run (`migration.spec.ts`)
 - [x] RBAC test: SEO Editor role sees correct UI, author sees view-only (`rbac.spec.ts`)
-- [ ] White-Label test: custom name appears in admin menu and plugin list
+- [x] White-Label test: custom name appears in admin menu and plugin list (`white-label.spec.ts`)
 
 ### Notifications & Scheduled Reports
 
-- [ ] Email digest: weekly site health summary (scores, issues, recommendations)
-- [ ] Score drop alerts: notify when a post's score drops below threshold
-- [ ] Slack webhook integration for alerts
-- [ ] Configurable alert thresholds per module (SEO, AEO, GEO)
-- [ ] Admin dashboard widget: site health at a glance
+- [x] Email digest: weekly site health summary (scores, issues, recommendations)
+- [x] Score drop alerts: notify when a post's score drops below threshold
+- [x] Slack webhook integration for alerts
+- [x] Configurable alert thresholds per module (SEO, AEO, GEO)
+- [x] Admin dashboard widget: site health at a glance
 
 ---
 

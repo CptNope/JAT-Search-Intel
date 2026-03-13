@@ -118,6 +118,9 @@ class Core {
     /** @var MainWP_Reporter */
     public $mainwp_reporter;
 
+    /** @var Notifications */
+    public $notifications;
+
     /**
      * Get singleton instance.
      */
@@ -226,6 +229,9 @@ class Core {
 
         // MainWP Child Reporter — expose scores and actions to MainWP Dashboard.
         $this->mainwp_reporter = new MainWP_Reporter( $settings );
+
+        // Notifications — email digest, score alerts, Slack, dashboard widget.
+        $this->notifications = new Notifications( $settings );
 
         // Auto-redirect on slug change.
         add_action( 'post_updated', [ $this->redirects, 'detect_slug_change' ], 10, 3 );
@@ -467,6 +473,14 @@ class Core {
 
             // Scale (v3.0)
             'enable_scale'           => false,
+
+            // Notifications & Reports (v3.1)
+            'enable_notifications'   => false,
+            'notification_email'     => '',
+            'alert_threshold_seo'    => 50,
+            'alert_threshold_aeo'    => 50,
+            'alert_threshold_geo'    => 50,
+            'slack_webhook_url'      => '',
         ];
     }
 }

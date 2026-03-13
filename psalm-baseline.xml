@@ -146,6 +146,7 @@
       <code><![CDATA[$local_business]]></code>
       <code><![CDATA[$mainwp_reporter]]></code>
       <code><![CDATA[$multilang]]></code>
+      <code><![CDATA[$notifications]]></code>
       <code><![CDATA[$privacy]]></code>
       <code><![CDATA[$rest_api]]></code>
       <code><![CDATA[$robots_txt]]></code>
@@ -283,6 +284,21 @@
     <UnusedProperty>
       <code><![CDATA[$settings]]></code>
     </UnusedProperty>
+  </file>
+  <file src="includes/class-notifications.php">
+    <InvalidArgument>
+      <code><![CDATA[[
+			'headers' => [ 'Content-Type' => 'application/json' ],
+			'body'    => $payload,
+			'timeout' => 10,
+		]]]></code>
+    </InvalidArgument>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[unschedule_events]]></code>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[bool]]></code>
+    </PossiblyUnusedReturnValue>
   </file>
   <file src="includes/class-privacy.php">
     <PossiblyUnusedMethod>

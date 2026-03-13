@@ -1355,6 +1355,24 @@ function _deprecated_function( string $function, string $version, string $replac
 	// No-op in tests — the shortcode still renders, this just triggers a notice.
 }
 
+// ── Notifications stubs ──────────────────────────────────────────────────────
+
+function wp_mail( string $to, string $subject, string $message, $headers = '', $attachments = [] ): bool {
+	global $si_test_state;
+	$si_test_state['last_email'] = [
+		'to'      => $to,
+		'subject' => $subject,
+		'message' => $message,
+	];
+	return true;
+}
+
+function is_email( string $email ) {
+	return filter_var( $email, FILTER_VALIDATE_EMAIL ) ? $email : false;
+}
+
+function wp_add_dashboard_widget( string $widget_id, string $widget_name, callable $callback, $control_callback = null, $args = null, $context = 'normal', $priority = 'core' ): void {}
+
 // ── Autoloader ───────────────────────────────────────────────────────────────
 
 spl_autoload_register( function ( string $class ) {
