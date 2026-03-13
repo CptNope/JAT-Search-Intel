@@ -267,7 +267,6 @@
       <code><![CDATA[array]]></code>
       <code><![CDATA[array]]></code>
       <code><![CDATA[array]]></code>
-      <code><![CDATA[bool]]></code>
     </PossiblyUnusedReturnValue>
     <UndefinedFunction>
       <code><![CDATA[get_woocommerce_currency()]]></code>
@@ -289,8 +288,7 @@
       <code><![CDATA[$public]]></code>
     </PossiblyUnusedParam>
     <PossiblyUnusedReturnValue>
-      <code><![CDATA[string]]></code>
-      <code><![CDATA[string]]></code>
+      <code><![CDATA[bool]]></code>
     </PossiblyUnusedReturnValue>
     <UnusedProperty>
       <code><![CDATA[$settings]]></code>
