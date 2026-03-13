@@ -288,6 +288,7 @@
       <code><![CDATA[$public]]></code>
     </PossiblyUnusedParam>
     <PossiblyUnusedReturnValue>
+      <code><![CDATA[string]]></code>
       <code><![CDATA[bool]]></code>
     </PossiblyUnusedReturnValue>
     <UnusedProperty>
