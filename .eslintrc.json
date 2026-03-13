@@ -1,0 +1,23 @@
+{
+  "env": {
+    "browser": true,
+    "jquery": true,
+    "es6": true
+  },
+  "globals": {
+    "wp": "readonly",
+    "ajaxurl": "readonly",
+    "searchIntel": "readonly"
+  },
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "script"
+  },
+  "rules": {
+    "no-unused-vars": "warn",
+    "no-undef": "error",
+    "no-console": "warn",
+    "semi": ["error", "always"],
+    "eqeqeq": "warn"
+  }
+}
