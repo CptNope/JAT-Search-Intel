@@ -127,6 +127,10 @@
       <code><![CDATA[$local_business]]></code>
       <code><![CDATA[$robots_txt]]></code>
       <code><![CDATA[$audit_log]]></code>
+      <code><![CDATA[$link_checker]]></code>
+      <code><![CDATA[$internal_linker]]></code>
+      <code><![CDATA[$csp_headers]]></code>
+      <code><![CDATA[$sri]]></code>
       <code><![CDATA[$rest_api]]></code>
       <code><![CDATA[$schema]]></code>
       <code><![CDATA[$title_engine]]></code>
@@ -299,6 +303,45 @@
     <PossiblyUnusedMethod>
       <code><![CDATA[clear_log]]></code>
     </PossiblyUnusedMethod>
+    <UnusedProperty>
+      <code><![CDATA[$settings]]></code>
+    </UnusedProperty>
+  </file>
+  <file src="includes/class-link-checker.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[schedule]]></code>
+      <code><![CDATA[unschedule]]></code>
+      <code><![CDATA[clear_results]]></code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="includes/class-internal-linker.php">
+    <UndefinedConstant>
+      <code><![CDATA[DAY_IN_SECONDS]]></code>
+    </UndefinedConstant>
+  </file>
+  <file src="includes/class-csp-headers.php">
+    <PossiblyUnusedParam>
+      <code><![CDATA[$result]]></code>
+      <code><![CDATA[$server]]></code>
+    </PossiblyUnusedParam>
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[bool]]></code>
+    </PossiblyUnusedReturnValue>
+    <UnusedProperty>
+      <code><![CDATA[$settings]]></code>
+    </UnusedProperty>
+  </file>
+  <file src="includes/class-sri.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[regenerate_hashes]]></code>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedParam>
+      <code><![CDATA[$media]]></code>
+    </PossiblyUnusedParam>
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[string]]></code>
+      <code><![CDATA[string]]></code>
+    </PossiblyUnusedReturnValue>
     <UnusedProperty>
       <code><![CDATA[$settings]]></code>
     </UnusedProperty>

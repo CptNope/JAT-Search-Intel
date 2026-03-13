@@ -1049,6 +1049,41 @@ function sanitize_textarea_field( string $str ): string {
 	return trim( strip_tags( $str ) );
 }
 
+// ── WP-Cron stubs ────────────────────────────────────────────────────────────
+
+function wp_next_scheduled( string $hook, array $args = [] ) {
+	global $si_test_state;
+	return $si_test_state['scheduled_events'][ $hook ] ?? false;
+}
+
+function wp_schedule_event( int $timestamp, string $recurrence, string $hook, array $args = [] ): bool {
+	global $si_test_state;
+	$si_test_state['scheduled_events'][ $hook ] = $timestamp;
+	return true;
+}
+
+function wp_unschedule_event( int $timestamp, string $hook, array $args = [] ): bool {
+	global $si_test_state;
+	unset( $si_test_state['scheduled_events'][ $hook ] );
+	return true;
+}
+
+// ── HTTP stubs ───────────────────────────────────────────────────────────────
+
+function wp_remote_head( string $url, array $args = [] ): array {
+	global $si_test_state;
+	return $si_test_state['remote_head_response'] ?? $si_test_state['remote_response'] ?? [
+		'response' => [ 'code' => 200, 'message' => 'OK' ],
+		'body'     => '',
+	];
+}
+
+// ── Taxonomy stubs ───────────────────────────────────────────────────────────
+
+function get_object_taxonomies( $object_type, string $output = 'names' ): array {
+	return [ 'category', 'post_tag' ];
+}
+
 // ── Autoloader ───────────────────────────────────────────────────────────────
 
 spl_autoload_register( function ( string $class ) {
