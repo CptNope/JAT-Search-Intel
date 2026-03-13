@@ -122,7 +122,6 @@
       <code><![CDATA[$geo]]></code>
       <code><![CDATA[$blocks]]></code>
       <code><![CDATA[$privacy]]></code>
-      <code><![CDATA[$redirects]]></code>
       <code><![CDATA[$indexnow]]></code>
       <code><![CDATA[$woocommerce]]></code>
       <code><![CDATA[$local_business]]></code>
@@ -244,54 +243,65 @@
   </file>
   <file src="includes/class-redirect-manager.php">
     <PossiblyUnusedMethod>
-      <code><![CDATA[maybe_redirect]]></code>
-      <code><![CDATA[log_404]]></code>
-      <code><![CDATA[register_admin_page]]></code>
-      <code><![CDATA[ajax_save_redirect]]></code>
-      <code><![CDATA[ajax_delete_redirect]]></code>
-      <code><![CDATA[ajax_export_csv]]></code>
-      <code><![CDATA[ajax_import_csv]]></code>
-      <code><![CDATA[ajax_clear_404_log]]></code>
-      <code><![CDATA[render_admin_page]]></code>
-      <code><![CDATA[detect_slug_change]]></code>
+      <code><![CDATA[create_tables]]></code>
+      <code><![CDATA[get_redirect]]></code>
+    </PossiblyUnusedMethod>
+    <UndefinedConstant>
+      <code><![CDATA[ABSPATH]]></code>
+      <code><![CDATA[ARRAY_A]]></code>
+    </UndefinedConstant>
+    <UnusedProperty>
+      <code><![CDATA[$settings]]></code>
+    </UnusedProperty>
+  </file>
+  <file src="includes/class-indexnow.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[clear_log]]></code>
     </PossiblyUnusedMethod>
     <PossiblyUnusedReturnValue>
       <code><![CDATA[array]]></code>
     </PossiblyUnusedReturnValue>
   </file>
-  <file src="includes/class-indexnow.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[ping_on_publish]]></code>
-      <code><![CDATA[ping_on_update]]></code>
-      <code><![CDATA[serve_key_file]]></code>
-    </PossiblyUnusedMethod>
-  </file>
   <file src="includes/class-woocommerce.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[inject_product_schema]]></code>
-      <code><![CDATA[product_breadcrumbs]]></code>
-      <code><![CDATA[add_product_sitemap]]></code>
-      <code><![CDATA[render_product_metabox]]></code>
-      <code><![CDATA[save_product_metabox]]></code>
-    </PossiblyUnusedMethod>
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[array]]></code>
+      <code><![CDATA[array]]></code>
+      <code><![CDATA[array]]></code>
+      <code><![CDATA[bool]]></code>
+    </PossiblyUnusedReturnValue>
+    <UndefinedFunction>
+      <code><![CDATA[get_woocommerce_currency()]]></code>
+    </UndefinedFunction>
+    <UnusedParam>
+      <code><![CDATA[$post_id]]></code>
+    </UnusedParam>
+    <UnusedProperty>
+      <code><![CDATA[$settings]]></code>
+    </UnusedProperty>
   </file>
   <file src="includes/class-local-business.php">
     <PossiblyUnusedMethod>
-      <code><![CDATA[render_schema]]></code>
+      <code><![CDATA[get_location]]></code>
     </PossiblyUnusedMethod>
   </file>
   <file src="includes/class-robots-txt.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[filter_robots_txt]]></code>
-      <code><![CDATA[register_admin_page]]></code>
-      <code><![CDATA[render_admin_page]]></code>
-      <code><![CDATA[ajax_save]]></code>
-      <code><![CDATA[ajax_validate]]></code>
-    </PossiblyUnusedMethod>
+    <PossiblyUnusedParam>
+      <code><![CDATA[$public]]></code>
+    </PossiblyUnusedParam>
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[string]]></code>
+      <code><![CDATA[string]]></code>
+    </PossiblyUnusedReturnValue>
+    <UnusedProperty>
+      <code><![CDATA[$settings]]></code>
+    </UnusedProperty>
   </file>
   <file src="includes/class-audit-log.php">
     <PossiblyUnusedMethod>
-      <code><![CDATA[log_settings_change]]></code>
+      <code><![CDATA[clear_log]]></code>
     </PossiblyUnusedMethod>
+    <UnusedProperty>
+      <code><![CDATA[$settings]]></code>
+    </UnusedProperty>
   </file>
 </files>

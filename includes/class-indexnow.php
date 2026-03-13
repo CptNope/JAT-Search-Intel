@@ -105,7 +105,6 @@ class IndexNow {
 			return [];
 		}
 
-		$host      = wp_parse_url( home_url(), PHP_URL_HOST );
 		$providers = $this->settings['indexnow_providers'] ?? array_keys( self::ENDPOINTS );
 		$results   = [];
 

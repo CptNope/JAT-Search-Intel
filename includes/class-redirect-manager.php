@@ -435,7 +435,7 @@ class Redirect_Manager {
 		$csv = stream_get_contents( $output );
 		fclose( $output );
 
-		return $csv;
+		return $csv !== false ? $csv : '';
 	}
 
 	/**
@@ -670,7 +670,7 @@ class Redirect_Manager {
 						<td>
 							<select id="si-status-code">
 								<?php foreach ( self::STATUS_CODES as $code => $label ) : ?>
-									<option value="<?php echo esc_attr( $code ); ?>"><?php echo esc_html( $label ); ?></option>
+									<option value="<?php echo esc_attr( (string) $code ); ?>"><?php echo esc_html( $label ); ?></option>
 								<?php endforeach; ?>
 							</select>
 						</td>
@@ -714,7 +714,7 @@ class Redirect_Manager {
 		$result = $this->get_404_log( $page, 50 );
 		$items  = $result['items'];
 		$total  = $result['total'];
-		$pages  = (int) ceil( $total / 50 );
+		$total_pages = (int) ceil( $total / 50 );
 		?>
 		<div style="margin-top: 20px;">
 			<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
@@ -752,6 +752,20 @@ class Redirect_Manager {
 				<?php endif; ?>
 				</tbody>
 			</table>
+			<?php if ( $total_pages > 1 ) : ?>
+			<div class="tablenav bottom">
+				<div class="tablenav-pages">
+					<?php
+					echo paginate_links( [
+						'base'    => add_query_arg( 'paged', '%#%' ),
+						'format'  => '',
+						'current' => $page,
+						'total'   => $total_pages,
+					] );
+					?>
+				</div>
+			</div>
+			<?php endif; ?>
 		</div>
 		<?php
 	}
