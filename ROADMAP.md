@@ -1,6 +1,6 @@
 # Search Intel — Development Roadmap
 
-> A version-by-version checklist for building Search Intel from v1.0 through v3.0.
+> A version-by-version checklist for building Search Intel from v1.0 through v4.0.
 
 ---
 
@@ -292,7 +292,7 @@
 - [x] Live: AJAX content analysis returns SEO/AEO/GEO/Readability score rings
 - [x] Bug fix: `speakable_selectors` sanitize crash when array passed to `explode()` (class-admin.php:187)
 - [x] Live: Block theme (Twenty Twenty-Four v1.4 FSE) — wp_head fires, SI comment marker + description + canonical + OG + JSON-LD all render correctly
-- [ ] Live testing: WPML / Polylang string compatibility — deferred (requires third-party premium plugins)
+- [ ] Live testing: WPML / Polylang string compatibility — deferred (integration code ships in v3.0 `class-multilang.php`, live testing requires premium plugins)
 
 ---
 
@@ -331,7 +331,7 @@
 - [x] `wp search-intel export > settings.json` — export settings
 - [x] `wp search-intel import < settings.json` — import settings
 - [x] `wp search-intel scores --format=table` — show all post scores
-- [ ] `wp search-intel migrate --from=yoast` — migrate from another SEO plugin (deferred to v1.4)
+- [x] `wp search-intel migrate --from=yoast` — migrate from another SEO plugin (CLI command added, migration class in v3.0)
 
 ---
 
@@ -341,7 +341,7 @@
 
 - [x] `PluginDocumentSettingPanel` React component
 - [x] `@wordpress/data` store (`search-intel/editor`)
-- [ ] Real-time analysis via `subscribe` to editor changes (deferred to v1.5)
+- [x] Real-time analysis via `subscribe` to editor changes
 - [x] SEO fields in sidebar (title, description, keyword, canonical, robots)
 - [x] Social fields in sidebar (title, description, image)
 - [x] AEO fields in sidebar (direct-answer, FAQ toggle)
@@ -358,20 +358,20 @@
 - [x] `search-intel/answer-box` — direct-answer formatting block
 - [x] `search-intel/citation` — inline source citation block
 - [x] Block previews in editor
-- [ ] Schema output deduplication (block + wp_head don't double-output) (deferred to v1.5)
+- [x] Schema output deduplication (block + wp_head don't double-output)
 
 ### FSE Template Integration
 
 - [x] Breadcrumbs block usable in FSE `header.html` template part
 - [x] TOC block usable in FSE `single.html` template
 - [x] FAQ block usable in FSE templates
-- [ ] Read `theme.json` color palette for admin score ring UI (deferred to v1.5)
+- [x] Read `theme.json` color palette for admin score ring UI
 
 ### Backward Compatibility
 
 - [x] Classic Editor: PHP metabox unchanged
 - [x] Block Editor without sidebar: metabox fallback
-- [ ] Shortcodes in block content: rendered + deprecation notice (deferred to v1.5)
+- [x] Shortcodes in block content: rendered + deprecation notice
 - [x] FSE theme with no blocks inserted: `wp_head` output only
 
 ---
@@ -566,9 +566,9 @@
 
 ### MainWP Integration
 
-- [ ] Child-side reporter class (`class-mainwp-reporter.php`) — hooks into `mainwp_child_extra_execution`
-- [ ] Expose site scores, feature status, post counts via MainWP Child callback API
-- [ ] Remote actions: trigger rescore, regenerate, toggle features from dashboard
+- [x] Child-side reporter class (`class-mainwp-reporter.php`) — hooks into `mainwp_child_extra_execution`
+- [x] Expose site scores, feature status, post counts via MainWP Child callback API
+- [x] Remote actions: trigger rescore, regenerate, toggle features from dashboard
 - [ ] Separate MainWP Dashboard Extension plugin (new repo: `search-intel-mainwp`)
 - [ ] Dashboard extension: network-wide scores grid with per-site drill-down
 - [ ] Dashboard extension: bulk push settings to all child sites
@@ -577,35 +577,35 @@
 
 ### WP-CLI for v3.0 Features
 
-- [ ] `wp search-intel migrate --from=yoast [--dry-run] [--overwrite]` — run migration from CLI
-- [ ] `wp search-intel rbac grant <user_id> <module>` — grant module access
-- [ ] `wp search-intel rbac revoke <user_id> <module>` — revoke module access
-- [ ] `wp search-intel rbac list` — show all user permissions
-- [ ] `wp search-intel multisite push-defaults` — push network defaults to all sites
-- [ ] `wp search-intel multisite report [--format=table|json|csv]` — network score report
-- [ ] `wp search-intel queue status` — show background queue status
-- [ ] `wp search-intel queue process [--batch=10]` — manually process queued jobs
-- [ ] `wp search-intel white-label export > brand.json` — export reseller config
-- [ ] `wp search-intel white-label import < brand.json` — import reseller config
+- [x] `wp search-intel migrate --from=yoast [--dry-run] [--overwrite]` — run migration from CLI
+- [x] `wp search-intel rbac grant <user_id> <module>` — grant module access
+- [x] `wp search-intel rbac revoke <user_id> <module>` — revoke module access
+- [x] `wp search-intel rbac list` — show all user permissions
+- [x] `wp search-intel multisite push-defaults` — push network defaults to all sites
+- [x] `wp search-intel multisite report [--format=table|json|csv]` — network score report
+- [x] `wp search-intel queue status` — show background queue status
+- [x] `wp search-intel queue process [--batch=10]` — manually process queued jobs
+- [x] `wp search-intel white-label export > brand.json` — export reseller config
+- [x] `wp search-intel white-label import < brand.json` — import reseller config
 
 ### Playwright E2E Tests
 
-- [ ] `wp-env` Docker setup with WordPress + MySQL
-- [ ] Playwright config targeting `localhost:8888`
-- [ ] Smoke test: settings page saves and persists
-- [ ] Smoke test: Classic Editor metabox renders all tabs
-- [ ] Smoke test: Bulk Editor table loads and saves
-- [ ] Smoke test: Migration wizard detects sources and runs dry-run
-- [ ] RBAC test: SEO Editor role sees correct UI, author sees view-only
-- [ ] White-Label test: custom name appears in admin menu and plugin list
+- [x] `wp-env` Docker setup with WordPress + MySQL (`.wp-env.json`)
+- [x] Playwright config targeting `localhost:8080`
+- [x] Smoke test: settings page saves and persists (`settings.spec.ts`)
+- [x] Smoke test: Classic Editor metabox renders all tabs (`metabox.spec.ts`)
+- [x] Smoke test: Bulk Editor table loads and saves (`bulk-editor.spec.ts`)
+- [x] Smoke test: Migration wizard detects sources and runs dry-run (`migration.spec.ts`)
+- [x] RBAC test: SEO Editor role sees correct UI, author sees view-only (`rbac.spec.ts`)
+- [x] White-Label test: custom name appears in admin menu and plugin list (`white-label.spec.ts`)
 
 ### Notifications & Scheduled Reports
 
-- [ ] Email digest: weekly site health summary (scores, issues, recommendations)
-- [ ] Score drop alerts: notify when a post's score drops below threshold
-- [ ] Slack webhook integration for alerts
-- [ ] Configurable alert thresholds per module (SEO, AEO, GEO)
-- [ ] Admin dashboard widget: site health at a glance
+- [x] Email digest: weekly site health summary (scores, issues, recommendations)
+- [x] Score drop alerts: notify when a post's score drops below threshold
+- [x] Slack webhook integration for alerts
+- [x] Configurable alert thresholds per module (SEO, AEO, GEO)
+- [x] Admin dashboard widget: site health at a glance
 
 ---
 

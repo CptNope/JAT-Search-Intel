@@ -1309,6 +1309,70 @@ function sanitize_hex_color( string $color ): string {
 	return '';
 }
 
+// ── Post time stubs ──────────────────────────────────────────────────────────
+
+function get_post_modified_time( string $format = 'U', bool $gmt = false, $post = null ): string {
+	$p = null;
+	if ( is_object( $post ) ) {
+		$p = $post;
+	} elseif ( is_int( $post ) ) {
+		$p = get_post( $post );
+	}
+	if ( $p && ! empty( $p->post_modified ) ) {
+		return $p->post_modified;
+	}
+	return gmdate( $format );
+}
+
+// ── Block detection stubs ────────────────────────────────────────────────────
+
+function has_block( string $block_name, $post = null ): bool {
+	if ( is_object( $post ) && ! empty( $post->post_content ) ) {
+		return str_contains( $post->post_content, '<!-- wp:' . $block_name );
+	}
+	if ( is_int( $post ) || is_string( $post ) ) {
+		$p = get_post( (int) $post );
+		if ( $p && ! empty( $p->post_content ) ) {
+			return str_contains( $p->post_content, '<!-- wp:' . $block_name );
+		}
+	}
+	return false;
+}
+
+function has_blocks( $post = null ): bool {
+	if ( is_int( $post ) || is_string( $post ) ) {
+		$p = get_post( (int) $post );
+		$content = $p->post_content ?? '';
+	} elseif ( is_object( $post ) ) {
+		$content = $post->post_content ?? '';
+	} else {
+		$content = '';
+	}
+	return str_contains( $content, '<!-- wp:' );
+}
+
+function _deprecated_function( string $function, string $version, string $replacement = '' ): void {
+	// No-op in tests — the shortcode still renders, this just triggers a notice.
+}
+
+// ── Notifications stubs ──────────────────────────────────────────────────────
+
+function wp_mail( string $to, string $subject, string $message, $headers = '', $attachments = [] ): bool {
+	global $si_test_state;
+	$si_test_state['last_email'] = [
+		'to'      => $to,
+		'subject' => $subject,
+		'message' => $message,
+	];
+	return true;
+}
+
+function is_email( string $email ) {
+	return filter_var( $email, FILTER_VALIDATE_EMAIL ) ? $email : false;
+}
+
+function wp_add_dashboard_widget( string $widget_id, string $widget_name, callable $callback, $control_callback = null, $args = null, $context = 'normal', $priority = 'core' ): void {}
+
 // ── Autoloader ───────────────────────────────────────────────────────────────
 
 spl_autoload_register( function ( string $class ) {

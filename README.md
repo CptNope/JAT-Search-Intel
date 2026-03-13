@@ -6,7 +6,7 @@
 [![License: GPL v2](https://img.shields.io/badge/License-GPLv2-blue.svg)](LICENSE.md)
 [![WordPress: 6.0+](https://img.shields.io/badge/WordPress-6.0%2B-21759b.svg)](https://wordpress.org/)
 [![PHP: 7.4+](https://img.shields.io/badge/PHP-7.4%2B-777bb4.svg)](https://php.net/)
-[![Release: v3.0.0](https://img.shields.io/badge/Release-v3.0.0-brightgreen)](https://github.com/CptNope/Search-Intel/releases/tag/v3.0.0)
+[![Release: v3.1.0](https://img.shields.io/badge/Release-v3.1.0-brightgreen)](https://github.com/CptNope/Search-Intel/releases/tag/v3.1.0)
 
 **[Roadmap](ROADMAP.md)** · **[Changelog](CHANGELOG.md)** · **[Contributing](CONTRIBUTING.md)** · **[License](LICENSE.md)**
 
@@ -119,6 +119,24 @@ graph TD
     CORE --> LOCALBIZ["Local Business<br/><i>v2.0+ Schema</i>"]
     CORE --> ROBOTSTXT["Robots.txt<br/><i>v2.0+ Editor</i>"]
     CORE --> AUDITLOG["Audit Log<br/><i>v2.0+ Tracking</i>"]
+    CORE --> SCHEMATYPES["Schema Types<br/><i>v2.1+ Video, Recipe, etc.</i>"]
+    CORE --> QADETECT["Q&A Detector<br/><i>v2.1+ Pattern Engine</i>"]
+    CORE --> FAQGEN["FAQ Generator<br/><i>v2.1+ AI-Assisted</i>"]
+    CORE --> LINKCHECK["Link Checker<br/><i>v2.0.1+ Broken Links</i>"]
+    CORE --> INTLINKER["Internal Linker<br/><i>v2.0.1+ Suggestions</i>"]
+    CORE --> CSPHEADERS["CSP Headers<br/><i>v2.0.1+ Security</i>"]
+    CORE --> SRI["SRI<br/><i>v2.0.1+ Integrity</i>"]
+    CORE --> VISDASH["Visibility Dashboard<br/><i>v2.5+ AI Visibility</i>"]
+    CORE --> CITGRAPH["Citation Graph<br/><i>v2.5+ Link Topology</i>"]
+    CORE --> AUTHMAP["Authority Map<br/><i>v2.5+ Topic Authority</i>"]
+    CORE --> MULTISITE["Multisite<br/><i>v3.0+ Network Settings</i>"]
+    CORE --> MIGRATION["Migration<br/><i>v3.0+ SEO Plugin Import</i>"]
+    CORE --> RBAC["RBAC<br/><i>v3.0+ Roles &amp; Caps</i>"]
+    CORE --> MULTILANG["Multilang<br/><i>v3.0+ WPML/Polylang</i>"]
+    CORE --> WHITELABEL["White-Label<br/><i>v3.0+ Reseller Branding</i>"]
+    CORE --> SCALE["Scale<br/><i>v3.0+ Queue &amp; Cache</i>"]
+    CORE --> MAINWP["MainWP Reporter<br/><i>v3.1+ Child Sync</i>"]
+    CORE --> NOTIFY["Notifications<br/><i>v3.1+ Alerts &amp; Digest</i>"]
 
     TITLE --> TVAR["Variable Resolver"]
     TITLE --> TCTX["Per-Context Templates"]
@@ -239,6 +257,24 @@ classDiagram
         +local_business : Local_Business
         +robots_txt : Robots_Txt
         +audit_log : Audit_Log
+        +schema_types : Schema_Types
+        +qa_detector : QA_Detector
+        +faq_generator : FAQ_Generator
+        +link_checker : Link_Checker
+        +internal_linker : Internal_Linker
+        +csp_headers : CSP_Headers
+        +sri : SRI
+        +visibility_dashboard : Visibility_Dashboard
+        +citation_graph : Citation_Graph
+        +authority_map : Authority_Map
+        +multisite : Multisite
+        +migration : Migration
+        +rbac : RBAC
+        +multilang : Multilang
+        +white_label : White_Label
+        +scale : Scale
+        +mainwp_reporter : MainWP_Reporter
+        +notifications : Notifications
         +get_instance() Core
         +get_settings() array
         +get_default_settings() array
@@ -436,9 +472,84 @@ classDiagram
     Core --> Local_Business
     Core --> Robots_Txt
     Core --> Audit_Log
+    Core --> Schema_Types
+    Core --> QA_Detector
+    Core --> FAQ_Generator
+    Core --> Link_Checker
+    Core --> Internal_Linker
+    Core --> CSP_Headers
+    Core --> SRI
+    Core --> Visibility_Dashboard
+    Core --> Citation_Graph
+    Core --> Authority_Map
+    Core --> Multisite
+    Core --> Migration
+    Core --> RBAC
+    Core --> Multilang
+    Core --> White_Label
+    Core --> Scale
+    Core --> MainWP_Reporter
+    Core --> Notifications
     Admin --> Core
     REST_Api --> Core
     Bulk_Tools --> Core
+
+    class MainWP_Reporter {
+        -settings : array
+        +is_mainwp_active() bool
+        +inject_sync_data(data) array
+        +get_site_summary() array
+        +get_aggregate_scores() array
+        +handle_callback(action, data) array
+    }
+
+    class Notifications {
+        -settings : array
+        +schedule_events() void
+        +get_thresholds() array
+        +snapshot_post_scores(post_id, scores) void
+        +check_score_drops() void
+        +send_weekly_digest() void
+        +send_slack_alert(message) bool
+        +register_dashboard_widget() void
+        +build_digest_summary() array
+        +get_notification_email() string
+    }
+
+    class Migration {
+        -settings : array
+        +detect_sources() array
+        +migrate(source, options) array
+        +dry_run(source) array
+        +render_admin_page() void
+    }
+
+    class RBAC {
+        -settings : array
+        +ensure_role_exists() void
+        +check_module_access(user_id, module) bool
+        +grant_module(user_id, module) void
+        +revoke_module(user_id, module) void
+        +get_permissions_summary() array
+    }
+
+    class Scale {
+        -settings : array
+        +enqueue_job(type, post_id) void
+        +process_queue() void
+        +cache_get(key) mixed
+        +cache_set(key, value) bool
+        +render_admin_page() void
+    }
+
+    class White_Label {
+        -settings : array
+        +get_config() array
+        +filter_plugin_meta(plugins) array
+        +get_custom_name() string
+        +export_reseller_config() array
+        +import_reseller_config(config) bool
+    }
 ```
 
 ---
@@ -884,6 +995,28 @@ wp search-intel import settings.json --mode=overwrite
 wp search-intel scores
 wp search-intel scores --format=csv --limit=100
 wp search-intel scores --orderby=seo
+
+# Migration (v3.0+)
+wp search-intel migrate --from=yoast             # Migrate from Yoast SEO
+wp search-intel migrate --from=rankmath --dry-run # Preview migration
+wp search-intel migrate --from=aioseo --overwrite # Overwrite existing data
+
+# RBAC (v3.0+)
+wp search-intel rbac grant 5 seo                 # Grant SEO module to user 5
+wp search-intel rbac revoke 5 geo                # Revoke GEO module from user 5
+wp search-intel rbac list                        # List all user permissions
+
+# Multisite (v3.0+)
+wp search-intel multisite push-defaults          # Push network defaults to all sites
+wp search-intel multisite report --format=table  # Network-wide score report
+
+# Background Queue (v3.0+)
+wp search-intel queue status                     # Show queue status
+wp search-intel queue process --batch=10         # Manually process queued jobs
+
+# White-Label (v3.0+)
+wp search-intel white-label export > brand.json  # Export reseller config
+wp search-intel white-label import < brand.json  # Import reseller config
 ```
 
 ---
@@ -1040,8 +1173,33 @@ search-intel/
 │   ├── class-admin.php           # Settings, metaboxes, user fields, Bulk Tools page
 │   ├── class-rest-api.php        # REST API controller (search-intel/v1 namespace)
 │   ├── class-bulk-tools.php      # Bulk rescore, regenerate, export/import (AJAX)
-│   ├── class-cli.php             # WP-CLI commands (analyze, rescore, scores, etc.)
-│   └── class-blocks.php          # Block editor: sidebar, custom blocks, meta registration
+│   ├── class-cli.php             # WP-CLI commands (analyze, rescore, scores, rbac, multisite, queue, white-label)
+│   ├── class-blocks.php          # Block editor: sidebar, custom blocks, meta registration
+│   ├── class-privacy.php         # GDPR: data exporter, eraser, privacy policy (v1.5+)
+│   ├── class-redirect-manager.php # 301/302/307/410 redirects, 404 log, CSV (v2.0+)
+│   ├── class-indexnow.php        # IndexNow ping on publish (Bing, Yandex, Naver) (v2.0+)
+│   ├── class-woocommerce.php     # Product schema, offers, breadcrumbs (v2.0+)
+│   ├── class-local-business.php  # LocalBusiness schema, multi-location (v2.0+)
+│   ├── class-robots-txt.php      # Visual robots.txt editor with validation (v2.0+)
+│   ├── class-audit-log.php       # Settings change tracking with diffs (v2.0+)
+│   ├── class-link-checker.php    # Broken link scanner via WP-Cron (v2.0.1+)
+│   ├── class-internal-linker.php # Internal linking suggestions (v2.0.1+)
+│   ├── class-csp-headers.php     # Content Security Policy headers (v2.0.1+)
+│   ├── class-sri.php             # Subresource Integrity hashes (v2.0.1+)
+│   ├── class-schema-types.php    # Video, Recipe, Event, Review, etc. (v2.1+)
+│   ├── class-qa-detector.php     # Q&A pattern detection engine (v2.1+)
+│   ├── class-faq-generator.php   # AI-assisted FAQ generation (v2.1+)
+│   ├── class-visibility-dashboard.php # AI visibility health score (v2.5+)
+│   ├── class-citation-graph.php  # Internal link graph & topic clusters (v2.5+)
+│   ├── class-authority-map.php   # Topical authority scoring (v2.5+)
+│   ├── class-multisite.php       # Network defaults & per-site overrides (v3.0+)
+│   ├── class-migration.php       # SEO plugin migration engine (v3.0+)
+│   ├── class-rbac.php            # Role-based access control (v3.0+)
+│   ├── class-multilang.php       # WPML/Polylang integration (v3.0+)
+│   ├── class-white-label.php     # Reseller branding & config (v3.0+)
+│   ├── class-scale.php           # Object cache, queue, bulk editor (v3.0+)
+│   ├── class-mainwp-reporter.php # MainWP child-side reporter (v3.1+)
+│   └── class-notifications.php   # Email digest, score alerts, Slack, widget (v3.1+)
 │
 ├── src/                           # Block editor source (compiled to build/)
 │   ├── store/
@@ -1108,9 +1266,9 @@ Search Intel has a comprehensive automated test suite and CI pipeline.
 
 | Suite | Count | Framework |
 |-------|-------|-----------|
-| Unit tests | 372 tests, 887 assertions | PHPUnit 9.6 |
+| Unit tests | 690 tests, 1,615 assertions | PHPUnit 9.6 |
 | Integration tests | 125 tests, 202 assertions | PHPUnit 9.6 |
-| E2E tests | 40 tests | Playwright (Chromium) |
+| E2E tests | 58 tests (51 pass, 7 skip) | Playwright (Chromium) |
 
 ### Static Analysis & Linting
 

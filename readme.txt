@@ -4,7 +4,7 @@ Tags: seo, aeo, geo, schema, structured-data, ai-optimization, llms, featured-sn
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 3.0.0
+Stable tag: 3.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -132,6 +132,44 @@ No. Search Intel outputs lightweight meta tags and JSON-LD schema directly in th
 
 == Changelog ==
 
+= 3.1.0 =
+* MainWP Child Reporter: expose site scores, feature status, and remote actions via MainWP callback API
+* Notifications: weekly email digest with score averages, worst posts, and recommendations
+* Notifications: score drop alerts when posts fall below configurable thresholds (SEO/AEO/GEO)
+* Notifications: Slack webhook integration for digests and score drop alerts
+* Notifications: admin dashboard widget with site health at a glance
+* WP-CLI: rbac grant/revoke/list, multisite push-defaults/report, queue status/process, white-label export/import
+* Playwright E2E: bulk editor, migration, RBAC, white-label smoke tests (58 total)
+* 690 unit tests, 1,615 assertions
+
+= 3.0.0 =
+* Multisite: network defaults, per-site overrides, centralized reporting, auto-apply to new sites
+* Migration: Yoast, Rank Math, AIOSEO, SEOPress, The SEO Framework with dry-run and merge modes
+* RBAC: SEO Editor role, per-module permissions, view-only mode, settings lock
+* Multi-Language: WPML and Polylang integration, auto hreflang, per-language meta and sitemap
+* White-Label: custom branding, plugin meta filter, reseller config export/import
+* Scale: object caching, background queue, bulk editor table, CDN-friendly assets, headless REST API
+* 665 unit tests, 1,533 assertions
+
+= 2.5.0 =
+* AI Visibility Dashboard: site-wide GEO health score, GSC/Bing API, AI referral tracking, daily trends
+* Citation Graph: internal link graph, topic clusters, pillar pages, orphaned content detection
+* Authority Map: per-topic authority score, content gaps, multimodal analysis
+* 574 unit tests, 1,381 assertions
+
+= 2.1.0 =
+* Schema Types: VideoObject, Recipe, Event, Review, Course, SoftwareApplication, JobPosting
+* Q&A Detector: heading patterns, bold Q/A, definitions, steps, comparisons
+* FAQ Generator: local pattern matching + optional OpenAI API, editable suggestions
+* 509 unit tests, 1,153 assertions
+
+= 2.0.1 =
+* Broken Link Checker: background HTTP HEAD scan, admin page with results
+* Internal Linking Suggestions: keyword extraction, taxonomy matching, relevance scoring
+* CSP Headers: Content Security Policy on admin pages and REST endpoints
+* SRI: SHA-256 integrity hashes for plugin CSS/JS assets
+* 437 unit tests, 987 assertions
+
 = 2.0.0 =
 * Redirect Manager: 301/302/307/410 redirects with exact, prefix, regex matching
 * Redirect Manager: Admin table, hit counter, 404 log, CSV import/export, slug change detection
@@ -193,6 +231,21 @@ No. Search Intel outputs lightweight meta tags and JSON-LD schema directly in th
 * User profile E-E-A-T fields
 
 == Upgrade Notice ==
+
+= 3.1.0 =
+New: MainWP child-side reporter, Notifications system (email digest, score drop alerts, Slack, dashboard widget), 10 new WP-CLI commands, 58 Playwright E2E tests.
+
+= 3.0.0 =
+Major: Multisite support, SEO plugin migration (5 sources), RBAC with SEO Editor role, WPML/Polylang integration, white-label branding, Scale (object cache, background queue, bulk editor).
+
+= 2.5.0 =
+New: AI Visibility Dashboard (GEO health score, GSC/Bing API, AI referral tracking), Citation Graph (link topology, topic clusters), Authority Map (topical authority scoring).
+
+= 2.1.0 =
+New: 7 additional schema types (Video, Recipe, Event, Review, Course, Software, JobPosting), Q&A Detection Engine, AI-assisted FAQ Generator.
+
+= 2.0.1 =
+New: Broken Link Checker, Internal Linking Suggestions, Content Security Policy headers, Subresource Integrity.
 
 = 2.0.0 =
 Major: Redirect Manager (301/302/307/410, 404 log, CSV), IndexNow (Bing/Yandex/Naver), WooCommerce product schema, Local Business schema, robots.txt editor, audit log.

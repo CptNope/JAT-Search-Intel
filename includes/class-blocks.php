@@ -104,6 +104,46 @@ class Blocks {
 			[],
 			$asset['version']
 		);
+
+		// Pass theme.json color palette to JS for score ring theming.
+		wp_localize_script( 'search-intel-sidebar', 'searchIntelTheme', [
+			'colors' => $this->get_theme_json_colors(),
+		] );
+	}
+
+	/**
+	 * Read the active theme's theme.json color palette.
+	 *
+	 * Returns an associative array of color slugs → hex values so the
+	 * sidebar score rings can adapt to the theme's design tokens.
+	 *
+	 * @return array<string,string> e.g. ['primary' => '#1e40af', 'secondary' => '#9333ea']
+	 */
+	private function get_theme_json_colors(): array {
+		if ( ! class_exists( 'WP_Theme_JSON_Resolver' ) ) {
+			return [];
+		}
+
+		$theme_json = \WP_Theme_JSON_Resolver::get_merged_data();
+		if ( ! method_exists( $theme_json, 'get_settings' ) ) {
+			return [];
+		}
+
+		$settings = $theme_json->get_settings();
+		$palette  = $settings['color']['palette']['theme'] ?? [];
+
+		if ( empty( $palette ) ) {
+			return [];
+		}
+
+		$colors = [];
+		foreach ( $palette as $entry ) {
+			if ( ! empty( $entry['slug'] ) && ! empty( $entry['color'] ) ) {
+				$colors[ $entry['slug'] ] = $entry['color'];
+			}
+		}
+
+		return $colors;
 	}
 
 	/**

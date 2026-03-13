@@ -17,6 +17,15 @@ if ( ! defined( 'ABSPATH' ) ) {
  *     wp search-intel export > settings.json
  *     wp search-intel import < settings.json
  *     wp search-intel scores --format=table
+ *     wp search-intel migrate --from=yoast --dry-run
+ *     wp search-intel rbac grant 5 seo
+ *     wp search-intel rbac list
+ *     wp search-intel multisite push-defaults
+ *     wp search-intel multisite report --format=table
+ *     wp search-intel queue status
+ *     wp search-intel queue process --batch=10
+ *     wp search-intel white-label export > brand.json
+ *     wp search-intel white-label import brand.json
  *
  * @since 1.3.0
  */
@@ -514,5 +523,427 @@ class CLI extends \WP_CLI_Command {
         }
 
         \WP_CLI\Utils\format_items( $format, $rows, [ 'ID', 'Title', 'SEO', 'AEO', 'GEO', 'Readability', 'Keyword' ] );
+    }
+
+    /**
+     * Migrate SEO data from another plugin.
+     *
+     * ## OPTIONS
+     *
+     * --from=<source>
+     * : Source plugin to migrate from.
+     * ---
+     * options:
+     *   - yoast
+     *   - rankmath
+     *   - aioseo
+     *   - seopress
+     *   - seoframework
+     * ---
+     *
+     * [--dry-run]
+     * : Preview what will be migrated without making changes.
+     *
+     * [--overwrite]
+     * : Overwrite existing Search Intel data (default is merge).
+     *
+     * [--post_type=<type>]
+     * : Comma-separated post types to migrate.
+     * ---
+     * default: post,page
+     * ---
+     *
+     * ## EXAMPLES
+     *
+     *     wp search-intel migrate --from=yoast
+     *     wp search-intel migrate --from=yoast --dry-run
+     *     wp search-intel migrate --from=rankmath --overwrite
+     *
+     * @param array $args       Positional arguments.
+     * @param array $assoc_args Associative arguments.
+     */
+    public function migrate( $args, $assoc_args ) { // phpcs:ignore VariableAnalysis -- $args required by WP-CLI.
+        unset( $args );
+        $source    = $assoc_args['from'] ?? '';
+        $dry_run   = \WP_CLI\Utils\get_flag_value( $assoc_args, 'dry-run', false );
+        $overwrite = \WP_CLI\Utils\get_flag_value( $assoc_args, 'overwrite', false );
+
+        if ( empty( $source ) ) {
+            \WP_CLI::error( 'Please specify --from=<source>. Options: yoast, rankmath, aioseo, seopress, seoframework' );
+        }
+
+        $core      = Core::get_instance();
+        $migration = $core->migration;
+
+        // Verify source is detected.
+        $sources = $migration->detect_sources();
+        $found   = false;
+        foreach ( $sources as $s ) {
+            if ( strtolower( $s['slug'] ) === strtolower( $source ) ) {
+                $found = true;
+                break;
+            }
+        }
+
+        if ( ! $found ) {
+            \WP_CLI::error( "Source plugin '{$source}' not detected. Run without --from to see available sources, or ensure the plugin's data exists in the database." );
+        }
+
+        // Dry run — show preview.
+        if ( $dry_run ) {
+            \WP_CLI::log( "Dry-run migration from {$source}..." );
+            $preview = $migration->dry_run( $source );
+
+            if ( empty( $preview ) ) {
+                \WP_CLI::warning( 'No data found to migrate.' );
+                return;
+            }
+
+            $rows = [];
+            foreach ( $preview as $item ) {
+                $rows[] = [
+                    'Post ID' => $item['post_id'] ?? '—',
+                    'Field'   => $item['field'] ?? '—',
+                    'Source'  => mb_strimwidth( (string) ( $item['source_value'] ?? '' ), 0, 60, '...' ),
+                    'Current' => mb_strimwidth( (string) ( $item['current_value'] ?? '' ), 0, 60, '...' ),
+                    'Action'  => $item['action'] ?? 'import',
+                ];
+            }
+
+            \WP_CLI\Utils\format_items( 'table', $rows, [ 'Post ID', 'Field', 'Source', 'Current', 'Action' ] );
+            \WP_CLI::log( sprintf( '%d field(s) would be migrated.', count( $rows ) ) );
+            return;
+        }
+
+        // Full migration.
+        \WP_CLI::log( sprintf( 'Migrating from %s (%s mode)...', $source, $overwrite ? 'overwrite' : 'merge' ) );
+        $result = $migration->migrate( $source, $overwrite );
+
+        if ( empty( $result ) || empty( $result['migrated'] ) ) {
+            \WP_CLI::warning( 'No data was migrated.' );
+            return;
+        }
+
+        \WP_CLI::success( sprintf(
+            'Migration complete: %d field(s) migrated from %s.',
+            $result['migrated'],
+            $source
+        ) );
+
+        if ( ! empty( $result['redirects'] ) ) {
+            \WP_CLI::log( sprintf( '%d redirect(s) imported.', $result['redirects'] ) );
+        }
+
+        if ( ! empty( $result['skipped'] ) ) {
+            \WP_CLI::log( sprintf( '%d field(s) skipped (existing data, merge mode).', $result['skipped'] ) );
+        }
+    }
+
+    /**
+     * Manage role-based access control.
+     *
+     * ## OPTIONS
+     *
+     * <action>
+     * : Action to perform: 'grant', 'revoke', or 'list'.
+     *
+     * [<user_id>]
+     * : User ID (required for grant/revoke).
+     *
+     * [<module>]
+     * : Module key: seo, aeo, geo, schema, sitemap, redirects, analytics (required for grant/revoke).
+     *
+     * ## EXAMPLES
+     *
+     *     wp search-intel rbac list
+     *     wp search-intel rbac grant 5 seo
+     *     wp search-intel rbac revoke 5 aeo
+     *
+     * @param array $args       Positional arguments.
+     * @param array $assoc_args Associative arguments.
+     */
+    public function rbac( $args, $assoc_args ) {
+        unset( $assoc_args );
+        $action = $args[0] ?? '';
+        $core   = Core::get_instance();
+        $rbac   = $core->rbac;
+
+        if ( 'list' === $action ) {
+            $summary = $rbac->get_permissions_summary();
+
+            if ( empty( $summary ) ) {
+                \WP_CLI::log( 'No users with custom Search Intel permissions found.' );
+                return;
+            }
+
+            $rows = [];
+            foreach ( $summary as $entry ) {
+                $rows[] = [
+                    'User ID'  => $entry['user_id'] ?? 0,
+                    'Login'    => $entry['login'] ?? '—',
+                    'Role'     => $entry['role'] ?? '—',
+                    'Modules'  => implode( ', ', $entry['modules'] ?? [] ),
+                    'View Only'=> ! empty( $entry['view_only'] ) ? 'Yes' : 'No',
+                ];
+            }
+
+            \WP_CLI\Utils\format_items( 'table', $rows, [ 'User ID', 'Login', 'Role', 'Modules', 'View Only' ] );
+            return;
+        }
+
+        if ( 'grant' === $action || 'revoke' === $action ) {
+            $user_id = absint( $args[1] ?? 0 );
+            $module  = $args[2] ?? '';
+
+            if ( $user_id <= 0 ) {
+                \WP_CLI::error( 'Please provide a valid user ID.' );
+            }
+            if ( empty( $module ) ) {
+                \WP_CLI::error( 'Please provide a module key (seo, aeo, geo, schema, sitemap, redirects, analytics).' );
+            }
+
+            if ( 'grant' === $action ) {
+                $ok = $rbac->grant_module( $user_id, $module );
+                if ( $ok ) {
+                    \WP_CLI::success( "Granted '{$module}' to user {$user_id}." );
+                } else {
+                    \WP_CLI::error( "Failed to grant '{$module}'. Check module key and user ID." );
+                }
+            } else {
+                $ok = $rbac->revoke_module( $user_id, $module );
+                if ( $ok ) {
+                    \WP_CLI::success( "Revoked '{$module}' from user {$user_id}." );
+                } else {
+                    \WP_CLI::error( "Failed to revoke '{$module}'. Check module key and user ID." );
+                }
+            }
+            return;
+        }
+
+        \WP_CLI::error( "Unknown action '{$action}'. Use 'grant', 'revoke', or 'list'." );
+    }
+
+    /**
+     * Manage multisite network settings and reports.
+     *
+     * ## OPTIONS
+     *
+     * <action>
+     * : Action to perform: 'push-defaults' or 'report'.
+     *
+     * [--format=<format>]
+     * : Output format for report.
+     * ---
+     * default: table
+     * options:
+     *   - table
+     *   - csv
+     *   - json
+     *   - yaml
+     * ---
+     *
+     * ## EXAMPLES
+     *
+     *     wp search-intel multisite push-defaults
+     *     wp search-intel multisite report
+     *     wp search-intel multisite report --format=json
+     *
+     * @param array $args       Positional arguments.
+     * @param array $assoc_args Associative arguments.
+     */
+    public function multisite( $args, $assoc_args ) {
+        if ( ! is_multisite() ) {
+            \WP_CLI::error( 'This command requires a WordPress multisite installation.' );
+        }
+
+        $action = $args[0] ?? '';
+        $core   = Core::get_instance();
+        $ms     = $core->multisite;
+
+        if ( 'push-defaults' === $action ) {
+            $defaults = $ms->get_network_defaults();
+
+            if ( empty( $defaults ) ) {
+                \WP_CLI::error( 'No network defaults configured. Set them in Network Admin > Search Intel first.' );
+            }
+
+            $sites = get_sites( [ 'number' => 0 ] );
+            $count = 0;
+
+            foreach ( $sites as $site ) {
+                switch_to_blog( (int) $site->blog_id );
+                update_option( 'search_intel_settings', $defaults );
+                restore_current_blog();
+                $count++;
+            }
+
+            \WP_CLI::success( sprintf( 'Pushed network defaults to %d site(s).', $count ) );
+            return;
+        }
+
+        if ( 'report' === $action ) {
+            $format = $assoc_args['format'] ?? 'table';
+            $report = $ms->get_network_report();
+
+            if ( empty( $report ) ) {
+                \WP_CLI::warning( 'No sites found in the network.' );
+                return;
+            }
+
+            $rows = [];
+            foreach ( $report as $site ) {
+                $rows[] = [
+                    'Blog ID'     => $site['blog_id'] ?? 0,
+                    'URL'         => $site['url'] ?? '—',
+                    'Posts'       => $site['post_count'] ?? 0,
+                    'Avg SEO'     => $site['avg_seo'] ?? 0,
+                    'Avg AEO'     => $site['avg_aeo'] ?? 0,
+                    'Avg GEO'     => $site['avg_geo'] ?? 0,
+                    'Active'      => ! empty( $site['active'] ) ? 'Yes' : 'No',
+                ];
+            }
+
+            \WP_CLI\Utils\format_items( $format, $rows, [ 'Blog ID', 'URL', 'Posts', 'Avg SEO', 'Avg AEO', 'Avg GEO', 'Active' ] );
+            return;
+        }
+
+        \WP_CLI::error( "Unknown action '{$action}'. Use 'push-defaults' or 'report'." );
+    }
+
+    /**
+     * Manage the background processing queue.
+     *
+     * ## OPTIONS
+     *
+     * <action>
+     * : Action to perform: 'status' or 'process'.
+     *
+     * [--batch=<size>]
+     * : Number of jobs to process.
+     * ---
+     * default: 10
+     * ---
+     *
+     * ## EXAMPLES
+     *
+     *     wp search-intel queue status
+     *     wp search-intel queue process
+     *     wp search-intel queue process --batch=25
+     *
+     * @param array $args       Positional arguments.
+     * @param array $assoc_args Associative arguments.
+     */
+    public function queue( $args, $assoc_args ) {
+        $action = $args[0] ?? '';
+        $core   = Core::get_instance();
+        $scale  = $core->scale;
+
+        if ( 'status' === $action ) {
+            $queue = $scale->get_queue();
+
+            if ( empty( $queue ) ) {
+                \WP_CLI::log( 'Queue is empty.' );
+                return;
+            }
+
+            $pending    = 0;
+            $processing = 0;
+            $completed  = 0;
+            $failed     = 0;
+
+            foreach ( $queue as $job ) {
+                switch ( $job['status'] ?? '' ) {
+                    case 'pending':
+                        $pending++;
+                        break;
+                    case 'processing':
+                        $processing++;
+                        break;
+                    case 'completed':
+                        $completed++;
+                        break;
+                    case 'failed':
+                        $failed++;
+                        break;
+                }
+            }
+
+            $rows = [
+                [ 'Status' => 'Pending',    'Count' => $pending ],
+                [ 'Status' => 'Processing', 'Count' => $processing ],
+                [ 'Status' => 'Completed',  'Count' => $completed ],
+                [ 'Status' => 'Failed',     'Count' => $failed ],
+                [ 'Status' => 'Total',      'Count' => count( $queue ) ],
+            ];
+
+            \WP_CLI\Utils\format_items( 'table', $rows, [ 'Status', 'Count' ] );
+            return;
+        }
+
+        if ( 'process' === $action ) {
+            $batch = absint( $assoc_args['batch'] ?? 10 );
+
+            \WP_CLI::log( "Processing up to {$batch} queued jobs..." );
+            $processed = $scale->process_queue( $batch );
+
+            if ( $processed > 0 ) {
+                \WP_CLI::success( sprintf( 'Processed %d job(s).', $processed ) );
+            } else {
+                \WP_CLI::log( 'No pending jobs to process.' );
+            }
+            return;
+        }
+
+        \WP_CLI::error( "Unknown action '{$action}'. Use 'status' or 'process'." );
+    }
+
+    /**
+     * Export white-label / reseller configuration as JSON.
+     *
+     * ## EXAMPLES
+     *
+     *     wp search-intel white-label export
+     *     wp search-intel white-label export > brand.json
+     *     wp search-intel white-label import brand.json
+     *
+     * @subcommand white-label
+     * @param array $args       Positional arguments.
+     * @param array $assoc_args Associative arguments.
+     */
+    public function white_label( $args, $assoc_args ) {
+        unset( $assoc_args );
+        $action = $args[0] ?? '';
+        $core   = Core::get_instance();
+        $wl     = $core->white_label;
+
+        if ( 'export' === $action ) {
+            $config = $wl->export_reseller_config();
+            echo wp_json_encode( $config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) . "\n";
+            return;
+        }
+
+        if ( 'import' === $action ) {
+            $file = $args[1] ?? '';
+            if ( empty( $file ) || ! file_exists( $file ) ) {
+                \WP_CLI::error( 'Please provide a valid path to a brand.json file.' );
+            }
+
+            $json = file_get_contents( $file );
+            $data = json_decode( $json, true );
+
+            if ( ! is_array( $data ) ) {
+                \WP_CLI::error( 'Invalid JSON in brand config file.' );
+            }
+
+            $ok = $wl->import_reseller_config( $data );
+            if ( $ok ) {
+                \WP_CLI::success( 'White-label configuration imported.' );
+            } else {
+                \WP_CLI::error( 'Failed to import white-label config. Check file format.' );
+            }
+            return;
+        }
+
+        \WP_CLI::error( "Unknown action '{$action}'. Use 'export' or 'import'." );
     }
 }

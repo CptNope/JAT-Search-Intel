@@ -29,6 +29,10 @@ class Schema_Manager {
     public function render_schema(): void {
         $graphs = [];
 
+        // Detect which schema types are already rendered by Gutenberg blocks
+        // to avoid duplicate output (block microdata + wp_head JSON-LD).
+        $block_schemas = $this->detect_block_schemas();
+
         // Organization / Person (site-wide)
         $graphs[] = $this->get_knowledge_graph();
 
@@ -37,8 +41,8 @@ class Schema_Manager {
             $graphs[] = $this->get_website_schema();
         }
 
-        // Breadcrumbs
-        if ( ! empty( $this->settings['enable_breadcrumbs'] ) && ! is_front_page() ) {
+        // Breadcrumbs — skip if breadcrumbs block is in the content.
+        if ( ! empty( $this->settings['enable_breadcrumbs'] ) && ! is_front_page() && ! in_array( 'BreadcrumbList', $block_schemas, true ) ) {
             $breadcrumbs = $this->get_breadcrumbs_schema();
             if ( $breadcrumbs ) {
                 $graphs[] = $breadcrumbs;
@@ -65,6 +69,45 @@ class Schema_Manager {
             "\n" . '<script type="application/ld+json">%s</script>' . "\n",
             wp_json_encode( $output, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT )
         );
+    }
+
+    /**
+     * Detect Search Intel blocks in the current post content that already output schema.
+     *
+     * Returns an array of schema type names that blocks handle via microdata,
+     * so wp_head JSON-LD can skip those types to prevent duplication.
+     *
+     * @return array<string> Schema type names (e.g. 'FAQPage', 'HowTo', 'BreadcrumbList').
+     */
+    private function detect_block_schemas(): array {
+        if ( ! is_singular() ) {
+            return [];
+        }
+
+        $post = get_post();
+        if ( ! $post || empty( $post->post_content ) ) {
+            return [];
+        }
+
+        if ( ! function_exists( 'has_block' ) ) {
+            return [];
+        }
+
+        $schemas = [];
+
+        if ( has_block( 'search-intel/faq', $post ) ) {
+            $schemas[] = 'FAQPage';
+        }
+
+        if ( has_block( 'search-intel/howto', $post ) ) {
+            $schemas[] = 'HowTo';
+        }
+
+        if ( has_block( 'search-intel/breadcrumbs', $post ) ) {
+            $schemas[] = 'BreadcrumbList';
+        }
+
+        return $schemas;
     }
 
     /**

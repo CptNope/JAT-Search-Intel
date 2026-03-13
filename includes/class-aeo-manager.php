@@ -412,6 +412,15 @@ class AEO_Manager {
      * Or nested: [search_intel_faq]Q: What is SEO?\nA: SEO stands for...[/search_intel_faq]
      */
     public function faq_shortcode( $atts, $content = null ): string {
+        // Deprecation notice when shortcode is used in block editor content.
+        if ( function_exists( 'has_blocks' ) && has_blocks( get_the_ID() ) ) {
+            _deprecated_function(
+                '[search_intel_faq] shortcode',
+                '1.4.0',
+                'the search-intel/faq Gutenberg block'
+            );
+        }
+
         $atts = shortcode_atts( [
             'question' => '',
             'answer'   => '',
@@ -451,6 +460,15 @@ class AEO_Manager {
      *        [/search_intel_howto]
      */
     public function howto_shortcode( $atts, $content = null ): string {
+        // Deprecation notice when shortcode is used in block editor content.
+        if ( function_exists( 'has_blocks' ) && has_blocks( get_the_ID() ) ) {
+            _deprecated_function(
+                '[search_intel_howto] shortcode',
+                '1.4.0',
+                'the search-intel/howto Gutenberg block'
+            );
+        }
+
         $atts = shortcode_atts( [
             'name' => '',
             'time' => '',
