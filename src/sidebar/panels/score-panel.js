@@ -60,15 +60,23 @@ function ScoreRing( { label, score, color } ) {
 
 /**
  * Get color for score value.
+ *
+ * Uses theme.json palette colors when available (passed via wp_localize_script),
+ * falling back to WordPress admin defaults.
  */
 function getScoreColor( score ) {
+	const theme = window.searchIntelTheme?.colors || {};
+	const good    = theme.primary   || '#00a32a';
+	const warning = theme.secondary || '#dba617';
+	const poor    = theme.tertiary  || '#cc1818';
+
 	if ( score >= 80 ) {
-		return '#00a32a';
+		return good;
 	}
 	if ( score >= 50 ) {
-		return '#dba617';
+		return warning;
 	}
-	return '#cc1818';
+	return poor;
 }
 
 export default function ScorePanel() {

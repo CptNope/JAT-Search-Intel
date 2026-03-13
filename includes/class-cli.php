@@ -515,4 +515,118 @@ class CLI extends \WP_CLI_Command {
 
         \WP_CLI\Utils\format_items( $format, $rows, [ 'ID', 'Title', 'SEO', 'AEO', 'GEO', 'Readability', 'Keyword' ] );
     }
+
+    /**
+     * Migrate SEO data from another plugin.
+     *
+     * ## OPTIONS
+     *
+     * --from=<source>
+     * : Source plugin to migrate from.
+     * ---
+     * options:
+     *   - yoast
+     *   - rankmath
+     *   - aioseo
+     *   - seopress
+     *   - seoframework
+     * ---
+     *
+     * [--dry-run]
+     * : Preview what will be migrated without making changes.
+     *
+     * [--overwrite]
+     * : Overwrite existing Search Intel data (default is merge).
+     *
+     * [--post_type=<type>]
+     * : Comma-separated post types to migrate.
+     * ---
+     * default: post,page
+     * ---
+     *
+     * ## EXAMPLES
+     *
+     *     wp search-intel migrate --from=yoast
+     *     wp search-intel migrate --from=yoast --dry-run
+     *     wp search-intel migrate --from=rankmath --overwrite
+     *
+     * @param array $args       Positional arguments.
+     * @param array $assoc_args Associative arguments.
+     */
+    public function migrate( $args, $assoc_args ) { // phpcs:ignore VariableAnalysis -- $args required by WP-CLI.
+        unset( $args );
+        $source    = $assoc_args['from'] ?? '';
+        $dry_run   = \WP_CLI\Utils\get_flag_value( $assoc_args, 'dry-run', false );
+        $overwrite = \WP_CLI\Utils\get_flag_value( $assoc_args, 'overwrite', false );
+
+        if ( empty( $source ) ) {
+            \WP_CLI::error( 'Please specify --from=<source>. Options: yoast, rankmath, aioseo, seopress, seoframework' );
+        }
+
+        $core      = Core::get_instance();
+        $migration = $core->migration;
+
+        // Verify source is detected.
+        $sources = $migration->detect_sources();
+        $found   = false;
+        foreach ( $sources as $s ) {
+            if ( strtolower( $s['slug'] ) === strtolower( $source ) ) {
+                $found = true;
+                break;
+            }
+        }
+
+        if ( ! $found ) {
+            \WP_CLI::error( "Source plugin '{$source}' not detected. Run without --from to see available sources, or ensure the plugin's data exists in the database." );
+        }
+
+        // Dry run — show preview.
+        if ( $dry_run ) {
+            \WP_CLI::log( "Dry-run migration from {$source}..." );
+            $preview = $migration->dry_run( $source );
+
+            if ( empty( $preview ) ) {
+                \WP_CLI::warning( 'No data found to migrate.' );
+                return;
+            }
+
+            $rows = [];
+            foreach ( $preview as $item ) {
+                $rows[] = [
+                    'Post ID' => $item['post_id'] ?? '—',
+                    'Field'   => $item['field'] ?? '—',
+                    'Source'  => mb_strimwidth( (string) ( $item['source_value'] ?? '' ), 0, 60, '...' ),
+                    'Current' => mb_strimwidth( (string) ( $item['current_value'] ?? '' ), 0, 60, '...' ),
+                    'Action'  => $item['action'] ?? 'import',
+                ];
+            }
+
+            \WP_CLI\Utils\format_items( 'table', $rows, [ 'Post ID', 'Field', 'Source', 'Current', 'Action' ] );
+            \WP_CLI::log( sprintf( '%d field(s) would be migrated.', count( $rows ) ) );
+            return;
+        }
+
+        // Full migration.
+        \WP_CLI::log( sprintf( 'Migrating from %s (%s mode)...', $source, $overwrite ? 'overwrite' : 'merge' ) );
+        $result = $migration->migrate( $source, $overwrite );
+
+        if ( empty( $result ) || empty( $result['migrated'] ) ) {
+            \WP_CLI::warning( 'No data was migrated.' );
+            return;
+        }
+
+        \WP_CLI::success( sprintf(
+            'Migration complete: %d field(s) migrated from %s.',
+            $result['migrated'],
+            $source
+        ) );
+
+        if ( ! empty( $result['redirects'] ) ) {
+            \WP_CLI::log( sprintf( '%d redirect(s) imported.', $result['redirects'] ) );
+        }
+
+        if ( ! empty( $result['skipped'] ) ) {
+            \WP_CLI::log( sprintf( '%d field(s) skipped (existing data, merge mode).', $result['skipped'] ) );
+        }
+    }
 }

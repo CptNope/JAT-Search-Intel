@@ -162,4 +162,63 @@ const store = createReduxStore( 'search-intel/editor', {
 
 register( store );
 
+/**
+ * Subscribe to editor changes — auto-trigger analysis when content is modified.
+ *
+ * Debounced to avoid excessive API calls while typing. Triggers 2 seconds
+ * after the last content change.
+ */
+let _autoAnalysisTimeout = null;
+let _lastContentHash = '';
+
+const { subscribe, select: globalSelect, dispatch: globalDispatch } = wp.data;
+
+subscribe( () => {
+	const editor = globalSelect( 'core/editor' );
+	if ( ! editor ) {
+		return;
+	}
+
+	const postId = editor.getCurrentPostId();
+	if ( ! postId ) {
+		return;
+	}
+
+	// Build a lightweight hash from content + title + meta fields that affect scores.
+	const title   = editor.getEditedPostAttribute( 'title' ) || '';
+	const content = editor.getEditedPostAttribute( 'content' ) || '';
+	const meta    = editor.getEditedPostAttribute( 'meta' ) || {};
+	const keyword = meta[ META_KEYS.focusKeyword ] || '';
+	const desc    = meta[ META_KEYS.description ] || '';
+
+	const contentHash = `${ title.length }:${ content.length }:${ keyword }:${ desc.length }`;
+
+	if ( contentHash === _lastContentHash ) {
+		return;
+	}
+	_lastContentHash = contentHash;
+
+	// Don't auto-analyze empty posts.
+	if ( content.length < 50 ) {
+		return;
+	}
+
+	// Don't auto-analyze if already running.
+	if ( globalSelect( 'search-intel/editor' ).isAnalyzing() ) {
+		return;
+	}
+
+	// Debounce — wait 2s after last change before triggering.
+	if ( _autoAnalysisTimeout ) {
+		clearTimeout( _autoAnalysisTimeout );
+	}
+
+	_autoAnalysisTimeout = setTimeout( () => {
+		// Only auto-analyze if the post has been saved at least once.
+		if ( ! editor.isEditedPostNew() ) {
+			globalDispatch( 'search-intel/editor' ).runAnalysis();
+		}
+	}, 2000 );
+} );
+
 export default store;

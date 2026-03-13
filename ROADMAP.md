@@ -331,7 +331,7 @@
 - [x] `wp search-intel export > settings.json` — export settings
 - [x] `wp search-intel import < settings.json` — import settings
 - [x] `wp search-intel scores --format=table` — show all post scores
-- [ ] `wp search-intel migrate --from=yoast` — migrate from another SEO plugin (deferred to v3.1 — migration class ships in v3.0)
+- [x] `wp search-intel migrate --from=yoast` — migrate from another SEO plugin (CLI command added, migration class in v3.0)
 
 ---
 
@@ -341,7 +341,7 @@
 
 - [x] `PluginDocumentSettingPanel` React component
 - [x] `@wordpress/data` store (`search-intel/editor`)
-- [ ] Real-time analysis via `subscribe` to editor changes (deferred to v3.2)
+- [x] Real-time analysis via `subscribe` to editor changes
 - [x] SEO fields in sidebar (title, description, keyword, canonical, robots)
 - [x] Social fields in sidebar (title, description, image)
 - [x] AEO fields in sidebar (direct-answer, FAQ toggle)
@@ -358,20 +358,20 @@
 - [x] `search-intel/answer-box` — direct-answer formatting block
 - [x] `search-intel/citation` — inline source citation block
 - [x] Block previews in editor
-- [ ] Schema output deduplication (block + wp_head don't double-output) (deferred to v3.2)
+- [x] Schema output deduplication (block + wp_head don't double-output)
 
 ### FSE Template Integration
 
 - [x] Breadcrumbs block usable in FSE `header.html` template part
 - [x] TOC block usable in FSE `single.html` template
 - [x] FAQ block usable in FSE templates
-- [ ] Read `theme.json` color palette for admin score ring UI (deferred to v3.2)
+- [x] Read `theme.json` color palette for admin score ring UI
 
 ### Backward Compatibility
 
 - [x] Classic Editor: PHP metabox unchanged
 - [x] Block Editor without sidebar: metabox fallback
-- [ ] Shortcodes in block content: rendered + deprecation notice (deferred to v3.2)
+- [x] Shortcodes in block content: rendered + deprecation notice
 - [x] FSE theme with no blocks inserted: `wp_head` output only
 
 ---

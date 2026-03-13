@@ -1309,6 +1309,37 @@ function sanitize_hex_color( string $color ): string {
 	return '';
 }
 
+// ── Block detection stubs ────────────────────────────────────────────────────
+
+function has_block( string $block_name, $post = null ): bool {
+	if ( is_object( $post ) && ! empty( $post->post_content ) ) {
+		return str_contains( $post->post_content, '<!-- wp:' . $block_name );
+	}
+	if ( is_int( $post ) || is_string( $post ) ) {
+		$p = get_post( (int) $post );
+		if ( $p && ! empty( $p->post_content ) ) {
+			return str_contains( $p->post_content, '<!-- wp:' . $block_name );
+		}
+	}
+	return false;
+}
+
+function has_blocks( $post = null ): bool {
+	if ( is_int( $post ) || is_string( $post ) ) {
+		$p = get_post( (int) $post );
+		$content = $p->post_content ?? '';
+	} elseif ( is_object( $post ) ) {
+		$content = $post->post_content ?? '';
+	} else {
+		$content = '';
+	}
+	return str_contains( $content, '<!-- wp:' );
+}
+
+function _deprecated_function( string $function, string $version, string $replacement = '' ): void {
+	// No-op in tests — the shortcode still renders, this just triggers a notice.
+}
+
 // ── Autoloader ───────────────────────────────────────────────────────────────
 
 spl_autoload_register( function ( string $class ) {
