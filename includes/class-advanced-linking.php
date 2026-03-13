@@ -85,7 +85,6 @@ class Advanced_Linking {
 
         $keywords  = $this->extract_keywords( $content );
         $post_cats = wp_get_post_categories( $post_id, [ 'fields' => 'ids' ] );
-        $post_tags = wp_get_post_tags( $post_id, [ 'fields' => 'ids' ] );
 
         // Get existing internal links to avoid duplicates.
         $existing = $this->get_existing_links( $post_id );
@@ -497,7 +496,7 @@ class Advanced_Linking {
     /**
      * Run broken internal link check across all published posts.
      *
-     * @return array { checked: int, posts_with_broken: int, total_broken: int }
+     * @return array Checked/posts_with_broken/total_broken counts.
      */
     public function run_broken_link_check(): array {
         $stats = [ 'checked' => 0, 'posts_with_broken' => 0, 'total_broken' => 0 ];
