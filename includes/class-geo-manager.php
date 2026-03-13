@@ -408,6 +408,12 @@ class GEO_Manager {
         $post_id   = get_queried_object_id();
         $author_id = get_post_field( 'post_author', $post_id );
 
+        // Respect E-E-A-T consent — skip if author has not opted in.
+        $consent = get_user_meta( $author_id, 'search_intel_eeat_consent', true );
+        if ( '1' !== $consent ) {
+            return;
+        }
+
         // Author credentials
         $credentials  = get_user_meta( $author_id, 'search_intel_credentials', true );
         $expertise    = get_user_meta( $author_id, 'search_intel_expertise_areas', true );

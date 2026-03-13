@@ -851,6 +851,29 @@ function get_the_archive_title(): string {
 	return 'Archive';
 }
 
+function get_user_by( string $field, $value ) {
+	global $si_test_state;
+	if ( 'email' === $field ) {
+		foreach ( $si_test_state['users'] ?? [] as $user ) {
+			if ( ( $user['user_email'] ?? '' ) === $value ) {
+				return (object) $user;
+			}
+		}
+	}
+	return false;
+}
+
+function delete_user_meta( int $user_id, string $key ): bool {
+	global $si_test_state;
+	unset( $si_test_state['user_meta'][ $user_id ][ $key ] );
+	return true;
+}
+
+function wp_add_privacy_policy_content( string $plugin_name, string $policy_text ): void {
+	global $si_test_state;
+	$si_test_state['privacy_policy'][ $plugin_name ] = $policy_text;
+}
+
 // ── Autoloader ───────────────────────────────────────────────────────────────
 
 spl_autoload_register( function ( string $class ) {

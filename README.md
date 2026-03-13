@@ -112,6 +112,7 @@ graph TD
     CORE --> REST["REST API<br/><i>v1.3+</i>"]
     CORE --> BULK["Bulk Tools<br/><i>v1.3+</i>"]
     CORE --> BLOCKS["Blocks<br/><i>v1.4+ Block Editor</i>"]
+    CORE --> PRIVACY["Privacy<br/><i>v1.5+ GDPR</i>"]
 
     TITLE --> TVAR["Variable Resolver"]
     TITLE --> TCTX["Per-Context Templates"]
@@ -163,6 +164,10 @@ graph TD
     BLOCKS --> BANSWER["Answer Box Block"]
     BLOCKS --> BCITE["Citation Block"]
 
+    PRIVACY --> EXPORTER["Data Exporter<br/><i>wp_privacy_personal_data_exporters</i>"]
+    PRIVACY --> ERASER["Data Eraser<br/><i>wp_privacy_personal_data_erasers</i>"]
+    PRIVACY --> PPOLICY["Privacy Policy Text<br/><i>wp_add_privacy_policy_content</i>"]
+
     style CORE fill:#2563eb,color:#fff
     style SEO fill:#16a34a,color:#fff
     style AEO fill:#d97706,color:#fff
@@ -173,6 +178,7 @@ graph TD
     style REST fill:#ea580c,color:#fff
     style BULK fill:#be185d,color:#fff
     style BLOCKS fill:#7c3aed,color:#fff
+    style PRIVACY fill:#059669,color:#fff
 ```
 
 ### Class Dependency Map
@@ -192,6 +198,7 @@ classDiagram
         +rest_api : REST_Api
         +bulk_tools : Bulk_Tools
         +blocks : Blocks
+        +privacy : Privacy
         +get_instance() Core
         +get_settings() array
         +get_default_settings() array
@@ -305,6 +312,15 @@ classDiagram
         +render_breadcrumbs(attributes, content) string
     }
 
+    class Privacy {
+        -USER_META_KEYS : array
+        +register_exporter(exporters) array
+        +register_eraser(erasers) array
+        +export_personal_data(email, page) array
+        +erase_personal_data(email, page) array
+        +add_privacy_policy_content() void
+    }
+
     Core --> Title_Engine
     Core --> SEO_Manager
     Core --> Schema_Manager
@@ -316,6 +332,7 @@ classDiagram
     Core --> REST_Api
     Core --> Bulk_Tools
     Core --> Blocks
+    Core --> Privacy
     Admin --> Core
     REST_Api --> Core
     Bulk_Tools --> Core
@@ -988,7 +1005,7 @@ Search Intel has a comprehensive automated test suite and CI pipeline.
 
 | Suite | Count | Framework |
 |-------|-------|-----------|
-| Unit tests | 256 tests, 666 assertions | PHPUnit 9.6 |
+| Unit tests | 277 tests, 719 assertions | PHPUnit 9.6 |
 | Integration tests | 125 tests, 202 assertions | PHPUnit 9.6 |
 | E2E tests | 40 tests | Playwright (Chromium) |
 
