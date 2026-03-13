@@ -562,6 +562,154 @@
 
 ---
 
+## v3.1 — Integrations & Monitoring
+
+### MainWP Integration
+
+- [ ] Child-side reporter class (`class-mainwp-reporter.php`) — hooks into `mainwp_child_extra_execution`
+- [ ] Expose site scores, feature status, post counts via MainWP Child callback API
+- [ ] Remote actions: trigger rescore, regenerate, toggle features from dashboard
+- [ ] Separate MainWP Dashboard Extension plugin (new repo: `search-intel-mainwp`)
+- [ ] Dashboard extension: network-wide scores grid with per-site drill-down
+- [ ] Dashboard extension: bulk push settings to all child sites
+- [ ] Dashboard extension: score threshold alerts (low SEO/AEO/GEO warnings)
+- [ ] Dashboard extension: migration status overview across all sites
+
+### WP-CLI for v3.0 Features
+
+- [ ] `wp search-intel migrate --from=yoast [--dry-run] [--overwrite]` — run migration from CLI
+- [ ] `wp search-intel rbac grant <user_id> <module>` — grant module access
+- [ ] `wp search-intel rbac revoke <user_id> <module>` — revoke module access
+- [ ] `wp search-intel rbac list` — show all user permissions
+- [ ] `wp search-intel multisite push-defaults` — push network defaults to all sites
+- [ ] `wp search-intel multisite report [--format=table|json|csv]` — network score report
+- [ ] `wp search-intel queue status` — show background queue status
+- [ ] `wp search-intel queue process [--batch=10]` — manually process queued jobs
+- [ ] `wp search-intel white-label export > brand.json` — export reseller config
+- [ ] `wp search-intel white-label import < brand.json` — import reseller config
+
+### Playwright E2E Tests
+
+- [ ] `wp-env` Docker setup with WordPress + MySQL
+- [ ] Playwright config targeting `localhost:8888`
+- [ ] Smoke test: settings page saves and persists
+- [ ] Smoke test: Classic Editor metabox renders all tabs
+- [ ] Smoke test: Bulk Editor table loads and saves
+- [ ] Smoke test: Migration wizard detects sources and runs dry-run
+- [ ] RBAC test: SEO Editor role sees correct UI, author sees view-only
+- [ ] White-Label test: custom name appears in admin menu and plugin list
+
+### Notifications & Scheduled Reports
+
+- [ ] Email digest: weekly site health summary (scores, issues, recommendations)
+- [ ] Score drop alerts: notify when a post's score drops below threshold
+- [ ] Slack webhook integration for alerts
+- [ ] Configurable alert thresholds per module (SEO, AEO, GEO)
+- [ ] Admin dashboard widget: site health at a glance
+
+---
+
+## v3.2 — AI & Content Intelligence
+
+### AI-Powered Content Optimization
+
+- [ ] AI meta description generation (OpenAI / Anthropic / Ollama API)
+- [ ] AI title tag suggestions based on content and keyword
+- [ ] AI internal link recommendations (based on Citation Graph topology)
+- [ ] AI content brief generator for gap topics (from Authority Map)
+- [ ] API key management in settings (encrypted storage)
+- [ ] Rate limiting and token budget controls
+- [ ] Ollama / local LLM support for privacy-first deployments
+
+### Content Decay Detection
+
+- [ ] Historical score tracking per post (store score snapshots on each analysis)
+- [ ] Decay detection: flag posts whose scores dropped > 10% over 30 days
+- [ ] Decay dashboard: sorted list of declining content with trend sparklines
+- [ ] Auto-queue decaying posts for re-analysis
+- [ ] "Content Refresh" suggestions based on what changed in the scoring
+
+### Keyword Cannibalization Detector
+
+- [ ] Detect multiple posts targeting the same focus keyword
+- [ ] Cannibalization report: grouped by keyword with score comparison
+- [ ] Suggested actions: merge, redirect, differentiate, or de-optimize
+- [ ] Integration with Citation Graph to show link relationships between cannibalizing posts
+
+### Advanced Internal Linking
+
+- [ ] Auto-suggest internal links while editing (based on Citation Graph + content similarity)
+- [ ] Orphaned content alerts in post editor sidebar
+- [ ] Link equity flow visualization (which posts pass authority to which)
+- [ ] Broken internal link detection with auto-fix suggestions (redirect or remove)
+
+---
+
+## v3.3 — Analytics & Reporting
+
+### Historical Analytics
+
+- [ ] Per-post score history chart (SEO / AEO / GEO over time)
+- [ ] Site-wide score trend dashboard (30 / 60 / 90 day views)
+- [ ] Before/after comparison for content updates
+- [ ] Score change log (what changed, when, by whom)
+
+### Google Analytics 4 Integration
+
+- [ ] GA4 API connection (Measurement Protocol or Data API)
+- [ ] Correlate SEO scores with organic traffic per post
+- [ ] Identify high-score / low-traffic posts (distribution opportunities)
+- [ ] Identify low-score / high-traffic posts (optimization priorities)
+
+### Core Web Vitals Monitoring
+
+- [ ] PageSpeed Insights API integration
+- [ ] Per-page CWV scores (LCP, FID/INP, CLS)
+- [ ] CWV trend tracking
+- [ ] Correlation with SEO scores
+
+### Custom Reports & Export
+
+- [ ] PDF report generation (site health, per-post breakdown)
+- [ ] Scheduled PDF reports via email
+- [ ] CSV/JSON export for all report types
+- [ ] Custom report builder (pick modules, date range, post types)
+
+---
+
+## v4.0 — Platform & Ecosystem
+
+### Cloud Sync (Optional)
+
+- [ ] Opt-in cloud sync for cross-site analytics
+- [ ] Centralized web dashboard (SaaS companion, not required)
+- [ ] API key authentication for cloud features
+- [ ] Data sovereignty controls (choose region, opt-out anytime)
+
+### Team Collaboration
+
+- [ ] Per-post editorial comments (SEO review notes)
+- [ ] Review workflows: request review → approve → publish
+- [ ] Activity log: who changed what SEO settings and when
+- [ ] @mention notifications for team members
+
+### Marketplace & Extensibility
+
+- [ ] Filter/action API for third-party extensions
+- [ ] Custom scoring rule engine (user-defined score weights)
+- [ ] Custom schema type registration API
+- [ ] Addon ecosystem: premium modules as separate plugins
+
+### WordPress.org Submission
+
+- [ ] Plugin review compliance audit
+- [ ] Remove all external API calls from default install
+- [ ] Readme.txt fully compliant with WP plugin directory guidelines
+- [ ] Asset preparation (banner, icon, screenshots)
+- [ ] Submission and review process
+
+---
+
 ## Reference
 
 ### Compatibility Targets
@@ -588,6 +736,7 @@
 | Divi | Compatible | `wp_head` fires normally |
 | ACF | Compatible | No conflicts |
 | WP Rocket | Compatible | Cache-friendly |
+| MainWP | Planned v3.1 | Child reporter + dashboard extension |
 
 ### Security Principles
 
@@ -614,5 +763,5 @@
 
 ---
 
-_Last updated: March 2026_
+_Last updated: March 13, 2026_
 _This roadmap is a living document. Check off items as they are completed._
