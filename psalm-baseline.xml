@@ -132,7 +132,6 @@
       <code><![CDATA[$csp_headers]]></code>
       <code><![CDATA[$sri]]></code>
       <code><![CDATA[$schema_types]]></code>
-      <code><![CDATA[$qa_detector]]></code>
       <code><![CDATA[$faq_generator]]></code>
       <code><![CDATA[$rest_api]]></code>
       <code><![CDATA[$schema]]></code>
@@ -348,5 +347,41 @@
     <UnusedProperty>
       <code><![CDATA[$settings]]></code>
     </UnusedProperty>
+  </file>
+  <file src="includes/class-schema-types.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[get_recipe_schema]]></code>
+      <code><![CDATA[get_event_schema]]></code>
+      <code><![CDATA[get_review_schema]]></code>
+      <code><![CDATA[get_course_schema]]></code>
+      <code><![CDATA[get_software_schema]]></code>
+      <code><![CDATA[get_job_posting_schema]]></code>
+      <code><![CDATA[get_types]]></code>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[array]]></code>
+    </PossiblyUnusedReturnValue>
+    <UnusedProperty>
+      <code><![CDATA[$settings]]></code>
+    </UnusedProperty>
+  </file>
+  <file src="includes/class-qa-detector.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[classify]]></code>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[array]]></code>
+    </PossiblyUnusedReturnValue>
+    <UndefinedConstant>
+      <code><![CDATA[DAY_IN_SECONDS]]></code>
+    </UndefinedConstant>
+    <UnusedProperty>
+      <code><![CDATA[$settings]]></code>
+    </UnusedProperty>
+  </file>
+  <file src="includes/class-faq-generator.php">
+    <InvalidArgument>
+      <code><![CDATA[['headers' => ['Authorization' => 'Bearer ' . $api_key, 'Content-Type' => 'application/json'], 'body' => (string) wp_json_encode(['model' => 'gpt-3.5-turbo', 'messages' => [['role' => 'user', 'content' => $prompt]], 'temperature' => 0.7, 'max_tokens' => 1000]), 'timeout' => 30]]]></code>
+    </InvalidArgument>
   </file>
 </files>

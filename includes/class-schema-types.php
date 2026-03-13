@@ -190,7 +190,7 @@ class Schema_Types {
 		// Steps.
 		if ( is_array( $steps ) ) {
 			$schema['recipeInstructions'] = [];
-			foreach ( $steps as $i => $step ) {
+			foreach ( $steps as $step ) {
 				$schema['recipeInstructions'][] = [
 					'@type' => 'HowToStep',
 					'text'  => sanitize_text_field( $step ),

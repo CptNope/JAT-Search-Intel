@@ -261,7 +261,7 @@ class FAQ_Generator {
 				'Authorization' => 'Bearer ' . $api_key,
 				'Content-Type'  => 'application/json',
 			],
-			'body'    => wp_json_encode( [
+			'body'    => (string) wp_json_encode( [
 				'model'       => 'gpt-3.5-turbo',
 				'messages'    => [
 					[ 'role' => 'user', 'content' => $prompt ],
@@ -314,7 +314,6 @@ class FAQ_Generator {
 		$post_id = absint( $_POST['post_id'] ?? 0 );
 		if ( ! $post_id || ! current_user_can( 'edit_post', $post_id ) ) {
 			wp_send_json_error( [ 'message' => 'Invalid post.' ] );
-			return;
 		}
 
 		$faqs = $this->generate( $post_id );
@@ -339,13 +338,11 @@ class FAQ_Generator {
 		$post_id = absint( $_POST['post_id'] ?? 0 );
 		if ( ! $post_id || ! current_user_can( 'edit_post', $post_id ) ) {
 			wp_send_json_error( [ 'message' => 'Invalid post.' ] );
-			return;
 		}
 
 		$faqs = $_POST['faqs'] ?? [];
 		if ( ! is_array( $faqs ) ) {
 			wp_send_json_error( [ 'message' => 'Invalid FAQ data.' ] );
-			return;
 		}
 
 		$sanitized = [];

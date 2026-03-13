@@ -44,7 +44,7 @@ class QA_Detector {
 	 * Run all detectors on content and return combined results.
 	 *
 	 * @param string $content HTML content.
-	 * @return array{questions: array, definitions: array, steps: array, comparisons: array}
+	 * @return array{questions: array, qa_pairs: array, definitions: array, steps: array, comparisons: array}
 	 */
 	public function detect_all( string $content ): array {
 		return [
