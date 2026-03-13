@@ -1309,6 +1309,21 @@ function sanitize_hex_color( string $color ): string {
 	return '';
 }
 
+// ── Post time stubs ──────────────────────────────────────────────────────────
+
+function get_post_modified_time( string $format = 'U', bool $gmt = false, $post = null ): string {
+	$p = null;
+	if ( is_object( $post ) ) {
+		$p = $post;
+	} elseif ( is_int( $post ) ) {
+		$p = get_post( $post );
+	}
+	if ( $p && ! empty( $p->post_modified ) ) {
+		return $p->post_modified;
+	}
+	return gmdate( $format );
+}
+
 // ── Block detection stubs ────────────────────────────────────────────────────
 
 function has_block( string $block_name, $post = null ): bool {

@@ -566,9 +566,9 @@
 
 ### MainWP Integration
 
-- [ ] Child-side reporter class (`class-mainwp-reporter.php`) — hooks into `mainwp_child_extra_execution`
-- [ ] Expose site scores, feature status, post counts via MainWP Child callback API
-- [ ] Remote actions: trigger rescore, regenerate, toggle features from dashboard
+- [x] Child-side reporter class (`class-mainwp-reporter.php`) — hooks into `mainwp_child_extra_execution`
+- [x] Expose site scores, feature status, post counts via MainWP Child callback API
+- [x] Remote actions: trigger rescore, regenerate, toggle features from dashboard
 - [ ] Separate MainWP Dashboard Extension plugin (new repo: `search-intel-mainwp`)
 - [ ] Dashboard extension: network-wide scores grid with per-site drill-down
 - [ ] Dashboard extension: bulk push settings to all child sites
@@ -577,26 +577,26 @@
 
 ### WP-CLI for v3.0 Features
 
-- [ ] `wp search-intel migrate --from=yoast [--dry-run] [--overwrite]` — run migration from CLI
-- [ ] `wp search-intel rbac grant <user_id> <module>` — grant module access
-- [ ] `wp search-intel rbac revoke <user_id> <module>` — revoke module access
-- [ ] `wp search-intel rbac list` — show all user permissions
-- [ ] `wp search-intel multisite push-defaults` — push network defaults to all sites
-- [ ] `wp search-intel multisite report [--format=table|json|csv]` — network score report
-- [ ] `wp search-intel queue status` — show background queue status
-- [ ] `wp search-intel queue process [--batch=10]` — manually process queued jobs
-- [ ] `wp search-intel white-label export > brand.json` — export reseller config
-- [ ] `wp search-intel white-label import < brand.json` — import reseller config
+- [x] `wp search-intel migrate --from=yoast [--dry-run] [--overwrite]` — run migration from CLI
+- [x] `wp search-intel rbac grant <user_id> <module>` — grant module access
+- [x] `wp search-intel rbac revoke <user_id> <module>` — revoke module access
+- [x] `wp search-intel rbac list` — show all user permissions
+- [x] `wp search-intel multisite push-defaults` — push network defaults to all sites
+- [x] `wp search-intel multisite report [--format=table|json|csv]` — network score report
+- [x] `wp search-intel queue status` — show background queue status
+- [x] `wp search-intel queue process [--batch=10]` — manually process queued jobs
+- [x] `wp search-intel white-label export > brand.json` — export reseller config
+- [x] `wp search-intel white-label import < brand.json` — import reseller config
 
 ### Playwright E2E Tests
 
-- [ ] `wp-env` Docker setup with WordPress + MySQL
-- [ ] Playwright config targeting `localhost:8888`
-- [ ] Smoke test: settings page saves and persists
-- [ ] Smoke test: Classic Editor metabox renders all tabs
-- [ ] Smoke test: Bulk Editor table loads and saves
-- [ ] Smoke test: Migration wizard detects sources and runs dry-run
-- [ ] RBAC test: SEO Editor role sees correct UI, author sees view-only
+- [x] `wp-env` Docker setup with WordPress + MySQL (`.wp-env.json`)
+- [x] Playwright config targeting `localhost:8080`
+- [x] Smoke test: settings page saves and persists (`settings.spec.ts`)
+- [x] Smoke test: Classic Editor metabox renders all tabs (`metabox.spec.ts`)
+- [x] Smoke test: Bulk Editor table loads and saves (`bulk-editor.spec.ts`)
+- [x] Smoke test: Migration wizard detects sources and runs dry-run (`migration.spec.ts`)
+- [x] RBAC test: SEO Editor role sees correct UI, author sees view-only (`rbac.spec.ts`)
 - [ ] White-Label test: custom name appears in admin menu and plugin list
 
 ### Notifications & Scheduled Reports

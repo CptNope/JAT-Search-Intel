@@ -144,19 +144,16 @@
       <code><![CDATA[$internal_linker]]></code>
       <code><![CDATA[$link_checker]]></code>
       <code><![CDATA[$local_business]]></code>
+      <code><![CDATA[$mainwp_reporter]]></code>
       <code><![CDATA[$multilang]]></code>
-      <code><![CDATA[$multisite]]></code>
       <code><![CDATA[$privacy]]></code>
-      <code><![CDATA[$rbac]]></code>
       <code><![CDATA[$rest_api]]></code>
       <code><![CDATA[$robots_txt]]></code>
-      <code><![CDATA[$scale]]></code>
       <code><![CDATA[$schema]]></code>
       <code><![CDATA[$schema_types]]></code>
       <code><![CDATA[$sri]]></code>
       <code><![CDATA[$title_engine]]></code>
       <code><![CDATA[$visibility_dashboard]]></code>
-      <code><![CDATA[$white_label]]></code>
       <code><![CDATA[$woocommerce]]></code>
     </PossiblyUnusedProperty>
     <UndefinedConstant>
@@ -230,6 +227,27 @@
       <code><![CDATA[get_location]]></code>
     </PossiblyUnusedMethod>
   </file>
+  <file src="includes/class-mainwp-reporter.php">
+    <FalsableReturnStatement>
+      <code><![CDATA[get_post_modified_time( 'c', true, $posts[0] )]]></code>
+    </FalsableReturnStatement>
+    <InvalidReturnStatement>
+      <code><![CDATA[get_post_modified_time( 'c', true, $posts[0] )]]></code>
+    </InvalidReturnStatement>
+    <InvalidReturnType>
+      <code><![CDATA[string]]></code>
+    </InvalidReturnType>
+    <PossiblyUnusedParam>
+      <code><![CDATA[$options]]></code>
+    </PossiblyUnusedParam>
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[array]]></code>
+      <code><![CDATA[array]]></code>
+    </PossiblyUnusedReturnValue>
+    <UnusedVariable>
+      <code><![CDATA[$core]]></code>
+    </UnusedVariable>
+  </file>
   <file src="includes/class-migration.php">
     <UnusedProperty>
       <code><![CDATA[$settings]]></code>
@@ -296,12 +314,9 @@
   </file>
   <file src="includes/class-rbac.php">
     <PossiblyUnusedMethod>
-      <code><![CDATA[get_permissions_summary]]></code>
-      <code><![CDATA[grant_module]]></code>
       <code><![CDATA[grant_view_only]]></code>
       <code><![CDATA[is_settings_locked]]></code>
       <code><![CDATA[remove_role]]></code>
-      <code><![CDATA[revoke_module]]></code>
     </PossiblyUnusedMethod>
     <PossiblyUnusedParam>
       <code><![CDATA[$can]]></code>
@@ -358,12 +373,11 @@
       <code><![CDATA[cache_delete]]></code>
       <code><![CDATA[cache_get]]></code>
       <code><![CDATA[cache_set]]></code>
-      <code><![CDATA[enqueue_job]]></code>
       <code><![CDATA[get_asset_url]]></code>
       <code><![CDATA[rest_get_all_meta]]></code>
     </PossiblyUnusedMethod>
     <PossiblyUnusedReturnValue>
-      <code><![CDATA[int]]></code>
+      <code><![CDATA[string]]></code>
     </PossiblyUnusedReturnValue>
     <UnusedProperty>
       <code><![CDATA[$settings]]></code>
@@ -473,8 +487,6 @@
   </file>
   <file src="includes/class-white-label.php">
     <PossiblyUnusedMethod>
-      <code><![CDATA[export_reseller_config]]></code>
-      <code><![CDATA[import_reseller_config]]></code>
       <code><![CDATA[save_config]]></code>
     </PossiblyUnusedMethod>
     <PossiblyUnusedReturnValue>

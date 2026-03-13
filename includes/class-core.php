@@ -115,6 +115,9 @@ class Core {
     /** @var Scale */
     public $scale;
 
+    /** @var MainWP_Reporter */
+    public $mainwp_reporter;
+
     /**
      * Get singleton instance.
      */
@@ -220,6 +223,9 @@ class Core {
 
         // Scale — object cache, background queue, bulk editor, headless REST.
         $this->scale = new Scale( $settings );
+
+        // MainWP Child Reporter — expose scores and actions to MainWP Dashboard.
+        $this->mainwp_reporter = new MainWP_Reporter( $settings );
 
         // Auto-redirect on slug change.
         add_action( 'post_updated', [ $this->redirects, 'detect_slug_change' ], 10, 3 );
