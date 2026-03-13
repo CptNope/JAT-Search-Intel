@@ -127,6 +127,10 @@
       <code><![CDATA[$local_business]]></code>
       <code><![CDATA[$robots_txt]]></code>
       <code><![CDATA[$audit_log]]></code>
+      <code><![CDATA[$link_checker]]></code>
+      <code><![CDATA[$internal_linker]]></code>
+      <code><![CDATA[$csp_headers]]></code>
+      <code><![CDATA[$sri]]></code>
       <code><![CDATA[$rest_api]]></code>
       <code><![CDATA[$schema]]></code>
       <code><![CDATA[$title_engine]]></code>
@@ -299,6 +303,67 @@
     <PossiblyUnusedMethod>
       <code><![CDATA[clear_log]]></code>
     </PossiblyUnusedMethod>
+    <UnusedProperty>
+      <code><![CDATA[$settings]]></code>
+    </UnusedProperty>
+  </file>
+  <file src="includes/class-link-checker.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[run_batch_check]]></code>
+      <code><![CDATA[register_admin_page]]></code>
+      <code><![CDATA[render_admin_page]]></code>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[array]]></code>
+      <code><![CDATA[array]]></code>
+      <code><![CDATA[array]]></code>
+    </PossiblyUnusedReturnValue>
+    <UnusedProperty>
+      <code><![CDATA[$settings]]></code>
+    </UnusedProperty>
+  </file>
+  <file src="includes/class-internal-linker.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[invalidate_cache]]></code>
+      <code><![CDATA[register_metabox]]></code>
+      <code><![CDATA[render_metabox]]></code>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[array]]></code>
+      <code><![CDATA[array]]></code>
+      <code><![CDATA[array]]></code>
+      <code><![CDATA[float]]></code>
+      <code><![CDATA[string]]></code>
+    </PossiblyUnusedReturnValue>
+    <UnusedProperty>
+      <code><![CDATA[$settings]]></code>
+    </UnusedProperty>
+  </file>
+  <file src="includes/class-csp-headers.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[send_admin_csp]]></code>
+      <code><![CDATA[send_rest_csp]]></code>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[string]]></code>
+      <code><![CDATA[bool]]></code>
+    </PossiblyUnusedReturnValue>
+    <UnusedProperty>
+      <code><![CDATA[$settings]]></code>
+    </UnusedProperty>
+  </file>
+  <file src="includes/class-sri.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[add_script_integrity]]></code>
+      <code><![CDATA[add_style_integrity]]></code>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[string]]></code>
+      <code><![CDATA[string]]></code>
+      <code><![CDATA[string]]></code>
+      <code><![CDATA[string]]></code>
+      <code><![CDATA[bool]]></code>
+    </PossiblyUnusedReturnValue>
     <UnusedProperty>
       <code><![CDATA[$settings]]></code>
     </UnusedProperty>

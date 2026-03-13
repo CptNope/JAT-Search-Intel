@@ -440,10 +440,10 @@
 ### Additional SEO Tools
 
 - [x] Robots.txt visual editor with syntax validation
-- [ ] Broken link checker (background HTTP HEAD scan)
-- [ ] Internal linking suggestions (AI-powered related content)
-- [ ] Content Security Policy headers on plugin endpoints
-- [ ] Subresource Integrity for admin assets
+- [x] Broken link checker (background HTTP HEAD scan)
+- [x] Internal linking suggestions (AI-powered related content)
+- [x] Content Security Policy headers on plugin endpoints
+- [x] Subresource Integrity for admin assets
 - [x] Audit logging for settings changes
 
 ---

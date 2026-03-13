@@ -6,6 +6,45 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [2.0.1] — 2026-03-13
+
+### Added
+
+#### Broken Link Checker (`class-link-checker.php`)
+- Background HTTP HEAD scan via WP-Cron (hourly batches)
+- Extract all links from published post content
+- Detect broken links (400, 403, 404, 405, 408, 410, 5xx)
+- Admin page listing broken links with status, source post, error, and check time
+- Clear results and manual re-scan support
+
+#### Internal Linking Suggestions (`class-internal-linker.php`)
+- Keyword extraction with stop-word filtering
+- Shared taxonomy term matching for related content discovery
+- Keyword overlap and title match scoring (0–100 relevance)
+- Suggestion caching via transients (auto-invalidated on save)
+- Editor metabox showing top 10 link suggestions with scores
+
+#### Content Security Policy Headers (`class-csp-headers.php`)
+- CSP headers on all Search Intel admin pages
+- Strict CSP (`default-src 'none'`) on REST API endpoints under `/search-intel/`
+- X-Content-Type-Options, X-Frame-Options, Referrer-Policy headers
+- Configurable via `enable_csp_headers` setting
+
+#### Subresource Integrity (`class-sri.php`)
+- SHA-256 integrity hashes for plugin CSS and JS assets
+- Automatic `integrity` and `crossorigin="anonymous"` attribute injection
+- Hash caching in options (regenerated on plugin update)
+- Filters `script_loader_tag` and `style_loader_tag`
+
+### Changed
+- Core: added `$link_checker`, `$internal_linker`, `$csp_headers`, `$sri` properties
+- Default settings: `enable_link_checker`, `enable_internal_linker`, `enable_csp_headers`, `enable_sri` (all off by default)
+
+### Tests
+- 437 unit tests, 987 assertions (up from 372/887)
+
+---
+
 ## [2.0.0] — 2026-03-13
 
 ### Added

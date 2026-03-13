@@ -6,7 +6,7 @@
 [![License: GPL v2](https://img.shields.io/badge/License-GPLv2-blue.svg)](LICENSE.md)
 [![WordPress: 6.0+](https://img.shields.io/badge/WordPress-6.0%2B-21759b.svg)](https://wordpress.org/)
 [![PHP: 7.4+](https://img.shields.io/badge/PHP-7.4%2B-777bb4.svg)](https://php.net/)
-[![Release: v2.0.0](https://img.shields.io/badge/Release-v2.0.0-brightgreen)](https://github.com/CptNope/Search-Intel/releases/tag/v2.0.0)
+[![Release: v2.0.1](https://img.shields.io/badge/Release-v2.0.1-brightgreen)](https://github.com/CptNope/Search-Intel/releases/tag/v2.0.1)
 
 **[Roadmap](ROADMAP.md)** · **[Changelog](CHANGELOG.md)** · **[Contributing](CONTRIBUTING.md)** · **[License](LICENSE.md)**
 

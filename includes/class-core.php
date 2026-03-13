@@ -67,6 +67,18 @@ class Core {
     /** @var Audit_Log */
     public $audit_log;
 
+    /** @var Link_Checker */
+    public $link_checker;
+
+    /** @var Internal_Linker */
+    public $internal_linker;
+
+    /** @var CSP_Headers */
+    public $csp_headers;
+
+    /** @var SRI */
+    public $sri;
+
     /**
      * Get singleton instance.
      */
@@ -124,6 +136,18 @@ class Core {
 
         // Audit log for settings changes.
         $this->audit_log = new Audit_Log( $settings );
+
+        // Broken link checker — background HTTP HEAD scan.
+        $this->link_checker = new Link_Checker( $settings );
+
+        // Internal linking suggestions — related content matching.
+        $this->internal_linker = new Internal_Linker( $settings );
+
+        // Content Security Policy headers on plugin endpoints.
+        $this->csp_headers = new CSP_Headers( $settings );
+
+        // Subresource Integrity for admin assets.
+        $this->sri = new SRI( $settings );
 
         // Auto-redirect on slug change.
         add_action( 'post_updated', [ $this->redirects, 'detect_slug_change' ], 10, 3 );
@@ -309,6 +333,18 @@ class Core {
 
             // Audit Log
             'enable_audit_log'       => true,
+
+            // Broken Link Checker
+            'enable_link_checker'    => false,
+
+            // Internal Linking Suggestions
+            'enable_internal_linker' => false,
+
+            // Content Security Policy Headers
+            'enable_csp_headers'     => false,
+
+            // Subresource Integrity
+            'enable_sri'             => false,
         ];
     }
 }
