@@ -225,7 +225,7 @@ class Content_Decay {
      *
      * Flags decaying posts and optionally queues them for re-analysis.
      *
-     * @return array { checked: int, decaying: int, queued: int }
+     * @return array Checked/decaying/queued counts.
      */
     public function run_decay_check(): array {
         $stats = [ 'checked' => 0, 'decaying' => 0, 'queued' => 0 ];
