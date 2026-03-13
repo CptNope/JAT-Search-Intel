@@ -379,9 +379,4 @@
       <code><![CDATA[$settings]]></code>
     </UnusedProperty>
   </file>
-  <file src="includes/class-faq-generator.php">
-    <InvalidArgument>
-      <code><![CDATA[['headers' => ['Authorization' => 'Bearer ' . $api_key, 'Content-Type' => 'application/json'], 'body' => (string) wp_json_encode(['model' => 'gpt-3.5-turbo', 'messages' => [['role' => 'user', 'content' => $prompt]], 'temperature' => 0.7, 'max_tokens' => 1000]), 'timeout' => 30]]]></code>
-    </InvalidArgument>
-  </file>
 </files>
