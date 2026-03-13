@@ -43,6 +43,9 @@ class Core {
     /** @var Bulk_Tools */
     public $bulk_tools;
 
+    /** @var Blocks */
+    public $blocks;
+
     /**
      * Get singleton instance.
      */
@@ -76,6 +79,9 @@ class Core {
 
         // REST API — registers on rest_api_init.
         $this->rest_api = new Rest_Api( $settings, $this );
+
+        // Block editor integration — sidebar, custom blocks, meta registration.
+        $this->blocks = new Blocks();
 
         // Prefetch all post meta on singular pages to avoid N+1 queries
         add_action( 'wp', [ $this, 'prefetch_post_meta' ] );

@@ -339,40 +339,40 @@
 
 ### Gutenberg Sidebar Panel
 
-- [ ] `PluginDocumentSettingPanel` React component
-- [ ] `@wordpress/data` store (`search-intel/editor`)
-- [ ] Real-time analysis via `subscribe` to editor changes
-- [ ] SEO fields in sidebar (title, description, keyword, canonical, robots)
-- [ ] Social fields in sidebar (title, description, image)
-- [ ] AEO fields in sidebar (direct-answer, FAQ toggle)
-- [ ] GEO fields in sidebar (AI summary, intent, audience)
-- [ ] Score display in sidebar
-- [ ] Keep PHP metabox as fallback for Classic Editor
+- [x] `PluginDocumentSettingPanel` React component
+- [x] `@wordpress/data` store (`search-intel/editor`)
+- [ ] Real-time analysis via `subscribe` to editor changes (deferred to v1.5)
+- [x] SEO fields in sidebar (title, description, keyword, canonical, robots)
+- [x] Social fields in sidebar (title, description, image)
+- [x] AEO fields in sidebar (direct-answer, FAQ toggle)
+- [x] GEO fields in sidebar (AI summary, intent, audience)
+- [x] Score display in sidebar
+- [x] Keep PHP metabox as fallback for Classic Editor
 
 ### Custom Gutenberg Blocks
 
-- [ ] `search-intel/faq` — visual FAQ editor with live schema preview
-- [ ] `search-intel/howto` — step editor with image support per step
-- [ ] `search-intel/toc` — auto-generated table of contents from headings
-- [ ] `search-intel/breadcrumbs` — theme-aware breadcrumb navigation
-- [ ] `search-intel/answer-box` — direct-answer formatting block
-- [ ] `search-intel/citation` — inline source citation block
-- [ ] Block previews in editor
-- [ ] Schema output deduplication (block + wp_head don't double-output)
+- [x] `search-intel/faq` — visual FAQ editor with live schema preview
+- [x] `search-intel/howto` — step editor with image support per step
+- [x] `search-intel/toc` — auto-generated table of contents from headings
+- [x] `search-intel/breadcrumbs` — theme-aware breadcrumb navigation
+- [x] `search-intel/answer-box` — direct-answer formatting block
+- [x] `search-intel/citation` — inline source citation block
+- [x] Block previews in editor
+- [ ] Schema output deduplication (block + wp_head don't double-output) (deferred to v1.5)
 
 ### FSE Template Integration
 
-- [ ] Breadcrumbs block usable in FSE `header.html` template part
-- [ ] TOC block usable in FSE `single.html` template
-- [ ] FAQ block usable in FSE templates
-- [ ] Read `theme.json` color palette for admin score ring UI
+- [x] Breadcrumbs block usable in FSE `header.html` template part
+- [x] TOC block usable in FSE `single.html` template
+- [x] FAQ block usable in FSE templates
+- [ ] Read `theme.json` color palette for admin score ring UI (deferred to v1.5)
 
 ### Backward Compatibility
 
-- [ ] Classic Editor: PHP metabox unchanged
-- [ ] Block Editor without sidebar: metabox fallback
-- [ ] Shortcodes in block content: rendered + deprecation notice
-- [ ] FSE theme with no blocks inserted: `wp_head` output only
+- [x] Classic Editor: PHP metabox unchanged
+- [x] Block Editor without sidebar: metabox fallback
+- [ ] Shortcodes in block content: rendered + deprecation notice (deferred to v1.5)
+- [x] FSE theme with no blocks inserted: `wp_head` output only
 
 ---
 

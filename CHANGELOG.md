@@ -200,6 +200,52 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [1.4.0] — 2026-03-12
+
+### Added
+
+#### Gutenberg Sidebar Panel (`src/sidebar/`)
+- `PluginDocumentSettingPanel` with tabbed interface (SEO, AEO, GEO, Analysis)
+- `@wordpress/data` store (`search-intel/editor`) for post meta state management
+- **SEO tab**: SEO title, meta description, focus keyword, secondary keywords, canonical URL, noindex/nofollow toggles, social overrides (OG + Twitter), live SERP preview with character counts
+- **AEO tab**: Direct answer field with character count, schema type override dropdown, FAQ/HowTo block guidance
+- **GEO tab**: AI summary, key topics, content type, content intent, target audience, expertise level, fact-check date, local relevance toggle with location field
+- **Analysis tab**: Score ring SVG visualizations (SEO, AEO, GEO, Readability), "Run Analysis" button via REST API, detailed check results by category
+- Post meta registered in REST API for all public post types (`register_post_meta` with `show_in_rest`)
+- PHP metabox retained as Classic Editor fallback
+
+#### Custom Gutenberg Blocks (`src/blocks/`)
+- `search-intel/faq` — visual FAQ editor with add/remove items, numbered entries, automatic FAQPage schema markup, microdata on frontend
+- `search-intel/howto` — step-by-step editor with per-step image upload via `MediaUpload`, HowTo schema, configurable total time (ISO 8601)
+- `search-intel/toc` — auto-generated Table of Contents from post headings, configurable max depth and list type, dynamic server-side rendering
+- `search-intel/breadcrumbs` — theme-aware breadcrumb navigation with BreadcrumbList schema, configurable separator and home label, server-side rendering
+- `search-intel/answer-box` — highlighted answer box optimized for featured snippets and AI extraction, question + answer fields with semantic data attributes
+- `search-intel/citation` — inline source citation block with CreativeWork schema, configurable source type/name/URL/author/date, `<figure>` + `<figcaption>` output
+
+#### Build System
+- `@wordpress/scripts` build toolchain with custom `webpack.config.js`
+- 7 webpack entry points: sidebar + 6 blocks
+- `npm run build` / `npm run start` scripts
+- Asset files (`.asset.php`) for dependency and version management
+- ESLint config updated for ESM + JSX
+
+#### PHP Integration (`class-blocks.php`)
+- `Blocks` class registered in `Core` singleton
+- `register_blocks()` — registers all 6 custom blocks with editor scripts/styles
+- `register_meta()` — registers 28 post meta keys in REST API for all public post types
+- `enqueue_sidebar()` — loads compiled sidebar JS/CSS in block editor
+- `render_toc()` — server-side TOC rendering from post heading extraction
+- `render_breadcrumbs()` — server-side breadcrumb rendering with BreadcrumbList schema
+
+### Changed
+- `class-core.php`: Added `$blocks` property and `Blocks` instantiation
+- `package.json`: Added `@wordpress/*` dependencies and build scripts, bumped to 1.4.0
+- `.eslintrc.json`: Updated to `sourceType: module` with JSX support
+- `.distignore`: Added `src/`, `webpack.config.js` exclusions
+- `psalm-baseline.xml`: Added entries for `class-blocks.php` constants and `$blocks` property
+
+---
+
 ## [1.3.0] — 2026-03-12
 
 ### Added

@@ -1,0 +1,88 @@
+/**
+ * FAQ Block — Editor Styles
+ */
+
+.si-faq-block {
+	border: 1px solid #ddd;
+	border-radius: 8px;
+	padding: 16px;
+	background: #fafafa;
+}
+
+.si-faq-block__header {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 16px;
+	padding-bottom: 8px;
+	border-bottom: 2px solid #007cba;
+}
+
+.si-faq-block__icon {
+	font-size: 20px;
+}
+
+.si-faq-block__title {
+	font-size: 14px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	color: #007cba;
+}
+
+.si-faq-item {
+	background: #fff;
+	border: 1px solid #e0e0e0;
+	border-radius: 6px;
+	padding: 12px;
+	margin-bottom: 12px;
+	position: relative;
+}
+
+.si-faq-item__header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 8px;
+}
+
+.si-faq-item__number {
+	background: #007cba;
+	color: #fff;
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 12px;
+	font-weight: 700;
+}
+
+.si-faq-item__remove {
+	opacity: 0.3;
+	transition: opacity 0.2s;
+}
+
+.si-faq-item:hover .si-faq-item__remove {
+	opacity: 1;
+}
+
+.si-faq-item__question {
+	font-size: 15px;
+	font-weight: 600;
+	margin: 0 0 8px;
+	color: #1e1e1e;
+}
+
+.si-faq-item__answer {
+	font-size: 14px;
+	color: #555;
+	line-height: 1.5;
+}
+
+.si-faq-block__add {
+	width: 100%;
+	justify-content: center;
+	margin-top: 4px;
+}

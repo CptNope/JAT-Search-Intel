@@ -1,0 +1,100 @@
+/**
+ * HowTo Block — Editor Styles
+ */
+
+.si-howto-block {
+	border: 1px solid #ddd;
+	border-radius: 8px;
+	padding: 16px;
+	background: #fafafa;
+}
+
+.si-howto-block__header {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 12px;
+	padding-bottom: 8px;
+	border-bottom: 2px solid #007cba;
+}
+
+.si-howto-block__icon {
+	font-size: 20px;
+}
+
+.si-howto-block__label {
+	font-size: 14px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	color: #007cba;
+}
+
+.si-howto-block__title {
+	font-size: 18px;
+	font-weight: 700;
+	margin: 0 0 8px;
+}
+
+.si-howto-block__description {
+	font-size: 14px;
+	color: #555;
+	margin: 0 0 16px;
+}
+
+.si-howto-step {
+	background: #fff;
+	border: 1px solid #e0e0e0;
+	border-radius: 6px;
+	padding: 12px;
+	margin-bottom: 12px;
+}
+
+.si-howto-step__header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 8px;
+}
+
+.si-howto-step__number {
+	font-size: 12px;
+	font-weight: 700;
+	text-transform: uppercase;
+	color: #007cba;
+}
+
+.si-howto-step__remove {
+	opacity: 0.3;
+	transition: opacity 0.2s;
+}
+
+.si-howto-step:hover .si-howto-step__remove {
+	opacity: 1;
+}
+
+.si-howto-step__name {
+	font-size: 15px;
+	font-weight: 600;
+	margin: 0 0 6px;
+}
+
+.si-howto-step__text {
+	font-size: 14px;
+	color: #555;
+	line-height: 1.5;
+	margin-bottom: 8px;
+}
+
+.si-howto-step__image-preview img {
+	max-width: 100%;
+	height: auto;
+	border-radius: 4px;
+	margin-bottom: 4px;
+}
+
+.si-howto-block__add {
+	width: 100%;
+	justify-content: center;
+	margin-top: 4px;
+}

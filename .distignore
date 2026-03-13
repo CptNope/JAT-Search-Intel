@@ -14,8 +14,10 @@ blob-report/
 
 # ── Node / Build ─────────────────────────────────────────────────────────
 node_modules/
+src/
 package.json
 package-lock.json
+webpack.config.js
 .wp-env.json
 
 # ── Composer Dev ──────────────────────────────────────────────────────────
@@ -33,6 +35,7 @@ vendor/phpstan/
 .distignore
 .editorconfig
 .eslintrc.js
+.eslintrc.json
 phpstan.neon
 phpstan.neon.dist
 phpstan-baseline.neon

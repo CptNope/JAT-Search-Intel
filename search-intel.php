@@ -3,7 +3,7 @@
  * Plugin Name: Search Intel
  * Plugin URI:  https://searchintel.io
  * Description: A comprehensive SEO, AEO (Answer Engine Optimization), and GEO (Generative Engine Optimization) plugin for WordPress. Optimize your content for traditional search engines, voice assistants, featured snippets, and AI-powered answer engines.
- * Version:     1.3.0
+ * Version:     1.4.0
  * Author:      Search Intel
  * Author URI:  https://searchintel.io
  * License:     GPL-2.0-or-later
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Plugin constants
-define( 'SEARCH_INTEL_VERSION', '1.3.0' );
+define( 'SEARCH_INTEL_VERSION', '1.4.0' );
 define( 'SEARCH_INTEL_FILE', __FILE__ );
 define( 'SEARCH_INTEL_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SEARCH_INTEL_URL', plugin_dir_url( __FILE__ ) );
