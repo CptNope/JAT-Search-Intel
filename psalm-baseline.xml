@@ -74,18 +74,7 @@
       <code><![CDATA[$args]]></code>
       <code><![CDATA[$args]]></code>
       <code><![CDATA[$args]]></code>
-      <code><![CDATA[$args]]></code>
-      <code><![CDATA[$args]]></code>
-      <code><![CDATA[$args]]></code>
-      <code><![CDATA[$assoc_args]]></code>
-      <code><![CDATA[$assoc_args]]></code>
-      <code><![CDATA[$assoc_args]]></code>
-      <code><![CDATA[$assoc_args]]></code>
-      <code><![CDATA[$assoc_args]]></code>
     </PossiblyUnusedParam>
-    <UndefinedClass>
-      <code><![CDATA[WP_CLI_Command]]></code>
-    </UndefinedClass>
     <UnusedClass>
       <code><![CDATA[CLI]]></code>
     </UnusedClass>
@@ -97,7 +86,6 @@
     <PossiblyUnusedProperty>
       <code><![CDATA[$admin]]></code>
       <code><![CDATA[$aeo]]></code>
-      <code><![CDATA[$bulk_tools]]></code>
       <code><![CDATA[$geo]]></code>
       <code><![CDATA[$rest_api]]></code>
       <code><![CDATA[$schema]]></code>
