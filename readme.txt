@@ -4,7 +4,7 @@ Tags: seo, aeo, geo, schema, structured-data, ai-optimization, llms, featured-sn
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.3.0
+Stable tag: 1.4.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -82,6 +82,23 @@ Admin page with batch operations and live progress bars:
 * `wp search-intel export / import` — settings export/import
 * `wp search-intel scores` — display score table (table, CSV, JSON, YAML)
 
+**Gutenberg Sidebar Panel (v1.4+)**
+Native Block Editor integration with a tabbed sidebar panel:
+
+* SEO tab: title, description, keyword, canonical, robots, social overrides, live SERP preview
+* AEO tab: direct answer, schema type override
+* GEO tab: AI summary, key topics, content type, intent, audience, expertise, fact-check date
+* Analysis tab: score ring visualizations + one-click analysis via REST API
+
+**Custom Gutenberg Blocks (v1.4+)**
+
+* FAQ block — visual FAQ editor with automatic FAQPage schema
+* How To block — step editor with per-step images and HowTo schema
+* Table of Contents — auto-generated from post headings
+* Breadcrumbs — theme-aware navigation with BreadcrumbList schema
+* Answer Box — featured snippet-optimized answer formatting
+* Citation — inline source citation with CreativeWork schema
+
 == Installation ==
 
 1. Upload the `search-intel` folder to `/wp-content/plugins/`
@@ -115,6 +132,16 @@ No. Search Intel outputs lightweight meta tags and JSON-LD schema directly in th
 
 == Changelog ==
 
+= 1.4.0 =
+* Gutenberg sidebar panel with SEO, AEO, GEO, and Analysis tabs
+* @wordpress/data store for post meta state management
+* 6 custom Gutenberg blocks: FAQ, HowTo, TOC, Breadcrumbs, Answer Box, Citation
+* Server-side rendering for TOC and Breadcrumbs blocks
+* BreadcrumbList and FAQPage schema from blocks
+* 28 post meta keys registered in REST API for all public post types
+* @wordpress/scripts build toolchain with 7 webpack entry points
+* PHP metabox retained as Classic Editor fallback
+
 = 1.3.0 =
 * REST API: 9 endpoints under `search-intel/v1` namespace with permission callbacks
 * REST API: Toggleable via enable_rest_api setting in GEO settings page
@@ -146,6 +173,9 @@ No. Search Intel outputs lightweight meta tags and JSON-LD schema directly in th
 * User profile E-E-A-T fields
 
 == Upgrade Notice ==
+
+= 1.4.0 =
+New: Gutenberg sidebar panel (SEO/AEO/GEO/Analysis tabs), 6 custom blocks (FAQ, HowTo, TOC, Breadcrumbs, Answer Box, Citation), @wordpress/data store, server-side rendering.
 
 = 1.3.0 =
 New: REST API (9 endpoints), Bulk Tools admin page, WP-CLI commands (7 subcommands), settings export/import.

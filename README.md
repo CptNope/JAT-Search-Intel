@@ -6,7 +6,7 @@
 [![License: GPL v2](https://img.shields.io/badge/License-GPLv2-blue.svg)](LICENSE.md)
 [![WordPress: 6.0+](https://img.shields.io/badge/WordPress-6.0%2B-21759b.svg)](https://wordpress.org/)
 [![PHP: 7.4+](https://img.shields.io/badge/PHP-7.4%2B-777bb4.svg)](https://php.net/)
-[![Release: v1.3.0](https://img.shields.io/badge/Release-v1.3.0-brightgreen)](https://github.com/CptNope/Search-Intel/releases/tag/v1.3.0)
+[![Release: v1.4.0](https://img.shields.io/badge/Release-v1.4.0-brightgreen)](https://github.com/CptNope/Search-Intel/releases/tag/v1.4.0)
 
 **[Roadmap](ROADMAP.md)** · **[Changelog](CHANGELOG.md)** · **[Contributing](CONTRIBUTING.md)** · **[License](LICENSE.md)**
 
@@ -26,6 +26,8 @@
 - [REST API](#rest-api)
 - [WP-CLI Commands](#wp-cli-commands)
 - [Bulk Tools](#bulk-tools)
+- [Gutenberg Sidebar](#gutenberg-sidebar)
+- [Custom Blocks](#custom-blocks)
 - [Shortcodes](#shortcodes)
 - [Hooks and Filters](#hooks-and-filters)
 - [File Structure](#file-structure)
@@ -637,6 +639,70 @@ All bulk operations are batched via AJAX (20 posts per request) with a progress 
 
 ---
 
+## Gutenberg Sidebar
+
+Search Intel adds a native **PluginDocumentSettingPanel** to the Block Editor with four tabs:
+
+### SEO Tab
+- **SEO Title** — custom title tag with character count (60 max)
+- **Meta Description** — custom description with character count (160 max)
+- **Focus Keyword** — primary keyword for content analysis
+- **Secondary Keywords** — comma-separated additional keywords
+- **Canonical URL** — override the canonical URL
+- **noindex / nofollow** — toggle robots directives
+- **Social Overrides** — collapsible panel for OG and Twitter title/description
+- **SERP Preview** — live preview of how the page appears in Google results
+
+### AEO Tab
+- **Direct Answer** — concise answer for featured snippets and voice assistants (300 char limit)
+- **Schema Type Override** — select Article, NewsArticle, BlogPosting, HowTo, FAQPage, or Review (default: auto-detect)
+- **FAQ & HowTo Guidance** — prompts to use the dedicated blocks for structured data
+
+### GEO Tab
+- **AI Summary** — factual summary for LLM consumption (500 char limit)
+- **Key Topics** — comma-separated topics for AI indexing
+- **Content Type** — article, how-to, faq, comparison, review, guide, news, opinion
+- **Content Intent** — informational, navigational, transactional, commercial
+- **Target Audience** — general, beginner, intermediate, expert, professional
+- **Expertise Level** — beginner through expert
+- **Fact-Check Date** — date picker for freshness signals
+- **Local Relevance** — toggle with conditional location field
+
+### Analysis Tab
+- **Score Rings** — SVG ring visualizations for SEO, AEO, GEO, and Readability scores (color-coded: green ≥80, yellow ≥50, red <50)
+- **Run Analysis** — one-click analysis via the REST API with spinner feedback
+- **Check Results** — categorized pass/fail/info items from the content analyzer
+
+> **Classic Editor users**: The existing PHP metabox continues to work unchanged. The Gutenberg sidebar is only loaded in the Block Editor.
+
+---
+
+## Custom Blocks
+
+Search Intel provides 6 custom Gutenberg blocks under the `search-intel` namespace:
+
+### `search-intel/faq`
+Visual FAQ editor with numbered question/answer pairs. Add, remove, and reorder items directly in the editor. Outputs microdata with `itemScope`/`itemProp` attributes and a `data-schema="FAQPage"` data attribute for JSON-LD generation.
+
+### `search-intel/howto`
+Step-by-step tutorial editor with a title, description, optional total time (ISO 8601), and per-step name, instructions, and image upload via `MediaUpload`. Outputs an ordered list with HowTo schema data attributes.
+
+### `search-intel/toc`
+Auto-generated Table of Contents from headings in the post. Updates in real-time as you add or edit headings. Settings: max heading depth (1–6) and ordered/unordered list. **Dynamic block** — rendered server-side via `render_toc()` on the frontend.
+
+### `search-intel/breadcrumbs`
+Theme-aware breadcrumb navigation with configurable separator (`›`, `/`, `»`, `→`, `|`) and home label. Outputs a full `BreadcrumbList` schema with `itemListElement` microdata. **Dynamic block** — rendered server-side via `render_breadcrumbs()` with category hierarchy.
+
+### `search-intel/answer-box`
+Highlighted answer container optimized for featured snippet extraction. Question + answer fields with `data-si-answer-box` and `data-si-direct-answer` attributes for AI and search engine parsing.
+
+### `search-intel/citation`
+Inline source citation block wrapping quoted text with source metadata. Inspector panel for source name, URL, type (website, journal, book, report, news, government), author, and date. Outputs a `<figure>` with `CreativeWork` microdata.
+
+> **FSE Templates**: The TOC, Breadcrumbs, and FAQ blocks are all usable in Full Site Editing templates (`header.html`, `single.html`, etc.).
+
+---
+
 ## Shortcodes
 
 ### FAQ Block
@@ -697,6 +763,7 @@ search-intel/
 ├── LICENSE.md                    # GPL-2.0-or-later
 ├── CHANGELOG.md                  # Version history
 ├── ROADMAP.md                    # Development roadmap
+├── webpack.config.js             # @wordpress/scripts build config (7 entry points)
 │
 ├── includes/
 │   ├── class-core.php            # Singleton orchestrator + default settings
@@ -710,7 +777,29 @@ search-intel/
 │   ├── class-admin.php           # Settings, metaboxes, user fields, Bulk Tools page
 │   ├── class-rest-api.php        # REST API controller (search-intel/v1 namespace)
 │   ├── class-bulk-tools.php      # Bulk rescore, regenerate, export/import (AJAX)
-│   └── class-cli.php             # WP-CLI commands (analyze, rescore, scores, etc.)
+│   ├── class-cli.php             # WP-CLI commands (analyze, rescore, scores, etc.)
+│   └── class-blocks.php          # Block editor: sidebar, custom blocks, meta registration
+│
+├── src/                           # Block editor source (compiled to build/)
+│   ├── store/
+│   │   └── index.js              # @wordpress/data store (search-intel/editor)
+│   ├── sidebar/
+│   │   ├── index.js              # PluginDocumentSettingPanel registration
+│   │   ├── sidebar.css           # Sidebar styles (tabs, SERP preview, score rings)
+│   │   └── panels/
+│   │       ├── seo-panel.js      # SEO fields + SERP preview + social overrides
+│   │       ├── aeo-panel.js      # Direct answer + schema type override
+│   │       ├── geo-panel.js      # AI summary, topics, intent, audience, local
+│   │       └── score-panel.js    # Score rings + Run Analysis + check results
+│   └── blocks/
+│       ├── faq/                  # FAQ block (edit, save, editor CSS)
+│       ├── howto/                # HowTo block (edit, save, editor CSS)
+│       ├── toc/                  # Table of Contents block (dynamic)
+│       ├── breadcrumbs/          # Breadcrumbs block (dynamic)
+│       ├── answer-box/           # Answer Box block (edit, save, editor CSS)
+│       └── citation/             # Citation block (edit, save, editor CSS)
+│
+├── build/                         # Compiled assets (sidebar.js, blocks/*/index.js)
 │
 ├── admin/
 │   ├── css/

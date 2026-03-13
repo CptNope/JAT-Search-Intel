@@ -1,0 +1,42 @@
+/**
+ * Answer Box Block — Editor Styles
+ */
+
+.si-answer-box {
+	border: 2px solid #007cba;
+	border-radius: 8px;
+	padding: 16px;
+	background: #f0f6fc;
+}
+
+.si-answer-box__header {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 12px;
+}
+
+.si-answer-box__icon {
+	font-size: 20px;
+}
+
+.si-answer-box__label {
+	font-size: 12px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	color: #007cba;
+}
+
+.si-answer-box__question {
+	font-size: 16px;
+	font-weight: 700;
+	margin: 0 0 8px;
+	color: #1e1e1e;
+}
+
+.si-answer-box__answer {
+	font-size: 14px;
+	line-height: 1.6;
+	color: #333;
+}

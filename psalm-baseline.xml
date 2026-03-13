@@ -69,6 +69,25 @@
       <code><![CDATA[SEARCH_INTEL_VERSION]]></code>
     </UndefinedConstant>
   </file>
+  <file src="includes/class-blocks.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[render_toc]]></code>
+      <code><![CDATA[render_breadcrumbs]]></code>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedParam>
+      <code><![CDATA[$content]]></code>
+      <code><![CDATA[$content]]></code>
+    </PossiblyUnusedParam>
+    <UndefinedConstant>
+      <code><![CDATA[SEARCH_INTEL_DIR]]></code>
+      <code><![CDATA[SEARCH_INTEL_DIR]]></code>
+      <code><![CDATA[SEARCH_INTEL_DIR]]></code>
+      <code><![CDATA[SEARCH_INTEL_URL]]></code>
+      <code><![CDATA[SEARCH_INTEL_URL]]></code>
+      <code><![CDATA[SEARCH_INTEL_URL]]></code>
+      <code><![CDATA[SEARCH_INTEL_URL]]></code>
+    </UndefinedConstant>
+  </file>
   <file src="includes/class-cli.php">
     <UndefinedConstant>
       <code><![CDATA[SEARCH_INTEL_VERSION]]></code>
@@ -87,6 +106,7 @@
       <code><![CDATA[$admin]]></code>
       <code><![CDATA[$aeo]]></code>
       <code><![CDATA[$geo]]></code>
+      <code><![CDATA[$blocks]]></code>
       <code><![CDATA[$rest_api]]></code>
       <code><![CDATA[$schema]]></code>
       <code><![CDATA[$title_engine]]></code>
