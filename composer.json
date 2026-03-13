@@ -8,8 +8,10 @@
     },
     "require-dev": {
         "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+        "php-stubs/wordpress-stubs": "^6.9",
         "phpstan/phpstan": "^1.10",
         "phpunit/phpunit": "^9.6",
+        "vimeo/psalm": "*",
         "wp-coding-standards/wpcs": "^3.0"
     },
     "autoload": {
@@ -18,7 +20,9 @@
         ]
     },
     "config": {
-        "allow-plugins": {},
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        },
         "sort-packages": true
     }
 }

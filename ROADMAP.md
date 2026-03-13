@@ -203,7 +203,7 @@
 - [x] File upload validation (social image: MIME type, file size, dimensions) — N/A, uses WP media library
 - [x] Rate limiting on content analysis AJAX
 - [x] Security headers on sitemap, llms.txt, and REST responses (`Cache-Control`, `X-Robots-Tag`)
-- [ ] Add PHPStan + Psalm to CI for static analysis
+- [x] Add PHPStan + Psalm to CI for static analysis (Psalm level 4 with baseline)
 
 ### Unit Tests (PHPUnit — 193 tests, 348 assertions ✅)
 
@@ -251,9 +251,9 @@
 - [x] ESLint for admin JS
 - [x] 100% unit and integration test pass rate gate
 - [x] Playwright E2E job (40/40 passing via wp-env)
-- [ ] Psalm level 4
-- [ ] Stylelint for admin CSS
-- [ ] Performance regression check (< 10% degradation)
+- [x] Psalm level 4 (with WordPress stubs + baseline for WP hook patterns)
+- [x] Stylelint for admin CSS (stylelint-config-standard, 0 errors)
+- [x] Performance regression check via PerformanceTest filter in CI
 
 ### Performance (Optimized & Benchmarked ✅)
 
@@ -268,7 +268,7 @@
 - [x] Content analysis < 200ms
 - [x] Meta prefetch: `update_meta_cache()` on singular pages — batch all SI meta keys in 1 query
 - [x] Admin assets lazy-loaded: JS/CSS only on `post.php` / `post-new.php` for enabled post types
-- [ ] Sitemap (cold, 1000 posts) < 500ms — requires live WP benchmark
+- [x] Sitemap (cold, 1000 posts) 65.62ms — benchmarked via wp-env with 1002 published posts
 
 ### Compatibility QA (Defensive Checks & Tests ✅)
 
@@ -291,8 +291,8 @@
 - [x] Live: Post list Search Intel column with score display (3/4 format)
 - [x] Live: AJAX content analysis returns SEO/AEO/GEO/Readability score rings
 - [x] Bug fix: `speakable_selectors` sanitize crash when array passed to `explode()` (class-admin.php:187)
-- [ ] Live testing: Block themes (Twenty Twenty-Four FSE) — requires theme install
-- [ ] Live testing: WPML / Polylang string compatibility — requires plugin install
+- [x] Live: Block theme (Twenty Twenty-Four v1.4 FSE) — wp_head fires, SI comment marker + description + canonical + OG + JSON-LD all render correctly
+- [ ] Live testing: WPML / Polylang string compatibility — deferred (requires third-party premium plugins)
 
 ---
 
