@@ -49,6 +49,24 @@ class Core {
     /** @var Privacy */
     public $privacy;
 
+    /** @var Redirect_Manager */
+    public $redirects;
+
+    /** @var IndexNow */
+    public $indexnow;
+
+    /** @var WooCommerce */
+    public $woocommerce;
+
+    /** @var Local_Business */
+    public $local_business;
+
+    /** @var Robots_Txt */
+    public $robots_txt;
+
+    /** @var Audit_Log */
+    public $audit_log;
+
     /**
      * Get singleton instance.
      */
@@ -88,6 +106,27 @@ class Core {
 
         // Privacy & GDPR compliance — exporters, erasers, privacy policy.
         $this->privacy = new Privacy();
+
+        // Redirect Manager — 301/302/307/410 with exact, prefix, regex matching.
+        $this->redirects = new Redirect_Manager( $settings );
+
+        // IndexNow — ping search engines on publish/update.
+        $this->indexnow = new IndexNow( $settings );
+
+        // WooCommerce — product schema, breadcrumbs, sitemap (only when WC active).
+        $this->woocommerce = new WooCommerce( $settings );
+
+        // Local Business schema — address, hours, geo, multi-location.
+        $this->local_business = new Local_Business( $settings );
+
+        // Robots.txt visual editor.
+        $this->robots_txt = new Robots_Txt( $settings );
+
+        // Audit log for settings changes.
+        $this->audit_log = new Audit_Log( $settings );
+
+        // Auto-redirect on slug change.
+        add_action( 'post_updated', [ $this->redirects, 'detect_slug_change' ], 10, 3 );
 
         // Prefetch all post meta on singular pages to avoid N+1 queries
         add_action( 'wp', [ $this, 'prefetch_post_meta' ] );
@@ -252,6 +291,24 @@ class Core {
 
             // Post types to enable on
             'enabled_post_types'     => [ 'post', 'page' ],
+
+            // Redirect Manager
+            'enable_redirects'       => true,
+
+            // IndexNow
+            'enable_indexnow'        => false,
+            'indexnow_api_key'       => '',
+            'indexnow_providers'     => [ 'bing', 'yandex', 'naver' ],
+
+            // Local Business
+            'enable_local_business'  => false,
+            'local_business_locations' => [],
+
+            // Robots.txt Editor
+            'enable_robots_editor'   => false,
+
+            // Audit Log
+            'enable_audit_log'       => true,
         ];
     }
 }

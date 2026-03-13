@@ -403,48 +403,48 @@
 
 ### Redirect Manager
 
-- [ ] 301, 302, 307, 410 redirect rules
-- [ ] Exact match, prefix match, regex match
-- [ ] Admin table with search, filter, sort
-- [ ] Hit counter and last-hit date per redirect
-- [ ] 404 log with auto-suggest redirect targets
-- [ ] CSV import/export for redirects
-- [ ] Slug change auto-redirect detection
-- [ ] Redirect loop detection and prevention
+- [x] 301, 302, 307, 410 redirect rules
+- [x] Exact match, prefix match, regex match
+- [x] Admin table with search, filter, sort
+- [x] Hit counter and last-hit date per redirect
+- [x] 404 log with auto-suggest redirect targets
+- [x] CSV import/export for redirects
+- [x] Slug change auto-redirect detection
+- [x] Redirect loop detection and prevention
 
 ### IndexNow Integration
 
-- [ ] IndexNow API ping on post publish/update
-- [ ] Support for Bing, Yandex, Naver
-- [ ] API key management in settings
-- [ ] Ping log with success/failure status
+- [x] IndexNow API ping on post publish/update
+- [x] Support for Bing, Yandex, Naver
+- [x] API key management in settings
+- [x] Ping log with success/failure status
 
 ### WooCommerce Support
 
-- [ ] Auto-detect WooCommerce product pages
-- [ ] Product schema (name, description, image, SKU, brand, GTIN, MPN)
-- [ ] Offer schema (price, currency, availability, condition, seller)
-- [ ] AggregateRating from WooCommerce product reviews
-- [ ] Product breadcrumbs (Home > Shop > Category > Product)
-- [ ] Product sitemap (`sitemap-product-{page}.xml`)
-- [ ] Product-specific metabox fields
+- [x] Auto-detect WooCommerce product pages
+- [x] Product schema (name, description, image, SKU, brand, GTIN, MPN)
+- [x] Offer schema (price, currency, availability, condition, seller)
+- [x] AggregateRating from WooCommerce product reviews
+- [x] Product breadcrumbs (Home > Shop > Category > Product)
+- [x] Product sitemap (`sitemap-product-{page}.xml`)
+- [x] Product-specific metabox fields
 
 ### Local Business Schema
 
-- [ ] LocalBusiness schema type with address, phone, hours
-- [ ] Geo coordinates (latitude, longitude)
-- [ ] Service area support
-- [ ] Multiple locations support
-- [ ] Opening hours specification
+- [x] LocalBusiness schema type with address, phone, hours
+- [x] Geo coordinates (latitude, longitude)
+- [x] Service area support
+- [x] Multiple locations support
+- [x] Opening hours specification
 
 ### Additional SEO Tools
 
-- [ ] Robots.txt visual editor with syntax validation
+- [x] Robots.txt visual editor with syntax validation
 - [ ] Broken link checker (background HTTP HEAD scan)
 - [ ] Internal linking suggestions (AI-powered related content)
 - [ ] Content Security Policy headers on plugin endpoints
 - [ ] Subresource Integrity for admin assets
-- [ ] Audit logging for settings changes
+- [x] Audit logging for settings changes
 
 ---
 

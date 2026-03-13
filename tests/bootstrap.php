@@ -8,7 +8,14 @@
 
 // Plugin constants
 define( 'SEARCH_INTEL_VERSION', '1.1.0' );
-define( 'SEARCH_INTEL_DIR', dirname( __DIR__ ) . '/' );
+define( 'SEARCH_INTEL_DIR', __DIR__ . '/../' );
+
+if ( ! defined( 'ARRAY_A' ) ) {
+	define( 'ARRAY_A', 'ARRAY_A' );
+}
+if ( ! defined( 'ARRAY_N' ) ) {
+	define( 'ARRAY_N', 'ARRAY_N' );
+}
 define( 'SEARCH_INTEL_URL', 'https://example.com/wp-content/plugins/search-intel/' );
 define( 'ABSPATH', dirname( __DIR__, 3 ) . '/' );
 define( 'MINUTE_IN_SECONDS', 60 );
@@ -290,6 +297,9 @@ function admin_url( string $path = '' ): string {
 }
 
 function get_permalink( $post_id = 0 ): string {
+    if ( is_object( $post_id ) ) {
+        $post_id = $post_id->ID ?? 0;
+    }
     return 'https://example.com/?p=' . (int) $post_id;
 }
 
@@ -779,9 +789,14 @@ $wp = (object) [ 'request' => '' ];
 
 global $wpdb;
 $wpdb = new class {
-    public $options = 'wp_options';
-    public $posts   = 'wp_posts';
-    public $prefix  = 'wp_';
+    public $options   = 'wp_options';
+    public $posts     = 'wp_posts';
+    public $prefix    = 'wp_';
+    public $insert_id = 0;
+
+    /** @var array<string,array<int,array>> In-memory tables for testing */
+    public $tables = [];
+    private $auto_increment = [];
 
     public function esc_like( string $text ): string {
         return addcslashes( $text, '_%\\' );
@@ -800,6 +815,63 @@ $wpdb = new class {
 
     public function get_results( string $query, $output = 'OBJECT' ): array {
         return [];
+    }
+
+    public function get_row( string $query, $output = 'OBJECT', int $y = 0 ) {
+        return null;
+    }
+
+    public function get_var( string $query, int $x = 0, int $y = 0 ) {
+        return null;
+    }
+
+    public function get_charset_collate(): string {
+        return 'DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci';
+    }
+
+    public function insert( string $table, array $data, $format = null ) {
+        if ( ! isset( $this->auto_increment[ $table ] ) ) {
+            $this->auto_increment[ $table ] = 1;
+        }
+        $id = $this->auto_increment[ $table ]++;
+        $data['id'] = $id;
+        $this->tables[ $table ][ $id ] = $data;
+        $this->insert_id = $id;
+        return 1;
+    }
+
+    public function update( string $table, array $data, array $where, $format = null, $where_format = null ) {
+        foreach ( $this->tables[ $table ] ?? [] as $id => $row ) {
+            $match = true;
+            foreach ( $where as $k => $v ) {
+                if ( ( $row[ $k ] ?? null ) != $v ) {
+                    $match = false;
+                    break;
+                }
+            }
+            if ( $match ) {
+                $this->tables[ $table ][ $id ] = array_merge( $row, $data );
+                return 1;
+            }
+        }
+        return 0;
+    }
+
+    public function delete( string $table, array $where, $where_format = null ) {
+        foreach ( $this->tables[ $table ] ?? [] as $id => $row ) {
+            $match = true;
+            foreach ( $where as $k => $v ) {
+                if ( ( $row[ $k ] ?? null ) != $v ) {
+                    $match = false;
+                    break;
+                }
+            }
+            if ( $match ) {
+                unset( $this->tables[ $table ][ $id ] );
+                return 1;
+            }
+        }
+        return 0;
     }
 };
 
@@ -872,6 +944,109 @@ function delete_user_meta( int $user_id, string $key ): bool {
 function wp_add_privacy_policy_content( string $plugin_name, string $policy_text ): void {
 	global $si_test_state;
 	$si_test_state['privacy_policy'][ $plugin_name ] = $policy_text;
+}
+
+// ── Redirect / IndexNow / WooCommerce / Local Business stubs ─────────────────
+
+function wp_redirect( string $location, int $status = 302 ): bool {
+	global $si_test_state;
+	$si_test_state['last_redirect'] = [ 'location' => $location, 'status' => $status ];
+	return true;
+}
+
+function status_header( int $code ): void {
+	global $si_test_state;
+	$si_test_state['last_status_header'] = $code;
+}
+
+function nocache_headers(): void {}
+
+function wp_parse_url( string $url, int $component = -1 ) {
+	if ( $component === -1 ) {
+		return parse_url( $url );
+	}
+	$map = [
+		PHP_URL_SCHEME => 'scheme',
+		PHP_URL_HOST   => 'host',
+		PHP_URL_PATH   => 'path',
+		PHP_URL_QUERY  => 'query',
+	];
+	$key = $map[ $component ] ?? null;
+	if ( ! $key ) {
+		return null;
+	}
+	$parts = parse_url( $url );
+	return $parts[ $key ] ?? null;
+}
+
+function wp_salt( string $scheme = 'auth' ): string {
+	return 'test-salt-' . $scheme;
+}
+
+function human_time_diff( int $from, int $to = 0 ): string {
+	return '1 hour';
+}
+
+function number_format_i18n( $number, int $decimals = 0 ): string {
+	return number_format( (float) $number, $decimals );
+}
+
+function paginate_links( array $args = [] ): string {
+	return '<span class="page-numbers">1</span>';
+}
+
+function sanitize_key( string $key ): string {
+	return preg_replace( '/[^a-z0-9_\-]/', '', strtolower( $key ) );
+}
+
+function wp_remote_get( string $url, array $args = [] ): array {
+	global $si_test_state;
+	return $si_test_state['remote_response'] ?? [
+		'response' => [ 'code' => 200, 'message' => 'OK' ],
+		'body'     => '',
+	];
+}
+
+function wp_remote_retrieve_response_code( $response ): int {
+	if ( is_array( $response ) && isset( $response['response']['code'] ) ) {
+		return (int) $response['response']['code'];
+	}
+	return 0;
+}
+
+function wp_remote_retrieve_response_message( $response ): string {
+	if ( is_array( $response ) && isset( $response['response']['message'] ) ) {
+		return $response['response']['message'];
+	}
+	return '';
+}
+
+function current_time( string $type, bool $gmt = false ): string {
+	if ( 'mysql' === $type ) {
+		return gmdate( 'Y-m-d H:i:s' );
+	}
+	return (string) time();
+}
+
+function get_the_terms( int $post_id, string $taxonomy ) {
+	global $si_test_state;
+	return $si_test_state['post_terms'][ $post_id ][ $taxonomy ] ?? false;
+}
+
+function wp_get_attachment_url( int $attachment_id ) {
+	return $attachment_id > 0 ? 'https://example.com/wp-content/uploads/image-' . $attachment_id . '.jpg' : false;
+}
+
+function wp_die( $message = '', $title = '', $args = [] ): void {
+	// No-op in tests
+}
+
+function get_woocommerce_currency(): string {
+	return 'USD';
+}
+
+function sanitize_textarea_field( string $str ): string {
+	return trim( strip_tags( $str ) );
 }
 
 // ── Autoloader ───────────────────────────────────────────────────────────────
