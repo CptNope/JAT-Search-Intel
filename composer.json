@@ -11,7 +11,7 @@
         "php-stubs/wordpress-stubs": "^6.9",
         "phpstan/phpstan": "^1.10",
         "phpunit/phpunit": "^9.6",
-        "vimeo/psalm": "*",
+        "vimeo/psalm": "^6.0",
         "wp-coding-standards/wpcs": "^3.0"
     },
     "autoload": {
