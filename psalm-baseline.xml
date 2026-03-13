@@ -384,18 +384,33 @@
   </file>
   <file src="includes/class-visibility-dashboard.php">
     <InvalidArgument>
-      <code><![CDATA[['hide_empty' => false]]]></code>
+      <code><![CDATA[[ 'hide_empty' => false ]]]></code>
     </InvalidArgument>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[fetch_gsc_data]]></code>
+      <code><![CDATA[fetch_bing_data]]></code>
+      <code><![CDATA[identify_ai_referral]]></code>
+    </PossiblyUnusedMethod>
   </file>
   <file src="includes/class-citation-graph.php">
     <InvalidArgument>
-      <code><![CDATA[['hide_empty' => true]]]></code>
+      <code><![CDATA[[ 'hide_empty' => true ]]]></code>
     </InvalidArgument>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[get_citation_data]]></code>
+      <code><![CDATA[detect_missing_links]]></code>
+    </PossiblyUnusedMethod>
+    <UnusedProperty>
+      <code><![CDATA[$settings]]></code>
+    </UnusedProperty>
   </file>
   <file src="includes/class-authority-map.php">
     <InvalidArgument>
-      <code><![CDATA[['hide_empty' => false]]]></code>
-      <code><![CDATA[['hide_empty' => true]]]></code>
+      <code><![CDATA[[ 'hide_empty' => false ]]]></code>
+      <code><![CDATA[[ 'hide_empty' => true ]]]></code>
     </InvalidArgument>
+    <UnusedProperty>
+      <code><![CDATA[$settings]]></code>
+    </UnusedProperty>
   </file>
 </files>
