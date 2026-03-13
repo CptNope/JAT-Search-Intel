@@ -6,6 +6,52 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.2.0] — 2026-03-13
+
+### Added
+
+#### AI Engine (`class-ai-engine.php`)
+- Unified LLM abstraction layer with provider support for OpenAI, Anthropic, and Ollama (local)
+- Encrypted API key storage using AES-256-CBC with WordPress salts
+- Per-minute rate limiting with configurable threshold (default 30 req/min)
+- Monthly token budget controls with automatic reset and usage tracking
+- AI meta description generation (120-155 chars, keyword-aware)
+- AI title tag suggestions (3 alternatives, 50-60 chars each)
+- AI internal link recommendations using Citation Graph topology
+- AI content brief generator from Authority Map gap analysis
+
+#### Content Decay Detection (`class-content-decay.php`)
+- Historical score snapshots stored per post on every analysis (90-day retention)
+- Decay detection: flag posts whose SEO/AEO/GEO scores dropped > threshold% over lookback period
+- Decay Dashboard admin page: sorted list of declining content with drop percentages
+- Auto-queue decaying posts for re-analysis via Scale background queue
+- Content refresh suggestions based on which modules declined and by how much
+- Score trend data API for sparkline visualizations (configurable period)
+- Score change calculator with absolute and percentage deltas
+
+#### Keyword Cannibalization Detector (`class-keyword-cannibalization.php`)
+- Keyword index builder: detect multiple posts targeting the same focus keyword
+- Cannibalization report: grouped by keyword with SEO/AEO/GEO score comparisons
+- Smart action suggestions: merge, redirect, differentiate, or de-optimize based on score gaps
+- Citation Graph integration: show internal link relationships between cannibalizing posts
+- Admin dashboard with per-keyword cards, best-performer highlighting, and recommendation banners
+- Transient caching with auto-invalidation on post save
+
+#### Advanced Internal Linking (`class-advanced-linking.php`)
+- Content-similarity link suggestion engine (keyword overlap, title match, taxonomy, graph proximity)
+- REST API endpoints for editor integration (`/link-suggestions/{id}`, `/orphan-check/{id}`)
+- Orphaned content detection (zero inbound internal links) with Citation Graph or fallback search
+- Link equity flow visualization: nodes (posts) with inbound/outbound counts and edges
+- Broken internal link scanner: daily cron, per-post checks, status classification
+- Auto-fix suggestions for broken links: redirect, restore, or remove
+- Anchor text suggestion algorithm (progressive substring matching from target title)
+
+### Tests
+- 765 unit tests, 1,747 assertions (up from 690/1,615)
+- Psalm level 4: 0 errors
+
+---
+
 ## [3.1.0] — 2026-03-13
 
 ### Added

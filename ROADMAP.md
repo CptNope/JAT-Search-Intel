@@ -613,35 +613,35 @@
 
 ### AI-Powered Content Optimization
 
-- [ ] AI meta description generation (OpenAI / Anthropic / Ollama API)
-- [ ] AI title tag suggestions based on content and keyword
-- [ ] AI internal link recommendations (based on Citation Graph topology)
-- [ ] AI content brief generator for gap topics (from Authority Map)
-- [ ] API key management in settings (encrypted storage)
-- [ ] Rate limiting and token budget controls
-- [ ] Ollama / local LLM support for privacy-first deployments
+- [x] AI meta description generation (OpenAI / Anthropic / Ollama API)
+- [x] AI title tag suggestions based on content and keyword
+- [x] AI internal link recommendations (based on Citation Graph topology)
+- [x] AI content brief generator for gap topics (from Authority Map)
+- [x] API key management in settings (encrypted storage)
+- [x] Rate limiting and token budget controls
+- [x] Ollama / local LLM support for privacy-first deployments
 
 ### Content Decay Detection
 
-- [ ] Historical score tracking per post (store score snapshots on each analysis)
-- [ ] Decay detection: flag posts whose scores dropped > 10% over 30 days
-- [ ] Decay dashboard: sorted list of declining content with trend sparklines
-- [ ] Auto-queue decaying posts for re-analysis
-- [ ] "Content Refresh" suggestions based on what changed in the scoring
+- [x] Historical score tracking per post (store score snapshots on each analysis)
+- [x] Decay detection: flag posts whose scores dropped > 10% over 30 days
+- [x] Decay dashboard: sorted list of declining content with trend sparklines
+- [x] Auto-queue decaying posts for re-analysis
+- [x] "Content Refresh" suggestions based on what changed in the scoring
 
 ### Keyword Cannibalization Detector
 
-- [ ] Detect multiple posts targeting the same focus keyword
-- [ ] Cannibalization report: grouped by keyword with score comparison
-- [ ] Suggested actions: merge, redirect, differentiate, or de-optimize
-- [ ] Integration with Citation Graph to show link relationships between cannibalizing posts
+- [x] Detect multiple posts targeting the same focus keyword
+- [x] Cannibalization report: grouped by keyword with score comparison
+- [x] Suggested actions: merge, redirect, differentiate, or de-optimize
+- [x] Integration with Citation Graph to show link relationships between cannibalizing posts
 
 ### Advanced Internal Linking
 
-- [ ] Auto-suggest internal links while editing (based on Citation Graph + content similarity)
-- [ ] Orphaned content alerts in post editor sidebar
-- [ ] Link equity flow visualization (which posts pass authority to which)
-- [ ] Broken internal link detection with auto-fix suggestions (redirect or remove)
+- [x] Auto-suggest internal links while editing (based on Citation Graph + content similarity)
+- [x] Orphaned content alerts in post editor sidebar
+- [x] Link equity flow visualization (which posts pass authority to which)
+- [x] Broken internal link detection with auto-fix suggestions (redirect or remove)
 
 ---
 

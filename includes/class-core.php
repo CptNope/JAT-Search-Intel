@@ -121,6 +121,18 @@ class Core {
     /** @var Notifications */
     public $notifications;
 
+    /** @var AI_Engine */
+    public $ai_engine;
+
+    /** @var Content_Decay */
+    public $content_decay;
+
+    /** @var Keyword_Cannibalization */
+    public $keyword_cannibalization;
+
+    /** @var Advanced_Linking */
+    public $advanced_linking;
+
     /**
      * Get singleton instance.
      */
@@ -232,6 +244,18 @@ class Core {
 
         // Notifications — email digest, score alerts, Slack, dashboard widget.
         $this->notifications = new Notifications( $settings );
+
+        // AI Engine — LLM abstraction (OpenAI, Anthropic, Ollama).
+        $this->ai_engine = new AI_Engine( $settings );
+
+        // Content Decay — historical scores, decay detection, refresh suggestions.
+        $this->content_decay = new Content_Decay( $settings );
+
+        // Keyword Cannibalization — duplicate keyword detection and action suggestions.
+        $this->keyword_cannibalization = new Keyword_Cannibalization( $settings );
+
+        // Advanced Internal Linking — suggestions, orphan alerts, equity flow, broken links.
+        $this->advanced_linking = new Advanced_Linking( $settings );
 
         // Auto-redirect on slug change.
         add_action( 'post_updated', [ $this->redirects, 'detect_slug_change' ], 10, 3 );
@@ -481,6 +505,26 @@ class Core {
             'alert_threshold_aeo'    => 50,
             'alert_threshold_geo'    => 50,
             'slack_webhook_url'      => '',
+
+            // AI Engine (v3.2)
+            'enable_ai_engine'       => false,
+            'ai_provider'            => 'openai',
+            'ai_model'               => '',
+            'ai_endpoint'            => '',
+            'ai_rate_limit'          => 30,
+            'ai_token_budget'        => 0,
+
+            // Content Decay Detection (v3.2)
+            'enable_content_decay'   => false,
+            'decay_threshold'        => 10.0,
+            'decay_lookback_days'    => 30,
+            'decay_auto_queue'       => true,
+
+            // Keyword Cannibalization (v3.2)
+            'enable_cannibalization' => false,
+
+            // Advanced Internal Linking (v3.2)
+            'enable_advanced_linking' => false,
         ];
     }
 }
