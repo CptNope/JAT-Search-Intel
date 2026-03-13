@@ -12,7 +12,6 @@
         <directory name="includes" />
         <ignoreFiles>
             <directory name="vendor" />
-            <directory name="node_modules" />
             <directory name="tests" />
         </ignoreFiles>
     </projectFiles>
