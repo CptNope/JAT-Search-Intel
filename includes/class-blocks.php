@@ -152,11 +152,11 @@ class Blocks {
 			}
 
 			$block_args = [
-				'editor_script' => $script_handle,
+				'editor_script_handles' => [ $script_handle ],
 			];
 
 			if ( $style_handle ) {
-				$block_args['editor_style'] = $style_handle;
+				$block_args['editor_style_handles'] = [ $style_handle ];
 			}
 
 			if ( ! empty( $args['render_callback'] ) ) {
