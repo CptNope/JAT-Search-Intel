@@ -79,6 +79,15 @@ class Core {
     /** @var SRI */
     public $sri;
 
+    /** @var Schema_Types */
+    public $schema_types;
+
+    /** @var QA_Detector */
+    public $qa_detector;
+
+    /** @var FAQ_Generator */
+    public $faq_generator;
+
     /**
      * Get singleton instance.
      */
@@ -148,6 +157,15 @@ class Core {
 
         // Subresource Integrity for admin assets.
         $this->sri = new SRI( $settings );
+
+        // Additional schema types — VideoObject, Recipe, Event, Review, Course, Software, JobPosting.
+        $this->schema_types = new Schema_Types( $settings );
+
+        // Q&A Detection Engine — classify content for FAQPage, HowTo, QAPage, DefinedTerm.
+        $this->qa_detector = new QA_Detector( $settings );
+
+        // FAQ Generator — local pattern matching + optional AI enhancement.
+        $this->faq_generator = new FAQ_Generator( $settings, $this->qa_detector );
 
         // Auto-redirect on slug change.
         add_action( 'post_updated', [ $this->redirects, 'detect_slug_change' ], 10, 3 );
@@ -345,6 +363,16 @@ class Core {
 
             // Subresource Integrity
             'enable_sri'             => false,
+
+            // Additional Schema Types (v2.1)
+            'enable_schema_types'    => false,
+
+            // Q&A Detection Engine (v2.1)
+            'enable_qa_detector'     => false,
+
+            // FAQ Generator (v2.1)
+            'enable_faq_generator'   => false,
+            'faq_ai_api_key'         => '',
         ];
     }
 }

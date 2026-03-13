@@ -452,31 +452,31 @@
 
 ### Additional Schema Types
 
-- [ ] VideoObject (auto-detect YouTube/Vimeo iframes)
-- [ ] Recipe (ingredients, steps, cook time, nutrition)
-- [ ] Event (date, location, price, performer, organizer)
-- [ ] Review / Rating (star rating, pros/cons, itemReviewed)
-- [ ] Course (provider, duration, price, description)
-- [ ] SoftwareApplication (OS, price, rating, category)
-- [ ] JobPosting (salary, location, employment type, company)
+- [x] VideoObject (auto-detect YouTube/Vimeo iframes)
+- [x] Recipe (ingredients, steps, cook time, nutrition)
+- [x] Event (date, location, price, performer, organizer)
+- [x] Review / Rating (star rating, pros/cons, itemReviewed)
+- [x] Course (provider, duration, price, description)
+- [x] SoftwareApplication (OS, price, rating, category)
+- [x] JobPosting (salary, location, employment type, company)
 
 ### AI-Assisted FAQ Generation
 
-- [ ] Local pattern-matching FAQ generator (no API key needed)
-- [ ] Extract Q&A from headings + following paragraphs
-- [ ] Optional AI-enhanced generation (user provides API key)
-- [ ] Suggested FAQs are editable before saving
-- [ ] Auto-update AEO score after FAQ changes
+- [x] Local pattern-matching FAQ generator (no API key needed)
+- [x] Extract Q&A from headings + following paragraphs
+- [x] Optional AI-enhanced generation (user provides API key)
+- [x] Suggested FAQs are editable before saving
+- [x] Auto-update AEO score after FAQ changes
 
 ### Q&A Detection Engine
 
-- [ ] Detect H2/H3 headings ending with `?`
-- [ ] Detect bold `Q:` / `A:` inline patterns
-- [ ] Detect definition patterns ("X is defined as...")
-- [ ] Detect numbered step patterns ("Step 1:", "1.")
-- [ ] Detect comparison patterns ("X vs Y", "difference between")
-- [ ] Classify content as FAQPage, HowTo, Q&A, or Definition eligible
-- [ ] Surface classification in AEO analysis tab
+- [x] Detect H2/H3 headings ending with `?`
+- [x] Detect bold `Q:` / `A:` inline patterns
+- [x] Detect definition patterns ("X is defined as...")
+- [x] Detect numbered step patterns ("Step 1:", "1.")
+- [x] Detect comparison patterns ("X vs Y", "difference between")
+- [x] Classify content as FAQPage, HowTo, Q&A, or Definition eligible
+- [x] Surface classification in AEO analysis tab
 
 ---
 
