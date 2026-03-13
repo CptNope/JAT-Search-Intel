@@ -1,6 +1,6 @@
 # Search Intel — Development Roadmap
 
-> A version-by-version checklist for building Search Intel from v1.0 through v3.0.
+> A version-by-version checklist for building Search Intel from v1.0 through v4.0.
 
 ---
 
@@ -292,7 +292,7 @@
 - [x] Live: AJAX content analysis returns SEO/AEO/GEO/Readability score rings
 - [x] Bug fix: `speakable_selectors` sanitize crash when array passed to `explode()` (class-admin.php:187)
 - [x] Live: Block theme (Twenty Twenty-Four v1.4 FSE) — wp_head fires, SI comment marker + description + canonical + OG + JSON-LD all render correctly
-- [ ] Live testing: WPML / Polylang string compatibility — deferred (requires third-party premium plugins)
+- [ ] Live testing: WPML / Polylang string compatibility — deferred (integration code ships in v3.0 `class-multilang.php`, live testing requires premium plugins)
 
 ---
 
@@ -331,7 +331,7 @@
 - [x] `wp search-intel export > settings.json` — export settings
 - [x] `wp search-intel import < settings.json` — import settings
 - [x] `wp search-intel scores --format=table` — show all post scores
-- [ ] `wp search-intel migrate --from=yoast` — migrate from another SEO plugin (deferred to v1.4)
+- [ ] `wp search-intel migrate --from=yoast` — migrate from another SEO plugin (deferred to v3.1 — migration class ships in v3.0)
 
 ---
 
@@ -341,7 +341,7 @@
 
 - [x] `PluginDocumentSettingPanel` React component
 - [x] `@wordpress/data` store (`search-intel/editor`)
-- [ ] Real-time analysis via `subscribe` to editor changes (deferred to v1.5)
+- [ ] Real-time analysis via `subscribe` to editor changes (deferred to v3.2)
 - [x] SEO fields in sidebar (title, description, keyword, canonical, robots)
 - [x] Social fields in sidebar (title, description, image)
 - [x] AEO fields in sidebar (direct-answer, FAQ toggle)
@@ -358,20 +358,20 @@
 - [x] `search-intel/answer-box` — direct-answer formatting block
 - [x] `search-intel/citation` — inline source citation block
 - [x] Block previews in editor
-- [ ] Schema output deduplication (block + wp_head don't double-output) (deferred to v1.5)
+- [ ] Schema output deduplication (block + wp_head don't double-output) (deferred to v3.2)
 
 ### FSE Template Integration
 
 - [x] Breadcrumbs block usable in FSE `header.html` template part
 - [x] TOC block usable in FSE `single.html` template
 - [x] FAQ block usable in FSE templates
-- [ ] Read `theme.json` color palette for admin score ring UI (deferred to v1.5)
+- [ ] Read `theme.json` color palette for admin score ring UI (deferred to v3.2)
 
 ### Backward Compatibility
 
 - [x] Classic Editor: PHP metabox unchanged
 - [x] Block Editor without sidebar: metabox fallback
-- [ ] Shortcodes in block content: rendered + deprecation notice (deferred to v1.5)
+- [ ] Shortcodes in block content: rendered + deprecation notice (deferred to v3.2)
 - [x] FSE theme with no blocks inserted: `wp_head` output only
 
 ---
