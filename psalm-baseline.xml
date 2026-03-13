@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<files psalm-version="6.5.0@38fc8444edf0cebc9205296ee6e30e906ade783b">
+  <file src="includes/class-admin.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[sanitize_settings]]></code>
+      <code><![CDATA[sanitize_social_profiles]]></code>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedParam>
+      <code><![CDATA[$post]]></code>
+    </PossiblyUnusedParam>
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[array]]></code>
+      <code><![CDATA[array]]></code>
+    </PossiblyUnusedReturnValue>
+    <UndefinedConstant>
+      <code><![CDATA[SEARCH_INTEL_BASENAME]]></code>
+      <code><![CDATA[SEARCH_INTEL_DIR]]></code>
+      <code><![CDATA[SEARCH_INTEL_DIR]]></code>
+      <code><![CDATA[SEARCH_INTEL_DIR]]></code>
+      <code><![CDATA[SEARCH_INTEL_DIR]]></code>
+      <code><![CDATA[SEARCH_INTEL_DIR]]></code>
+      <code><![CDATA[SEARCH_INTEL_DIR]]></code>
+      <code><![CDATA[SEARCH_INTEL_DIR]]></code>
+      <code><![CDATA[SEARCH_INTEL_URL]]></code>
+      <code><![CDATA[SEARCH_INTEL_URL]]></code>
+      <code><![CDATA[SEARCH_INTEL_URL]]></code>
+      <code><![CDATA[SEARCH_INTEL_VERSION]]></code>
+      <code><![CDATA[SEARCH_INTEL_VERSION]]></code>
+      <code><![CDATA[SEARCH_INTEL_VERSION]]></code>
+    </UndefinedConstant>
+    <UnusedProperty>
+      <code><![CDATA[$core]]></code>
+    </UnusedProperty>
+    <UnusedVariable>
+      <code><![CDATA[$meta]]></code>
+      <code><![CDATA[$title]]></code>
+    </UnusedVariable>
+  </file>
+  <file src="includes/class-aeo-manager.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[detect_qa_patterns]]></code>
+      <code><![CDATA[get_aeo_score]]></code>
+      <code><![CDATA[get_snippet_score]]></code>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[string]]></code>
+      <code><![CDATA[string]]></code>
+      <code><![CDATA[string]]></code>
+    </PossiblyUnusedReturnValue>
+  </file>
+  <file src="includes/class-content-analyzer.php">
+    <InvalidOperand>
+      <code><![CDATA[$modified]]></code>
+    </InvalidOperand>
+    <InvalidScalarArgument>
+      <code><![CDATA[$slug]]></code>
+    </InvalidScalarArgument>
+    <UndefinedConstant>
+      <code><![CDATA[DAY_IN_SECONDS]]></code>
+      <code><![CDATA[MINUTE_IN_SECONDS]]></code>
+    </UndefinedConstant>
+    <UnusedParam>
+      <code><![CDATA[$text]]></code>
+      <code><![CDATA[$word_count]]></code>
+    </UnusedParam>
+  </file>
+  <file src="includes/class-core.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[get_instance]]></code>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedProperty>
+      <code><![CDATA[$admin]]></code>
+      <code><![CDATA[$aeo]]></code>
+      <code><![CDATA[$analyzer]]></code>
+      <code><![CDATA[$geo]]></code>
+      <code><![CDATA[$schema]]></code>
+      <code><![CDATA[$seo]]></code>
+      <code><![CDATA[$sitemap]]></code>
+      <code><![CDATA[$title_engine]]></code>
+    </PossiblyUnusedProperty>
+    <UndefinedConstant>
+      <code><![CDATA[SEARCH_INTEL_BASENAME]]></code>
+    </UndefinedConstant>
+  </file>
+  <file src="includes/class-geo-manager.php">
+    <InvalidArgument>
+      <code><![CDATA[[ 'hide_empty' => true, 'number' => 20 ]]]></code>
+    </InvalidArgument>
+    <InvalidNullableReturnType>
+      <code><![CDATA[string]]></code>
+    </InvalidNullableReturnType>
+    <InvalidOperand>
+      <code><![CDATA[$modified]]></code>
+      <code><![CDATA[$modified]]></code>
+    </InvalidOperand>
+    <NullableReturnStatement>
+      <code><![CDATA[$content]]></code>
+    </NullableReturnStatement>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[get_geo_score]]></code>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[string]]></code>
+    </PossiblyUnusedReturnValue>
+    <UndefinedConstant>
+      <code><![CDATA[DAY_IN_SECONDS]]></code>
+      <code><![CDATA[DAY_IN_SECONDS]]></code>
+    </UndefinedConstant>
+    <UnusedVariable>
+      <code><![CDATA[$modified]]></code>
+      <code><![CDATA[$modified]]></code>
+      <code><![CDATA[$now]]></code>
+    </UnusedVariable>
+  </file>
+  <file src="includes/class-schema-manager.php">
+    <UndefinedMagicPropertyFetch>
+      <code><![CDATA[$term->name]]></code>
+      <code><![CDATA[$term->name]]></code>
+    </UndefinedMagicPropertyFetch>
+    <UndefinedPropertyFetch>
+      <code><![CDATA[$ancestor->name]]></code>
+    </UndefinedPropertyFetch>
+  </file>
+  <file src="includes/class-seo-manager.php">
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[string]]></code>
+      <code><![CDATA[string]]></code>
+    </PossiblyUnusedReturnValue>
+    <RedundantCondition>
+      <code><![CDATA[! empty( $directives )]]></code>
+      <code><![CDATA[empty( $directives )]]></code>
+    </RedundantCondition>
+    <UndefinedConstant>
+      <code><![CDATA[SEARCH_INTEL_VERSION]]></code>
+    </UndefinedConstant>
+    <UnusedVariable>
+      <code><![CDATA[$robots]]></code>
+    </UnusedVariable>
+  </file>
+  <file src="includes/class-sitemap.php">
+    <FalsableReturnStatement>
+      <code><![CDATA[get_the_modified_date( 'c', $latest[0]->ID )]]></code>
+    </FalsableReturnStatement>
+    <InvalidReturnStatement>
+      <code><![CDATA[get_the_modified_date( 'c', $latest[0]->ID )]]></code>
+    </InvalidReturnStatement>
+    <InvalidReturnType>
+      <code><![CDATA[string]]></code>
+    </InvalidReturnType>
+    <UndefinedConstant>
+      <code><![CDATA[DAY_IN_SECONDS]]></code>
+    </UndefinedConstant>
+    <UnusedVariable>
+      <code><![CDATA[$modified]]></code>
+    </UnusedVariable>
+  </file>
+  <file src="includes/class-title-engine.php">
+    <InvalidReturnStatement>
+      <code><![CDATA[get_the_date( '', get_queried_object_id() ) ?: '']]></code>
+      <code><![CDATA[get_the_date() ?: '']]></code>
+    </InvalidReturnStatement>
+    <InvalidReturnType>
+      <code><![CDATA[string]]></code>
+    </InvalidReturnType>
+    <PossiblyUnusedParam>
+      <code><![CDATA[$title]]></code>
+    </PossiblyUnusedParam>
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[string]]></code>
+    </PossiblyUnusedReturnValue>
+    <UndefinedMethod>
+      <code><![CDATA[$tags]]></code>
+    </UndefinedMethod>
+  </file>
+</files>

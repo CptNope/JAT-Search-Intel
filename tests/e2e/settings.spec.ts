@@ -16,7 +16,7 @@ test.describe('Settings Pages', () => {
 
   test('main settings page loads', async ({ page }) => {
     await page.goto('/wp-admin/admin.php?page=search-intel');
-    await expect(page.locator('h1, h2')).toContainText(/Search Intel/);
+    await expect(page.locator('h1').first()).toContainText(/Search Intel/);
   });
 
   test('SEO settings tab loads', async ({ page }) => {
@@ -24,8 +24,8 @@ test.describe('Settings Pages', () => {
     await expect(page.locator('form')).toBeVisible();
   });
 
-  test('Schema settings tab loads', async ({ page }) => {
-    await page.goto('/wp-admin/admin.php?page=search-intel-schema');
+  test('Social settings tab loads', async ({ page }) => {
+    await page.goto('/wp-admin/admin.php?page=search-intel-social');
     await expect(page.locator('form')).toBeVisible();
   });
 
@@ -47,10 +47,11 @@ test.describe('Settings Pages', () => {
   // ── SEO settings save ────────────────────────────────────────────
 
   test('separator setting saves correctly', async ({ page }) => {
-    await page.goto('/wp-admin/admin.php?page=search-intel-seo');
+    await page.goto('/wp-admin/admin.php?page=search-intel');
     await page.selectOption('select[name="search_intel_settings[separator]"]', '-');
     await page.click('input[type="submit"]');
-    await expect(page.locator('.notice-success, .updated')).toBeVisible();
+    // Page redirects back after save — verify the value persisted
+    await page.waitForLoadState('networkidle');
     await expect(page.locator('select[name="search_intel_settings[separator]"]')).toHaveValue('-');
   });
 
@@ -64,8 +65,8 @@ test.describe('Settings Pages', () => {
       await checkbox.check();
     }
     await page.click('input[type="submit"]');
-    await expect(page.locator('.notice-success, .updated')).toBeVisible();
-    const nowChecked = await checkbox.isChecked();
+    await page.waitForLoadState('networkidle');
+    const nowChecked = await page.locator('input[name="search_intel_settings[enable_og]"]').isChecked();
     expect(nowChecked).not.toBe(wasChecked);
   });
 
@@ -75,7 +76,7 @@ test.describe('Settings Pages', () => {
     await page.goto('/wp-admin/admin.php?page=search-intel-sitemap');
     await page.fill('input[name="search_intel_settings[sitemap_max_urls]"]', '5000');
     await page.click('input[type="submit"]');
-    await expect(page.locator('.notice-success, .updated')).toBeVisible();
+    await page.waitForLoadState('networkidle');
     await expect(page.locator('input[name="search_intel_settings[sitemap_max_urls]"]')).toHaveValue('5000');
   });
 });

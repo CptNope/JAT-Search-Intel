@@ -184,7 +184,12 @@ class Admin {
 
         // Speakable selectors
         if ( isset( $input['speakable_selectors'] ) ) {
-            $sanitized['speakable_selectors'] = array_filter( array_map( 'sanitize_text_field', explode( "\n", $input['speakable_selectors'] ) ) );
+            $raw = $input['speakable_selectors'];
+            if ( is_array( $raw ) ) {
+                $sanitized['speakable_selectors'] = array_filter( array_map( 'sanitize_text_field', $raw ) );
+            } else {
+                $sanitized['speakable_selectors'] = array_filter( array_map( 'sanitize_text_field', explode( "\n", $raw ) ) );
+            }
         } else {
             $sanitized['speakable_selectors'] = $defaults['speakable_selectors'];
         }

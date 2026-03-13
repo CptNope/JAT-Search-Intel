@@ -30,7 +30,7 @@
     border-radius: 8px;
     padding: 20px 24px;
     margin-bottom: 20px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 4%);
 }
 
 .si-settings-card h2 {
@@ -384,7 +384,7 @@
 }
 
 /* Responsive */
-@media screen and (max-width: 782px) {
+@media screen and (width <= 782px) {
     .si-tabs {
         flex-wrap: wrap;
     }
