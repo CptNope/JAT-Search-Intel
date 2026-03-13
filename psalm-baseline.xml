@@ -324,6 +324,12 @@
       <code><![CDATA[$result]]></code>
       <code><![CDATA[$server]]></code>
     </PossiblyUnusedParam>
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[bool]]></code>
+    </PossiblyUnusedReturnValue>
+    <UnusedProperty>
+      <code><![CDATA[$settings]]></code>
+    </UnusedProperty>
   </file>
   <file src="includes/class-sri.php">
     <PossiblyUnusedMethod>
@@ -332,5 +338,12 @@
     <PossiblyUnusedParam>
       <code><![CDATA[$media]]></code>
     </PossiblyUnusedParam>
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[string]]></code>
+      <code><![CDATA[string]]></code>
+    </PossiblyUnusedReturnValue>
+    <UnusedProperty>
+      <code><![CDATA[$settings]]></code>
+    </UnusedProperty>
   </file>
 </files>
