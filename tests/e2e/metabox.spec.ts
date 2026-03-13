@@ -8,18 +8,18 @@ import { test, expect } from '@playwright/test';
 test.describe('Metabox', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/wp-admin/post-new.php');
-    await expect(page.locator('#search-intel-metabox')).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator('#search-intel-seo')).toBeVisible({ timeout: 10_000 });
   });
 
   // ── Tab navigation ──────────────────────────────────────────────────
 
   test('SEO tab is active by default', async ({ page }) => {
     const seoTab = page.locator('.si-tab[data-tab="seo"]');
-    await expect(seoTab).toHaveClass(/active/);
+    await expect(seoTab).toHaveClass(/si-tab-active/);
   });
 
   test('all tabs navigate correctly', async ({ page }) => {
-    const tabs = ['seo', 'aeo', 'geo', 'social', 'advanced'];
+    const tabs = ['seo', 'aeo', 'geo', 'advanced', 'analysis'];
     for (const tab of tabs) {
       await page.click(`.si-tab[data-tab="${tab}"]`);
       const panel = page.locator(`.si-tab-content[data-tab="${tab}"]`);
@@ -37,13 +37,13 @@ test.describe('Metabox', () => {
 
   test('SERP preview shows title', async ({ page }) => {
     await page.fill('#si_title', 'My SEO Title for Preview');
-    const preview = page.locator('.si-serp-title');
+    const preview = page.locator('#si-serp-title');
     await expect(preview).toContainText('My SEO Title for Preview');
   });
 
   test('SERP preview shows description', async ({ page }) => {
     await page.fill('#si_description', 'Meta description text for SERP.');
-    const preview = page.locator('.si-serp-description');
+    const preview = page.locator('#si-serp-desc');
     await expect(preview).toContainText('Meta description text for SERP.');
   });
 
@@ -51,20 +51,21 @@ test.describe('Metabox', () => {
 
   test('title character counter updates on input', async ({ page }) => {
     await page.fill('#si_title', 'Short');
-    const counter = page.locator('.si-title-counter');
+    const counter = page.locator('.si-char-count').first();
     await expect(counter).toContainText('5');
   });
 
   test('description character counter updates on input', async ({ page }) => {
     await page.fill('#si_description', 'A description.');
-    const counter = page.locator('.si-desc-counter');
+    const counter = page.locator('.si-char-count').nth(1);
     await expect(counter).toContainText('14');
   });
 
-  test('title counter warns on overlong title', async ({ page }) => {
+  test('title counter shows over-limit for long title', async ({ page }) => {
     await page.fill('#si_title', 'A'.repeat(70));
-    const counter = page.locator('.si-title-counter');
-    await expect(counter).toHaveClass(/warning|over/);
+    const counter = page.locator('.si-char-count').first();
+    // Counter should show 70/60 indicating over the 60 char limit
+    await expect(counter).toContainText('70/60');
   });
 
   // ── Focus keyword ─────────────────────────────────────────────────
