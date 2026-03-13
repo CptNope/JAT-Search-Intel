@@ -116,6 +116,15 @@ class Admin {
             'search-intel-social',
             [ $this, 'render_social_settings_page' ]
         );
+
+        add_submenu_page(
+            'search-intel',
+            __( 'Bulk Tools', 'search-intel' ),
+            __( 'Bulk Tools', 'search-intel' ),
+            'manage_options',
+            'search-intel-bulk-tools',
+            [ $this, 'render_bulk_tools_page' ]
+        );
     }
 
     /**
@@ -147,7 +156,7 @@ class Admin {
             'enable_schema', 'enable_breadcrumbs', 'enable_sitelinks',
             'enable_aeo', 'enable_faq_schema', 'enable_howto_schema', 'enable_speakable',
             'enable_geo', 'enable_llms_txt', 'enable_ai_meta', 'enable_entity_markup',
-            'content_freshness', 'enable_sitemap', 'enable_analyzer',
+            'content_freshness', 'enable_rest_api', 'enable_sitemap', 'enable_analyzer',
         ];
 
         foreach ( $bool_keys as $key ) {
@@ -219,6 +228,11 @@ class Admin {
                 [],
                 SEARCH_INTEL_VERSION
             );
+        }
+
+        // Bulk Tools page — enqueue batch processing JS.
+        if ( strpos( $hook, 'search-intel-bulk-tools' ) !== false && $this->core->bulk_tools ) {
+            $this->core->bulk_tools->enqueue_assets();
         }
 
         // Post editor — only on post.php / post-new.php for enabled post types
@@ -577,5 +591,12 @@ class Admin {
      */
     public function render_social_settings_page(): void {
         include SEARCH_INTEL_DIR . 'admin/views/settings-social.php';
+    }
+
+    /**
+     * Render Bulk Tools page.
+     */
+    public function render_bulk_tools_page(): void {
+        include SEARCH_INTEL_DIR . 'admin/views/bulk-tools.php';
     }
 }

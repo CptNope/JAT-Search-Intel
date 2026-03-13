@@ -21,6 +21,7 @@
       <code><![CDATA[SEARCH_INTEL_DIR]]></code>
       <code><![CDATA[SEARCH_INTEL_DIR]]></code>
       <code><![CDATA[SEARCH_INTEL_DIR]]></code>
+      <code><![CDATA[SEARCH_INTEL_DIR]]></code>
       <code><![CDATA[SEARCH_INTEL_URL]]></code>
       <code><![CDATA[SEARCH_INTEL_URL]]></code>
       <code><![CDATA[SEARCH_INTEL_URL]]></code>
@@ -28,9 +29,6 @@
       <code><![CDATA[SEARCH_INTEL_VERSION]]></code>
       <code><![CDATA[SEARCH_INTEL_VERSION]]></code>
     </UndefinedConstant>
-    <UnusedProperty>
-      <code><![CDATA[$core]]></code>
-    </UnusedProperty>
     <UnusedVariable>
       <code><![CDATA[$meta]]></code>
       <code><![CDATA[$title]]></code>
@@ -64,18 +62,33 @@
       <code><![CDATA[$word_count]]></code>
     </UnusedParam>
   </file>
+  <file src="includes/class-bulk-tools.php">
+    <UndefinedConstant>
+      <code><![CDATA[SEARCH_INTEL_URL]]></code>
+      <code><![CDATA[SEARCH_INTEL_VERSION]]></code>
+      <code><![CDATA[SEARCH_INTEL_VERSION]]></code>
+    </UndefinedConstant>
+  </file>
+  <file src="includes/class-cli.php">
+    <UndefinedConstant>
+      <code><![CDATA[SEARCH_INTEL_VERSION]]></code>
+    </UndefinedConstant>
+    <PossiblyUnusedParam>
+      <code><![CDATA[$args]]></code>
+      <code><![CDATA[$args]]></code>
+      <code><![CDATA[$args]]></code>
+    </PossiblyUnusedParam>
+    <UnusedClass>
+      <code><![CDATA[CLI]]></code>
+    </UnusedClass>
+  </file>
   <file src="includes/class-core.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[get_instance]]></code>
-    </PossiblyUnusedMethod>
     <PossiblyUnusedProperty>
       <code><![CDATA[$admin]]></code>
       <code><![CDATA[$aeo]]></code>
-      <code><![CDATA[$analyzer]]></code>
       <code><![CDATA[$geo]]></code>
+      <code><![CDATA[$rest_api]]></code>
       <code><![CDATA[$schema]]></code>
-      <code><![CDATA[$seo]]></code>
-      <code><![CDATA[$sitemap]]></code>
       <code><![CDATA[$title_engine]]></code>
     </PossiblyUnusedProperty>
     <UndefinedConstant>
@@ -120,6 +133,22 @@
     <UndefinedPropertyFetch>
       <code><![CDATA[$ancestor->name]]></code>
     </UndefinedPropertyFetch>
+  </file>
+  <file src="includes/class-rest-api.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[analyze_post]]></code>
+      <code><![CDATA[bulk_rescore]]></code>
+      <code><![CDATA[can_edit_post]]></code>
+      <code><![CDATA[can_manage_options]]></code>
+      <code><![CDATA[can_read_post]]></code>
+      <code><![CDATA[get_geo]]></code>
+      <code><![CDATA[get_meta]]></code>
+      <code><![CDATA[get_scores]]></code>
+      <code><![CDATA[get_settings]]></code>
+      <code><![CDATA[invalidate_sitemap]]></code>
+      <code><![CDATA[update_meta]]></code>
+      <code><![CDATA[update_settings]]></code>
+    </PossiblyUnusedMethod>
   </file>
   <file src="includes/class-seo-manager.php">
     <PossiblyUnusedReturnValue>

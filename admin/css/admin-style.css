@@ -411,3 +411,61 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* ========== Bulk Tools ========== */
+
+.si-bulk-tools .si-bulk-action {
+    margin-top: 12px;
+}
+
+.si-bulk-tools .si-progress {
+    margin-top: 12px;
+}
+
+.si-bulk-tools .si-progress-bar {
+    width: 100%;
+    max-width: 500px;
+    height: 24px;
+    background: #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.si-bulk-tools .si-progress-fill {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, #2563eb, #16a34a);
+    border-radius: 12px;
+    transition: width 0.3s ease;
+}
+
+.si-bulk-tools .si-progress-text {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 13px;
+    color: #374151;
+}
+
+.si-bulk-tools .si-bulk-result {
+    margin-top: 12px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+.si-bulk-tools .si-success {
+    color: #166534;
+    font-weight: 600;
+}
+
+.si-bulk-tools .si-error {
+    color: #dc2626;
+    font-weight: 600;
+}
+
+.si-bulk-tools .button .dashicons {
+    vertical-align: middle;
+    margin-right: 4px;
+    font-size: 16px;
+    line-height: 1.6;
+}

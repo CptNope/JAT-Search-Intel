@@ -4,7 +4,7 @@ Tags: seo, aeo, geo, schema, structured-data, ai-optimization, llms, featured-sn
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -54,6 +54,34 @@ The future of search — optimize for AI-powered answer engines like ChatGPT, Pe
 **Unified Content Analyzer**
 Real-time scoring dashboard in the post editor with separate SEO, AEO, and GEO scores plus actionable recommendations.
 
+**REST API (v1.3+)**
+Full REST API under the `search-intel/v1` namespace with toggleable endpoints:
+
+* `GET /scores/{id}` — SEO, AEO, GEO, readability scores
+* `GET /geo/{id}` — full GEO metadata
+* `GET/PUT /meta/{id}` — read/write SEO meta fields
+* `POST /analyze/{id}` — trigger content analysis
+* `POST /bulk/rescore` — batch rescore with pagination
+* `GET/PUT /settings` — read/write plugin settings (admin only)
+* `POST /sitemap/invalidate` — clear sitemap caches (admin only)
+
+**Bulk Tools (v1.3+)**
+Admin page with batch operations and live progress bars:
+
+* Bulk rescore all published content
+* Bulk regenerate empty metadata fields (non-destructive)
+* Sitemap cache clear and warm
+* Export/import settings as JSON (merge or overwrite mode)
+
+**WP-CLI Commands (v1.3+)**
+
+* `wp search-intel analyze <post_id>` — analyze a single post
+* `wp search-intel rescore --all` — bulk rescore with progress bar
+* `wp search-intel regenerate --all` — bulk regenerate metadata
+* `wp search-intel sitemap cache|clear` — manage sitemap caches
+* `wp search-intel export / import` — settings export/import
+* `wp search-intel scores` — display score table (table, CSV, JSON, YAML)
+
 == Installation ==
 
 1. Upload the `search-intel` folder to `/wp-content/plugins/`
@@ -87,6 +115,25 @@ No. Search Intel outputs lightweight meta tags and JSON-LD schema directly in th
 
 == Changelog ==
 
+= 1.3.0 =
+* REST API: 9 endpoints under `search-intel/v1` namespace with permission callbacks
+* REST API: Toggleable via enable_rest_api setting in GEO settings page
+* Bulk Tools: Admin page with batch rescore, regenerate, sitemap cache management
+* Bulk Tools: Settings export/import as JSON with merge and overwrite modes
+* Bulk Tools: AJAX progress bars for all batch operations
+* WP-CLI: 7 commands — analyze, rescore, regenerate, sitemap, export, import, scores
+* 225 unit tests, 441 assertions — all passing
+
+= 1.2.1 =
+* Fix: Psalm CI configuration and PHP 8.0 dropped from test matrix
+* Fix: Composer platform requirement for CI
+
+= 1.2.0 =
+* 193 PHPUnit unit tests, 125 integration tests, 40 Playwright E2E tests
+* Psalm level 4, PHPStan level 6, Stylelint, ESLint static analysis
+* CI pipeline: PHPUnit matrix, static analysis, performance benchmarks, E2E
+* Fix: speakable_selectors sanitize crash
+
 = 1.0.0 =
 * Initial release
 * Full SEO suite: meta tags, Open Graph, Twitter Cards, canonical URLs, robots
@@ -99,6 +146,9 @@ No. Search Intel outputs lightweight meta tags and JSON-LD schema directly in th
 * User profile E-E-A-T fields
 
 == Upgrade Notice ==
+
+= 1.3.0 =
+New: REST API (9 endpoints), Bulk Tools admin page, WP-CLI commands (7 subcommands), settings export/import.
 
 = 1.0.0 =
 Initial release of Search Intel.

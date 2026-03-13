@@ -14,7 +14,7 @@ $settings = wp_parse_args( $settings, \Search_Intel\Core::get_default_settings()
 
         <?php
         // Preserve all non-GEO settings as hidden
-        $geo_keys = [ 'enable_llms_txt', 'enable_ai_meta', 'enable_entity_markup', 'content_freshness', 'author_expertise', 'ai_summary_word_count', 'default_content_intent', 'default_audience' ];
+        $geo_keys = [ 'enable_llms_txt', 'enable_ai_meta', 'enable_entity_markup', 'content_freshness', 'enable_rest_api', 'author_expertise', 'ai_summary_word_count', 'default_content_intent', 'default_audience' ];
         foreach ( $settings as $key => $val ) :
             if ( in_array( $key, $geo_keys, true ) ) continue;
             if ( is_array( $val ) ) :
@@ -141,6 +141,24 @@ $settings = wp_parse_args( $settings, \Search_Intel\Core::get_default_settings()
                     <td>
                         <input type="text" id="si_default_audience" name="search_intel_settings[default_audience]" value="<?php echo esc_attr( $settings['default_audience'] ); ?>" class="regular-text" placeholder="<?php esc_attr_e( 'e.g., Developers, Small Business Owners', 'search-intel' ); ?>" />
                         <p class="description"><?php esc_html_e( 'Pre-filled audience for new posts. Can be overridden per-post.', 'search-intel' ); ?></p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="si-settings-card">
+            <h2><?php esc_html_e( 'REST API', 'search-intel' ); ?></h2>
+            <table class="form-table">
+                <tr>
+                    <th><?php esc_html_e( 'Enable REST API', 'search-intel' ); ?></th>
+                    <td>
+                        <label>
+                            <input type="checkbox" name="search_intel_settings[enable_rest_api]" value="1" <?php checked( $settings['enable_rest_api'] ); ?> />
+                            <?php esc_html_e( 'Expose Search Intel data via the WordPress REST API (scores, meta, analysis)', 'search-intel' ); ?>
+                        </label>
+                        <p class="description">
+                            <?php esc_html_e( 'Endpoints: /wp-json/search-intel/v1/scores/{id}, /geo/{id}, /meta/{id}, /analyze/{id}, /settings, /sitemap/invalidate', 'search-intel' ); ?>
+                        </p>
                     </td>
                 </tr>
             </table>

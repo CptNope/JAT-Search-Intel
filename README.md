@@ -6,7 +6,7 @@
 [![License: GPL v2](https://img.shields.io/badge/License-GPLv2-blue.svg)](LICENSE.md)
 [![WordPress: 6.0+](https://img.shields.io/badge/WordPress-6.0%2B-21759b.svg)](https://wordpress.org/)
 [![PHP: 7.4+](https://img.shields.io/badge/PHP-7.4%2B-777bb4.svg)](https://php.net/)
-[![Release: v1.2.1](https://img.shields.io/badge/Release-v1.2.1-brightgreen)](https://github.com/CptNope/Search-Intel/releases/tag/v1.2.1)
+[![Release: v1.3.0](https://img.shields.io/badge/Release-v1.3.0-brightgreen)](https://github.com/CptNope/Search-Intel/releases/tag/v1.3.0)
 
 **[Roadmap](ROADMAP.md)** · **[Changelog](CHANGELOG.md)** · **[Contributing](CONTRIBUTING.md)** · **[License](LICENSE.md)**
 
@@ -23,6 +23,9 @@
 - [Scoring System](#scoring-system)
 - [Installation](#installation)
 - [Configuration](#configuration)
+- [REST API](#rest-api)
+- [WP-CLI Commands](#wp-cli-commands)
+- [Bulk Tools](#bulk-tools)
 - [Shortcodes](#shortcodes)
 - [Hooks and Filters](#hooks-and-filters)
 - [File Structure](#file-structure)
@@ -551,6 +554,89 @@ Every post and page gets a **Search Intel** metabox with five tabs:
 
 ---
 
+## REST API
+
+Search Intel exposes a REST API under the `search-intel/v1` namespace. Enable it via **Search Intel > GEO > Enable REST API**.
+
+All endpoints use standard WordPress REST authentication (cookie, application passwords, or OAuth).
+
+### Endpoints
+
+| Method | Route | Permission | Description |
+|--------|-------|------------|-------------|
+| `GET` | `/search-intel/v1/scores/{id}` | `read` (published) | SEO, AEO, GEO, readability scores |
+| `GET` | `/search-intel/v1/geo/{id}` | `read` (published) | Full GEO metadata (AI summary, topics, entities, intent, audience) |
+| `GET` | `/search-intel/v1/meta/{id}` | `read` (published) | SEO meta fields (title, description, keyword, canonical, robots) |
+| `PUT` | `/search-intel/v1/meta/{id}` | `edit_post` | Update SEO meta fields |
+| `POST` | `/search-intel/v1/analyze/{id}` | `edit_post` | Run content analysis and save scores |
+| `POST` | `/search-intel/v1/bulk/rescore` | `manage_options` | Batch rescore with offset pagination |
+| `GET` | `/search-intel/v1/settings` | `manage_options` | Read all plugin settings |
+| `PUT` | `/search-intel/v1/settings` | `manage_options` | Update plugin settings |
+| `POST` | `/search-intel/v1/sitemap/invalidate` | `manage_options` | Clear sitemap transient caches |
+
+### Example
+
+```bash
+# Get scores for post 42
+curl -u admin:APP_PASSWORD https://example.com/wp-json/search-intel/v1/scores/42
+
+# Trigger analysis
+curl -X POST -u admin:APP_PASSWORD https://example.com/wp-json/search-intel/v1/analyze/42
+
+# Export settings
+curl -u admin:APP_PASSWORD https://example.com/wp-json/search-intel/v1/settings
+```
+
+---
+
+## WP-CLI Commands
+
+Search Intel registers a `search-intel` WP-CLI command group with the following subcommands:
+
+```bash
+# Analyze a single post (displays score table)
+wp search-intel analyze 42
+wp search-intel analyze 42 --save        # Save scores to post meta
+
+# Bulk rescore all published posts
+wp search-intel rescore --all
+wp search-intel rescore --all --post_type=page --batch_size=100
+
+# Bulk regenerate empty metadata (descriptions, AI summaries, content types)
+wp search-intel regenerate --all
+wp search-intel regenerate --all --post_type=page
+
+# Sitemap cache management
+wp search-intel sitemap cache             # Clear + queue regeneration
+wp search-intel sitemap clear             # Clear caches only
+
+# Settings export/import
+wp search-intel export > settings.json
+wp search-intel import settings.json
+wp search-intel import settings.json --mode=overwrite
+
+# Display score table
+wp search-intel scores
+wp search-intel scores --format=csv --limit=100
+wp search-intel scores --orderby=seo
+```
+
+---
+
+## Bulk Tools
+
+Navigate to **Search Intel > Bulk Tools** in the WordPress admin to access:
+
+- **Bulk Rescore** — re-run SEO/AEO/GEO/readability analysis on all published posts with a live progress bar
+- **Bulk Regenerate Metadata** — auto-fill empty descriptions, AI summaries, and content types (existing values are never overwritten)
+- **Sitemap Cache** — clear all sitemap transient caches and queue regeneration
+- **Export Settings** — download all plugin settings + social profiles as a timestamped JSON file
+- **Import Settings** — upload a JSON file with **merge** (overlay on current) or **overwrite** (reset to defaults first) mode
+
+All bulk operations are batched via AJAX (20 posts per request) with a progress bar, so they won't time out on large sites.
+
+---
+
 ## Shortcodes
 
 ### FAQ Block
@@ -604,7 +690,7 @@ All output hooks fire on `wp_head` with the following priorities:
 
 ```
 search-intel/
-├── search-intel.php              # Main plugin bootstrap + autoloader
+├── search-intel.php              # Main plugin bootstrap + autoloader + WP-CLI registration
 ├── uninstall.php                 # Database cleanup on uninstall
 ├── readme.txt                    # WordPress.org readme
 ├── README.md                     # This file
@@ -621,21 +707,26 @@ search-intel/
 │   ├── class-geo-manager.php     # AI meta, llms.txt, entities, E-E-A-T, intent, local
 │   ├── class-content-analyzer.php# Scoring engine + analysis-on-save + 11 content checks
 │   ├── class-sitemap.php         # XML sitemap with images + transient caching
-│   └── class-admin.php           # Settings, metaboxes, user fields
+│   ├── class-admin.php           # Settings, metaboxes, user fields, Bulk Tools page
+│   ├── class-rest-api.php        # REST API controller (search-intel/v1 namespace)
+│   ├── class-bulk-tools.php      # Bulk rescore, regenerate, export/import (AJAX)
+│   └── class-cli.php             # WP-CLI commands (analyze, rescore, scores, etc.)
 │
 ├── admin/
 │   ├── css/
-│   │   └── admin-style.css       # Admin UI styles
+│   │   └── admin-style.css       # Admin UI styles + bulk tools progress bars
 │   ├── js/
-│   │   └── admin-script.js       # Tabs, SERP preview, repeaters, AJAX analysis
+│   │   ├── admin-script.js       # Tabs, SERP preview, repeaters, AJAX analysis
+│   │   └── bulk-tools.js         # Batch AJAX processing with progress UI
 │   └── views/
 │       ├── metabox.php           # Post editor metabox (SEO, AEO, GEO, Advanced, Analysis)
 │       ├── settings-general.php  # General settings page
 │       ├── settings-seo.php      # SEO settings (+ OG defaults, descriptions, robots, titles)
 │       ├── settings-aeo.php      # AEO settings page
-│       ├── settings-geo.php      # GEO settings (+ content defaults, intent, audience)
+│       ├── settings-geo.php      # GEO settings (+ content defaults, REST API toggle)
 │       ├── settings-sitemap.php  # Sitemap settings (+ taxonomy toggles)
-│       └── settings-social.php   # Social profiles page
+│       ├── settings-social.php   # Social profiles page
+│       └── bulk-tools.php        # Bulk Tools admin page
 │
 └── languages/                    # Translation files (i18n ready)
 ```
@@ -665,7 +756,7 @@ Search Intel has a comprehensive automated test suite and CI pipeline.
 
 | Suite | Count | Framework |
 |-------|-------|-----------|
-| Unit tests | 193 tests, 348 assertions | PHPUnit 9.6 |
+| Unit tests | 225 tests, 441 assertions | PHPUnit 9.6 |
 | Integration tests | 125 tests, 202 assertions | PHPUnit 9.6 |
 | E2E tests | 40 tests | Playwright (Chromium) |
 
