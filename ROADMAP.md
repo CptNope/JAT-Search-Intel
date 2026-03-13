@@ -300,39 +300,38 @@
 
 ### Bulk Tools Admin Page
 
-- [ ] "Search Intel > Bulk Tools" admin page
-- [ ] Bulk regenerate metadata (re-run title templates, description fallbacks, auto-excerpts)
-- [ ] Bulk rescore content (run SEO + AEO + GEO analysis on all posts)
-- [ ] Bulk generate sitemap cache (pre-warm all transients)
-- [ ] Export settings as JSON download
-- [ ] Import settings from JSON upload with validation
-- [ ] `WP_Background_Process` for long-running operations
-- [ ] AJAX progress bar for bulk operations
-- [ ] Merge vs overwrite option on settings import
+- [x] "Search Intel > Bulk Tools" admin page
+- [x] Bulk regenerate metadata (re-run title templates, description fallbacks, auto-excerpts)
+- [x] Bulk rescore content (run SEO + AEO + GEO analysis on all posts)
+- [x] Bulk generate sitemap cache (pre-warm all transients)
+- [x] Export settings as JSON download
+- [x] Import settings from JSON upload with validation
+- [x] AJAX progress bar for bulk operations (batched AJAX with progress UI)
+- [x] Merge vs overwrite option on settings import
 
 ### REST API
 
-- [ ] `GET /search-intel/v1/geo/{id}` — full GEO metadata for a post
-- [ ] `GET /search-intel/v1/scores/{id}` — SEO + AEO + GEO scores
-- [ ] `GET/PUT /search-intel/v1/meta/{id}` — read/write SEO meta fields
-- [ ] `POST /search-intel/v1/analyze/{id}` — trigger analysis, return results
-- [ ] `POST /search-intel/v1/bulk/rescore` — queue bulk rescore job
-- [ ] `GET/PUT /search-intel/v1/settings` — read/write plugin settings (admin only)
-- [ ] `POST /search-intel/v1/sitemap/invalidate` — clear sitemap cache (admin only)
-- [ ] REST endpoint toggle in GEO settings
-- [ ] Authentication via WordPress app passwords
-- [ ] Proper permission callbacks on all endpoints
+- [x] `GET /search-intel/v1/geo/{id}` — full GEO metadata for a post
+- [x] `GET /search-intel/v1/scores/{id}` — SEO + AEO + GEO scores
+- [x] `GET/PUT /search-intel/v1/meta/{id}` — read/write SEO meta fields
+- [x] `POST /search-intel/v1/analyze/{id}` — trigger analysis, return results
+- [x] `POST /search-intel/v1/bulk/rescore` — queue bulk rescore job
+- [x] `GET/PUT /search-intel/v1/settings` — read/write plugin settings (admin only)
+- [x] `POST /search-intel/v1/sitemap/invalidate` — clear sitemap cache (admin only)
+- [x] REST endpoint toggle in GEO settings
+- [x] Authentication via WordPress app passwords (built-in WP REST auth)
+- [x] Proper permission callbacks on all endpoints
 
 ### WP-CLI Commands
 
-- [ ] `wp search-intel analyze <post_id>` — analyze a single post
-- [ ] `wp search-intel rescore --all` — rescore all published posts
-- [ ] `wp search-intel regenerate --all` — regenerate metadata for all posts
-- [ ] `wp search-intel sitemap cache` — pre-warm sitemap caches
-- [ ] `wp search-intel export > settings.json` — export settings
-- [ ] `wp search-intel import < settings.json` — import settings
-- [ ] `wp search-intel scores --format=table` — show all post scores
-- [ ] `wp search-intel migrate --from=yoast` — migrate from another SEO plugin
+- [x] `wp search-intel analyze <post_id>` — analyze a single post
+- [x] `wp search-intel rescore --all` — rescore all published posts
+- [x] `wp search-intel regenerate --all` — regenerate metadata for all posts
+- [x] `wp search-intel sitemap cache` — pre-warm sitemap caches
+- [x] `wp search-intel export > settings.json` — export settings
+- [x] `wp search-intel import < settings.json` — import settings
+- [x] `wp search-intel scores --format=table` — show all post scores
+- [ ] `wp search-intel migrate --from=yoast` — migrate from another SEO plugin (deferred to v1.4)
 
 ---
 

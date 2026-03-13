@@ -37,6 +37,12 @@ class Core {
     /** @var Admin */
     public $admin;
 
+    /** @var Rest_Api */
+    public $rest_api;
+
+    /** @var Bulk_Tools */
+    public $bulk_tools;
+
     /**
      * Get singleton instance.
      */
@@ -64,8 +70,12 @@ class Core {
         $this->sitemap       = new Sitemap( $settings );
 
         if ( is_admin() ) {
-            $this->admin = new Admin( $settings, $this );
+            $this->admin      = new Admin( $settings, $this );
+            $this->bulk_tools = new Bulk_Tools( $settings, $this );
         }
+
+        // REST API — registers on rest_api_init.
+        $this->rest_api = new Rest_Api( $settings, $this );
 
         // Prefetch all post meta on singular pages to avoid N+1 queries
         add_action( 'wp', [ $this, 'prefetch_post_meta' ] );
@@ -213,6 +223,7 @@ class Core {
             'ai_summary_word_count'  => 50,
             'default_content_intent' => '',
             'default_audience'       => '',
+            'enable_rest_api'        => true,
 
             // Sitemap
             'enable_sitemap'         => true,

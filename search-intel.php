@@ -66,3 +66,8 @@ register_deactivation_hook( __FILE__, function () {
 
 // Boot
 add_action( 'plugins_loaded', 'search_intel_init' );
+
+// WP-CLI commands
+if ( defined( 'WP_CLI' ) && WP_CLI ) {
+    \WP_CLI::add_command( 'search-intel', 'Search_Intel\CLI' );
+}

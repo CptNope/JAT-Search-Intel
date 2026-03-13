@@ -154,6 +154,10 @@ function delete_transient( string $key ): bool {
 
 function get_post( $post_id = null ) {
     global $si_test_state;
+    if ( is_object( $post_id ) ) {
+        $post_id = $post_id->ID ?? 0;
+    }
+    $post_id = (int) $post_id;
     if ( isset( $si_test_state['posts'][ $post_id ] ) ) {
         return (object) $si_test_state['posts'][ $post_id ];
     }
@@ -470,12 +474,38 @@ function get_post_type( $post_id = null ): string {
 
 function get_posts( array $args = [] ): array {
     global $si_test_state;
-    $result = [];
+    $result    = [];
+    $post_type = $args['post_type'] ?? 'post';
+    $limit     = $args['posts_per_page'] ?? -1;
+    $offset    = $args['offset'] ?? 0;
+    $fields    = $args['fields'] ?? '';
+
+    $filtered = [];
     foreach ( $si_test_state['posts'] as $p ) {
-        // Ensure date fields exist
+        if ( ! empty( $args['post_status'] ) && ( $p['post_status'] ?? 'publish' ) !== $args['post_status'] ) {
+            continue;
+        }
+        if ( ( $p['post_type'] ?? 'post' ) !== $post_type ) {
+            continue;
+        }
         $p['post_date_gmt']     = $p['post_date_gmt'] ?? gmdate( 'Y-m-d H:i:s' );
         $p['post_modified_gmt'] = $p['post_modified_gmt'] ?? gmdate( 'Y-m-d H:i:s' );
-        $result[] = (object) $p;
+        $filtered[] = $p;
+    }
+
+    if ( $offset > 0 ) {
+        $filtered = array_slice( $filtered, $offset );
+    }
+    if ( $limit > 0 ) {
+        $filtered = array_slice( $filtered, 0, $limit );
+    }
+
+    foreach ( $filtered as $p ) {
+        if ( 'ids' === $fields ) {
+            $result[] = (int) $p['ID'];
+        } else {
+            $result[] = (object) $p;
+        }
     }
     return $result;
 }
@@ -646,10 +676,125 @@ function wp_get_attachment_metadata( int $attachment_id ): array {
     return [ 'width' => 1200, 'height' => 630 ];
 }
 
+function get_post_types( $args = [], $output = 'names' ) {
+    return [ 'post' => (object) [ 'name' => 'post', 'labels' => (object) [ 'name' => 'Posts' ] ] ];
+}
+
+function register_rest_route( string $namespace, string $route, array $args = [], bool $override = false ): void {}
+
+function flush_rewrite_rules( bool $hard = true ): void {}
+
+function plugin_dir_path( string $file ): string {
+    return dirname( $file ) . '/';
+}
+
+function plugin_dir_url( string $file ): string {
+    return 'https://example.com/wp-content/plugins/' . basename( dirname( $file ) ) . '/';
+}
+
+function plugin_basename( string $file ): string {
+    return 'search-intel/' . basename( $file );
+}
+
+// ── WP_REST stubs ────────────────────────────────────────────────────────
+
+if ( ! class_exists( 'WP_REST_Request' ) ) {
+    class WP_REST_Request implements \ArrayAccess {
+        private $params = [];
+        private $json_params = [];
+        private $method = 'GET';
+
+        public function __construct( string $method = 'GET', string $route = '' ) {
+            $this->method = $method;
+        }
+
+        public function set_param( string $key, $value ): void {
+            $this->params[ $key ] = $value;
+        }
+
+        public function get_param( string $key ) {
+            return $this->params[ $key ] ?? null;
+        }
+
+        public function set_json_params( array $params ): void {
+            $this->json_params = $params;
+        }
+
+        public function get_json_params(): array {
+            return $this->json_params;
+        }
+
+        public function offsetExists( $offset ): bool {
+            return isset( $this->params[ $offset ] );
+        }
+
+        #[\ReturnTypeWillChange]
+        public function offsetGet( $offset ) {
+            return $this->params[ $offset ] ?? null;
+        }
+
+        public function offsetSet( $offset, $value ): void {
+            $this->params[ $offset ] = $value;
+        }
+
+        public function offsetUnset( $offset ): void {
+            unset( $this->params[ $offset ] );
+        }
+    }
+}
+
+if ( ! class_exists( 'WP_REST_Response' ) ) {
+    class WP_REST_Response {
+        public $data;
+        public $status;
+
+        public function __construct( $data = null, int $status = 200 ) {
+            $this->data   = $data;
+            $this->status = $status;
+        }
+
+        public function get_data() {
+            return $this->data;
+        }
+
+        public function get_status(): int {
+            return $this->status;
+        }
+    }
+}
+
 // ── Global $wp stub ──────────────────────────────────────────────────────
 
 global $wp;
 $wp = (object) [ 'request' => '' ];
+
+// ── Global $wpdb stub ───────────────────────────────────────────────────
+
+global $wpdb;
+$wpdb = new class {
+    public $options = 'wp_options';
+    public $posts   = 'wp_posts';
+    public $prefix  = 'wp_';
+
+    public function esc_like( string $text ): string {
+        return addcslashes( $text, '_%\\' );
+    }
+
+    public function prepare( string $query, ...$args ): string {
+        $i = 0;
+        return preg_replace_callback( '/%[sd]/', function () use ( $args, &$i ) {
+            return "'" . ( $args[ $i++ ] ?? '' ) . "'";
+        }, $query );
+    }
+
+    public function query( string $query ) {
+        return 0;
+    }
+
+    public function get_results( string $query, $output = 'OBJECT' ): array {
+        return [];
+    }
+};
 
 // ── Autoloader ───────────────────────────────────────────────────────────────
 
