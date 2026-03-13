@@ -515,6 +515,67 @@
       <code><![CDATA[SEARCH_INTEL_VERSION]]></code>
     </UndefinedConstant>
   </file>
+  <file src="includes/class-ai-engine.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[save_api_key]]></code>
+      <code><![CDATA[generate_meta_description]]></code>
+      <code><![CDATA[generate_title_suggestions]]></code>
+      <code><![CDATA[generate_link_recommendations]]></code>
+      <code><![CDATA[generate_content_brief]]></code>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[array]]></code>
+      <code><![CDATA[array]]></code>
+      <code><![CDATA[string]]></code>
+    </PossiblyUnusedReturnValue>
+    <UndefinedConstant>
+      <code><![CDATA[LOGGED_IN_SALT]]></code>
+    </UndefinedConstant>
+  </file>
+  <file src="includes/class-content-decay.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[register_admin_page]]></code>
+      <code><![CDATA[render_admin_page]]></code>
+      <code><![CDATA[get_refresh_suggestions]]></code>
+      <code><![CDATA[get_trend_data]]></code>
+      <code><![CDATA[get_score_change]]></code>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[array]]></code>
+      <code><![CDATA[array]]></code>
+      <code><![CDATA[array]]></code>
+    </PossiblyUnusedReturnValue>
+  </file>
+  <file src="includes/class-keyword-cannibalization.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[register_admin_page]]></code>
+      <code><![CDATA[render_admin_page]]></code>
+      <code><![CDATA[get_summary]]></code>
+      <code><![CDATA[invalidate_cache]]></code>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[array]]></code>
+      <code><![CDATA[array]]></code>
+      <code><![CDATA[string]]></code>
+    </PossiblyUnusedReturnValue>
+  </file>
+  <file src="includes/class-advanced-linking.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[register_admin_page]]></code>
+      <code><![CDATA[render_admin_page]]></code>
+      <code><![CDATA[register_rest_routes]]></code>
+      <code><![CDATA[rest_get_suggestions]]></code>
+      <code><![CDATA[rest_orphan_check]]></code>
+      <code><![CDATA[get_orphaned_posts]]></code>
+      <code><![CDATA[get_equity_flow]]></code>
+      <code><![CDATA[run_broken_link_check]]></code>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[array]]></code>
+      <code><![CDATA[array]]></code>
+      <code><![CDATA[array]]></code>
+    </PossiblyUnusedReturnValue>
+  </file>
   <file src="includes/class-woocommerce.php">
     <PossiblyUnusedReturnValue>
       <code><![CDATA[array]]></code>

@@ -6,7 +6,7 @@
 [![License: GPL v2](https://img.shields.io/badge/License-GPLv2-blue.svg)](LICENSE.md)
 [![WordPress: 6.0+](https://img.shields.io/badge/WordPress-6.0%2B-21759b.svg)](https://wordpress.org/)
 [![PHP: 7.4+](https://img.shields.io/badge/PHP-7.4%2B-777bb4.svg)](https://php.net/)
-[![Release: v3.1.0](https://img.shields.io/badge/Release-v3.1.0-brightgreen)](https://github.com/CptNope/Search-Intel/releases/tag/v3.1.0)
+[![Release: v3.2.0](https://img.shields.io/badge/Release-v3.2.0-brightgreen)](https://github.com/CptNope/Search-Intel/releases/tag/v3.2.0)
 
 **[Roadmap](ROADMAP.md)** · **[Changelog](CHANGELOG.md)** · **[Contributing](CONTRIBUTING.md)** · **[License](LICENSE.md)**
 
@@ -137,6 +137,10 @@ graph TD
     CORE --> SCALE["Scale<br/><i>v3.0+ Queue &amp; Cache</i>"]
     CORE --> MAINWP["MainWP Reporter<br/><i>v3.1+ Child Sync</i>"]
     CORE --> NOTIFY["Notifications<br/><i>v3.1+ Alerts &amp; Digest</i>"]
+    CORE --> AIENGINE["AI Engine<br/><i>v3.2+ LLM Abstraction</i>"]
+    CORE --> DECAY["Content Decay<br/><i>v3.2+ Score Tracking</i>"]
+    CORE --> CANNIBAL["Cannibalization<br/><i>v3.2+ Keyword Detector</i>"]
+    CORE --> ADVLINK["Advanced Linking<br/><i>v3.2+ Suggestions</i>"]
 
     TITLE --> TVAR["Variable Resolver"]
     TITLE --> TCTX["Per-Context Templates"]
@@ -275,6 +279,10 @@ classDiagram
         +scale : Scale
         +mainwp_reporter : MainWP_Reporter
         +notifications : Notifications
+        +ai_engine : AI_Engine
+        +content_decay : Content_Decay
+        +keyword_cannibalization : Keyword_Cannibalization
+        +advanced_linking : Advanced_Linking
         +get_instance() Core
         +get_settings() array
         +get_default_settings() array
@@ -490,6 +498,10 @@ classDiagram
     Core --> Scale
     Core --> MainWP_Reporter
     Core --> Notifications
+    Core --> AI_Engine
+    Core --> Content_Decay
+    Core --> Keyword_Cannibalization
+    Core --> Advanced_Linking
     Admin --> Core
     REST_Api --> Core
     Bulk_Tools --> Core
@@ -549,6 +561,58 @@ classDiagram
         +get_custom_name() string
         +export_reseller_config() array
         +import_reseller_config(config) bool
+    }
+
+    class AI_Engine {
+        -settings : array
+        +get_providers() array
+        +get_active_provider() string
+        +get_model() string
+        +encrypt(plaintext) string
+        +decrypt(ciphertext) string
+        +save_api_key(provider, key) void
+        +get_api_key(provider) string
+        +is_configured() bool
+        +is_rate_limited() bool
+        +is_budget_exceeded() bool
+        +chat(system, user, options) array
+        +generate_meta_description(content, keyword, title) array
+        +generate_title_suggestions(content, keyword, title) array
+        +generate_link_recommendations(post_id, candidates, content) array
+        +generate_content_brief(topic, titles, gaps) array
+    }
+
+    class Content_Decay {
+        -settings : array
+        +store_snapshot(post_id, scores) void
+        +get_score_history(post_id) array
+        +detect_decay(post_id) array
+        +run_decay_check() array
+        +get_decaying_posts(limit) array
+        +get_refresh_suggestions(post_id) array
+        +get_trend_data(post_id, module, days) array
+        +get_score_change(post_id, module, days) array
+    }
+
+    class Keyword_Cannibalization {
+        -settings : array
+        +build_keyword_index(post_type) array
+        +normalize_keyword(keyword) string
+        +generate_report(use_cache) array
+        +suggest_action(posts) array
+        +get_link_relationships(post_ids) array
+        +get_summary() array
+    }
+
+    class Advanced_Linking {
+        -settings : array
+        +get_suggestions(post_id, content, limit) array
+        +extract_keywords(text) array
+        +is_orphaned(post_id) bool
+        +get_orphaned_posts(limit) array
+        +get_equity_flow(limit) array
+        +check_internal_links(post_id) array
+        +run_broken_link_check() array
     }
 ```
 
@@ -1199,7 +1263,11 @@ search-intel/
 │   ├── class-white-label.php     # Reseller branding & config (v3.0+)
 │   ├── class-scale.php           # Object cache, queue, bulk editor (v3.0+)
 │   ├── class-mainwp-reporter.php # MainWP child-side reporter (v3.1+)
-│   └── class-notifications.php   # Email digest, score alerts, Slack, widget (v3.1+)
+│   ├── class-notifications.php   # Email digest, score alerts, Slack, widget (v3.1+)
+│   ├── class-ai-engine.php       # LLM abstraction: OpenAI, Anthropic, Ollama (v3.2+)
+│   ├── class-content-decay.php   # Score history, decay detection, refresh suggestions (v3.2+)
+│   ├── class-keyword-cannibalization.php # Duplicate keyword detector & report (v3.2+)
+│   └── class-advanced-linking.php # Link suggestions, orphans, equity, broken links (v3.2+)
 │
 ├── src/                           # Block editor source (compiled to build/)
 │   ├── store/
@@ -1266,7 +1334,7 @@ Search Intel has a comprehensive automated test suite and CI pipeline.
 
 | Suite | Count | Framework |
 |-------|-------|-----------|
-| Unit tests | 690 tests, 1,615 assertions | PHPUnit 9.6 |
+| Unit tests | 765 tests, 1,747 assertions | PHPUnit 9.6 |
 | Integration tests | 125 tests, 202 assertions | PHPUnit 9.6 |
 | E2E tests | 58 tests (51 pass, 7 skip) | Playwright (Chromium) |
 

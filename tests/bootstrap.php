@@ -1373,6 +1373,16 @@ function is_email( string $email ) {
 
 function wp_add_dashboard_widget( string $widget_id, string $widget_name, callable $callback, $control_callback = null, $args = null, $context = 'normal', $priority = 'core' ): void {}
 
+if ( ! function_exists( 'wp_get_post_tags' ) ) {
+	function wp_get_post_tags( int $post_id = 0, array $args = [] ) {
+		return [];
+	}
+}
+
+if ( ! defined( 'LOGGED_IN_SALT' ) ) {
+	define( 'LOGGED_IN_SALT', 'test-salt-for-unit-tests-only' );
+}
+
 // ── Autoloader ───────────────────────────────────────────────────────────────
 
 spl_autoload_register( function ( string $class ) {

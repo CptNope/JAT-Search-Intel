@@ -4,7 +4,7 @@ Tags: seo, aeo, geo, schema, structured-data, ai-optimization, llms, featured-sn
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 3.1.0
+Stable tag: 3.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -132,6 +132,21 @@ No. Search Intel outputs lightweight meta tags and JSON-LD schema directly in th
 
 == Changelog ==
 
+= 3.2.0 =
+* AI Engine: unified LLM abstraction for OpenAI, Anthropic, and Ollama (local) with encrypted API key storage
+* AI Engine: meta description generation, title suggestions, internal link recommendations, content briefs
+* AI Engine: per-minute rate limiting and monthly token budget controls
+* Content Decay: historical score snapshots per post (90-day retention)
+* Content Decay: detect posts with >10% score drops over 30 days, admin dashboard, auto-queue re-analysis
+* Content Decay: content refresh suggestions based on which modules declined
+* Keyword Cannibalization: detect multiple posts targeting the same focus keyword
+* Keyword Cannibalization: report with score comparison, smart action suggestions (merge/redirect/differentiate)
+* Keyword Cannibalization: Citation Graph integration for link relationships
+* Advanced Linking: content-similarity link suggestion engine with REST API for editor integration
+* Advanced Linking: orphaned content detection, link equity flow visualization
+* Advanced Linking: broken internal link scanner with auto-fix suggestions
+* 765 unit tests, 1,747 assertions
+
 = 3.1.0 =
 * MainWP Child Reporter: expose site scores, feature status, and remote actions via MainWP callback API
 * Notifications: weekly email digest with score averages, worst posts, and recommendations
@@ -231,6 +246,9 @@ No. Search Intel outputs lightweight meta tags and JSON-LD schema directly in th
 * User profile E-E-A-T fields
 
 == Upgrade Notice ==
+
+= 3.2.0 =
+New: AI Engine (OpenAI/Anthropic/Ollama with encrypted keys, rate limiting, token budgets), Content Decay Detection (score history, decay dashboard, refresh suggestions), Keyword Cannibalization Detector (duplicate keywords, smart actions), Advanced Internal Linking (suggestions, orphans, equity flow, broken link scanner).
 
 = 3.1.0 =
 New: MainWP child-side reporter, Notifications system (email digest, score drop alerts, Slack, dashboard widget), 10 new WP-CLI commands, 58 Playwright E2E tests.
