@@ -384,52 +384,18 @@
   </file>
   <file src="includes/class-visibility-dashboard.php">
     <InvalidArgument>
-      <code><![CDATA[['headers' => ['Authorization' => 'Bearer ' . $access_token, 'Content-Type' => 'application/json'], 'body' => (string) wp_json_encode(['startDate' => $start, 'endDate' => $end, 'dimensions' => ['query', 'page'], 'rowLimit' => 100]), 'timeout' => 30]]]></code>
+      <code><![CDATA[['hide_empty' => false]]]></code>
     </InvalidArgument>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[fetch_gsc_data]]></code>
-      <code><![CDATA[fetch_bing_data]]></code>
-      <code><![CDATA[get_llms_access_log]]></code>
-      <code><![CDATA[get_ai_referral_summary]]></code>
-      <code><![CDATA[get_visibility_trend]]></code>
-      <code><![CDATA[get_recommendations]]></code>
-      <code><![CDATA[analyze_content_gaps]]></code>
-      <code><![CDATA[identify_ai_bot]]></code>
-      <code><![CDATA[identify_ai_referral]]></code>
-    </PossiblyUnusedMethod>
-    <PossiblyUnusedReturnValue>
-      <code><![CDATA[array]]></code>
-    </PossiblyUnusedReturnValue>
-    <UnusedProperty>
-      <code><![CDATA[$settings]]></code>
-    </UnusedProperty>
   </file>
   <file src="includes/class-citation-graph.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[extract_internal_links]]></code>
-      <code><![CDATA[extract_external_links]]></code>
-      <code><![CDATA[build_link_graph]]></code>
-      <code><![CDATA[get_inbound_links]]></code>
-      <code><![CDATA[get_citation_data]]></code>
-      <code><![CDATA[detect_topic_clusters]]></code>
-      <code><![CDATA[identify_pillar_pages]]></code>
-      <code><![CDATA[detect_missing_links]]></code>
-      <code><![CDATA[detect_orphaned_content]]></code>
-      <code><![CDATA[calculate_cluster_linking_score]]></code>
-    </PossiblyUnusedMethod>
-    <UnusedProperty>
-      <code><![CDATA[$settings]]></code>
-    </UnusedProperty>
+    <InvalidArgument>
+      <code><![CDATA[['hide_empty' => true]]]></code>
+    </InvalidArgument>
   </file>
   <file src="includes/class-authority-map.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[calculate_topic_authority]]></code>
-      <code><![CDATA[analyze_content_gaps]]></code>
-      <code><![CDATA[get_dashboard_data]]></code>
-      <code><![CDATA[analyze_multimodal]]></code>
-    </PossiblyUnusedMethod>
-    <UnusedProperty>
-      <code><![CDATA[$settings]]></code>
-    </UnusedProperty>
+    <InvalidArgument>
+      <code><![CDATA[['hide_empty' => false]]]></code>
+      <code><![CDATA[['hide_empty' => true]]]></code>
+    </InvalidArgument>
   </file>
 </files>

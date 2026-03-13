@@ -379,7 +379,7 @@ class Citation_Graph {
 		}
 
 		foreach ( $graph['nodes'] as $pid => $node ) {
-			if ( ! isset( $inbound_map[ $pid ] ) || $inbound_map[ $pid ] === 0 ) {
+			if ( ! isset( $inbound_map[ $pid ] ) ) {
 				$orphaned[] = [
 					'post_id' => $pid,
 					'title'   => $node['title'],

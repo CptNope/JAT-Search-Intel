@@ -123,7 +123,7 @@ class Visibility_Dashboard {
 		$total += $schema_score;
 		$max   += 10;
 
-		$pct   = $max > 0 ? (int) round( ( $total / $max ) * 100 ) : 0;
+		$pct   = (int) round( ( $total / $max ) * 100 );
 		$grade = $this->score_to_grade( $pct );
 
 		return [
@@ -786,7 +786,6 @@ class Visibility_Dashboard {
 	public function render_admin_page(): void {
 		$health = $this->calculate_health_score();
 		$recs   = $this->get_recommendations();
-		$trend  = $this->get_visibility_trend( 30 );
 		$log    = $this->get_llms_access_log( 20 );
 		$ai_ref = $this->get_ai_referral_summary( 30 );
 		$gaps   = $this->analyze_content_gaps();

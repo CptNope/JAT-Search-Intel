@@ -110,7 +110,7 @@ class Authority_Map {
 		$total += $schema_score;
 		$max   += 15;
 
-		$pct   = $max > 0 ? (int) round( ( $total / $max ) * 100 ) : 0;
+		$pct   = (int) round( ( $total / $max ) * 100 );
 		$grade = $this->score_to_grade( $pct );
 
 		return [
