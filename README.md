@@ -2,11 +2,13 @@
 
 **The first WordPress plugin built for all three pillars of modern search visibility: SEO, AEO, and GEO.**
 
+[![CI](https://github.com/CptNope/Search-Intel/actions/workflows/ci.yml/badge.svg)](https://github.com/CptNope/Search-Intel/actions/workflows/ci.yml)
 [![License: GPL v2](https://img.shields.io/badge/License-GPLv2-blue.svg)](LICENSE.md)
 [![WordPress: 6.0+](https://img.shields.io/badge/WordPress-6.0%2B-21759b.svg)](https://wordpress.org/)
 [![PHP: 7.4+](https://img.shields.io/badge/PHP-7.4%2B-777bb4.svg)](https://php.net/)
+[![Release](https://img.shields.io/github/v/release/CptNope/Search-Intel?color=brightgreen)](https://github.com/CptNope/Search-Intel/releases/latest)
 
-**[Roadmap](ROADMAP.md)** · **[Changelog](CHANGELOG.md)** · **[License](LICENSE.md)**
+**[Roadmap](ROADMAP.md)** · **[Changelog](CHANGELOG.md)** · **[Contributing](CONTRIBUTING.md)** · **[License](LICENSE.md)**
 
 ---
 
@@ -25,6 +27,7 @@
 - [Hooks and Filters](#hooks-and-filters)
 - [File Structure](#file-structure)
 - [Compatibility](#compatibility)
+- [Testing & CI](#testing--ci)
 - [Security](#security)
 - [Contributing](#contributing)
 - [License](#license)
@@ -654,6 +657,63 @@ search-intel/
 
 ---
 
+## Testing & CI
+
+Search Intel has a comprehensive automated test suite and CI pipeline.
+
+### Test Coverage
+
+| Suite | Count | Framework |
+|-------|-------|-----------|
+| Unit tests | 193 tests, 348 assertions | PHPUnit 9.6 |
+| Integration tests | 125 tests, 202 assertions | PHPUnit 9.6 |
+| E2E tests | 40 tests | Playwright (Chromium) |
+
+### Static Analysis & Linting
+
+| Tool | Level / Standard | Status |
+|------|-----------------|--------|
+| Psalm | Level 4 | Passing (with WP stubs baseline) |
+| PHPStan | Level 6 | Passing |
+| PHPCS | WordPress-Core (WPCS 3.0) | Informational |
+| ESLint | Custom config | Informational |
+| Stylelint | stylelint-config-standard | Passing (0 errors) |
+
+### Performance Benchmarks
+
+| Metric | Result | Target |
+|--------|--------|--------|
+| `wp_head` full pipeline | < 10ms | < 10ms |
+| Sitemap cold (1000+ posts) | 65ms | < 500ms |
+| Content analysis | < 200ms | < 200ms |
+
+### CI Pipeline (GitHub Actions)
+
+- PHPUnit on PHP 8.1, 8.2, 8.3
+- Psalm level 4, PHPStan level 6, PHPCS, ESLint, Stylelint
+- Performance regression checks
+- Playwright E2E via `wp-env` (Docker)
+
+### Running Tests Locally
+
+```bash
+# Unit + integration tests
+composer install
+vendor/bin/phpunit --testsuite unit
+vendor/bin/phpunit --testsuite integration
+
+# E2E tests (requires Docker)
+npm install
+npx wp-env start
+npx playwright test
+
+# Static analysis
+vendor/bin/psalm --no-cache
+npx stylelint "admin/css/**/*.css"
+```
+
+---
+
 ## Security
 
 - All user input sanitized with `sanitize_text_field()`, `wp_kses_post()`, `esc_url_raw()`
@@ -663,16 +723,19 @@ search-intel/
 - No direct file access — all PHP files check `ABSPATH`
 - No external API calls except optional search engine pinging (non-blocking)
 - No JavaScript on the public frontend — zero attack surface
+- Rate limiting on AJAX content analysis (10 requests/min per user)
 
 ---
 
 ## Contributing
 
+See [CONTRIBUTING.md](CONTRIBUTING.md) for full details on branching strategy, commit conventions, and local development setup.
+
 1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/my-feature`
-3. Follow WordPress coding standards (WPCS)
+2. Create a feature branch from `develop`: `git checkout -b feature/my-feature develop`
+3. Follow WordPress coding standards (WPCS) and [Conventional Commits](https://www.conventionalcommits.org/)
 4. Write tests for new functionality
-5. Submit a pull request
+5. Submit a pull request against `develop`
 
 ---
 

@@ -200,10 +200,83 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [1.2.1] — 2026-03-12
+
+### Fixed
+- **CI: Psalm config** — Remove `node_modules` from `psalm.xml` `<ignoreFiles>` (directory doesn't exist in CI, causing parse error)
+- **CI: PHP 8.0 dropped from test matrix** — `amphp/parallel` (Psalm transitive dependency) uses PHP 8.1+ syntax in autoload files; PHP 8.0 is EOL since Nov 2023
+- **CI: Composer platform requirement** — Add `--ignore-platform-req=php` to all `composer install` commands (Psalm 6.5 lock file requires PHP ≥8.3.16)
+
+### Added
+- `phpstan.neon` configuration with WordPress stubs bootstrap
+- `.eslintrc.json` configuration with browser/jQuery/WP globals
+
+---
+
+## [1.2.0] — 2026-03-12
+
+### Added
+
+#### Testing Infrastructure
+- **193 PHPUnit unit tests** (348 assertions) covering all 9 plugin classes
+- **125 PHPUnit integration tests** (202 assertions) covering meta output, schema rendering, settings, and cross-module pipelines
+- **40 Playwright E2E tests** against live WordPress via `wp-env` (Docker)
+  - Metabox: tab navigation, panel switching, SERP preview (5 tests)
+  - Character counters: title and description with overflow detection (3 tests)
+  - Focus keyword field and nonce verification (2 tests)
+  - FAQ repeater: add, remove, multiple rows, question/answer fields (5 tests)
+  - Entity repeater: add, remove, visibility (3 tests)
+  - Citation repeater: add, remove, visibility (3 tests)
+  - Analysis: Run Analysis button, AJAX score rings, multi-category display (5 tests)
+  - Settings: all 6 pages load, separator save, OG toggle, sitemap max URLs (10 tests)
+  - Post list: Search Intel column header, cell rendering, score data (3 tests)
+  - Auth setup: automated WP login with stored session state (1 test)
+
+#### Static Analysis & Linting
+- Psalm level 4 with WordPress stubs and baseline (76 baselined WP hook pattern issues)
+- Stylelint with `stylelint-config-standard` (0 errors after auto-fix)
+- `psalm.xml` and `psalm-baseline.xml` configuration files
+- `.stylelintrc.json` configuration file
+
+#### CI/CD Pipeline
+- Psalm job (PHP 8.3)
+- Stylelint job
+- Performance regression check job (`--filter Performance`)
+- Playwright E2E job with `wp-env` startup, Classic Editor install, and auth configuration
+- PHPUnit matrix updated to PHP 8.1, 8.2, 8.3
+
+#### Performance Benchmarks
+- Sitemap cold benchmark script (`tests/benchmark-sitemap.php`): **65.62ms** with 1002 posts (target < 500ms)
+- Block theme compatibility test script (`tests/benchmark-blocktheme.php`)
+
+#### Compatibility Testing
+- Live verified: Classic Editor metabox with all 5 tabs
+- Live verified: Front-end meta output (description, canonical, robots, OG, Twitter, AI meta, JSON-LD)
+- Live verified: Settings pages save and persist across all 6 pages
+- Live verified: Post list Search Intel column with score display
+- Live verified: AJAX content analysis with SEO/AEO/GEO/Readability score rings
+- Live verified: Block theme (Twenty Twenty-Four v1.4 FSE) — `wp_head` renders all SI meta correctly
+
+#### Development Files
+- `.wp-env.json` for local WordPress development environment
+- `.distignore` for clean plugin distribution builds (excludes tests, configs, CI files)
+- `CONTRIBUTING.md` with Git Flow branching strategy and Conventional Commits guide
+- Playwright config with auth setup project and stored session state
+
+### Fixed
+- **`speakable_selectors` sanitize crash** — `explode()` called on array input when hidden fields passed array values (class-admin.php:187)
+- Admin CSS: `color-function-notation` and `media-feature-range-notation` updated to modern syntax
+
+### Changed
+- `composer.json`: Added `vimeo/psalm` and `php-stubs/wordpress-stubs` as dev dependencies
+- `package.json`: Added `@wordpress/env`, Playwright, Stylelint dev dependencies
+
+---
+
 ## [Unreleased]
 
 ### Planned
-- See [ROADMAP.md](ROADMAP.md) for v1.2+ features (security audit, unit tests, REST API, dashboard)
+- See [ROADMAP.md](ROADMAP.md) for v1.3 features (Bulk Tools, REST API, Dashboard widgets)
 
 ---
 
