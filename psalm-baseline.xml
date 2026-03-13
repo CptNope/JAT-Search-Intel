@@ -70,6 +70,9 @@
     </UndefinedConstant>
   </file>
   <file src="includes/class-cli.php">
+    <UndefinedConstant>
+      <code><![CDATA[SEARCH_INTEL_VERSION]]></code>
+    </UndefinedConstant>
     <PossiblyUnusedParam>
       <code><![CDATA[$args]]></code>
       <code><![CDATA[$args]]></code>
@@ -80,9 +83,6 @@
     </UnusedClass>
   </file>
   <file src="includes/class-core.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[get_instance]]></code>
-    </PossiblyUnusedMethod>
     <PossiblyUnusedProperty>
       <code><![CDATA[$admin]]></code>
       <code><![CDATA[$aeo]]></code>
