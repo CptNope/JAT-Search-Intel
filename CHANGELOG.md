@@ -6,6 +6,84 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [2.0.0] — 2026-03-13
+
+### Added
+
+#### Redirect Manager (`class-redirect-manager.php`)
+- 301, 302, 307, 410 redirect rules with exact, prefix, and regex matching
+- Admin table with search, filter, sort, and pagination
+- Hit counter and last-hit date per redirect rule
+- 404 log with hit aggregation and auto-suggest redirect targets
+- CSV import/export for bulk redirect management
+- Slug change auto-redirect detection on post save
+- Redirect loop detection and prevention
+- Custom database tables (`search_intel_redirects`, `search_intel_404_log`)
+
+#### IndexNow Integration (`class-indexnow.php`)
+- IndexNow API ping on post publish/update
+- Support for Bing, Yandex, Naver endpoints
+- API key management in settings with auto-served verification file
+- Ping log with success/failure status per provider
+- Page-level hooks for `publish_post`, `publish_page`, `post_updated`
+
+#### WooCommerce Support (`class-woocommerce.php`)
+- Auto-detect WooCommerce product pages
+- Product schema (name, description, image, SKU, brand, GTIN, MPN)
+- Offer schema (price, currency, availability, condition, seller, sale dates)
+- AggregateRating from WooCommerce product reviews
+- Product breadcrumbs (Home > Shop > Category > Product) with ancestor support
+- Product sitemap via `search_intel_sitemap_post_types` filter
+- Product-specific metabox fields (brand, GTIN, MPN, condition)
+
+#### Local Business Schema (`class-local-business.php`)
+- LocalBusiness schema type with 14 subtypes (Restaurant, Store, etc.)
+- PostalAddress schema (street, city, state, zip, country)
+- GeoCoordinates (latitude, longitude)
+- Service area support (cities served)
+- Multiple locations support via settings array
+- OpeningHoursSpecification per day of week
+- Price range, telephone, email, image, description
+
+#### Robots.txt Editor (`class-robots-txt.php`)
+- Visual robots.txt editor with monospace textarea
+- Syntax validation (directive format, User-agent presence, Sitemap URLs)
+- Warnings for wildcards and unknown directives
+- Save, validate, and reset to default actions
+- Filters WordPress `robots_txt` output when enabled
+
+#### Audit Log (`class-audit-log.php`)
+- Settings change tracking via `update_option_search_intel_settings` hook
+- Diff-based logging — only changed keys recorded
+- User ID, display name, timestamp, and hashed IP per entry
+- Configurable max entries (200) with automatic trimming
+- Clear log action for administrators
+
+#### Tests
+- `tests/unit/RedirectManagerTest.php` — 22 tests
+- `tests/unit/IndexNowTest.php` — 14 tests
+- `tests/unit/WooCommerceTest.php` — 10 tests
+- `tests/unit/LocalBusinessTest.php` — 17 tests
+- `tests/unit/RobotsTxtTest.php` — 14 tests
+- `tests/unit/AuditLogTest.php` — 15 tests
+- Unit test count: 372 tests, 887 assertions (up from 277/719)
+
+### Changed
+- `Core` constructor now boots 6 new modules: Redirect_Manager, IndexNow, WooCommerce, Local_Business, Robots_Txt, Audit_Log
+- Activation hook creates redirect and 404 log database tables via `dbDelta`
+- Default settings expanded with redirect, IndexNow, local business, robots editor, and audit log keys
+- Test bootstrap extended with 20+ new WP function stubs and enhanced `$wpdb` mock
+
+### New Files
+- `includes/class-redirect-manager.php` — Redirect Manager
+- `includes/class-indexnow.php` — IndexNow Integration
+- `includes/class-woocommerce.php` — WooCommerce Support
+- `includes/class-local-business.php` — Local Business Schema
+- `includes/class-robots-txt.php` — Robots.txt Editor
+- `includes/class-audit-log.php` — Audit Log
+
+---
+
 ## [1.5.0] — 2026-03-13
 
 ### Added

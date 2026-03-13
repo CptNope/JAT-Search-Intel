@@ -6,7 +6,7 @@
 [![License: GPL v2](https://img.shields.io/badge/License-GPLv2-blue.svg)](LICENSE.md)
 [![WordPress: 6.0+](https://img.shields.io/badge/WordPress-6.0%2B-21759b.svg)](https://wordpress.org/)
 [![PHP: 7.4+](https://img.shields.io/badge/PHP-7.4%2B-777bb4.svg)](https://php.net/)
-[![Release: v1.5.0](https://img.shields.io/badge/Release-v1.5.0-brightgreen)](https://github.com/CptNope/Search-Intel/releases/tag/v1.5.0)
+[![Release: v2.0.0](https://img.shields.io/badge/Release-v2.0.0-brightgreen)](https://github.com/CptNope/Search-Intel/releases/tag/v2.0.0)
 
 **[Roadmap](ROADMAP.md)** · **[Changelog](CHANGELOG.md)** · **[Contributing](CONTRIBUTING.md)** · **[License](LICENSE.md)**
 
@@ -113,6 +113,12 @@ graph TD
     CORE --> BULK["Bulk Tools<br/><i>v1.3+</i>"]
     CORE --> BLOCKS["Blocks<br/><i>v1.4+ Block Editor</i>"]
     CORE --> PRIVACY["Privacy<br/><i>v1.5+ GDPR</i>"]
+    CORE --> REDIRECTS["Redirects<br/><i>v2.0+ 301/302/307/410</i>"]
+    CORE --> INDEXNOW["IndexNow<br/><i>v2.0+ Ping API</i>"]
+    CORE --> WOO["WooCommerce<br/><i>v2.0+ Product Schema</i>"]
+    CORE --> LOCALBIZ["Local Business<br/><i>v2.0+ Schema</i>"]
+    CORE --> ROBOTSTXT["Robots.txt<br/><i>v2.0+ Editor</i>"]
+    CORE --> AUDITLOG["Audit Log<br/><i>v2.0+ Tracking</i>"]
 
     TITLE --> TVAR["Variable Resolver"]
     TITLE --> TCTX["Per-Context Templates"]
@@ -168,6 +174,28 @@ graph TD
     PRIVACY --> ERASER["Data Eraser<br/><i>wp_privacy_personal_data_erasers</i>"]
     PRIVACY --> PPOLICY["Privacy Policy Text<br/><i>wp_add_privacy_policy_content</i>"]
 
+    REDIRECTS --> REXACT["Exact / Prefix / Regex"]
+    REDIRECTS --> R404["404 Log + Auto-suggest"]
+    REDIRECTS --> RCSV["CSV Import / Export"]
+    REDIRECTS --> RSLUG["Slug Change Detection"]
+
+    INDEXNOW --> INBING["Bing / Yandex / Naver"]
+    INDEXNOW --> INLOG["Ping Log"]
+
+    WOO --> WPROD["Product Schema"]
+    WOO --> WOFFER["Offer + Rating"]
+    WOO --> WBREAD["Product Breadcrumbs"]
+
+    LOCALBIZ --> LADDR["PostalAddress + Geo"]
+    LOCALBIZ --> LHOURS["Opening Hours"]
+    LOCALBIZ --> LMULTI["Multi-Location"]
+
+    ROBOTSTXT --> RTEDIT["Visual Editor"]
+    ROBOTSTXT --> RTVALID["Syntax Validation"]
+
+    AUDITLOG --> ALDIFF["Settings Diff"]
+    AUDITLOG --> ALUSER["User Attribution"]
+
     style CORE fill:#2563eb,color:#fff
     style SEO fill:#16a34a,color:#fff
     style AEO fill:#d97706,color:#fff
@@ -179,6 +207,12 @@ graph TD
     style BULK fill:#be185d,color:#fff
     style BLOCKS fill:#7c3aed,color:#fff
     style PRIVACY fill:#059669,color:#fff
+    style REDIRECTS fill:#b91c1c,color:#fff
+    style INDEXNOW fill:#0369a1,color:#fff
+    style WOO fill:#7e22ce,color:#fff
+    style LOCALBIZ fill:#a16207,color:#fff
+    style ROBOTSTXT fill:#4d7c0f,color:#fff
+    style AUDITLOG fill:#64748b,color:#fff
 ```
 
 ### Class Dependency Map
@@ -199,6 +233,12 @@ classDiagram
         +bulk_tools : Bulk_Tools
         +blocks : Blocks
         +privacy : Privacy
+        +redirects : Redirect_Manager
+        +indexnow : IndexNow
+        +woocommerce : WooCommerce
+        +local_business : Local_Business
+        +robots_txt : Robots_Txt
+        +audit_log : Audit_Log
         +get_instance() Core
         +get_settings() array
         +get_default_settings() array
@@ -321,6 +361,63 @@ classDiagram
         +add_privacy_policy_content() void
     }
 
+    class Redirect_Manager {
+        -settings : array
+        +maybe_redirect() void
+        +log_404() void
+        +find_matching_redirect(path) object
+        +save_redirect(data) int
+        +delete_redirect(id) bool
+        +export_csv() string
+        +import_csv(csv) array
+        +detect_slug_change(post_id, post, before) void
+        +create_tables() void
+    }
+
+    class IndexNow {
+        -settings : array
+        +ping_on_publish(post_id) void
+        +submit_url(url) array
+        +serve_key_file() void
+        +get_log() array
+        +clear_log() void
+    }
+
+    class WooCommerce {
+        -settings : array
+        +is_woocommerce_active() bool
+        +inject_product_schema(schema, post_id) array
+        +get_offer_schema(product) array
+        +get_aggregate_rating(product) array
+        +product_breadcrumbs(crumbs, post_id) array
+    }
+
+    class Local_Business {
+        -settings : array
+        +render_schema() void
+        +build_location_schema(location) array
+        +build_address(location) array
+        +build_geo(location) array
+        +build_opening_hours(location) array
+    }
+
+    class Robots_Txt {
+        -settings : array
+        +filter_robots_txt(output, public) string
+        +get_content() string
+        +save_content(content) bool
+        +validate(content) array
+    }
+
+    class Audit_Log {
+        -settings : array
+        +log_settings_change(old, new) void
+        +add_entry(action, details) void
+        +get_log() array
+        +clear_log() void
+        +diff_settings(old, new) array
+    }
+
     Core --> Title_Engine
     Core --> SEO_Manager
     Core --> Schema_Manager
@@ -333,6 +430,12 @@ classDiagram
     Core --> Bulk_Tools
     Core --> Blocks
     Core --> Privacy
+    Core --> Redirect_Manager
+    Core --> IndexNow
+    Core --> WooCommerce
+    Core --> Local_Business
+    Core --> Robots_Txt
+    Core --> Audit_Log
     Admin --> Core
     REST_Api --> Core
     Bulk_Tools --> Core
@@ -1005,7 +1108,7 @@ Search Intel has a comprehensive automated test suite and CI pipeline.
 
 | Suite | Count | Framework |
 |-------|-------|-----------|
-| Unit tests | 277 tests, 719 assertions | PHPUnit 9.6 |
+| Unit tests | 372 tests, 887 assertions | PHPUnit 9.6 |
 | Integration tests | 125 tests, 202 assertions | PHPUnit 9.6 |
 | E2E tests | 40 tests | Playwright (Chromium) |
 

@@ -4,7 +4,7 @@ Tags: seo, aeo, geo, schema, structured-data, ai-optimization, llms, featured-sn
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.5.0
+Stable tag: 2.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -132,6 +132,17 @@ No. Search Intel outputs lightweight meta tags and JSON-LD schema directly in th
 
 == Changelog ==
 
+= 2.0.0 =
+* Redirect Manager: 301/302/307/410 redirects with exact, prefix, regex matching
+* Redirect Manager: Admin table, hit counter, 404 log, CSV import/export, slug change detection
+* IndexNow: Ping Bing, Yandex, Naver on publish/update with API key management and ping log
+* WooCommerce: Product schema (name, SKU, brand, GTIN, MPN), Offer, AggregateRating
+* WooCommerce: Product breadcrumbs, product sitemap, product metabox
+* Local Business: LocalBusiness schema with 14 subtypes, address, geo, hours, service areas
+* Robots.txt: Visual editor with syntax validation and WordPress robots_txt filter
+* Audit Log: Settings change tracking with diff, user attribution, and IP hashing
+* 372 unit tests, 887 assertions
+
 = 1.5.0 =
 * GDPR: Personal data exporter and eraser for author E-E-A-T meta
 * Privacy policy suggested text via wp_add_privacy_policy_content()
@@ -182,6 +193,9 @@ No. Search Intel outputs lightweight meta tags and JSON-LD schema directly in th
 * User profile E-E-A-T fields
 
 == Upgrade Notice ==
+
+= 2.0.0 =
+Major: Redirect Manager (301/302/307/410, 404 log, CSV), IndexNow (Bing/Yandex/Naver), WooCommerce product schema, Local Business schema, robots.txt editor, audit log.
 
 = 1.5.0 =
 New: GDPR compliance (data exporter/eraser, privacy policy text), E-E-A-T consent checkbox, author schema gated behind consent, search engine pinging opt-in.
