@@ -245,7 +245,7 @@
 ### CI/CD Pipeline (GitHub Actions ✅)
 
 - [x] GitHub Actions workflow (`.github/workflows/ci.yml`)
-- [x] PHPUnit test matrix: PHP 8.0, 8.1, 8.2, 8.3
+- [x] PHPUnit test matrix: PHP 8.1, 8.2, 8.3 (8.0 dropped — EOL Nov 2023)
 - [x] PHP_CodeSniffer with WordPress-Core standard (WPCS 3.0)
 - [x] PHPStan level 6
 - [x] ESLint for admin JS
