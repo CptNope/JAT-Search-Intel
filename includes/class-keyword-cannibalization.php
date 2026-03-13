@@ -61,7 +61,7 @@ class Keyword_Cannibalization {
      * Returns only keywords that appear on 2+ posts (actual cannibalization).
      *
      * @param string $post_type Post type to scan (empty = all public types).
-     * @return array { keyword => [ post_id, ... ] } only for duplicated keywords.
+     * @return array Keyword-to-post-IDs map, only for duplicated keywords.
      */
     public function build_keyword_index( string $post_type = '' ): array {
         $args = [
@@ -101,7 +101,7 @@ class Keyword_Cannibalization {
      */
     public function normalize_keyword( string $keyword ): string {
         $keyword = mb_strtolower( trim( $keyword ) );
-        return preg_replace( '/\s+/', ' ', $keyword );
+        return (string) preg_replace( '/\s+/', ' ', $keyword );
     }
 
     /*----------------------------------------------------------------------
@@ -324,8 +324,8 @@ class Keyword_Cannibalization {
         ?>
         <div class="wrap">
             <h1>Keyword Cannibalization Report</h1>
-            <p>Found <strong><?php echo esc_html( $summary['total_keywords'] ); ?></strong> cannibalized keywords
-               affecting <strong><?php echo esc_html( $summary['total_posts_affected'] ); ?></strong> posts.</p>
+            <p>Found <strong><?php echo esc_html( (string) $summary['total_keywords'] ); ?></strong> cannibalized keywords
+               affecting <strong><?php echo esc_html( (string) $summary['total_posts_affected'] ); ?></strong> posts.</p>
 
             <?php if ( empty( $report ) ) : ?>
                 <div class="notice notice-success"><p>No keyword cannibalization detected. Each focus keyword is unique.</p></div>

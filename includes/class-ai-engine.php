@@ -365,7 +365,7 @@ class AI_Engine {
                 'Content-Type'  => 'application/json',
                 'Authorization' => 'Bearer ' . $this->get_api_key(),
             ],
-            'body' => wp_json_encode( $body ),
+            'body' => (string) wp_json_encode( $body ),
         ] );
 
         if ( is_wp_error( $response ) ) {
@@ -417,7 +417,7 @@ class AI_Engine {
                 'x-api-key'         => $this->get_api_key(),
                 'anthropic-version' => '2023-06-01',
             ],
-            'body' => wp_json_encode( $body ),
+            'body' => (string) wp_json_encode( $body ),
         ] );
 
         if ( is_wp_error( $response ) ) {
@@ -469,7 +469,7 @@ class AI_Engine {
         $response = wp_remote_post( $this->get_endpoint(), [
             'timeout' => 120, // Local models can be slow.
             'headers' => [ 'Content-Type' => 'application/json' ],
-            'body'    => wp_json_encode( $body ),
+            'body'    => (string) wp_json_encode( $body ),
         ] );
 
         if ( is_wp_error( $response ) ) {

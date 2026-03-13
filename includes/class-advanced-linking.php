@@ -91,7 +91,7 @@ class Advanced_Linking {
         $existing = $this->get_existing_links( $post_id );
 
         // Candidate posts: same categories/tags, published, not self.
-        $candidates = $this->get_candidate_posts( $post_id, $post_cats, $post_tags );
+        $candidates = $this->get_candidate_posts( $post_id, $post_cats );
 
         $scored = [];
         foreach ( $candidates as $cand ) {
@@ -192,10 +192,9 @@ class Advanced_Linking {
      *
      * @param int   $post_id   Current post ID.
      * @param array $cat_ids   Category IDs.
-     * @param array $tag_ids   Tag IDs.
      * @return array Array of [ id, title, content ].
      */
-    private function get_candidate_posts( int $post_id, array $cat_ids, array $tag_ids ): array {
+    private function get_candidate_posts( int $post_id, array $cat_ids ): array {
         $args = [
             'post_type'      => 'any',
             'post_status'    => 'publish',
@@ -214,9 +213,9 @@ class Advanced_Linking {
 
         foreach ( $posts as $p ) {
             $result[] = [
-                'id'      => $p->ID ?? ( $p['ID'] ?? 0 ),
-                'title'   => $p->post_title ?? ( $p['post_title'] ?? '' ),
-                'content' => $p->post_content ?? ( $p['post_content'] ?? '' ),
+                'id'      => (int) $p->ID,
+                'title'   => (string) $p->post_title,
+                'content' => (string) $p->post_content,
             ];
         }
 
@@ -379,7 +378,7 @@ class Advanced_Linking {
      * Returns nodes (posts) and edges (internal links) with equity weights.
      *
      * @param int $limit Max nodes.
-     * @return array { nodes: [ { id, title, inbound, outbound } ], edges: [ { from, to } ] }
+     * @return array Associative array with 'nodes' and 'edges' keys.
      */
     public function get_equity_flow( int $limit = 50 ): array {
         $core = Core::get_instance();
