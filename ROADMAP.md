@@ -484,31 +484,31 @@
 
 ### AI Visibility Dashboard
 
-- [ ] Site-wide GEO health score
-- [ ] Google Search Console API integration
-- [ ] Bing Webmaster API integration
-- [ ] `llms.txt` access log tracking
-- [ ] AI referral traffic identification and tracking
-- [ ] Visibility trends over time chart
-- [ ] Prioritized recommendation list
-- [ ] Content gap map
+- [x] Site-wide GEO health score
+- [x] Google Search Console API integration
+- [x] Bing Webmaster API integration
+- [x] `llms.txt` access log tracking
+- [x] AI referral traffic identification and tracking
+- [x] Visibility trends over time chart
+- [x] Prioritized recommendation list
+- [x] Content gap map
 
 ### Citation Graph Builder
 
-- [ ] Internal link graph visualization
-- [ ] External citation tracking per post
-- [ ] Topic cluster auto-detection (shared entities, categories, semantic similarity)
-- [ ] Pillar page identification and suggestions
-- [ ] Missing internal link detection
-- [ ] Orphaned content detection
-- [ ] Internal linking score per cluster
+- [x] Internal link graph visualization
+- [x] External citation tracking per post
+- [x] Topic cluster auto-detection (shared entities, categories, semantic similarity)
+- [x] Pillar page identification and suggestions
+- [x] Missing internal link detection
+- [x] Orphaned content detection
+- [x] Internal linking score per cluster
 
 ### Topical Authority Map
 
-- [ ] Authority score per topic (based on content volume, freshness, E-E-A-T)
-- [ ] Content gap analysis vs competitor coverage
-- [ ] Topic cluster dashboard with drill-down
-- [ ] Multimodal optimization analysis (image alt text, video transcripts, structured data)
+- [x] Authority score per topic (based on content volume, freshness, E-E-A-T)
+- [x] Content gap analysis vs competitor coverage
+- [x] Topic cluster dashboard with drill-down
+- [x] Multimodal optimization analysis (image alt text, video transcripts, structured data)
 
 ---
 

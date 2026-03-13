@@ -1099,6 +1099,22 @@ function wp_remote_retrieve_body( $response ): string {
 	return '';
 }
 
+function url_to_postid( string $url ): int {
+	return 0;
+}
+
+function wp_get_post_categories( int $post_id, array $args = [] ): array {
+	$fields = $args['fields'] ?? 'ids';
+	if ( $fields === 'names' ) {
+		return [ 'Uncategorized' ];
+	}
+	return [ 1 ];
+}
+
+function get_edit_post_link( int $post_id = 0, string $context = 'display' ): ?string {
+	return 'https://example.com/wp-admin/post.php?post=' . $post_id . '&action=edit';
+}
+
 // ── Autoloader ───────────────────────────────────────────────────────────────
 
 spl_autoload_register( function ( string $class ) {

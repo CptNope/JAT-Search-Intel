@@ -88,6 +88,15 @@ class Core {
     /** @var FAQ_Generator */
     public $faq_generator;
 
+    /** @var Visibility_Dashboard */
+    public $visibility_dashboard;
+
+    /** @var Citation_Graph */
+    public $citation_graph;
+
+    /** @var Authority_Map */
+    public $authority_map;
+
     /**
      * Get singleton instance.
      */
@@ -166,6 +175,15 @@ class Core {
 
         // FAQ Generator — local pattern matching + optional AI enhancement.
         $this->faq_generator = new FAQ_Generator( $settings, $this->qa_detector );
+
+        // AI Visibility Dashboard — GEO health score, API integrations, llms.txt tracking.
+        $this->visibility_dashboard = new Visibility_Dashboard( $settings );
+
+        // Citation Graph Builder — link graph, topic clusters, orphaned content.
+        $this->citation_graph = new Citation_Graph( $settings );
+
+        // Topical Authority Map — authority scoring, content gaps, multimodal analysis.
+        $this->authority_map = new Authority_Map( $settings );
 
         // Auto-redirect on slug change.
         add_action( 'post_updated', [ $this->redirects, 'detect_slug_change' ], 10, 3 );
@@ -373,6 +391,19 @@ class Core {
             // FAQ Generator (v2.1)
             'enable_faq_generator'   => false,
             'faq_ai_api_key'         => '',
+
+            // AI Visibility Dashboard (v2.5)
+            'enable_visibility_dashboard' => false,
+            'gsc_access_token'       => '',
+            'gsc_site_url'           => '',
+            'bing_api_key'           => '',
+            'bing_site_url'          => '',
+
+            // Citation Graph Builder (v2.5)
+            'enable_citation_graph'  => false,
+
+            // Topical Authority Map (v2.5)
+            'enable_authority_map'   => false,
         ];
     }
 }

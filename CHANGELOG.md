@@ -6,6 +6,49 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [2.5.0] — 2026-03-13
+
+### Added
+
+#### AI Visibility Dashboard (`class-visibility-dashboard.php`)
+- Site-wide GEO health score (0–100) with 6 weighted factors
+- Google Search Console API integration for search analytics
+- Bing Webmaster API integration for query stats
+- llms.txt access log tracking with AI bot identification
+- AI referral traffic identification (ChatGPT, Perplexity, Claude, Gemini, Copilot, etc.)
+- Visibility score trends over time with daily snapshots
+- Prioritized recommendation engine based on health score gaps
+- Content gap map across categories with coverage analysis
+- Admin dashboard page with score card, trends, and logs
+- Daily cron for automated visibility data sync
+
+#### Citation Graph Builder (`class-citation-graph.php`)
+- Internal link graph builder across all published content
+- External citation tracking per post with domain distribution
+- Topic cluster auto-detection based on shared categories and link density
+- Pillar page identification via inbound link count, outbound links, and word count
+- Missing internal link detection within topic clusters
+- Orphaned content detection (posts with zero inbound links)
+- Internal linking score per cluster (0–100)
+- Auto-update link graph on post save
+- Admin page with cluster table, pillar pages, and orphan list
+
+#### Topical Authority Map (`class-authority-map.php`)
+- Authority score per topic (0–100) based on volume, freshness, E-E-A-T, linking, schema
+- Content gap analysis with per-topic recommendations
+- Topic cluster dashboard with drill-down post details
+- Multimodal optimization analysis (image alt text, video embeds, structured data)
+- Admin page with authority scores, gap recommendations, and multimodal report
+
+### Changed
+- Core: added `$visibility_dashboard`, `$citation_graph`, `$authority_map` properties
+- Default settings: `enable_visibility_dashboard`, `enable_citation_graph`, `enable_authority_map`, API key/URL settings
+
+### Tests
+- 574 unit tests, 1,381 assertions (up from 509/1,153)
+
+---
+
 ## [2.1.0] — 2026-03-13
 
 ### Added
