@@ -253,7 +253,7 @@ class Content_Decay {
                 if ( $this->settings['decay_auto_queue'] ?? true ) {
                     $core = Core::get_instance();
                     if ( isset( $core->scale ) && method_exists( $core->scale, 'enqueue_job' ) ) {
-                        $core->scale->enqueue_job( 'rescore', $post_id );
+                        $core->scale->enqueue_job( 'rescore', [ 'post_id' => $post_id ] );
                         $stats['queued']++;
                     }
                 }
@@ -448,8 +448,8 @@ class Content_Decay {
         <div class="wrap">
             <h1>Content Decay Dashboard</h1>
             <p>Posts whose SEO, AEO, or GEO scores have dropped more than
-               <?php echo esc_html( $this->get_decay_threshold() ); ?>%
-               over the past <?php echo esc_html( $this->get_lookback_days() ); ?> days.</p>
+               <?php echo esc_html( (string) $this->get_decay_threshold() ); ?>%
+               over the past <?php echo esc_html( (string) $this->get_lookback_days() ); ?> days.</p>
 
             <?php if ( empty( $decaying ) ) : ?>
                 <div class="notice notice-success"><p>No decaying content detected. All scores are stable.</p></div>
