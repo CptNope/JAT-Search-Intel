@@ -6,6 +6,50 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.1.0] — 2026-03-13
+
+### Added
+
+#### MainWP Child-Side Reporter (`class-mainwp-reporter.php`)
+- Detect MainWP Child plugin and hook into `mainwp_child_extra_execution`
+- Expose site scores, feature status, scored post counts via MainWP Child callback API
+- Remote actions: trigger rescore, regenerate, toggle features, push settings from dashboard
+- Inject sync data (site summary, aggregate scores) into MainWP heartbeat
+
+#### Notifications & Scheduled Reports (`class-notifications.php`)
+- Weekly email digest with site health summary (score averages, worst posts, recommendations)
+- Score drop alerts: detect posts below configurable per-module thresholds (SEO/AEO/GEO)
+- Slack webhook integration for both digest summaries and score drop alerts
+- Score snapshot storage for historical comparison (`search_intel_score_snapshots` option)
+- Admin dashboard widget: site health at a glance with colored score bars and attention list
+- Cron events: `search_intel_weekly_digest` (weekly) and `search_intel_score_drop_check` (daily)
+- Default notification settings wired into Core: `enable_notifications`, `notification_email`, `alert_threshold_seo/aeo/geo`, `slack_webhook_url`
+
+#### WP-CLI for v3.0 Features
+- `wp search-intel rbac grant <user_id> <module>` — grant module access
+- `wp search-intel rbac revoke <user_id> <module>` — revoke module access
+- `wp search-intel rbac list` — show all user permissions
+- `wp search-intel multisite push-defaults` — push network defaults to all sites
+- `wp search-intel multisite report [--format=table|json|csv]` — network score report
+- `wp search-intel queue status` — show background queue status
+- `wp search-intel queue process [--batch=10]` — manually process queued jobs
+- `wp search-intel white-label export > brand.json` — export reseller config
+- `wp search-intel white-label import < brand.json` — import reseller config
+
+#### Playwright E2E Tests
+- `wp-env` Docker setup with WordPress + MySQL (`.wp-env.json`, port 8080)
+- Bulk Editor smoke tests with graceful skip when Scale is disabled
+- Migration Wizard smoke tests (page load, structure, supported plugins)
+- RBAC smoke tests (admin access, author restriction with skip when user missing)
+- White-Label smoke tests (custom name in admin menu, plugins list, settings header)
+
+### Tests
+- 690 unit tests, 1,615 assertions (up from 665/1,533)
+- 58 Playwright E2E tests (51 pass, 7 skip for disabled features)
+- Psalm level 4: 0 errors
+
+---
+
 ## [3.0.0] — 2026-03-13
 
 ### Added
