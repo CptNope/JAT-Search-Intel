@@ -1,0 +1,53 @@
+# ── Development & Testing ─────────────────────────────────────────────────
+tests/
+phpunit.xml
+phpunit.xml.dist
+.phpunit.result.cache
+.phpunit.cache/
+
+# ── E2E / Playwright ─────────────────────────────────────────────────────
+playwright.config.ts
+test-results/
+playwright-report/
+blob-report/
+.auth/
+
+# ── Node / Build ─────────────────────────────────────────────────────────
+node_modules/
+package.json
+package-lock.json
+.wp-env.json
+
+# ── Composer Dev ──────────────────────────────────────────────────────────
+composer.json
+composer.lock
+vendor/bin/
+vendor/phpunit/
+vendor/wp-coding-standards/
+vendor/squizlabs/
+vendor/phpstan/
+
+# ── CI / Config ──────────────────────────────────────────────────────────
+.github/
+.gitignore
+.distignore
+.editorconfig
+.eslintrc.js
+phpstan.neon
+phpstan.neon.dist
+phpstan-baseline.neon
+.php-cs-fixer.dist.php
+
+# ── Documentation (dev-only) ─────────────────────────────────────────────
+CONTRIBUTING.md
+CHANGELOG.md
+
+# ── IDE & OS ─────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# ── Docker ───────────────────────────────────────────────────────────────
+.docker/
+docker-compose.yml
