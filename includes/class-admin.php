@@ -484,6 +484,16 @@ class Admin {
         <p class="description"><?php esc_html_e( 'This information enhances your author authority signals for search engines and AI systems.', 'search-intel' ); ?></p>
         <table class="form-table">
             <tr>
+                <th><?php esc_html_e( 'Data Consent', 'search-intel' ); ?></th>
+                <td>
+                    <label for="si_eeat_consent">
+                        <input type="checkbox" name="si_eeat_consent" id="si_eeat_consent" value="1" <?php checked( get_user_meta( $user->ID, 'search_intel_eeat_consent', true ), '1' ); ?> />
+                        <?php esc_html_e( 'I consent to Search Intel storing and displaying my E-E-A-T author data as structured data (JSON-LD) on published content.', 'search-intel' ); ?>
+                    </label>
+                    <p class="description"><?php esc_html_e( 'Your credentials, expertise, and profile URLs will appear in the HTML source of posts you author. You can withdraw consent at any time by unchecking this box.', 'search-intel' ); ?></p>
+                </td>
+            </tr>
+            <tr>
                 <th><label for="si_credentials"><?php esc_html_e( 'Credentials / Qualifications', 'search-intel' ); ?></label></th>
                 <td>
                     <textarea name="si_credentials" id="si_credentials" rows="3" cols="50"><?php echo esc_textarea( implode( "\n", (array) get_user_meta( $user->ID, 'search_intel_credentials', true ) ) ); ?></textarea>
@@ -526,6 +536,9 @@ class Admin {
         if ( ! current_user_can( 'edit_user', $user_id ) ) {
             return;
         }
+
+        // E-E-A-T consent.
+        update_user_meta( $user_id, 'search_intel_eeat_consent', isset( $_POST['si_eeat_consent'] ) ? '1' : '' );
 
         // Credentials
         if ( isset( $_POST['si_credentials'] ) ) {

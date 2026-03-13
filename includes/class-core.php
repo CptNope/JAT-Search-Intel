@@ -46,6 +46,9 @@ class Core {
     /** @var Blocks */
     public $blocks;
 
+    /** @var Privacy */
+    public $privacy;
+
     /**
      * Get singleton instance.
      */
@@ -82,6 +85,9 @@ class Core {
 
         // Block editor integration — sidebar, custom blocks, meta registration.
         $this->blocks = new Blocks();
+
+        // Privacy & GDPR compliance — exporters, erasers, privacy policy.
+        $this->privacy = new Privacy();
 
         // Prefetch all post meta on singular pages to avoid N+1 queries
         add_action( 'wp', [ $this, 'prefetch_post_meta' ] );
@@ -217,7 +223,7 @@ class Core {
             'description_fallback'   => 'excerpt',
             'description_max_length' => 160,
             'robots_default'         => 'index',
-            'ping_search_engines'    => true,
+            'ping_search_engines'    => false,
 
             // GEO
             'enable_geo'             => true,

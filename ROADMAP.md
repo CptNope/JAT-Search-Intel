@@ -380,22 +380,22 @@
 
 ### GDPR
 
-- [ ] Register `wp_privacy_personal_data_exporters` for author user meta
-- [ ] Register `wp_privacy_personal_data_erasers` for author user meta
-- [ ] Privacy policy suggested text via `wp_add_privacy_policy_content()`
-- [ ] Explicit consent checkbox on user profile E-E-A-T section
-- [ ] Data minimization audit (review all stored fields for necessity)
-- [ ] Document data processing inventory
+- [x] Register `wp_privacy_personal_data_exporters` for author user meta
+- [x] Register `wp_privacy_personal_data_erasers` for author user meta
+- [x] Privacy policy suggested text via `wp_add_privacy_policy_content()`
+- [x] Explicit consent checkbox on user profile E-E-A-T section
+- [x] Data minimization audit (review all stored fields for necessity)
+- [x] Document data processing inventory (privacy policy covers all stored fields)
 
 ### General Privacy
 
-- [ ] Verify no frontend cookies set by plugin
-- [ ] Verify no external API calls by default
-- [ ] Make search engine pinging opt-in with clear disclosure
-- [ ] Verify no tracking scripts
-- [ ] Verify all data stays in local database
-- [ ] CCPA compliance review
-- [ ] PIPEDA compliance review
+- [x] Verify no frontend cookies set by plugin
+- [x] Verify no external API calls by default
+- [x] Make search engine pinging opt-in with clear disclosure
+- [x] Verify no tracking scripts
+- [x] Verify all data stays in local database
+- [x] CCPA compliance review (no sale/sharing of data, all local storage)
+- [x] PIPEDA compliance review (consent-based, exportable, erasable)
 
 ---
 

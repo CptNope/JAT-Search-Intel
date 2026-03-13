@@ -6,7 +6,7 @@
 [![License: GPL v2](https://img.shields.io/badge/License-GPLv2-blue.svg)](LICENSE.md)
 [![WordPress: 6.0+](https://img.shields.io/badge/WordPress-6.0%2B-21759b.svg)](https://wordpress.org/)
 [![PHP: 7.4+](https://img.shields.io/badge/PHP-7.4%2B-777bb4.svg)](https://php.net/)
-[![Release: v1.4.0](https://img.shields.io/badge/Release-v1.4.0-brightgreen)](https://github.com/CptNope/Search-Intel/releases/tag/v1.4.0)
+[![Release: v1.5.0](https://img.shields.io/badge/Release-v1.5.0-brightgreen)](https://github.com/CptNope/Search-Intel/releases/tag/v1.5.0)
 
 **[Roadmap](ROADMAP.md)** · **[Changelog](CHANGELOG.md)** · **[Contributing](CONTRIBUTING.md)** · **[License](LICENSE.md)**
 
@@ -109,6 +109,10 @@ graph TD
     CORE --> ANALYZER["Content Analyzer"]
     CORE --> SITEMAP["Sitemap"]
     CORE --> ADMIN["Admin<br/><i>only in wp-admin</i>"]
+    CORE --> REST["REST API<br/><i>v1.3+</i>"]
+    CORE --> BULK["Bulk Tools<br/><i>v1.3+</i>"]
+    CORE --> BLOCKS["Blocks<br/><i>v1.4+ Block Editor</i>"]
+    CORE --> PRIVACY["Privacy<br/><i>v1.5+ GDPR</i>"]
 
     TITLE --> TVAR["Variable Resolver"]
     TITLE --> TCTX["Per-Context Templates"]
@@ -146,6 +150,24 @@ graph TD
     ADMIN --> COLUMNS["Admin Columns"]
     ADMIN --> USERFIELDS["User E-E-A-T Fields"]
 
+    REST --> RENDPOINTS["9 Endpoints<br/><i>scores, geo, meta, analyze,<br/>bulk, settings, sitemap</i>"]
+
+    BULK --> BRESCORE["Batch Rescore"]
+    BULK --> BREGEN["Batch Regenerate"]
+    BULK --> BEXPORT["Export / Import"]
+
+    BLOCKS --> SIDEBAR["Sidebar Panel<br/><i>SEO · AEO · GEO · Analysis</i>"]
+    BLOCKS --> BFAQ["FAQ Block"]
+    BLOCKS --> BHOWTO["HowTo Block"]
+    BLOCKS --> BTOC["TOC Block<br/><i>dynamic</i>"]
+    BLOCKS --> BCRUMB["Breadcrumbs Block<br/><i>dynamic</i>"]
+    BLOCKS --> BANSWER["Answer Box Block"]
+    BLOCKS --> BCITE["Citation Block"]
+
+    PRIVACY --> EXPORTER["Data Exporter<br/><i>wp_privacy_personal_data_exporters</i>"]
+    PRIVACY --> ERASER["Data Eraser<br/><i>wp_privacy_personal_data_erasers</i>"]
+    PRIVACY --> PPOLICY["Privacy Policy Text<br/><i>wp_add_privacy_policy_content</i>"]
+
     style CORE fill:#2563eb,color:#fff
     style SEO fill:#16a34a,color:#fff
     style AEO fill:#d97706,color:#fff
@@ -153,6 +175,10 @@ graph TD
     style TITLE fill:#0d9488,color:#fff
     style ANALYZER fill:#0891b2,color:#fff
     style ADMIN fill:#dc2626,color:#fff
+    style REST fill:#ea580c,color:#fff
+    style BULK fill:#be185d,color:#fff
+    style BLOCKS fill:#7c3aed,color:#fff
+    style PRIVACY fill:#059669,color:#fff
 ```
 
 ### Class Dependency Map
@@ -169,6 +195,10 @@ classDiagram
         +analyzer : Content_Analyzer
         +sitemap : Sitemap
         +admin : Admin
+        +rest_api : REST_Api
+        +bulk_tools : Bulk_Tools
+        +blocks : Blocks
+        +privacy : Privacy
         +get_instance() Core
         +get_settings() array
         +get_default_settings() array
@@ -253,6 +283,44 @@ classDiagram
         +render_user_eeat_fields(user) void
     }
 
+    class REST_Api {
+        -settings : array
+        -core : Core
+        +register_routes() void
+        +get_scores(request) WP_REST_Response
+        +get_geo(request) WP_REST_Response
+        +get_meta(request) WP_REST_Response
+        +update_meta(request) WP_REST_Response
+        +analyze(request) WP_REST_Response
+    }
+
+    class Bulk_Tools {
+        -settings : array
+        -core : Core
+        +ajax_bulk_rescore() void
+        +ajax_bulk_regenerate() void
+        +ajax_export_settings() void
+        +ajax_import_settings() void
+    }
+
+    class Blocks {
+        -META_KEYS : array
+        +register_blocks() void
+        +register_meta() void
+        +enqueue_sidebar() void
+        +render_toc(attributes, content) string
+        +render_breadcrumbs(attributes, content) string
+    }
+
+    class Privacy {
+        -USER_META_KEYS : array
+        +register_exporter(exporters) array
+        +register_eraser(erasers) array
+        +export_personal_data(email, page) array
+        +erase_personal_data(email, page) array
+        +add_privacy_policy_content() void
+    }
+
     Core --> Title_Engine
     Core --> SEO_Manager
     Core --> Schema_Manager
@@ -261,7 +329,13 @@ classDiagram
     Core --> Content_Analyzer
     Core --> Sitemap
     Core --> Admin
+    Core --> REST_Api
+    Core --> Bulk_Tools
+    Core --> Blocks
+    Core --> Privacy
     Admin --> Core
+    REST_Api --> Core
+    Bulk_Tools --> Core
 ```
 
 ---
@@ -316,26 +390,39 @@ flowchart TD
     style GEO_OUT fill:#ede9fe,stroke:#9333ea
 ```
 
-### Post Editor Metabox Data Flow
+### Post Editor Data Flow
 
 ```mermaid
 flowchart LR
-    EDITOR["Post Editor"] --> METABOX["Search Intel Metabox"]
+    EDITOR["Post Editor"]
+    EDITOR --> CLASSIC["Classic Editor<br/><i>PHP Metabox</i>"]
+    EDITOR --> BLOCK["Block Editor<br/><i>Gutenberg Sidebar v1.4+</i>"]
 
-    METABOX --> TAB_SEO["SEO Tab"]
-    METABOX --> TAB_AEO["AEO Tab"]
-    METABOX --> TAB_GEO["GEO Tab"]
-    METABOX --> TAB_ADV["Advanced Tab"]
-    METABOX --> TAB_ANALYSIS["Analysis Tab"]
+    CLASSIC --> TAB_SEO["SEO Tab"]
+    CLASSIC --> TAB_AEO["AEO Tab"]
+    CLASSIC --> TAB_GEO["GEO Tab"]
+    CLASSIC --> TAB_ADV["Advanced Tab"]
+    CLASSIC --> TAB_ANALYSIS["Analysis Tab"]
 
-    TAB_SEO --> |"save_post"| PM_SEO["Post Meta<br/>_search_intel_title<br/>_search_intel_description<br/>_search_intel_focus_keyword<br/>_search_intel_canonical<br/>_search_intel_noindex<br/>_search_intel_nofollow<br/>_search_intel_social_title<br/>_search_intel_social_description<br/>_search_intel_social_image<br/>_search_intel_secondary_keywords"]
+    BLOCK --> SB_SEO["SEO Panel<br/><i>title, desc, keyword, canonical,<br/>robots, social, SERP preview</i>"]
+    BLOCK --> SB_AEO["AEO Panel<br/><i>direct answer, schema type</i>"]
+    BLOCK --> SB_GEO["GEO Panel<br/><i>AI summary, topics, intent,<br/>audience, local relevance</i>"]
+    BLOCK --> SB_SCORE["Analysis Panel<br/><i>score rings, Run Analysis</i>"]
 
-    TAB_AEO --> |"save_post"| PM_AEO["Post Meta<br/>_search_intel_faqs<br/>_search_intel_schema_type<br/>_search_intel_direct_answer<br/>_search_intel_citations"]
+    TAB_SEO --> |"save_post"| PM["Post Meta<br/><i>28 _search_intel_* keys</i>"]
+    TAB_AEO --> |"save_post"| PM
+    TAB_GEO --> |"save_post"| PM
 
-    TAB_GEO --> |"save_post"| PM_GEO["Post Meta<br/>_search_intel_ai_summary<br/>_search_intel_topics<br/>_search_intel_entities<br/>_search_intel_expertise_level<br/>_search_intel_content_type<br/>_search_intel_fact_checked<br/>_search_intel_content_intent<br/>_search_intel_audience<br/>_search_intel_author_expertise_notes<br/>_search_intel_local_relevance<br/>_search_intel_local_location"]
+    SB_SEO --> |"REST API<br/>wp.data"| PM
+    SB_AEO --> |"REST API<br/>wp.data"| PM
+    SB_GEO --> |"REST API<br/>wp.data"| PM
 
     TAB_ANALYSIS --> |"AJAX"| ANALYZER["Content Analyzer"]
+    SB_SCORE --> |"REST API"| ANALYZER
     ANALYZER --> |"JSON response"| SCORES["SEO: 0-100<br/>AEO: 0-100<br/>GEO: 0-100<br/>Readability: 0-100"]
+
+    style CLASSIC fill:#dc2626,color:#fff
+    style BLOCK fill:#7c3aed,color:#fff
 ```
 
 ### Sitemap Request Flow
@@ -410,11 +497,84 @@ graph TD
     MENU --> GEO_S["GEO Settings<br/><i>AI meta, llms.txt, entity, E-E-A-T</i>"]
     MENU --> SIT_S["Sitemap Settings<br/><i>Post types, max URLs</i>"]
     MENU --> SOC_S["Social Settings<br/><i>8 platform profile URLs</i>"]
+    MENU --> BULK_S["Bulk Tools<br/><i>v1.3+ Rescore, Regenerate,<br/>Sitemap Warm, Export/Import</i>"]
 
     GEN --> OPT_MAIN["wp_options:<br/>search_intel_settings"]
     SOC_S --> OPT_SOC["wp_options:<br/>search_intel_social_profiles"]
 
     style MENU fill:#2563eb,color:#fff
+    style BULK_S fill:#be185d,color:#fff
+```
+
+---
+
+## Block Editor Architecture (v1.4+)
+
+### Gutenberg Sidebar & Blocks Data Flow
+
+```mermaid
+flowchart TD
+    subgraph JS["JavaScript (Block Editor)"]
+        STORE["@wordpress/data Store<br/><i>search-intel/editor</i>"]
+        SIDEBAR["Sidebar Panel<br/><i>PluginDocumentSettingPanel</i>"]
+        BLK_FAQ["FAQ Block<br/><i>FAQPage microdata</i>"]
+        BLK_HOWTO["HowTo Block<br/><i>HowTo schema</i>"]
+        BLK_TOC["TOC Block<br/><i>placeholder only</i>"]
+        BLK_CRUMB["Breadcrumbs Block<br/><i>placeholder only</i>"]
+        BLK_ANS["Answer Box Block"]
+        BLK_CITE["Citation Block<br/><i>CreativeWork schema</i>"]
+    end
+
+    subgraph PHP["PHP (Server)"]
+        META_REG["register_post_meta()<br/><i>28 keys × public post types</i>"]
+        RENDER_TOC["render_toc()<br/><i>extracts headings, builds nav</i>"]
+        RENDER_BC["render_breadcrumbs()<br/><i>BreadcrumbList schema</i>"]
+        REST["WP REST API<br/><i>/wp/v2/posts meta fields</i>"]
+        ANALYZE["REST /si/v1/analyze"]
+    end
+
+    SIDEBAR --> STORE
+    STORE -->|"editPost / savePost"| REST
+    REST --> META_REG
+
+    BLK_TOC -->|"dynamic render"| RENDER_TOC
+    BLK_CRUMB -->|"dynamic render"| RENDER_BC
+
+    SIDEBAR -->|"Run Analysis"| ANALYZE
+    ANALYZE -->|"scores JSON"| STORE
+
+    style JS fill:#ede9fe,stroke:#7c3aed
+    style PHP fill:#dbeafe,stroke:#2563eb
+```
+
+### Block Registration Pipeline
+
+```mermaid
+sequenceDiagram
+    participant WP as WordPress init
+    participant B as Blocks Class
+    participant FS as File System
+
+    WP->>B: register_blocks()
+    loop Each of 6 blocks
+        B->>FS: file_exists(build/blocks/{slug}/index.asset.php)
+        FS-->>B: asset{dependencies, version}
+        B->>WP: wp_register_script(search-intel-{slug})
+        B->>FS: file_exists(build/blocks/{slug}/index.css)
+        alt CSS exists
+            B->>WP: wp_register_style(search-intel-{slug}-editor)
+        end
+        B->>WP: register_block_type(search-intel/{slug}, args)
+    end
+
+    WP->>B: register_meta()
+    loop 28 meta keys × public post types
+        B->>WP: register_post_meta(type, key, config)
+    end
+
+    WP->>B: enqueue_sidebar()
+    B->>FS: file_exists(build/sidebar.asset.php)
+    B->>WP: wp_enqueue_script + wp_enqueue_style
 ```
 
 ---
@@ -845,7 +1005,7 @@ Search Intel has a comprehensive automated test suite and CI pipeline.
 
 | Suite | Count | Framework |
 |-------|-------|-----------|
-| Unit tests | 225 tests, 441 assertions | PHPUnit 9.6 |
+| Unit tests | 277 tests, 719 assertions | PHPUnit 9.6 |
 | Integration tests | 125 tests, 202 assertions | PHPUnit 9.6 |
 | E2E tests | 40 tests | Playwright (Chromium) |
 

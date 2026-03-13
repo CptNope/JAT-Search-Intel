@@ -267,6 +267,10 @@ function esc_html_e( string $text, string $domain = 'default' ): void {
     echo esc_html( $text );
 }
 
+function esc_attr__( string $text, string $domain = 'default' ): string {
+    return esc_attr( $text );
+}
+
 function esc_attr_e( string $text, string $domain = 'default' ): void {
     echo esc_attr( $text );
 }
@@ -677,6 +681,9 @@ function wp_get_attachment_metadata( int $attachment_id ): array {
 }
 
 function get_post_types( $args = [], $output = 'names' ) {
+    if ( $output === 'names' || ( isset( $args['public'] ) && $args['public'] ) ) {
+        return [ 'post' => 'post', 'page' => 'page' ];
+    }
     return [ 'post' => (object) [ 'name' => 'post', 'labels' => (object) [ 'name' => 'Posts' ] ] ];
 }
 
@@ -795,6 +802,77 @@ $wpdb = new class {
         return [];
     }
 };
+
+// ── Block / Script / Style registration stubs ────────────────────────────────
+
+global $si_registered_meta, $si_registered_blocks, $si_registered_scripts, $si_registered_styles;
+$si_registered_meta    = [];
+$si_registered_blocks  = [];
+$si_registered_scripts = [];
+$si_registered_styles  = [];
+
+function register_post_meta( string $post_type, string $meta_key, array $args ): bool {
+	global $si_registered_meta;
+	$si_registered_meta[ $post_type ][ $meta_key ] = $args;
+	return true;
+}
+
+function register_block_type( string $block_type, array $args = [] ) {
+	global $si_registered_blocks;
+	$si_registered_blocks[ $block_type ] = $args;
+	return true;
+}
+
+function wp_register_script( string $handle, string $src = '', array $deps = [], $ver = false, $in_footer = false ): bool {
+	global $si_registered_scripts;
+	$si_registered_scripts[ $handle ] = [
+		'src'  => $src,
+		'deps' => $deps,
+		'ver'  => $ver,
+	];
+	return true;
+}
+
+function wp_register_style( string $handle, string $src = '', array $deps = [], $ver = false, string $media = 'all' ): bool {
+	global $si_registered_styles;
+	$si_registered_styles[ $handle ] = [
+		'src'  => $src,
+		'deps' => $deps,
+		'ver'  => $ver,
+	];
+	return true;
+}
+
+function sanitize_title( string $title ): string {
+	return strtolower( preg_replace( '/[^a-zA-Z0-9]+/', '-', $title ) );
+}
+
+function get_the_archive_title(): string {
+	return 'Archive';
+}
+
+function get_user_by( string $field, $value ) {
+	global $si_test_state;
+	if ( 'email' === $field ) {
+		foreach ( $si_test_state['users'] ?? [] as $user ) {
+			if ( ( $user['user_email'] ?? '' ) === $value ) {
+				return (object) $user;
+			}
+		}
+	}
+	return false;
+}
+
+function delete_user_meta( int $user_id, string $key ): bool {
+	global $si_test_state;
+	unset( $si_test_state['user_meta'][ $user_id ][ $key ] );
+	return true;
+}
+
+function wp_add_privacy_policy_content( string $plugin_name, string $policy_text ): void {
+	global $si_test_state;
+	$si_test_state['privacy_policy'][ $plugin_name ] = $policy_text;
+}
 
 // ── Autoloader ───────────────────────────────────────────────────────────────
 

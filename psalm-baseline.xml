@@ -88,6 +88,20 @@
       <code><![CDATA[SEARCH_INTEL_URL]]></code>
     </UndefinedConstant>
   </file>
+  <file src="includes/class-privacy.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[export_personal_data]]></code>
+      <code><![CDATA[erase_personal_data]]></code>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedParam>
+      <code><![CDATA[$page]]></code>
+      <code><![CDATA[$page]]></code>
+    </PossiblyUnusedParam>
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[array]]></code>
+      <code><![CDATA[array]]></code>
+    </PossiblyUnusedReturnValue>
+  </file>
   <file src="includes/class-cli.php">
     <UndefinedConstant>
       <code><![CDATA[SEARCH_INTEL_VERSION]]></code>
@@ -107,6 +121,7 @@
       <code><![CDATA[$aeo]]></code>
       <code><![CDATA[$geo]]></code>
       <code><![CDATA[$blocks]]></code>
+      <code><![CDATA[$privacy]]></code>
       <code><![CDATA[$rest_api]]></code>
       <code><![CDATA[$schema]]></code>
       <code><![CDATA[$title_engine]]></code>

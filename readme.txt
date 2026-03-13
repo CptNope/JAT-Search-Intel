@@ -4,7 +4,7 @@ Tags: seo, aeo, geo, schema, structured-data, ai-optimization, llms, featured-sn
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.4.0
+Stable tag: 1.5.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -132,6 +132,15 @@ No. Search Intel outputs lightweight meta tags and JSON-LD schema directly in th
 
 == Changelog ==
 
+= 1.5.0 =
+* GDPR: Personal data exporter and eraser for author E-E-A-T meta
+* Privacy policy suggested text via wp_add_privacy_policy_content()
+* Explicit E-E-A-T consent checkbox on user profile
+* Author structured data gated behind consent — no output without opt-in
+* Search engine pinging changed to opt-in (default off)
+* Privacy audit: no cookies, no external calls by default, no tracking, all data local
+* 277 unit tests, 719 assertions
+
 = 1.4.0 =
 * Gutenberg sidebar panel with SEO, AEO, GEO, and Analysis tabs
 * @wordpress/data store for post meta state management
@@ -173,6 +182,9 @@ No. Search Intel outputs lightweight meta tags and JSON-LD schema directly in th
 * User profile E-E-A-T fields
 
 == Upgrade Notice ==
+
+= 1.5.0 =
+New: GDPR compliance (data exporter/eraser, privacy policy text), E-E-A-T consent checkbox, author schema gated behind consent, search engine pinging opt-in.
 
 = 1.4.0 =
 New: Gutenberg sidebar panel (SEO/AEO/GEO/Analysis tabs), 6 custom blocks (FAQ, HowTo, TOC, Breadcrumbs, Answer Box, Citation), @wordpress/data store, server-side rendering.

@@ -6,6 +6,43 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [1.5.0] — 2026-03-13
+
+### Added
+
+#### Privacy & GDPR Compliance (`class-privacy.php`)
+- `wp_privacy_personal_data_exporters` — exports all 5 Search Intel user meta fields (credentials, expertise areas, years of experience, social profiles, consent status)
+- `wp_privacy_personal_data_erasers` — erases all Search Intel user meta on data deletion request
+- `wp_add_privacy_policy_content()` — suggested privacy policy text covering data collection, storage, search engine pinging, and export/deletion support
+- Privacy class registered in `Core` singleton — hooks fire automatically on `admin_init` and privacy filters
+
+#### E-E-A-T Consent
+- Explicit consent checkbox on user profile E-E-A-T section ("I consent to Search Intel storing and displaying my E-E-A-T author data…")
+- `search_intel_eeat_consent` user meta key — `'1'` when opted in, empty when not
+- `GEO_Manager::render_author_eeat()` now checks consent before outputting author structured data — no E-E-A-T schema without opt-in
+- Consent can be withdrawn at any time by unchecking the box
+
+#### Privacy Audit
+- Verified: no frontend cookies set by plugin
+- Verified: no external API calls by default (search engine pinging now opt-in)
+- Verified: no tracking scripts or analytics
+- Verified: all data stored locally in WordPress database (`wp_options`, `wp_postmeta`, `wp_usermeta`)
+
+#### Tests
+- `tests/unit/PrivacyTest.php` — 21 tests covering exporter, eraser, privacy policy content, constructor hooks
+- Unit test count: 277 tests, 719 assertions (up from 256/666)
+
+### Changed
+- `ping_search_engines` default changed from `true` to `false` — search engine pinging is now opt-in with clear disclosure in settings
+- `GEO_Manager::render_author_eeat()` returns early if author has not given E-E-A-T consent
+- `Admin::render_user_eeat_fields()` now renders consent checkbox before credential fields
+- `Admin::save_user_eeat_fields()` now saves `search_intel_eeat_consent` meta
+
+### New Files
+- `includes/class-privacy.php` — Privacy & GDPR compliance class
+
+---
+
 ## [1.0.0] — 2026-03-12
 
 ### Added
