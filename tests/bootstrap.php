@@ -496,10 +496,12 @@ function get_posts( array $args = [] ): array {
 
     $filtered = [];
     foreach ( $si_test_state['posts'] as $p ) {
-        if ( ! empty( $args['post_status'] ) && ( $p['post_status'] ?? 'publish' ) !== $args['post_status'] ) {
+        $status_filter = $args['post_status'] ?? '';
+        if ( ! empty( $status_filter ) && $status_filter !== 'any' && ( $p['post_status'] ?? 'publish' ) !== $status_filter ) {
             continue;
         }
-        if ( ( $p['post_type'] ?? 'post' ) !== $post_type ) {
+        $p_type = $p['post_type'] ?? 'post';
+        if ( is_array( $post_type ) ? ! in_array( $p_type, $post_type, true ) : $p_type !== $post_type ) {
             continue;
         }
         $p['post_date_gmt']     = $p['post_date_gmt'] ?? gmdate( 'Y-m-d H:i:s' );
@@ -1113,6 +1115,198 @@ function wp_get_post_categories( int $post_id, array $args = [] ): array {
 
 function get_edit_post_link( int $post_id = 0, string $context = 'display' ): ?string {
 	return 'https://example.com/wp-admin/post.php?post=' . $post_id . '&action=edit';
+}
+
+// ── WP_Query stub ────────────────────────────────────────────────────────────
+
+class WP_Query {
+	public array $posts      = [];
+	public int   $found_posts = 0;
+
+	public function __construct( array $args = [] ) {
+		$this->posts       = get_posts( $args );
+		$this->found_posts = count( $this->posts );
+	}
+
+	public function have_posts(): bool {
+		return ! empty( $this->posts );
+	}
+}
+
+// ── Multisite stubs ──────────────────────────────────────────────────────────
+
+function is_multisite(): bool {
+	global $si_test_state;
+	return $si_test_state['is_multisite'] ?? false;
+}
+
+function get_site_option( string $option, $default = false ) {
+	global $si_test_state;
+	return $si_test_state['site_options'][ $option ] ?? $default;
+}
+
+function update_site_option( string $option, $value ): bool {
+	global $si_test_state;
+	$si_test_state['site_options'][ $option ] = $value;
+	return true;
+}
+
+function switch_to_blog( int $blog_id ): bool {
+	return true;
+}
+
+function restore_current_blog(): bool {
+	return true;
+}
+
+function get_sites( array $args = [] ): array {
+	return [];
+}
+
+function get_home_url( int $blog_id = 0, string $path = '', string $scheme = '' ): string {
+	return 'https://example.com' . $path;
+}
+
+function network_admin_url( string $path = '' ): string {
+	return 'https://example.com/wp-admin/network/' . $path;
+}
+
+function wp_safe_redirect( string $location, int $status = 302, string $x_redirect_by = 'WordPress' ): void {}
+
+// ── User / Role stubs ────────────────────────────────────────────────────────
+
+function get_users( array $args = [] ): array {
+	return [];
+}
+
+/**
+ * Minimal WP_User stand-in for tests.
+ */
+class SI_Test_User {
+	public int $ID;
+	public string $user_login;
+	public array $roles;
+	public array $caps;
+
+	public function __construct( array $data ) {
+		$this->ID         = $data['ID'] ?? 0;
+		$this->user_login = $data['user_login'] ?? '';
+		$this->roles      = $data['roles'] ?? [];
+		$this->caps       = $data['caps'] ?? [];
+	}
+
+	public function exists(): bool {
+		return $this->ID > 0;
+	}
+
+	public function add_cap( string $cap ): void {
+		$this->caps[ $cap ] = true;
+		// Persist back to state.
+		global $si_test_state;
+		if ( isset( $si_test_state['users'][ $this->ID ] ) ) {
+			$si_test_state['users'][ $this->ID ]['caps'][ $cap ] = true;
+		}
+	}
+
+	public function remove_cap( string $cap ): void {
+		unset( $this->caps[ $cap ] );
+		global $si_test_state;
+		if ( isset( $si_test_state['users'][ $this->ID ] ) ) {
+			unset( $si_test_state['users'][ $this->ID ]['caps'][ $cap ] );
+		}
+	}
+}
+
+function get_userdata( int $user_id ) {
+	global $si_test_state;
+	$users = $si_test_state['users'] ?? [];
+	if ( isset( $users[ $user_id ] ) ) {
+		return new \SI_Test_User( $users[ $user_id ] );
+	}
+	return false;
+}
+
+function wp_get_current_user() {
+	global $si_test_state;
+	$uid = $si_test_state['current_user_id'] ?? 0;
+	if ( $uid > 0 ) {
+		$user = get_userdata( $uid );
+		return $user ?: new \SI_Test_User( [ 'ID' => 0 ] );
+	}
+	return new \SI_Test_User( [ 'ID' => 0 ] );
+}
+
+function user_can( $user, string $cap ): bool {
+	if ( $user instanceof \SI_Test_User ) {
+		return ! empty( $user->caps[ $cap ] );
+	}
+	if ( is_object( $user ) && isset( $user->caps ) && is_array( $user->caps ) ) {
+		return ! empty( $user->caps[ $cap ] );
+	}
+	return false;
+}
+
+function get_role( string $role ) {
+	global $si_test_state;
+	return $si_test_state['roles'][ $role ] ?? null;
+}
+
+function add_role( string $role, string $display_name, array $caps = [] ) {
+	global $si_test_state;
+	$si_test_state['roles'][ $role ] = (object) [
+		'name'         => $role,
+		'display_name' => $display_name,
+		'capabilities' => $caps,
+	];
+	// add_cap / remove_cap methods via stdClass won't work, but good enough for construction tests.
+	return $si_test_state['roles'][ $role ];
+}
+
+function remove_role( string $role ): void {
+	global $si_test_state;
+	unset( $si_test_state['roles'][ $role ] );
+}
+
+// ── Object cache stubs ──────────────────────────────────────────────────────
+
+function wp_using_ext_object_cache(): bool {
+	global $si_test_state;
+	return $si_test_state['ext_object_cache'] ?? false;
+}
+
+function wp_cache_get( string $key, string $group = '' ) {
+	global $si_test_state;
+	return $si_test_state['object_cache'][ $group . ':' . $key ] ?? false;
+}
+
+function wp_cache_set( string $key, $value, string $group = '', int $expiry = 0 ): bool {
+	global $si_test_state;
+	$si_test_state['object_cache'][ $group . ':' . $key ] = $value;
+	return true;
+}
+
+function wp_cache_delete( string $key, string $group = '' ): bool {
+	global $si_test_state;
+	unset( $si_test_state['object_cache'][ $group . ':' . $key ] );
+	return true;
+}
+
+function wp_generate_uuid4(): string {
+	return sprintf(
+		'%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+		mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ),
+		mt_rand( 0, 0xffff ),
+		mt_rand( 0, 0x0fff ) | 0x4000,
+		mt_rand( 0, 0x3fff ) | 0x8000,
+		mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff )
+	);
+}
+
+function sanitize_hex_color( string $color ): string {
+	if ( preg_match( '/^#([A-Fa-f0-9]{3}){1,2}$/', $color ) ) {
+		return $color;
+	}
+	return '';
 }
 
 // ── Autoloader ───────────────────────────────────────────────────────────────

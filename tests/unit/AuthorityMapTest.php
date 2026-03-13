@@ -80,6 +80,7 @@ class AuthorityMapTest extends TestCase {
 
 	public function test_content_gap_topic_structure(): void {
 		$result = $this->map->analyze_content_gaps();
+		$this->assertIsArray( $result['topics'] );
 
 		foreach ( $result['topics'] as $topic ) {
 			$this->assertArrayHasKey( 'term_id', $topic );
@@ -92,6 +93,7 @@ class AuthorityMapTest extends TestCase {
 
 	public function test_content_gap_recommendations_structure(): void {
 		$result = $this->map->analyze_content_gaps();
+		$this->assertIsArray( $result['recommendations'] );
 
 		foreach ( $result['recommendations'] as $rec ) {
 			$this->assertArrayHasKey( 'topic', $rec );
@@ -104,6 +106,7 @@ class AuthorityMapTest extends TestCase {
 
 	public function test_content_gap_sorted_by_score(): void {
 		$result = $this->map->analyze_content_gaps();
+		$this->assertIsArray( $result['topics'] );
 
 		for ( $i = 1; $i < count( $result['topics'] ); $i++ ) {
 			$this->assertGreaterThanOrEqual(
@@ -126,6 +129,7 @@ class AuthorityMapTest extends TestCase {
 
 	public function test_dashboard_cluster_structure(): void {
 		$result = $this->map->get_dashboard_data();
+		$this->assertIsArray( $result['clusters'] );
 
 		foreach ( $result['clusters'] as $cluster ) {
 			$this->assertArrayHasKey( 'term_id', $cluster );

@@ -516,49 +516,49 @@
 
 ### Multisite
 
-- [ ] Network-level default settings
-- [ ] Per-site setting overrides
-- [ ] Centralized reporting across network
-- [ ] Network admin menu page
+- [x] Network-level default settings
+- [x] Per-site setting overrides
+- [x] Centralized reporting across network
+- [x] Network admin menu page
 
 ### Plugin Migration
 
-- [ ] Yoast SEO (titles, descriptions, keywords, robots, canonical, OG, schema, redirects, breadcrumbs)
-- [ ] Rank Math (titles, descriptions, keywords, robots, canonical, schema, redirects, 404 monitor)
-- [ ] All in One SEO (titles, descriptions, robots, OG, Twitter, canonical, local SEO)
-- [ ] SEOPress (titles, descriptions, robots, OG, Twitter, canonical, redirects, schemas)
-- [ ] The SEO Framework (titles, descriptions, robots, canonical)
-- [ ] Dry-run mode (preview what will be migrated before committing)
+- [x] Yoast SEO (titles, descriptions, keywords, robots, canonical, OG, schema, redirects, breadcrumbs)
+- [x] Rank Math (titles, descriptions, keywords, robots, canonical, schema, redirects, 404 monitor)
+- [x] All in One SEO (titles, descriptions, robots, OG, Twitter, canonical, local SEO)
+- [x] SEOPress (titles, descriptions, robots, OG, Twitter, canonical, redirects, schemas)
+- [x] The SEO Framework (titles, descriptions, robots, canonical)
+- [x] Dry-run mode (preview what will be migrated before committing)
 
 ### Role-Based Access Control
 
-- [ ] Custom "SEO Editor" role
-- [ ] Per-module permissions (SEO, AEO, GEO, Sitemap, Settings)
-- [ ] View-only mode for authors (can see scores, can't change settings)
-- [ ] Settings lock (prevent non-admins from changing global config)
+- [x] Custom "SEO Editor" role
+- [x] Per-module permissions (SEO, AEO, GEO, Sitemap, Settings)
+- [x] View-only mode for authors (can see scores, can't change settings)
+- [x] Settings lock (prevent non-admins from changing global config)
 
 ### Multi-Language Support
 
-- [ ] WPML integration (per-language SEO title, description, OG image)
-- [ ] Polylang integration (per-language SEO title, description, OG image)
-- [ ] Auto-generate hreflang tags
-- [ ] Per-language sitemap (separate or combined)
-- [ ] Per-language `llms.txt`
+- [x] WPML integration (per-language SEO title, description, OG image)
+- [x] Polylang integration (per-language SEO title, description, OG image)
+- [x] Auto-generate hreflang tags
+- [x] Per-language sitemap (separate or combined)
+- [x] Per-language `llms.txt`
 
 ### White-Label
 
-- [ ] Custom plugin name
-- [ ] Custom branding (logo, colors)
-- [ ] Remove "Search Intel" references
-- [ ] Reseller support
+- [x] Custom plugin name
+- [x] Custom branding (logo, colors)
+- [x] Remove "Search Intel" references
+- [x] Reseller support
 
 ### Scale
 
-- [ ] Object caching support (Redis / Memcached aware)
-- [ ] Background processing queue for all heavy operations
-- [ ] Bulk editor table (mass edit title/description/keyword)
-- [ ] CDN-friendly (no query string dependencies)
-- [ ] Headless WordPress support (REST API serves all SEO/AEO/GEO data)
+- [x] Object caching support (Redis / Memcached aware)
+- [x] Background processing queue for all heavy operations
+- [x] Bulk editor table (mass edit title/description/keyword)
+- [x] CDN-friendly (no query string dependencies)
+- [x] Headless WordPress support (REST API serves all SEO/AEO/GEO data)
 
 ---
 
