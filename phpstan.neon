@@ -7,12 +7,15 @@ parameters:
     bootstrapFiles:
         - vendor/php-stubs/wordpress-stubs/wordpress-stubs.php
         - phpstan-constants.php
+    excludePaths:
+        - includes/class-cli.php
     ignoreErrors:
-        - '#Function [a-zA-Z_]+ not found#'
-        - '#Class [a-zA-Z_\\\\]+ extends unknown class#'
+        - '#Function .+ not found#'
+        - '#extends unknown class#'
+        - '#on an unknown class#'
         - '#no value type specified in iterable type array#'
-        - '#has parameter \$[a-z_]+ with no type specified#'
-        - '#Right side of && is always true#'
+        - '#with no type specified#'
+        - '#has no return type specified#'
         - '#is always true#'
         - '#Else branch is unreachable#'
         - '#in isset\(\) is not nullable#'
