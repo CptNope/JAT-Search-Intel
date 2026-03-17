@@ -51,6 +51,10 @@ class Admin {
         // AI Engine AJAX handlers
         add_action( 'wp_ajax_si_save_ai_api_key', [ $this, 'ajax_save_ai_api_key' ] );
         add_action( 'wp_ajax_si_test_ai_connection', [ $this, 'ajax_test_ai_connection' ] );
+
+        // GitHub token AJAX handlers
+        add_action( 'wp_ajax_si_save_github_token', [ $this, 'ajax_save_github_token' ] );
+        add_action( 'wp_ajax_si_test_github_token', [ $this, 'ajax_test_github_token' ] );
     }
 
     /**
@@ -749,6 +753,97 @@ class Admin {
         } else {
             wp_send_json_error( [ 'message' => $result['error'] ] );
         }
+    }
+
+    /**
+     * AJAX: Save the GitHub personal access token (encrypted).
+     */
+    public function ajax_save_github_token(): void {
+        check_ajax_referer( 'si_ai_settings', 'nonce' );
+
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => 'Unauthorized.' ], 403 );
+        }
+
+        $token = sanitize_text_field( wp_unslash( $_POST['github_token'] ?? '' ) );
+        if ( empty( $token ) ) {
+            wp_send_json_error( [ 'message' => 'Token cannot be empty.' ] );
+        }
+
+        // Store encrypted using the AI Engine's encryption.
+        $encrypted = $this->core->ai_engine->encrypt( $token );
+        update_option( 'search_intel_github_token', $encrypted, false );
+
+        // Clear the cached release so the updater picks up the new token.
+        delete_transient( 'search_intel_github_release' );
+
+        wp_send_json_success( [ 'message' => 'GitHub token saved.' ] );
+    }
+
+    /**
+     * AJAX: Test the GitHub token by hitting the repo API.
+     */
+    public function ajax_test_github_token(): void {
+        check_ajax_referer( 'si_ai_settings', 'nonce' );
+
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => 'Unauthorized.' ], 403 );
+        }
+
+        $token = self::get_github_token();
+        if ( empty( $token ) ) {
+            wp_send_json_error( [ 'message' => 'No token saved. Save a token first.' ] );
+        }
+
+        $response = wp_remote_get( 'https://api.github.com/repos/CptNope/Search-Intel/releases/latest', [
+            'timeout' => 10,
+            'headers' => [
+                'Accept'        => 'application/vnd.github.v3+json',
+                'Authorization' => 'Bearer ' . $token,
+                'User-Agent'    => 'Search-Intel-Updater/' . SEARCH_INTEL_VERSION,
+            ],
+        ] );
+
+        if ( is_wp_error( $response ) ) {
+            wp_send_json_error( [ 'message' => 'Connection failed: ' . $response->get_error_message() ] );
+        }
+
+        $code = wp_remote_retrieve_response_code( $response );
+        if ( $code === 200 ) {
+            $body    = json_decode( wp_remote_retrieve_body( $response ), true );
+            $tag     = $body['tag_name'] ?? 'unknown';
+            $current = SEARCH_INTEL_VERSION;
+            $remote  = ltrim( $tag, 'vV' );
+            $status  = version_compare( $current, $remote, '>=' ) ? 'up to date' : 'update available: ' . $remote;
+            wp_send_json_success( [ 'message' => 'Connected! Latest release: ' . $tag . ' (' . $status . ')' ] );
+        } elseif ( $code === 404 ) {
+            wp_send_json_error( [ 'message' => 'Repo not found — check token has "repo" scope.' ] );
+        } elseif ( $code === 401 ) {
+            wp_send_json_error( [ 'message' => 'Authentication failed — token may be expired or invalid.' ] );
+        } else {
+            wp_send_json_error( [ 'message' => 'GitHub API returned HTTP ' . $code . '.' ] );
+        }
+    }
+
+    /**
+     * Get the decrypted GitHub token (static helper for Plugin_Updater).
+     *
+     * @return string Decrypted token or empty string.
+     */
+    public static function get_github_token(): string {
+        // 1. wp-config.php constant takes priority.
+        if ( defined( 'SEARCH_INTEL_GITHUB_TOKEN' ) && SEARCH_INTEL_GITHUB_TOKEN ) {
+            return (string) SEARCH_INTEL_GITHUB_TOKEN;
+        }
+
+        // 2. Encrypted option saved via admin UI.
+        $encrypted = get_option( 'search_intel_github_token', '' );
+        if ( empty( $encrypted ) ) {
+            return '';
+        }
+
+        $core = Core::get_instance();
+        return $core->ai_engine->decrypt( $encrypted );
     }
 
     /**

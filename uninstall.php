@@ -21,6 +21,7 @@ delete_option( 'search_intel_settings' );
 delete_option( 'search_intel_social_profiles' );
 delete_option( 'search_intel_ai_permissions' );
 delete_option( 'search_intel_clean_uninstall' );
+delete_option( 'search_intel_github_token' );
 
 // Delete all post meta created by the plugin
 global $wpdb;

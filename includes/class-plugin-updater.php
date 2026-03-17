@@ -81,23 +81,16 @@ class Plugin_Updater {
 	 *--------------------------------------------------------------------*/
 
 	/**
-	 * Resolve the GitHub token from constant or settings.
+	 * Resolve the GitHub token from constant or encrypted option.
+	 *
+	 * Delegates to Admin::get_github_token() which checks:
+	 *   1. SEARCH_INTEL_GITHUB_TOKEN constant in wp-config.php
+	 *   2. Encrypted option saved via the admin UI
 	 *
 	 * @return string Token or empty string.
 	 */
 	private function resolve_token(): string {
-		// 1. wp-config.php constant (most secure — never stored in DB).
-		if ( defined( 'SEARCH_INTEL_GITHUB_TOKEN' ) && SEARCH_INTEL_GITHUB_TOKEN ) {
-			return (string) SEARCH_INTEL_GITHUB_TOKEN;
-		}
-
-		// 2. Plugin settings (stored encrypted in DB via AI Engine).
-		$settings = get_option( 'search_intel_settings', [] );
-		if ( is_array( $settings ) && ! empty( $settings['github_token'] ) ) {
-			return (string) $settings['github_token'];
-		}
-
-		return '';
+		return Admin::get_github_token();
 	}
 
 	/**
