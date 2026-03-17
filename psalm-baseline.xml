@@ -165,6 +165,7 @@
       <code><![CDATA[$core_web_vitals]]></code>
       <code><![CDATA[$custom_reports]]></code>
       <code><![CDATA[$ai_optimizer]]></code>
+      <code><![CDATA[$plugin_updater]]></code>
     </PossiblyUnusedProperty>
     <UndefinedConstant>
       <code><![CDATA[SEARCH_INTEL_BASENAME]]></code>
@@ -538,6 +539,31 @@
     <UndefinedConstant>
       <code><![CDATA[SEARCH_INTEL_URL]]></code>
       <code><![CDATA[SEARCH_INTEL_VERSION]]></code>
+    </UndefinedConstant>
+  </file>
+  <file src="includes/class-plugin-updater.php">
+    <InvalidReturnStatement>
+      <code><![CDATA[$result]]></code>
+      <code><![CDATA[$result]]></code>
+      <code><![CDATA[$result]]></code>
+    </InvalidReturnStatement>
+    <InvalidReturnType>
+      <code><![CDATA[false|object]]></code>
+    </InvalidReturnType>
+    <PossiblyUnusedParam>
+      <code><![CDATA[$response]]></code>
+    </PossiblyUnusedParam>
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[object]]></code>
+      <code><![CDATA[false|object]]></code>
+      <code><![CDATA[array]]></code>
+    </PossiblyUnusedReturnValue>
+    <UndefinedConstant>
+      <code><![CDATA[HOUR_IN_SECONDS]]></code>
+      <code><![CDATA[SEARCH_INTEL_BASENAME]]></code>
+      <code><![CDATA[SEARCH_INTEL_VERSION]]></code>
+      <code><![CDATA[WP_PLUGIN_DIR]]></code>
+      <code><![CDATA[MINUTE_IN_SECONDS]]></code>
     </UndefinedConstant>
   </file>
   <file src="includes/class-content-decay.php">

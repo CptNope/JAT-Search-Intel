@@ -10,7 +10,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 }
 
 // Only clean up if the user opted in (or always clean for a full uninstall)
-$clean_on_uninstall = get_option( 'search_intel_clean_uninstall', true );
+$clean_on_uninstall = get_option( 'search_intel_clean_uninstall', false );
 
 if ( ! $clean_on_uninstall ) {
     return;
@@ -59,6 +59,11 @@ $meta_keys = [
     '_search_intel_aeo_score',
     '_search_intel_geo_score',
     '_search_intel_readability_score',
+    '_search_intel_ai_suggestions',
+    '_search_intel_failing_checks',
+    '_search_intel_ai_snapshot',
+    '_search_intel_score_history',
+    '_search_intel_score_change_log',
 ];
 
 foreach ( $meta_keys as $key ) {
