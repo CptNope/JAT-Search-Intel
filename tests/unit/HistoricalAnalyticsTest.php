@@ -23,13 +23,14 @@ class HistoricalAnalyticsTest extends TestCase {
         $si_test_state['post_meta'] = [];
 
         $ha = $this->make();
-        $ha->record_score( 10, [ 'seo' => 72.5, 'aeo' => 60.0, 'geo' => 55.0 ] );
+        $ha->record_score( 10, [ 'seo' => 72.5, 'aeo' => 60.0, 'geo' => 55.0, 'readability' => 68.0 ] );
 
         $history = $ha->get_post_history( 10 );
         $this->assertCount( 1, $history );
         $this->assertSame( 72.5, $history[0]['seo'] );
         $this->assertSame( 60.0, $history[0]['aeo'] );
         $this->assertSame( 55.0, $history[0]['geo'] );
+        $this->assertSame( 68.0, $history[0]['readability'] );
         $this->assertSame( gmdate( 'Y-m-d' ), $history[0]['date'] );
     }
 
@@ -38,8 +39,8 @@ class HistoricalAnalyticsTest extends TestCase {
         $si_test_state['post_meta'] = [];
 
         $ha = $this->make();
-        $ha->record_score( 10, [ 'seo' => 50.0, 'aeo' => 50.0, 'geo' => 50.0 ] );
-        $ha->record_score( 10, [ 'seo' => 80.0, 'aeo' => 70.0, 'geo' => 60.0 ] );
+        $ha->record_score( 10, [ 'seo' => 50.0, 'aeo' => 50.0, 'geo' => 50.0, 'readability' => 50.0 ] );
+        $ha->record_score( 10, [ 'seo' => 80.0, 'aeo' => 70.0, 'geo' => 60.0, 'readability' => 75.0 ] );
 
         $history = $ha->get_post_history( 10 );
         $this->assertCount( 1, $history );
@@ -63,7 +64,7 @@ class HistoricalAnalyticsTest extends TestCase {
         $si_test_state['post_meta'] = [];
 
         $ha = $this->make();
-        $ha->record_score( 10, [ 'seo' => 70.0, 'aeo' => 60.0, 'geo' => 50.0 ] );
+        $ha->record_score( 10, [ 'seo' => 70.0, 'aeo' => 60.0, 'geo' => 50.0, 'readability' => 65.0 ] );
 
         $chart = $ha->get_chart_data( 10, 'all', 30 );
 
@@ -80,7 +81,7 @@ class HistoricalAnalyticsTest extends TestCase {
         $si_test_state['post_meta'] = [];
 
         $ha = $this->make();
-        $ha->record_score( 10, [ 'seo' => 70.0, 'aeo' => 60.0, 'geo' => 50.0 ] );
+        $ha->record_score( 10, [ 'seo' => 70.0, 'aeo' => 60.0, 'geo' => 50.0, 'readability' => 65.0 ] );
 
         $chart = $ha->get_chart_data( 10, 'seo', 30 );
 
@@ -134,6 +135,7 @@ class HistoricalAnalyticsTest extends TestCase {
         $this->assertArrayHasKey( 'labels', $trends );
         $this->assertArrayHasKey( 'datasets', $trends );
         $this->assertArrayHasKey( 'seo', $trends['datasets'] );
+        $this->assertArrayHasKey( 'readability', $trends['datasets'] );
         $this->assertSame( 30, $trends['days'] );
     }
 
@@ -145,10 +147,10 @@ class HistoricalAnalyticsTest extends TestCase {
 
         // Simulate 2 posts with score history.
         update_post_meta( 1, '_search_intel_analytics_history', [
-            [ 'date' => gmdate( 'Y-m-d' ), 'seo' => 80.0, 'aeo' => 60.0, 'geo' => 40.0 ],
+            [ 'date' => gmdate( 'Y-m-d' ), 'seo' => 80.0, 'aeo' => 60.0, 'geo' => 40.0, 'readability' => 70.0 ],
         ] );
         update_post_meta( 2, '_search_intel_analytics_history', [
-            [ 'date' => gmdate( 'Y-m-d' ), 'seo' => 60.0, 'aeo' => 40.0, 'geo' => 20.0 ],
+            [ 'date' => gmdate( 'Y-m-d' ), 'seo' => 60.0, 'aeo' => 40.0, 'geo' => 20.0, 'readability' => 50.0 ],
         ] );
 
         // get_posts returns IDs — mock it via test state.
@@ -173,9 +175,9 @@ class HistoricalAnalyticsTest extends TestCase {
         $ha = $this->make();
 
         $history = [
-            [ 'date' => '2026-01-01', 'seo' => 50.0, 'aeo' => 40.0, 'geo' => 30.0 ],
-            [ 'date' => '2026-01-15', 'seo' => 70.0, 'aeo' => 60.0, 'geo' => 50.0 ],
-            [ 'date' => '2026-02-01', 'seo' => 80.0, 'aeo' => 70.0, 'geo' => 60.0 ],
+            [ 'date' => '2026-01-01', 'seo' => 50.0, 'aeo' => 40.0, 'geo' => 30.0, 'readability' => 55.0 ],
+            [ 'date' => '2026-01-15', 'seo' => 70.0, 'aeo' => 60.0, 'geo' => 50.0, 'readability' => 65.0 ],
+            [ 'date' => '2026-02-01', 'seo' => 80.0, 'aeo' => 70.0, 'geo' => 60.0, 'readability' => 75.0 ],
         ];
         update_post_meta( 10, '_search_intel_analytics_history', $history );
 
@@ -192,6 +194,7 @@ class HistoricalAnalyticsTest extends TestCase {
 
         // Delta should show the increase.
         $this->assertSame( 20.0, $result['delta']['seo']['change'] );
+        $this->assertSame( 10.0, $result['delta']['readability']['change'] );
     }
 
     public function test_get_before_after_handles_no_data(): void {
@@ -218,8 +221,8 @@ class HistoricalAnalyticsTest extends TestCase {
         $ha->log_change(
             10,
             'Content updated',
-            [ 'seo' => 50.0, 'aeo' => 40.0, 'geo' => 30.0 ],
-            [ 'seo' => 70.0, 'aeo' => 60.0, 'geo' => 50.0 ],
+            [ 'seo' => 50.0, 'aeo' => 40.0, 'geo' => 30.0, 'readability' => 55.0 ],
+            [ 'seo' => 70.0, 'aeo' => 60.0, 'geo' => 50.0, 'readability' => 72.0 ],
             1
         );
 
@@ -229,6 +232,8 @@ class HistoricalAnalyticsTest extends TestCase {
         $this->assertSame( 1, $log[0]['user_id'] );
         $this->assertSame( 50.0, $log[0]['old']['seo'] );
         $this->assertSame( 70.0, $log[0]['new']['seo'] );
+        $this->assertSame( 55.0, $log[0]['old']['readability'] );
+        $this->assertSame( 72.0, $log[0]['new']['readability'] );
     }
 
     public function test_get_change_log_returns_newest_first(): void {

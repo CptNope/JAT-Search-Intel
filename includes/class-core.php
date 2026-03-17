@@ -145,6 +145,9 @@ class Core {
     /** @var Custom_Reports */
     public $custom_reports;
 
+    /** @var AI_Optimizer */
+    public $ai_optimizer;
+
     /**
      * Get singleton instance.
      */
@@ -280,6 +283,9 @@ class Core {
 
         // Custom Reports — PDF generation, scheduled email, CSV/JSON export, report builder.
         $this->custom_reports = new Custom_Reports( $settings );
+
+        // AI Optimizer — score-driven content improvement suggestions.
+        $this->ai_optimizer = new AI_Optimizer( $settings, $this );
 
         // Auto-redirect on slug change.
         add_action( 'post_updated', [ $this->redirects, 'detect_slug_change' ], 10, 3 );
