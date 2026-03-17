@@ -6,6 +6,14 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.3.6] — 2026-03-17
+
+### Fixed
+- **Bulk rescore/regenerate only processed one post type**: Added "All Public Post Types" option to the bulk tools dropdown — rescore, regenerate, and AI generate now process posts, pages, and all CPTs in a single run
+- **Reports readability module**: Added Readability as a selectable module in the Reports form
+
+---
+
 ## [3.3.5] — 2026-03-17
 
 ### Fixed

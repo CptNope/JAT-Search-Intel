@@ -63,6 +63,41 @@ class Bulk_Tools {
         ] );
     }
 
+    // ── Helpers ──────────────────────────────────────────────────────────────
+
+    /**
+     * Resolve a post_type value from the UI.
+     *
+     * When 'all' is passed, returns an array of every public post type.
+     * Otherwise returns the sanitized string as-is.
+     *
+     * @param string $raw Raw post_type value from the request.
+     * @return string|string[] Single post type or array of types.
+     */
+    private function resolve_post_types( string $raw ) {
+        if ( 'all' === $raw ) {
+            return array_values( get_post_types( [ 'public' => true ] ) );
+        }
+        return $raw;
+    }
+
+    /**
+     * Count total published posts for the given type(s).
+     *
+     * @param string|string[] $post_type Single type or array of types.
+     * @return int Total published count.
+     */
+    private function count_published( $post_type ): int {
+        if ( is_array( $post_type ) ) {
+            $total = 0;
+            foreach ( $post_type as $pt ) {
+                $total += (int) wp_count_posts( $pt )->publish;
+            }
+            return $total;
+        }
+        return (int) wp_count_posts( $post_type )->publish;
+    }
+
     // ── AJAX: Bulk Rescore ──────────────────────────────────────────────────
 
     /**
@@ -75,12 +110,13 @@ class Bulk_Tools {
             wp_send_json_error( [ 'message' => 'Unauthorized.' ], 403 );
         }
 
-        $batch_size = 20;
-        $offset     = absint( $_POST['offset'] ?? 0 );
-        $post_type  = sanitize_text_field( $_POST['post_type'] ?? 'post' );
+        $batch_size  = 20;
+        $offset      = absint( $_POST['offset'] ?? 0 );
+        $post_type   = sanitize_text_field( $_POST['post_type'] ?? 'post' );
+        $query_types = $this->resolve_post_types( $post_type );
 
         $posts = get_posts( [
-            'post_type'      => $post_type,
+            'post_type'      => $query_types,
             'post_status'    => 'publish',
             'posts_per_page' => $batch_size,
             'offset'         => $offset,
@@ -88,8 +124,7 @@ class Bulk_Tools {
             'order'          => 'ASC',
         ] );
 
-        $total_obj = wp_count_posts( $post_type );
-        $total     = (int) $total_obj->publish;
+        $total = $this->count_published( $query_types );
 
         $processed = 0;
         foreach ( $posts as $post ) {
@@ -141,12 +176,13 @@ class Bulk_Tools {
             wp_send_json_error( [ 'message' => 'Unauthorized.' ], 403 );
         }
 
-        $batch_size = 20;
-        $offset     = absint( $_POST['offset'] ?? 0 );
-        $post_type  = sanitize_text_field( $_POST['post_type'] ?? 'post' );
+        $batch_size  = 20;
+        $offset      = absint( $_POST['offset'] ?? 0 );
+        $post_type   = sanitize_text_field( $_POST['post_type'] ?? 'post' );
+        $query_types = $this->resolve_post_types( $post_type );
 
         $posts = get_posts( [
-            'post_type'      => $post_type,
+            'post_type'      => $query_types,
             'post_status'    => 'publish',
             'posts_per_page' => $batch_size,
             'offset'         => $offset,
@@ -154,8 +190,7 @@ class Bulk_Tools {
             'order'          => 'ASC',
         ] );
 
-        $total_obj = wp_count_posts( $post_type );
-        $total     = (int) $total_obj->publish;
+        $total = $this->count_published( $query_types );
 
         $processed = 0;
         foreach ( $posts as $post ) {
@@ -231,10 +266,11 @@ class Bulk_Tools {
             wp_send_json_error( [ 'message' => 'AI provider is not configured. Add an API key in Settings → AI Engine.' ] );
         }
 
-        $offset    = absint( $_POST['offset'] ?? 0 );
-        $post_type = sanitize_text_field( wp_unslash( $_POST['post_type'] ?? 'post' ) );
-        $mode      = sanitize_text_field( wp_unslash( $_POST['mode'] ?? 'empty_only' ) );
-        $fields    = array_map( 'sanitize_text_field', (array) ( $_POST['fields'] ?? [] ) );
+        $offset      = absint( $_POST['offset'] ?? 0 );
+        $post_type   = sanitize_text_field( wp_unslash( $_POST['post_type'] ?? 'post' ) );
+        $query_types = $this->resolve_post_types( $post_type );
+        $mode        = sanitize_text_field( wp_unslash( $_POST['mode'] ?? 'empty_only' ) );
+        $fields      = array_map( 'sanitize_text_field', (array) ( $_POST['fields'] ?? [] ) );
 
         $valid_fields = [
             'seo_title', 'meta_description', 'focus_keyword', 'secondary_keywords',
@@ -253,7 +289,7 @@ class Bulk_Tools {
         $batch_size = 1;
 
         $posts = get_posts( [
-            'post_type'      => $post_type,
+            'post_type'      => $query_types,
             'post_status'    => 'publish',
             'posts_per_page' => $batch_size,
             'offset'         => $offset,
@@ -261,8 +297,7 @@ class Bulk_Tools {
             'order'          => 'ASC',
         ] );
 
-        $total_obj = wp_count_posts( $post_type );
-        $total     = (int) $total_obj->publish;
+        $total = $this->count_published( $query_types );
 
         $generated = 0;
         $errors    = 0;
