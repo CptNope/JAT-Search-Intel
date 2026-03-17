@@ -438,10 +438,6 @@
       <code><![CDATA[string]]></code>
       <code><![CDATA[string]]></code>
     </PossiblyUnusedReturnValue>
-    <RedundantCondition>
-      <code><![CDATA[! empty( $directives )]]></code>
-      <code><![CDATA[empty( $directives )]]></code>
-    </RedundantCondition>
     <UndefinedConstant>
       <code><![CDATA[SEARCH_INTEL_VERSION]]></code>
     </UndefinedConstant>
