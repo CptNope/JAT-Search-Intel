@@ -57,6 +57,10 @@ register_activation_hook( __FILE__, function () {
         update_option( 'search_intel_settings', Search_Intel\Core::get_default_settings() );
     }
     Search_Intel\Redirect_Manager::create_tables();
+
+    // Register sitemap rewrite rules before flushing so WP picks them up.
+    add_rewrite_rule( '^sitemap\.xml$', 'index.php?search_intel_sitemap=index', 'top' );
+    add_rewrite_rule( '^sitemap-([a-z]+)-?(\d*)\.xml$', 'index.php?search_intel_sitemap=$matches[1]&search_intel_sitemap_page=$matches[2]', 'top' );
     flush_rewrite_rules();
 });
 

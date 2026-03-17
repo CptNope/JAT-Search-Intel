@@ -22,6 +22,7 @@
       <code><![CDATA[SEARCH_INTEL_DIR]]></code>
       <code><![CDATA[SEARCH_INTEL_DIR]]></code>
       <code><![CDATA[SEARCH_INTEL_DIR]]></code>
+      <code><![CDATA[SEARCH_INTEL_DIR]]></code>
       <code><![CDATA[SEARCH_INTEL_URL]]></code>
       <code><![CDATA[SEARCH_INTEL_URL]]></code>
       <code><![CDATA[SEARCH_INTEL_URL]]></code>
@@ -156,7 +157,6 @@
       <code><![CDATA[$title_engine]]></code>
       <code><![CDATA[$visibility_dashboard]]></code>
       <code><![CDATA[$woocommerce]]></code>
-      <code><![CDATA[$ai_engine]]></code>
       <code><![CDATA[$content_decay]]></code>
       <code><![CDATA[$keyword_cannibalization]]></code>
       <code><![CDATA[$advanced_linking]]></code>
@@ -522,8 +522,6 @@
   <file src="includes/class-ai-engine.php">
     <PossiblyUnusedMethod>
       <code><![CDATA[get_providers]]></code>
-      <code><![CDATA[save_api_key]]></code>
-      <code><![CDATA[generate_meta_description]]></code>
       <code><![CDATA[generate_title_suggestions]]></code>
       <code><![CDATA[generate_link_recommendations]]></code>
       <code><![CDATA[generate_content_brief]]></code>

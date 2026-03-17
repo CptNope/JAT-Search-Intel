@@ -58,6 +58,61 @@ $post_types = get_post_types( [ 'public' => true ], 'objects' );
         </div>
     </div>
 
+    <!-- Bulk AI Content Generation -->
+    <div class="si-settings-card">
+        <h2><span class="dashicons dashicons-admin-generic" style="margin-right:4px;"></span> <?php esc_html_e( 'Bulk AI Content Generation', 'search-intel' ); ?></h2>
+        <?php if ( empty( $settings['enable_ai_engine'] ) ) : ?>
+            <div class="si-notice si-notice-warning">
+                <p><?php esc_html_e( 'AI Engine is disabled.', 'search-intel' ); ?>
+                <a href="<?php echo esc_url( admin_url( 'admin.php?page=search-intel-ai' ) ); ?>"><?php esc_html_e( 'Enable it and add an API key →', 'search-intel' ); ?></a></p>
+            </div>
+        <?php else : ?>
+            <p><?php esc_html_e( 'Use AI to generate SEO meta descriptions, AI summaries, and focus keywords for all published posts. Only empty fields are filled — existing content is never overwritten.', 'search-intel' ); ?></p>
+            <table class="form-table">
+                <tr>
+                    <th><?php esc_html_e( 'Generate', 'search-intel' ); ?></th>
+                    <td>
+                        <label style="display:block; margin-bottom:6px;">
+                            <input type="checkbox" class="si-ai-gen-field" value="meta_description" checked />
+                            <?php esc_html_e( 'Meta Descriptions (120-155 chars, keyword-optimized)', 'search-intel' ); ?>
+                        </label>
+                        <label style="display:block; margin-bottom:6px;">
+                            <input type="checkbox" class="si-ai-gen-field" value="ai_summary" checked />
+                            <?php esc_html_e( 'AI Summaries (concise factual overview for LLMs)', 'search-intel' ); ?>
+                        </label>
+                        <label style="display:block; margin-bottom:6px;">
+                            <input type="checkbox" class="si-ai-gen-field" value="focus_keyword" />
+                            <?php esc_html_e( 'Focus Keywords (primary SEO target keyword)', 'search-intel' ); ?>
+                        </label>
+                    </td>
+                </tr>
+                <tr>
+                    <th><?php esc_html_e( 'Mode', 'search-intel' ); ?></th>
+                    <td>
+                        <label style="display:block; margin-bottom:6px;">
+                            <input type="radio" name="si_ai_gen_mode" value="empty_only" checked />
+                            <?php esc_html_e( 'Only fill empty fields (safe — never overwrites)', 'search-intel' ); ?>
+                        </label>
+                        <label style="display:block; margin-bottom:6px;">
+                            <input type="radio" name="si_ai_gen_mode" value="overwrite_all" />
+                            <?php esc_html_e( 'Regenerate all (overwrites existing AI-generated content)', 'search-intel' ); ?>
+                        </label>
+                    </td>
+                </tr>
+            </table>
+            <div class="si-bulk-action">
+                <button type="button" class="button button-primary" id="si-btn-ai-generate">
+                    <span class="dashicons dashicons-admin-generic"></span> <?php esc_html_e( 'Generate AI Content', 'search-intel' ); ?>
+                </button>
+                <div class="si-progress" id="si-progress-ai-generate" style="display:none;">
+                    <div class="si-progress-bar"><div class="si-progress-fill" id="si-fill-ai-generate"></div></div>
+                    <span class="si-progress-text" id="si-text-ai-generate"></span>
+                </div>
+                <div class="si-bulk-result" id="si-result-ai-generate" style="display:none;"></div>
+            </div>
+        <?php endif; ?>
+    </div>
+
     <!-- Sitemap Cache Warm -->
     <div class="si-settings-card">
         <h2><?php esc_html_e( 'Sitemap Cache', 'search-intel' ); ?></h2>

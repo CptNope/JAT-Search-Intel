@@ -47,6 +47,10 @@ class Admin {
         add_action( 'edit_user_profile', [ $this, 'render_user_eeat_fields' ] );
         add_action( 'personal_options_update', [ $this, 'save_user_eeat_fields' ] );
         add_action( 'edit_user_profile_update', [ $this, 'save_user_eeat_fields' ] );
+
+        // AI Engine AJAX handlers
+        add_action( 'wp_ajax_si_save_ai_api_key', [ $this, 'ajax_save_ai_api_key' ] );
+        add_action( 'wp_ajax_si_test_ai_connection', [ $this, 'ajax_test_ai_connection' ] );
     }
 
     /**
@@ -115,6 +119,15 @@ class Admin {
             'manage_options',
             'search-intel-social',
             [ $this, 'render_social_settings_page' ]
+        );
+
+        add_submenu_page(
+            'search-intel',
+            __( 'AI Engine', 'search-intel' ),
+            __( 'AI Engine', 'search-intel' ),
+            'manage_options',
+            'search-intel-ai',
+            [ $this, 'render_ai_settings_page' ]
         );
 
         add_submenu_page(
@@ -604,6 +617,74 @@ class Admin {
      */
     public function render_social_settings_page(): void {
         include SEARCH_INTEL_DIR . 'admin/views/settings-social.php';
+    }
+
+    /**
+     * AJAX: Save an AI API key (encrypted storage).
+     */
+    public function ajax_save_ai_api_key(): void {
+        check_ajax_referer( 'si_ai_settings', 'nonce' );
+
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => 'Unauthorized.' ], 403 );
+        }
+
+        $provider = sanitize_text_field( wp_unslash( $_POST['provider'] ?? '' ) );
+        $api_key  = sanitize_text_field( wp_unslash( $_POST['api_key'] ?? '' ) );
+
+        $valid_providers = [ 'openai', 'anthropic', 'ollama' ];
+        if ( ! in_array( $provider, $valid_providers, true ) ) {
+            wp_send_json_error( [ 'message' => 'Invalid provider.' ] );
+        }
+
+        if ( empty( $api_key ) ) {
+            wp_send_json_error( [ 'message' => 'API key cannot be empty.' ] );
+        }
+
+        $this->core->ai_engine->save_api_key( $provider, $api_key );
+
+        wp_send_json_success( [ 'message' => 'API key saved.' ] );
+    }
+
+    /**
+     * AJAX: Test AI provider connection with a simple prompt.
+     */
+    public function ajax_test_ai_connection(): void {
+        check_ajax_referer( 'si_ai_settings', 'nonce' );
+
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => 'Unauthorized.' ], 403 );
+        }
+
+        $provider = sanitize_text_field( wp_unslash( $_POST['provider'] ?? '' ) );
+
+        // Temporarily override the active provider for this test.
+        $settings                = $this->settings;
+        $settings['ai_provider'] = $provider;
+        $test_engine             = new AI_Engine( $settings );
+
+        if ( 'ollama' !== $provider && $test_engine->get_api_key( $provider ) === '' ) {
+            wp_send_json_error( [ 'message' => 'No API key saved for this provider. Save a key first.' ] );
+        }
+
+        $result = $test_engine->chat(
+            'You are a helpful assistant. Respond with exactly: OK',
+            'Say OK.',
+            [ 'max_tokens' => 10, 'temperature' => 0 ]
+        );
+
+        if ( $result['success'] ) {
+            wp_send_json_success( [ 'message' => 'Connected! Response: ' . mb_substr( $result['text'], 0, 50 ) ] );
+        } else {
+            wp_send_json_error( [ 'message' => $result['error'] ] );
+        }
+    }
+
+    /**
+     * Render AI Engine settings page.
+     */
+    public function render_ai_settings_page(): void {
+        include SEARCH_INTEL_DIR . 'admin/views/settings-ai.php';
     }
 
     /**
