@@ -7,6 +7,13 @@
  * plugins from the wp.org repo. Checks GitHub Releases for new
  * versions and serves the zip download URL to WordPress.
  *
+ * Supports **private repositories** by injecting an auth token into
+ * both the API check and the download request. The token can be set
+ * in two ways (checked in order):
+ *
+ *   1. `SEARCH_INTEL_GITHUB_TOKEN` constant in wp-config.php (recommended)
+ *   2. `github_token` key in the search_intel_settings option
+ *
  * @package Search_Intel
  * @since   3.4.0
  */
@@ -37,12 +44,19 @@ class Plugin_Updater {
 	/** @var string Current installed version. */
 	private $version;
 
+	/** @var string GitHub personal access token (empty = public repo). */
+	private $token;
+
 	/**
 	 * Constructor.
 	 */
 	public function __construct() {
 		$this->basename = SEARCH_INTEL_BASENAME;
 		$this->version  = SEARCH_INTEL_VERSION;
+		$this->token    = $this->resolve_token();
+
+		// Bail silently if no token and repo is private — API will 404.
+		// Update checks still register so the admin notice can warn.
 
 		// Inject update info into the transient WordPress checks.
 		add_filter( 'pre_set_site_transient_update_plugins', [ $this, 'check_update' ] );
@@ -50,9 +64,63 @@ class Plugin_Updater {
 		// Supply plugin info for the "View details" modal.
 		add_filter( 'plugins_api', [ $this, 'plugin_info' ], 20, 3 );
 
-		// Point the download to the GitHub zip after update is confirmed.
+		// Inject auth header when WP downloads our zip from GitHub.
+		add_filter( 'http_request_args', [ $this, 'inject_download_auth' ], 10, 2 );
+
+		// Rename extracted folder to match installed plugin directory.
 		add_filter( 'upgrader_post_install', [ $this, 'after_install' ], 10, 3 );
+
+		// Show admin notice when token is missing.
+		if ( empty( $this->token ) && is_admin() ) {
+			add_action( 'admin_notices', [ $this, 'missing_token_notice' ] );
+		}
 	}
+
+	/*----------------------------------------------------------------------
+	 * Token resolution
+	 *--------------------------------------------------------------------*/
+
+	/**
+	 * Resolve the GitHub token from constant or settings.
+	 *
+	 * @return string Token or empty string.
+	 */
+	private function resolve_token(): string {
+		// 1. wp-config.php constant (most secure — never stored in DB).
+		if ( defined( 'SEARCH_INTEL_GITHUB_TOKEN' ) && SEARCH_INTEL_GITHUB_TOKEN ) {
+			return (string) SEARCH_INTEL_GITHUB_TOKEN;
+		}
+
+		// 2. Plugin settings (stored encrypted in DB via AI Engine).
+		$settings = get_option( 'search_intel_settings', [] );
+		if ( is_array( $settings ) && ! empty( $settings['github_token'] ) ) {
+			return (string) $settings['github_token'];
+		}
+
+		return '';
+	}
+
+	/**
+	 * Get the common HTTP headers for GitHub API requests.
+	 *
+	 * @return array Headers array.
+	 */
+	private function api_headers(): array {
+		$headers = [
+			'Accept'     => 'application/vnd.github.v3+json',
+			'User-Agent' => 'Search-Intel-Updater/' . $this->version,
+		];
+
+		if ( $this->token ) {
+			$headers['Authorization'] = 'Bearer ' . $this->token;
+		}
+
+		return $headers;
+	}
+
+	/*----------------------------------------------------------------------
+	 * Update check
+	 *--------------------------------------------------------------------*/
 
 	/**
 	 * Check GitHub for a newer release and inject into WP update transient.
@@ -107,6 +175,10 @@ class Plugin_Updater {
 		return $transient;
 	}
 
+	/*----------------------------------------------------------------------
+	 * Plugin info modal
+	 *--------------------------------------------------------------------*/
+
 	/**
 	 * Supply plugin information for the "View details" modal in the dashboard.
 	 *
@@ -149,10 +221,57 @@ class Plugin_Updater {
 		];
 	}
 
+	/*----------------------------------------------------------------------
+	 * Download auth injection
+	 *--------------------------------------------------------------------*/
+
+	/**
+	 * Inject the auth header when WordPress downloads a zip from GitHub.
+	 *
+	 * WP's upgrader uses wp_remote_get() without custom headers.
+	 * For private repos the download URL (zipball or asset) returns
+	 * 404 without authentication. This filter adds the Bearer token
+	 * to any request going to api.github.com for our repo.
+	 *
+	 * @param array  $args HTTP request args.
+	 * @param string $url  Request URL.
+	 * @return array Modified args.
+	 */
+	public function inject_download_auth( $args, $url ) {
+		if ( empty( $this->token ) ) {
+			return $args;
+		}
+
+		// Only inject auth for GitHub API URLs related to our repo.
+		if ( strpos( $url, 'api.github.com/repos/' . self::GITHUB_REPO ) === false
+			&& strpos( $url, 'github.com/' . self::GITHUB_REPO ) === false
+			&& strpos( $url, 'codeload.github.com/' . self::GITHUB_REPO ) === false
+		) {
+			return $args;
+		}
+
+		if ( ! isset( $args['headers'] ) || ! is_array( $args['headers'] ) ) {
+			$args['headers'] = [];
+		}
+
+		$args['headers']['Authorization'] = 'Bearer ' . $this->token;
+
+		// For GitHub API asset downloads, request the binary directly.
+		if ( strpos( $url, '/releases/assets/' ) !== false ) {
+			$args['headers']['Accept'] = 'application/octet-stream';
+		}
+
+		return $args;
+	}
+
+	/*----------------------------------------------------------------------
+	 * Post-install folder rename
+	 *--------------------------------------------------------------------*/
+
 	/**
 	 * After install, ensure the plugin directory name is correct.
 	 *
-	 * GitHub zips extract to "Search-Intel-<branch>" — this renames
+	 * GitHub zips extract to "Search-Intel-<tag>" — this renames
 	 * the folder to match the installed plugin directory so WP
 	 * recognises it as the same plugin (preserving all data).
 	 *
@@ -173,10 +292,10 @@ class Plugin_Updater {
 		$installed  = $result['destination'] ?? '';
 
 		// If the extracted folder name doesn't match, rename it.
-		if ( $installed && $installed !== $proper_dir ) {
+		if ( $installed && rtrim( $installed, '/\\' ) !== rtrim( $proper_dir, '/\\' ) ) {
 			$wp_filesystem->move( $installed, $proper_dir );
-			$result['destination']      = $proper_dir;
-			$result['destination_name'] = dirname( $this->basename );
+			$result['destination']        = $proper_dir;
+			$result['destination_name']   = dirname( $this->basename );
 			$result['remote_destination'] = $proper_dir;
 		}
 
@@ -186,6 +305,10 @@ class Plugin_Updater {
 		return $result;
 	}
 
+	/*----------------------------------------------------------------------
+	 * GitHub API
+	 *--------------------------------------------------------------------*/
+
 	/**
 	 * Fetch the latest GitHub release (cached).
 	 *
@@ -193,28 +316,21 @@ class Plugin_Updater {
 	 */
 	private function get_latest_release(): ?array {
 		$cached = get_transient( self::CACHE_KEY );
-		if ( is_array( $cached ) ) {
+		if ( is_array( $cached ) && ! empty( $cached ) ) {
 			return $cached;
+		}
+
+		// Need a token for the private repo.
+		if ( empty( $this->token ) ) {
+			return null;
 		}
 
 		$url = self::API_BASE . '/releases/latest';
 
-		$args = [
+		$response = wp_remote_get( $url, [
 			'timeout' => 10,
-			'headers' => [
-				'Accept'     => 'application/vnd.github.v3+json',
-				'User-Agent' => 'Search-Intel-Updater/' . $this->version,
-			],
-		];
-
-		// Use a GitHub token if available (for private repos or higher rate limits).
-		$settings = get_option( 'search_intel_settings', [] );
-		$token    = $settings['github_token'] ?? '';
-		if ( $token ) {
-			$args['headers']['Authorization'] = 'Bearer ' . $token;
-		}
-
-		$response = wp_remote_get( $url, $args );
+			'headers' => $this->api_headers(),
+		] );
 
 		if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) !== 200 ) {
 			// Cache a failure for 30 minutes to avoid hammering GitHub.
@@ -235,21 +351,48 @@ class Plugin_Updater {
 	/**
 	 * Get the zip download URL from a release.
 	 *
-	 * Prefers a .zip asset attached to the release. Falls back to the
-	 * auto-generated GitHub source zipball.
+	 * For private repos, we use the API asset URL (which our
+	 * inject_download_auth filter will authenticate). For assets,
+	 * this returns the API URL; for zipball, the authenticated
+	 * zipball_url works via the same filter.
 	 *
 	 * @param array $release GitHub release data.
 	 * @return string Download URL.
 	 */
 	private function get_download_url( array $release ): string {
-		// Check for an attached .zip asset first.
+		// Check for an attached .zip asset first — use the API URL.
 		foreach ( $release['assets'] ?? [] as $asset ) {
 			if ( str_ends_with( $asset['name'] ?? '', '.zip' ) ) {
-				return $asset['browser_download_url'] ?? '';
+				// Use the API URL so our auth header gets injected.
+				return $asset['url'] ?? ( $asset['browser_download_url'] ?? '' );
 			}
 		}
 
-		// Fall back to GitHub's auto-generated zipball.
+		// Fall back to GitHub's auto-generated zipball (auth injected by filter).
 		return $release['zipball_url'] ?? '';
+	}
+
+	/*----------------------------------------------------------------------
+	 * Admin notice
+	 *--------------------------------------------------------------------*/
+
+	/**
+	 * Show a notice when the GitHub token is not configured.
+	 */
+	public function missing_token_notice(): void {
+		$screen = get_current_screen();
+		if ( ! $screen || ! in_array( $screen->id, [ 'plugins', 'update-core', 'dashboard' ], true ) ) {
+			return;
+		}
+
+		echo '<div class="notice notice-warning"><p>';
+		echo '<strong>Search Intel:</strong> ';
+		echo esc_html__(
+			'Automatic updates are disabled — no GitHub token configured. '
+			. 'Add this to your wp-config.php to enable updates:',
+			'search-intel'
+		);
+		echo ' <code>define( \'SEARCH_INTEL_GITHUB_TOKEN\', \'ghp_your_token_here\' );</code>';
+		echo '</p></div>';
 	}
 }

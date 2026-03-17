@@ -557,6 +557,7 @@
       <code><![CDATA[object]]></code>
       <code><![CDATA[false|object]]></code>
       <code><![CDATA[array]]></code>
+      <code><![CDATA[array]]></code>
     </PossiblyUnusedReturnValue>
     <UndefinedConstant>
       <code><![CDATA[HOUR_IN_SECONDS]]></code>
