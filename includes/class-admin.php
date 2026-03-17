@@ -164,13 +164,30 @@ class Admin {
 
         // Checkboxes (booleans)
         $bool_keys = [
+            // Core
             'enable_seo', 'enable_og', 'enable_twitter', 'enable_canonical',
             'enable_robots_meta', 'noindex_archives', 'noindex_search', 'noindex_404',
             'enable_schema', 'enable_breadcrumbs', 'enable_sitelinks',
             'enable_aeo', 'enable_faq_schema', 'enable_howto_schema', 'enable_speakable',
             'enable_geo', 'enable_llms_txt', 'enable_ai_meta', 'enable_entity_markup',
             'content_freshness', 'enable_rest_api', 'enable_sitemap', 'enable_analyzer',
-            'enable_ai_engine',
+            // Advanced SEO (v2.0)
+            'enable_redirects', 'enable_indexnow', 'enable_robots_editor',
+            'enable_link_checker', 'enable_internal_linker', 'enable_local_business',
+            'enable_audit_log',
+            'enable_csp_headers', 'enable_sri',
+            // Advanced AEO (v2.1)
+            'enable_schema_types', 'enable_qa_detector', 'enable_faq_generator',
+            // Advanced GEO (v2.5)
+            'enable_visibility_dashboard', 'enable_citation_graph', 'enable_authority_map',
+            // AI & Content Intelligence (v3.2)
+            'enable_ai_engine', 'enable_content_decay', 'enable_cannibalization',
+            'enable_advanced_linking',
+            // Analytics & Reporting (v3.3)
+            'enable_historical_analytics', 'enable_ga4', 'enable_cwv',
+            'enable_custom_reports', 'enable_notifications',
+            // Enterprise (v3.0)
+            'enable_rbac', 'enable_multilang', 'enable_white_label', 'enable_scale',
         ];
 
         foreach ( $bool_keys as $key ) {
