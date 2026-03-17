@@ -70,9 +70,15 @@ class Plugin_Updater {
 		// Rename extracted folder to match installed plugin directory.
 		add_filter( 'upgrader_post_install', [ $this, 'after_install' ], 10, 3 );
 
-		// Show admin notice when token is missing.
-		if ( empty( $this->token ) && is_admin() ) {
-			add_action( 'admin_notices', [ $this, 'missing_token_notice' ] );
+		// Admin-only hooks.
+		if ( is_admin() ) {
+			// Show admin notice when token is missing.
+			if ( empty( $this->token ) ) {
+				add_action( 'admin_notices', [ $this, 'missing_token_notice' ] );
+			}
+
+			// Force-check action — clears cache and redirects to updates page.
+			add_action( 'admin_post_search_intel_force_update_check', [ $this, 'force_update_check' ] );
 		}
 	}
 
@@ -387,5 +393,45 @@ class Plugin_Updater {
 		);
 		echo ' <code>define( \'SEARCH_INTEL_GITHUB_TOKEN\', \'ghp_your_token_here\' );</code>';
 		echo '</p></div>';
+	}
+
+	/*----------------------------------------------------------------------
+	 * Force update check
+	 *--------------------------------------------------------------------*/
+
+	/**
+	 * Handle the force-check admin action.
+	 *
+	 * Clears the cached release transient, deletes WP's plugin update
+	 * transient to force a fresh check, and redirects to the updates page.
+	 */
+	public function force_update_check(): void {
+		if ( ! current_user_can( 'update_plugins' ) ) {
+			wp_die( esc_html__( 'Unauthorized.', 'search-intel' ) );
+		}
+
+		check_admin_referer( 'search_intel_force_update_check' );
+
+		// Clear our GitHub release cache.
+		delete_transient( self::CACHE_KEY );
+
+		// Clear WP's plugin update transient to force a fresh check.
+		delete_site_transient( 'update_plugins' );
+
+		// Redirect to the WordPress updates page.
+		wp_safe_redirect( admin_url( 'update-core.php' ) );
+		exit;
+	}
+
+	/**
+	 * Get the URL for the force-check action (for use in admin UI).
+	 *
+	 * @return string Nonce-protected admin-post URL.
+	 */
+	public static function get_force_check_url(): string {
+		return wp_nonce_url(
+			admin_url( 'admin-post.php?action=search_intel_force_update_check' ),
+			'search_intel_force_update_check'
+		);
 	}
 }

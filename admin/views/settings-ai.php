@@ -175,7 +175,14 @@ $usage     = $ai_engine->get_token_usage();
                 </tr>
                 <tr>
                     <th><?php esc_html_e( 'Current Version', 'search-intel' ); ?></th>
-                    <td><strong><?php echo esc_html( SEARCH_INTEL_VERSION ); ?></strong></td>
+                    <td>
+                        <strong><?php echo esc_html( SEARCH_INTEL_VERSION ); ?></strong>
+                        &nbsp;&nbsp;
+                        <a href="<?php echo esc_url( \Search_Intel\Plugin_Updater::get_force_check_url() ); ?>" class="button button-secondary">
+                            <?php esc_html_e( 'Check for Updates Now', 'search-intel' ); ?>
+                        </a>
+                        <p class="description"><?php esc_html_e( 'Clears the update cache and checks GitHub immediately. You will be redirected to the Updates page.', 'search-intel' ); ?></p>
+                    </td>
                 </tr>
             </table>
         </div>

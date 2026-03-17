@@ -552,6 +552,9 @@
     <InvalidReturnType>
       <code><![CDATA[false|object]]></code>
     </InvalidReturnType>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[get_force_check_url]]></code>
+    </PossiblyUnusedMethod>
     <PossiblyUnusedParam>
       <code><![CDATA[$response]]></code>
     </PossiblyUnusedParam>
