@@ -8,7 +8,7 @@
  * @phpstan-ignore-next-line
  */
 
-define( 'SEARCH_INTEL_VERSION', '3.3.2' );
+define( 'SEARCH_INTEL_VERSION', '3.3.3' );
 define( 'SEARCH_INTEL_FILE', __FILE__ );
 define( 'SEARCH_INTEL_DIR', __DIR__ . '/' );
 define( 'SEARCH_INTEL_URL', 'https://example.com/wp-content/plugins/search-intel/' );

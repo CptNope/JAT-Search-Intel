@@ -6,6 +6,17 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.3.3] — 2026-03-17
+
+### Added
+- **Module Toggles**: 27 feature toggles added to General Settings page, organized into 8 categories (Core, Advanced SEO, Advanced AEO, Advanced GEO, AI & Content Intelligence, Analytics & Reporting, Enterprise, Security)
+- **Admin Pages Exposed**: All v2.0+ admin pages now accessible when their module toggle is enabled — adds 12 new menu items: Visibility, Citation Graph, Authority Map, Content Decay, Cannibalization, Analytics, GA4 Insights, Web Vitals, Reports, Bulk Editor, Internal Linking, Broken Links
+
+### Fixed
+- **Settings Persistence**: `sanitize_settings()` now includes all `enable_*` boolean keys so toggled modules persist on save
+
+---
+
 ## [3.3.2] — 2026-03-17
 
 ### Added

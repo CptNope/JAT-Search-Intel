@@ -4,7 +4,7 @@ Tags: seo, aeo, geo, schema, structured-data, ai-optimization, llms, featured-sn
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 3.3.2
+Stable tag: 3.3.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -131,6 +131,11 @@ llms.txt is a proposed standard (similar to robots.txt) that provides a machine-
 No. Search Intel outputs lightweight meta tags and JSON-LD schema directly in the page head. There are no frontend JavaScript files or CSS loaded on the public site.
 
 == Changelog ==
+
+= 3.3.3 =
+* Added: 27 feature module toggles in General Settings (Advanced SEO, AEO, GEO, AI, Analytics, Enterprise, Security)
+* Added: All v2.0+ admin pages now accessible via settings toggles (Visibility, Citation Graph, Authority Map, Content Decay, Cannibalization, Analytics, GA4, Web Vitals, Reports, Bulk Editor, Internal Linking, Broken Links)
+* Fixed: sanitize_settings() now persists all enable_* boolean keys
 
 = 3.3.2 =
 * Added: AI Engine settings page with provider selection, encrypted API key management, rate limiting, and token budgets
@@ -274,6 +279,9 @@ No. Search Intel outputs lightweight meta tags and JSON-LD schema directly in th
 * User profile E-E-A-T fields
 
 == Upgrade Notice ==
+
+= 3.3.3 =
+New: 27 feature module toggles expose all v2.0+ admin pages (12 new menu items) via General Settings.
 
 = 3.3.2 =
 New: AI Engine settings page with API key management, Bulk AI Content Generation for meta descriptions/summaries/keywords, fixed sitemap 404 on activation.
