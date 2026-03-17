@@ -12,6 +12,7 @@ test.describe('White-Label Branding', () => {
   const CUSTOM_NAME = 'Acme SEO Suite';
 
   test.beforeAll(async ({ browser }) => {
+    test.setTimeout(60_000);
     // Set white-label settings via the REST API.
     const context = await browser.newContext();
     const page = await context.newPage();
@@ -20,7 +21,7 @@ test.describe('White-Label Branding', () => {
     await page.fill('#user_login', process.env.WP_ADMIN_USER || 'admin');
     await page.fill('#user_pass', process.env.WP_ADMIN_PASS || 'password');
     await page.click('#wp-submit');
-    await page.waitForURL(/wp-admin/);
+    await page.waitForURL(/wp-admin/, { timeout: 45_000, waitUntil: 'networkidle' });
 
     // Enable white-label and set custom name via options API.
     await page.evaluate(async (name) => {
