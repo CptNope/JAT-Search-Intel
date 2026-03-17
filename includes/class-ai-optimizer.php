@@ -30,6 +30,19 @@ class AI_Optimizer {
 	/** @var string Post meta key for failing checks snapshot. */
 	private const FAILING_CHECKS_META_KEY = '_search_intel_failing_checks';
 
+	/** @var string Post meta key for pre-optimization snapshot (rollback). */
+	private const SNAPSHOT_META_KEY = '_search_intel_ai_snapshot';
+
+	/** @var array Meta keys we snapshot and can restore. */
+	private const TRACKED_META_KEYS = [
+		'_search_intel_title',
+		'_search_intel_description',
+		'_search_intel_focus_keyword',
+		'_search_intel_faqs',
+		'_search_intel_ai_summary',
+		'_search_intel_entities',
+	];
+
 	/**
 	 * Constructor.
 	 *
@@ -55,6 +68,8 @@ class AI_Optimizer {
 		// AJAX endpoints.
 		add_action( 'wp_ajax_si_ai_get_suggestions', [ $this, 'ajax_get_suggestions' ] );
 		add_action( 'wp_ajax_si_ai_apply_suggestion', [ $this, 'ajax_apply_suggestion' ] );
+		add_action( 'wp_ajax_si_ai_auto_optimize', [ $this, 'ajax_auto_optimize' ] );
+		add_action( 'wp_ajax_si_ai_rollback', [ $this, 'ajax_rollback' ] );
 	}
 
 	/*----------------------------------------------------------------------
@@ -634,6 +649,308 @@ class AI_Optimizer {
 	}
 
 	/*----------------------------------------------------------------------
+	 * Auto-Optimize with rollback
+	 *--------------------------------------------------------------------*/
+
+	/**
+	 * Create a full snapshot of the post state for rollback.
+	 *
+	 * @param int $post_id Post ID.
+	 */
+	private function create_snapshot( int $post_id ): void {
+		$post = get_post( $post_id );
+		if ( ! $post ) {
+			return;
+		}
+
+		$snapshot = [
+			'ts'           => time(),
+			'date'         => gmdate( 'Y-m-d H:i:s' ),
+			'user_id'      => get_current_user_id(),
+			'post_title'   => $post->post_title,
+			'post_content' => $post->post_content,
+			'meta'         => [],
+			'scores'       => [
+				'seo'         => (float) get_post_meta( $post_id, '_search_intel_seo_score', true ),
+				'aeo'         => (float) get_post_meta( $post_id, '_search_intel_aeo_score', true ),
+				'geo'         => (float) get_post_meta( $post_id, '_search_intel_geo_score', true ),
+				'readability' => (float) get_post_meta( $post_id, '_search_intel_readability_score', true ),
+			],
+		];
+
+		foreach ( self::TRACKED_META_KEYS as $key ) {
+			$snapshot['meta'][ $key ] = get_post_meta( $post_id, $key, true );
+		}
+
+		// Stack snapshots (max 5 rollback points).
+		$stack = get_post_meta( $post_id, self::SNAPSHOT_META_KEY, true );
+		if ( ! is_array( $stack ) ) {
+			$stack = [];
+		}
+		$stack[] = $snapshot;
+		if ( count( $stack ) > 5 ) {
+			$stack = array_slice( $stack, -5 );
+		}
+		update_post_meta( $post_id, self::SNAPSHOT_META_KEY, $stack );
+	}
+
+	/**
+	 * AJAX: Auto-optimize post content using AI based on failing checks.
+	 */
+	public function ajax_auto_optimize(): void {
+		check_ajax_referer( 'search_intel_nonce', 'nonce' );
+
+		$post_id = (int) ( $_POST['post_id'] ?? 0 );
+		if ( ! $post_id || ! current_user_can( 'edit_post', $post_id ) ) {
+			wp_send_json_error( [ 'message' => 'Unauthorized.' ], 403 );
+		}
+
+		$post = get_post( $post_id );
+		if ( ! $post ) {
+			wp_send_json_error( [ 'message' => 'Post not found.' ] );
+		}
+
+		$ai = $this->core->ai_engine ?? null;
+		if ( ! $ai || ! $ai->is_configured() ) {
+			wp_send_json_error( [ 'message' => 'AI provider not configured. Go to Settings → AI to set up.' ] );
+		}
+
+		$failing = get_post_meta( $post_id, self::FAILING_CHECKS_META_KEY, true );
+		if ( ! is_array( $failing ) || empty( $failing ) ) {
+			wp_send_json_error( [ 'message' => 'No failing checks to optimize. Run analysis first.' ] );
+		}
+
+		// Create rollback snapshot before making any changes.
+		$this->create_snapshot( $post_id );
+
+		$title       = $post->post_title;
+		$content     = $post->post_content;
+		$description = get_post_meta( $post_id, '_search_intel_description', true ) ?: '';
+		$keyword     = get_post_meta( $post_id, '_search_intel_focus_keyword', true ) ?: '';
+
+		// Build the issue list for AI.
+		$issue_lines = [];
+		foreach ( $failing as $check ) {
+			$module = strtoupper( $check['module'] ?? 'SEO' );
+			$label  = $check['label'] ?? '';
+			$issue_lines[] = "[{$module}] {$label}";
+		}
+		$issues_text = implode( "\n", $issue_lines );
+
+		$changes_made = [];
+
+		// --- Phase 1: Content enhancement ---
+		$content_result = $ai->chat(
+			'You are an expert SEO content optimizer. You will receive a WordPress post and a list of '
+			. 'failing checks. Rewrite and enhance the content to fix as many issues as possible. '
+			. 'Rules: '
+			. '1) Preserve the original meaning, voice, and key points. '
+			. '2) Use the focus keyword naturally throughout. '
+			. '3) Add internal link placeholders as [internal link: anchor text]. '
+			. '4) Add image placeholders as [image: description]. '
+			. '5) Add comparison/data tables where appropriate using HTML <table> markup. '
+			. '6) Add source citations as [Source: description]. '
+			. '7) Ensure content is 800+ words with good subheadings. '
+			. '8) Make paragraphs concise and scannable. '
+			. '9) Return ONLY the improved HTML content — no explanations, no markdown fences.',
+			"Focus Keyword: {$keyword}\n"
+			. "Current Title: {$title}\n"
+			. "Current Meta Description: {$description}\n\n"
+			. "FAILING CHECKS:\n{$issues_text}\n\n"
+			. "CURRENT CONTENT:\n{$content}",
+			[ 'max_tokens' => 4000, 'temperature' => 0.3 ]
+		);
+
+		if ( $content_result['success'] && ! empty( $content_result['text'] ) ) {
+			$new_content = $content_result['text'];
+			// Strip any markdown fences the AI might add.
+			$new_content = preg_replace( '/^```(?:html)?\s*/i', '', $new_content );
+			$new_content = preg_replace( '/\s*```\s*$/', '', $new_content );
+
+			wp_update_post( [
+				'ID'           => $post_id,
+				'post_content' => wp_kses_post( $new_content ),
+			] );
+			$changes_made[] = 'Content enhanced and expanded';
+		}
+
+		// --- Phase 2: Title optimization (if failing) ---
+		if ( $this->checks_contain( $failing, 'title' ) ) {
+			$title_result = $ai->chat(
+				'You are an SEO title specialist. Generate an optimized title that is 30-60 characters, '
+				. 'includes the focus keyword, and is compelling. Return ONLY the title text, nothing else.',
+				"Focus Keyword: {$keyword}\nCurrent Title: {$title}\nContent excerpt: "
+				. wp_trim_words( $content, 100 ),
+				[ 'max_tokens' => 60, 'temperature' => 0.5 ]
+			);
+			if ( $title_result['success'] && ! empty( $title_result['text'] ) ) {
+				$new_title = sanitize_text_field( trim( $title_result['text'], "\" \n\r\t" ) );
+				if ( strlen( $new_title ) >= 20 && strlen( $new_title ) <= 70 ) {
+					wp_update_post( [ 'ID' => $post_id, 'post_title' => $new_title ] );
+					$changes_made[] = "Title: \"{$title}\" → \"{$new_title}\"";
+				}
+			}
+		}
+
+		// --- Phase 3: Meta description (if failing) ---
+		if ( $this->checks_contain( $failing, 'meta description' ) && $keyword ) {
+			$meta_result = $ai->generate_meta_description(
+				wp_trim_words( $content, 150 ),
+				$keyword,
+				$title
+			);
+			if ( $meta_result['success'] && ! empty( $meta_result['text'] ) ) {
+				$new_desc = sanitize_text_field( trim( $meta_result['text'], "\" \n\r\t" ) );
+				update_post_meta( $post_id, '_search_intel_description', $new_desc );
+				$changes_made[] = 'Meta description generated';
+			}
+		}
+
+		// --- Phase 4: FAQ schema (if failing) ---
+		if ( $this->checks_contain( $failing, 'faq' ) ) {
+			$faq_result = $ai->chat(
+				'Generate 3-5 FAQ entries as a JSON array: [{"question":"...","answer":"..."}]. '
+				. 'Base them on the content below. Return ONLY valid JSON, nothing else.',
+				"Focus Keyword: {$keyword}\nContent: " . wp_trim_words( $content, 200 ),
+				[ 'max_tokens' => 500, 'temperature' => 0.3 ]
+			);
+			if ( $faq_result['success'] && ! empty( $faq_result['text'] ) ) {
+				$faq_text = trim( $faq_result['text'] );
+				$faq_text = preg_replace( '/^```(?:json)?\s*/i', '', $faq_text );
+				$faq_text = preg_replace( '/\s*```\s*$/', '', $faq_text );
+				$faqs     = json_decode( $faq_text, true );
+				if ( is_array( $faqs ) && ! empty( $faqs ) ) {
+					update_post_meta( $post_id, '_search_intel_faqs', $faqs );
+					$changes_made[] = count( $faqs ) . ' FAQ entries added';
+				}
+			}
+		}
+
+		// --- Phase 5: AI summary for GEO (if failing) ---
+		if ( $this->checks_contain( $failing, 'ai summary' ) ) {
+			$summary_result = $ai->chat(
+				'Write a 2-3 sentence AI summary of this content suitable for LLM indexing. '
+				. 'Be factual and concise. Return ONLY the summary text.',
+				wp_trim_words( $content, 200 ),
+				[ 'max_tokens' => 150, 'temperature' => 0.3 ]
+			);
+			if ( $summary_result['success'] && ! empty( $summary_result['text'] ) ) {
+				update_post_meta( $post_id, '_search_intel_ai_summary', sanitize_textarea_field( $summary_result['text'] ) );
+				$changes_made[] = 'AI summary generated';
+			}
+		}
+
+		if ( empty( $changes_made ) ) {
+			wp_send_json_error( [ 'message' => 'AI optimization could not apply any changes. Try again or check your AI provider.' ] );
+		}
+
+		// Re-run analysis to get new scores.
+		$analyzer   = $this->core->content_analyzer ?? null;
+		$new_scores = [];
+		if ( $analyzer ) {
+			$refreshed = get_post( $post_id );
+			if ( $refreshed ) {
+				$results    = $analyzer->analyze( $refreshed );
+				$new_scores = [
+					'seo'         => (float) ( $results['seo_score']['score'] ?? 0 ),
+					'aeo'         => (float) ( $results['aeo_score']['score'] ?? 0 ),
+					'geo'         => (float) ( $results['geo_score']['score'] ?? 0 ),
+					'readability' => (float) ( $results['readability_score']['score'] ?? 0 ),
+				];
+				update_post_meta( $post_id, '_search_intel_seo_score', $new_scores['seo'] );
+				update_post_meta( $post_id, '_search_intel_aeo_score', $new_scores['aeo'] );
+				update_post_meta( $post_id, '_search_intel_geo_score', $new_scores['geo'] );
+				update_post_meta( $post_id, '_search_intel_readability_score', $new_scores['readability'] );
+			}
+		}
+
+		// Get snapshot scores for comparison.
+		$stack    = get_post_meta( $post_id, self::SNAPSHOT_META_KEY, true );
+		$snapshot = is_array( $stack ) ? end( $stack ) : [];
+		$old_scores = $snapshot['scores'] ?? [];
+
+		wp_send_json_success( [
+			'message'      => count( $changes_made ) . ' optimization(s) applied.',
+			'changes'      => $changes_made,
+			'old_scores'   => $old_scores,
+			'new_scores'   => $new_scores,
+			'can_rollback' => true,
+		] );
+	}
+
+	/**
+	 * AJAX: Rollback to the previous snapshot.
+	 */
+	public function ajax_rollback(): void {
+		check_ajax_referer( 'search_intel_nonce', 'nonce' );
+
+		$post_id = (int) ( $_POST['post_id'] ?? 0 );
+		if ( ! $post_id || ! current_user_can( 'edit_post', $post_id ) ) {
+			wp_send_json_error( [ 'message' => 'Unauthorized.' ], 403 );
+		}
+
+		$stack = get_post_meta( $post_id, self::SNAPSHOT_META_KEY, true );
+		if ( ! is_array( $stack ) || empty( $stack ) ) {
+			wp_send_json_error( [ 'message' => 'No rollback snapshot available.' ] );
+		}
+
+		// Pop the latest snapshot.
+		$snapshot = array_pop( $stack );
+		update_post_meta( $post_id, self::SNAPSHOT_META_KEY, $stack );
+
+		// Restore post title and content.
+		wp_update_post( [
+			'ID'           => $post_id,
+			'post_title'   => $snapshot['post_title'] ?? '',
+			'post_content' => $snapshot['post_content'] ?? '',
+		] );
+
+		// Restore tracked meta values.
+		foreach ( self::TRACKED_META_KEYS as $key ) {
+			if ( array_key_exists( $key, $snapshot['meta'] ?? [] ) ) {
+				$val = $snapshot['meta'][ $key ];
+				if ( $val === '' || $val === false || $val === null ) {
+					delete_post_meta( $post_id, $key );
+				} else {
+					update_post_meta( $post_id, $key, $val );
+				}
+			}
+		}
+
+		// Restore scores.
+		if ( ! empty( $snapshot['scores'] ) ) {
+			update_post_meta( $post_id, '_search_intel_seo_score', $snapshot['scores']['seo'] ?? 0 );
+			update_post_meta( $post_id, '_search_intel_aeo_score', $snapshot['scores']['aeo'] ?? 0 );
+			update_post_meta( $post_id, '_search_intel_geo_score', $snapshot['scores']['geo'] ?? 0 );
+			update_post_meta( $post_id, '_search_intel_readability_score', $snapshot['scores']['readability'] ?? 0 );
+		}
+
+		wp_send_json_success( [
+			'message'        => 'Rolled back to previous version (' . ( $snapshot['date'] ?? 'unknown' ) . ').',
+			'scores'         => $snapshot['scores'] ?? [],
+			'remaining'      => count( $stack ),
+			'snapshot_date'  => $snapshot['date'] ?? '',
+		] );
+	}
+
+	/**
+	 * Check if any failing check label contains a keyword.
+	 *
+	 * @param array  $failing Array of failing checks.
+	 * @param string $keyword Keyword to search for.
+	 * @return bool
+	 */
+	private function checks_contain( array $failing, string $keyword ): bool {
+		$keyword = strtolower( $keyword );
+		foreach ( $failing as $check ) {
+			if ( stripos( $check['label'] ?? '', $keyword ) !== false ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/*----------------------------------------------------------------------
 	 * Admin UI
 	 *--------------------------------------------------------------------*/
 
@@ -672,6 +989,11 @@ class AI_Optimizer {
 
 		$cached = get_post_meta( $post->ID, self::SUGGESTIONS_META_KEY, true );
 		$has_cached = is_array( $cached ) && ! empty( $cached );
+
+		$snapshots     = get_post_meta( $post->ID, self::SNAPSHOT_META_KEY, true );
+		$has_snapshots = is_array( $snapshots ) && ! empty( $snapshots );
+		$snap_count    = $has_snapshots ? count( $snapshots ) : 0;
+		$last_snap     = $has_snapshots ? end( $snapshots ) : null;
 		?>
 		<div id="si-ai-optimizer" data-post-id="<?php echo esc_attr( (string) $post->ID ); ?>">
 			<div class="si-ai-scores" style="margin-bottom:12px;">
@@ -689,7 +1011,35 @@ class AI_Optimizer {
 				<p style="color:#00a32a;margin:0 0 8px;"><?php esc_html_e( 'All checks passing!', 'search-intel' ); ?></p>
 			<?php endif; ?>
 
-			<button type="button" class="button button-primary" id="si-ai-generate-btn" <?php echo $fail_count === 0 ? 'disabled' : ''; ?>>
+			<div class="si-ai-actions" style="margin-bottom:10px;">
+				<button type="button" class="button button-primary" id="si-ai-auto-optimize-btn" <?php echo $fail_count === 0 ? 'disabled' : ''; ?>
+					title="AI will rewrite content, title, meta, FAQ, and summary to fix all failing checks. A rollback snapshot is created first.">
+					<?php esc_html_e( 'Auto-Optimize', 'search-intel' ); ?>
+				</button>
+
+				<button type="button" class="button" id="si-ai-rollback-btn" <?php echo $has_snapshots ? '' : 'disabled'; ?>
+					title="Undo the last AI optimization and restore the previous version.">
+					<?php esc_html_e( 'Rollback', 'search-intel' ); ?>
+					<?php if ( $snap_count > 0 ) : ?>
+						<span class="si-rollback-count">(<?php echo esc_html( (string) $snap_count ); ?>)</span>
+					<?php endif; ?>
+				</button>
+			</div>
+
+			<?php if ( $has_snapshots && $last_snap ) : ?>
+				<div id="si-ai-snapshot-info" class="si-snapshot-info">
+					<?php /* translators: %s: snapshot date */ ?>
+					<?php printf( esc_html__( 'Last snapshot: %s', 'search-intel' ), esc_html( $last_snap['date'] ?? '' ) ); ?>
+				</div>
+			<?php else : ?>
+				<div id="si-ai-snapshot-info" class="si-snapshot-info" style="display:none;"></div>
+			<?php endif; ?>
+
+			<div id="si-ai-optimize-result" style="display:none;margin-bottom:10px;"></div>
+
+			<hr style="margin:10px 0;">
+
+			<button type="button" class="button" id="si-ai-generate-btn" <?php echo $fail_count === 0 ? 'disabled' : ''; ?> style="width:100%;">
 				<?php echo $has_cached ? esc_html__( 'Regenerate AI Suggestions', 'search-intel' ) : esc_html__( 'Generate AI Suggestions', 'search-intel' ); ?>
 			</button>
 
@@ -701,12 +1051,23 @@ class AI_Optimizer {
 
 			<div id="si-ai-loading" style="display:none;margin-top:10px;">
 				<span class="spinner is-active" style="float:none;margin:0 5px 0 0;"></span>
-				<?php esc_html_e( 'Generating AI suggestions…', 'search-intel' ); ?>
+				<span id="si-ai-loading-text"><?php esc_html_e( 'Generating AI suggestions…', 'search-intel' ); ?></span>
 			</div>
 		</div>
 
 		<style>
 			.si-score-badge { display:inline-block; padding:2px 8px; border-radius:3px; color:#fff; font-size:11px; font-weight:600; margin:0 2px 4px 0; }
+			.si-ai-actions { display:flex; gap:6px; }
+			.si-ai-actions .button { flex:1; text-align:center; }
+			.si-snapshot-info { font-size:11px; color:#646970; margin-bottom:8px; }
+			.si-rollback-count { font-size:10px; opacity:.75; }
+			.si-optimize-result { padding:8px 10px; border-radius:3px; font-size:12px; }
+			.si-optimize-result--success { background:#f0f6e8; border-left:3px solid #00a32a; }
+			.si-optimize-result--error { background:#fcf0f1; border-left:3px solid #d63638; }
+			.si-optimize-result .si-score-delta { display:inline-block; margin:0 6px 2px 0; font-size:11px; font-weight:600; }
+			.si-optimize-result .si-score-delta .up { color:#00a32a; }
+			.si-optimize-result .si-score-delta .down { color:#d63638; }
+			.si-optimize-result .si-score-delta .same { color:#646970; }
 			.si-suggestion { background:#f0f6fc; border-left:3px solid #2271b1; padding:8px 10px; margin-bottom:8px; border-radius:2px; }
 			.si-suggestion.si-suggestion--applied { border-left-color:#00a32a; background:#f0f6e8; }
 			.si-suggestion h4 { margin:0 0 4px; font-size:12px; }
