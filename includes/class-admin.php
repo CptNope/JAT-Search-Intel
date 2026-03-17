@@ -170,6 +170,7 @@ class Admin {
             'enable_aeo', 'enable_faq_schema', 'enable_howto_schema', 'enable_speakable',
             'enable_geo', 'enable_llms_txt', 'enable_ai_meta', 'enable_entity_markup',
             'content_freshness', 'enable_rest_api', 'enable_sitemap', 'enable_analyzer',
+            'enable_ai_engine',
         ];
 
         foreach ( $bool_keys as $key ) {
@@ -181,6 +182,7 @@ class Admin {
             'separator', 'site_name', 'knowledge_type', 'knowledge_name',
             'knowledge_logo', 'twitter_card_type', 'twitter_site',
             'schema_article_type', 'author_expertise',
+            'ai_provider', 'ai_model', 'ai_endpoint',
         ];
 
         foreach ( $text_keys as $key ) {
@@ -203,6 +205,8 @@ class Admin {
         // Numeric
         $sanitized['sitemap_max_urls']    = absint( $input['sitemap_max_urls'] ?? 2000 );
         $sanitized['target_readability']  = absint( $input['target_readability'] ?? 60 );
+        $sanitized['ai_rate_limit']       = absint( $input['ai_rate_limit'] ?? 10 );
+        $sanitized['ai_token_budget']     = absint( $input['ai_token_budget'] ?? 0 );
 
         // Speakable selectors
         if ( isset( $input['speakable_selectors'] ) ) {

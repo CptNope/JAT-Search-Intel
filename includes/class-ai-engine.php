@@ -105,6 +105,10 @@ class AI_Engine {
         $provider = $this->get_active_provider();
         $custom   = $this->settings['ai_endpoint'] ?? '';
         if ( $custom !== '' && 'ollama' === $provider ) {
+            // Only append /api/chat if the user gave a base URL without it.
+            if ( str_contains( $custom, '/api/' ) ) {
+                return rtrim( $custom, '/' );
+            }
             return rtrim( $custom, '/' ) . '/api/chat';
         }
         return $custom !== '' ? $custom : self::PROVIDERS[ $provider ]['endpoint'];
