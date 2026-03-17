@@ -4,7 +4,7 @@ Tags: seo, aeo, geo, schema, structured-data, ai-optimization, llms, featured-sn
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 3.2.0
+Stable tag: 3.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -132,6 +132,24 @@ No. Search Intel outputs lightweight meta tags and JSON-LD schema directly in th
 
 == Changelog ==
 
+= 3.3.0 =
+* Historical Analytics: per-post score history charts (SEO/AEO/GEO over time, 365-day retention)
+* Historical Analytics: site-wide score trend dashboard (30/60/90 day views)
+* Historical Analytics: before/after comparison for content updates with delta calculation
+* Historical Analytics: score change log (what changed, when, by whom)
+* GA4 Integration: Google Analytics 4 Data API connection via OAuth
+* GA4 Integration: correlate SEO scores with organic traffic per post
+* GA4 Integration: identify high-score/low-traffic posts (distribution opportunities)
+* GA4 Integration: identify low-score/high-traffic posts (optimization priorities)
+* Core Web Vitals: PageSpeed Insights API integration (LCP, CLS, INP)
+* Core Web Vitals: per-page CWV scores with trend tracking (90-day history)
+* Core Web Vitals: CWV correlation with SEO scores
+* Custom Reports: PDF report generation (site health, per-post breakdown)
+* Custom Reports: scheduled PDF reports via email (daily/weekly/monthly)
+* Custom Reports: CSV/JSON export for all report types
+* Custom Reports: report builder (pick modules, date range, post types)
+* 828 unit tests, 1,880 assertions
+
 = 3.2.0 =
 * AI Engine: unified LLM abstraction for OpenAI, Anthropic, and Ollama (local) with encrypted API key storage
 * AI Engine: meta description generation, title suggestions, internal link recommendations, content briefs
@@ -246,6 +264,9 @@ No. Search Intel outputs lightweight meta tags and JSON-LD schema directly in th
 * User profile E-E-A-T fields
 
 == Upgrade Notice ==
+
+= 3.3.0 =
+New: Historical Analytics (per-post score charts, site-wide trends, before/after comparison, change log), GA4 Integration (organic traffic correlation, distribution opportunities, optimization priorities), Core Web Vitals (PageSpeed Insights, CWV tracking, SEO correlation), Custom Reports (PDF/CSV/JSON export, scheduled email reports, report builder).
 
 = 3.2.0 =
 New: AI Engine (OpenAI/Anthropic/Ollama with encrypted keys, rate limiting, token budgets), Content Decay Detection (score history, decay dashboard, refresh suggestions), Keyword Cannibalization Detector (duplicate keywords, smart actions), Advanced Internal Linking (suggestions, orphans, equity flow, broken link scanner).

@@ -6,7 +6,7 @@
 [![License: GPL v2](https://img.shields.io/badge/License-GPLv2-blue.svg)](LICENSE.md)
 [![WordPress: 6.0+](https://img.shields.io/badge/WordPress-6.0%2B-21759b.svg)](https://wordpress.org/)
 [![PHP: 7.4+](https://img.shields.io/badge/PHP-7.4%2B-777bb4.svg)](https://php.net/)
-[![Release: v3.2.0](https://img.shields.io/badge/Release-v3.2.0-brightgreen)](https://github.com/CptNope/Search-Intel/releases/tag/v3.2.0)
+[![Release: v3.3.0](https://img.shields.io/badge/Release-v3.3.0-brightgreen)](https://github.com/CptNope/Search-Intel/releases/tag/v3.3.0)
 
 **[Roadmap](ROADMAP.md)** · **[Changelog](CHANGELOG.md)** · **[Contributing](CONTRIBUTING.md)** · **[License](LICENSE.md)**
 
@@ -141,6 +141,10 @@ graph TD
     CORE --> DECAY["Content Decay<br/><i>v3.2+ Score Tracking</i>"]
     CORE --> CANNIBAL["Cannibalization<br/><i>v3.2+ Keyword Detector</i>"]
     CORE --> ADVLINK["Advanced Linking<br/><i>v3.2+ Suggestions</i>"]
+    CORE --> ANALYTICS["Historical Analytics<br/><i>v3.3+ Score Charts</i>"]
+    CORE --> GA4["GA4 Integration<br/><i>v3.3+ Traffic Correlation</i>"]
+    CORE --> CWV["Core Web Vitals<br/><i>v3.3+ PageSpeed</i>"]
+    CORE --> REPORTS["Custom Reports<br/><i>v3.3+ PDF/CSV/JSON</i>"]
 
     TITLE --> TVAR["Variable Resolver"]
     TITLE --> TCTX["Per-Context Templates"]
@@ -1267,7 +1271,11 @@ search-intel/
 │   ├── class-ai-engine.php       # LLM abstraction: OpenAI, Anthropic, Ollama (v3.2+)
 │   ├── class-content-decay.php   # Score history, decay detection, refresh suggestions (v3.2+)
 │   ├── class-keyword-cannibalization.php # Duplicate keyword detector & report (v3.2+)
-│   └── class-advanced-linking.php # Link suggestions, orphans, equity, broken links (v3.2+)
+│   ├── class-advanced-linking.php # Link suggestions, orphans, equity, broken links (v3.2+)
+│   ├── class-historical-analytics.php # Per-post score charts, site-wide trends (v3.3+)
+│   ├── class-ga4-integration.php # GA4 traffic correlation, opportunities (v3.3+)
+│   ├── class-core-web-vitals.php # PageSpeed Insights, CWV tracking (v3.3+)
+│   └── class-custom-reports.php  # PDF/CSV/JSON export, scheduled reports (v3.3+)
 │
 ├── src/                           # Block editor source (compiled to build/)
 │   ├── store/
@@ -1334,7 +1342,7 @@ Search Intel has a comprehensive automated test suite and CI pipeline.
 
 | Suite | Count | Framework |
 |-------|-------|-----------|
-| Unit tests | 765 tests, 1,747 assertions | PHPUnit 9.6 |
+| Unit tests | 828 tests, 1,880 assertions | PHPUnit 9.6 |
 | Integration tests | 125 tests, 202 assertions | PHPUnit 9.6 |
 | E2E tests | 58 tests (51 pass, 7 skip) | Playwright (Chromium) |
 

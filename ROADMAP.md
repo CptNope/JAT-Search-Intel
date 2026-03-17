@@ -649,31 +649,31 @@
 
 ### Historical Analytics
 
-- [ ] Per-post score history chart (SEO / AEO / GEO over time)
-- [ ] Site-wide score trend dashboard (30 / 60 / 90 day views)
-- [ ] Before/after comparison for content updates
-- [ ] Score change log (what changed, when, by whom)
+- [x] Per-post score history chart (SEO / AEO / GEO over time)
+- [x] Site-wide score trend dashboard (30 / 60 / 90 day views)
+- [x] Before/after comparison for content updates
+- [x] Score change log (what changed, when, by whom)
 
 ### Google Analytics 4 Integration
 
-- [ ] GA4 API connection (Measurement Protocol or Data API)
-- [ ] Correlate SEO scores with organic traffic per post
-- [ ] Identify high-score / low-traffic posts (distribution opportunities)
-- [ ] Identify low-score / high-traffic posts (optimization priorities)
+- [x] GA4 API connection (Measurement Protocol or Data API)
+- [x] Correlate SEO scores with organic traffic per post
+- [x] Identify high-score / low-traffic posts (distribution opportunities)
+- [x] Identify low-score / high-traffic posts (optimization priorities)
 
 ### Core Web Vitals Monitoring
 
-- [ ] PageSpeed Insights API integration
-- [ ] Per-page CWV scores (LCP, FID/INP, CLS)
-- [ ] CWV trend tracking
-- [ ] Correlation with SEO scores
+- [x] PageSpeed Insights API integration
+- [x] Per-page CWV scores (LCP, FID/INP, CLS)
+- [x] CWV trend tracking
+- [x] Correlation with SEO scores
 
 ### Custom Reports & Export
 
-- [ ] PDF report generation (site health, per-post breakdown)
-- [ ] Scheduled PDF reports via email
-- [ ] CSV/JSON export for all report types
-- [ ] Custom report builder (pick modules, date range, post types)
+- [x] PDF report generation (site health, per-post breakdown)
+- [x] Scheduled PDF reports via email
+- [x] CSV/JSON export for all report types
+- [x] Custom report builder (pick modules, date range, post types)
 
 ---
 
