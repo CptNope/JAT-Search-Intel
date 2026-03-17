@@ -582,9 +582,6 @@
     <PossiblyUnusedMethod>
       <code><![CDATA[get_cwv_trends]]></code>
     </PossiblyUnusedMethod>
-    <PossiblyUnusedReturnValue>
-      <code><![CDATA[array]]></code>
-    </PossiblyUnusedReturnValue>
     <UndefinedConstant>
       <code><![CDATA[DAY_IN_SECONDS]]></code>
     </UndefinedConstant>

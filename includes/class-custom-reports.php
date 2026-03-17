@@ -103,11 +103,7 @@ class Custom_Reports {
         }
 
         foreach ( $post_ids as $pid ) {
-            $pid    = (int) $pid;
-            $scores = get_post_meta( $pid, '_search_intel_scores', true );
-            if ( ! is_array( $scores ) ) {
-                $scores = [];
-            }
+            $pid = (int) $pid;
 
             $row = [
                 'post_id'    => $pid,
@@ -117,8 +113,17 @@ class Custom_Reports {
                 'url'        => get_permalink( $pid ),
             ];
 
+            // Read scores from individual meta keys (set by bulk rescore / content analyzer).
+            $meta_map = [
+                'seo'         => '_search_intel_seo_score',
+                'aeo'         => '_search_intel_aeo_score',
+                'geo'         => '_search_intel_geo_score',
+                'readability' => '_search_intel_readability_score',
+            ];
+
             foreach ( $modules as $mod ) {
-                $val = (float) ( $scores[ $mod ] ?? 0 );
+                $meta_key = $meta_map[ $mod ] ?? '';
+                $val      = $meta_key !== '' ? (float) get_post_meta( $pid, $meta_key, true ) : 0.0;
                 $row[ $mod ] = $val;
                 $totals[ $mod ] += $val;
             }
