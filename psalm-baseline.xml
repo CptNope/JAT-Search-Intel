@@ -164,6 +164,7 @@
       <code><![CDATA[$ga4_integration]]></code>
       <code><![CDATA[$core_web_vitals]]></code>
       <code><![CDATA[$custom_reports]]></code>
+      <code><![CDATA[$ai_optimizer]]></code>
     </PossiblyUnusedProperty>
     <UndefinedConstant>
       <code><![CDATA[SEARCH_INTEL_BASENAME]]></code>
@@ -522,10 +523,22 @@
   <file src="includes/class-ai-engine.php">
     <PossiblyUnusedMethod>
       <code><![CDATA[get_providers]]></code>
-      <code><![CDATA[generate_title_suggestions]]></code>
       <code><![CDATA[generate_link_recommendations]]></code>
       <code><![CDATA[generate_content_brief]]></code>
     </PossiblyUnusedMethod>
+  </file>
+  <file src="includes/class-ai-optimizer.php">
+    <PossiblyUnusedParam>
+      <code><![CDATA[$new_scores]]></code>
+      <code><![CDATA[$old_scores]]></code>
+    </PossiblyUnusedParam>
+    <UnusedParam>
+      <code><![CDATA[$issues]]></code>
+    </UnusedParam>
+    <UndefinedConstant>
+      <code><![CDATA[SEARCH_INTEL_URL]]></code>
+      <code><![CDATA[SEARCH_INTEL_VERSION]]></code>
+    </UndefinedConstant>
   </file>
   <file src="includes/class-content-decay.php">
     <PossiblyUnusedMethod>
@@ -558,16 +571,17 @@
     <PossiblyUnusedMethod>
       <code><![CDATA[get_chart_data]]></code>
       <code><![CDATA[get_before_after]]></code>
-      <code><![CDATA[log_change]]></code>
       <code><![CDATA[get_change_log]]></code>
     </PossiblyUnusedMethod>
     <PossiblyUnusedParam>
       <code><![CDATA[$days]]></code>
+      <code><![CDATA[$results]]></code>
     </PossiblyUnusedParam>
     <UndefinedConstant>
       <code><![CDATA[DAY_IN_SECONDS]]></code>
       <code><![CDATA[DAY_IN_SECONDS]]></code>
       <code><![CDATA[DAY_IN_SECONDS]]></code>
+      <code><![CDATA[DOING_CRON]]></code>
     </UndefinedConstant>
     <UnusedProperty>
       <code><![CDATA[$settings]]></code>

@@ -204,7 +204,6 @@ class AI_Optimizer {
 	 */
 	private function generate_seo_suggestions( AI_Engine $ai, \WP_Post $post, string $excerpt, string $title, string $keyword, string $description, array $issues ): array {
 		$suggestions = [];
-		$labels      = implode( "\n", $issues );
 
 		// Missing or bad meta description.
 		if ( $this->issues_contain( $issues, 'meta description' ) ) {
@@ -780,9 +779,9 @@ class AI_Optimizer {
 
 		wp_enqueue_script(
 			'si-ai-optimizer',
-			plugins_url( 'admin/js/ai-optimizer.js', dirname( __FILE__ ) ),
+			SEARCH_INTEL_URL . 'admin/js/ai-optimizer.js',
 			[ 'jquery' ],
-			defined( 'SEARCH_INTEL_VERSION' ) ? SEARCH_INTEL_VERSION : '3.4.0',
+			SEARCH_INTEL_VERSION,
 			true
 		);
 
