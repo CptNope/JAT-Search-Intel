@@ -6,6 +6,17 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.3.2] — 2026-03-17
+
+### Added
+- **AI Engine Settings Page**: New admin page (Search Intel → AI Engine) with provider selection (OpenAI, Anthropic, Ollama), encrypted API key management with save/test buttons, model override, custom endpoint, rate limiting, token budget, and usage statistics
+- **Bulk AI Content Generation**: New section in Bulk Tools for AI-powered generation of meta descriptions, AI summaries, and focus keywords with empty-only or overwrite-all modes
+
+### Fixed
+- **Sitemap 404**: Register rewrite rules before `flush_rewrite_rules()` in activation hook so WordPress recognizes `/sitemap.xml` immediately
+
+---
+
 ## [3.3.1] — 2026-03-17
 
 ### Fixed

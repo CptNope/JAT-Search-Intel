@@ -176,4 +176,74 @@
         reader.readAsText(file);
     });
 
+    // ── Bulk AI Content Generation ─────────────────────────────────────────
+
+    $('#si-btn-ai-generate').on('click', function () {
+        var fields = [];
+        $('.si-ai-gen-field:checked').each(function () {
+            fields.push($(this).val());
+        });
+
+        if (!fields.length) {
+            $('#si-result-ai-generate')
+                .html('<span class="si-error">Select at least one field to generate.</span>')
+                .show();
+            return;
+        }
+
+        var mode = $('input[name="si_ai_gen_mode"]:checked').val();
+
+        if (mode === 'overwrite_all' && !confirm('This will overwrite existing AI-generated content. Continue?')) {
+            return;
+        }
+
+        $(this).prop('disabled', true);
+        $('#si-progress-ai-generate').show();
+        $('#si-result-ai-generate').hide();
+        runAiBatch(0, fields, mode, 0, 0);
+    });
+
+    function runAiBatch(offset, fields, mode, generated, errors) {
+        var postType = $('#si-bulk-post-type').val();
+
+        $.post(siBulkTools.ajaxUrl, {
+            action: 'si_bulk_ai_generate',
+            nonce: siBulkTools.nonce,
+            offset: offset,
+            post_type: postType,
+            fields: fields,
+            mode: mode
+        }, function (response) {
+            if (!response.success) {
+                $('#si-text-ai-generate').text(response.data.message || i18n.error);
+                $('#si-btn-ai-generate').prop('disabled', false);
+                return;
+            }
+
+            var data = response.data;
+            var pct = Math.round((data.done / data.total) * 100) || 0;
+            generated += data.generated || 0;
+            errors += data.errors || 0;
+
+            $('#si-fill-ai-generate').css('width', pct + '%');
+            $('#si-text-ai-generate').text(
+                data.done + ' / ' + data.total + ' (' + pct + '%) — ' +
+                generated + ' generated, ' + errors + ' errors'
+            );
+
+            if (data.has_more) {
+                runAiBatch(data.next_offset, fields, mode, generated, errors);
+            } else {
+                $('#si-text-ai-generate').text(
+                    data.total + ' / ' + data.total + ' — ' + i18n.complete +
+                    ' (' + generated + ' generated, ' + errors + ' errors)'
+                );
+                $('#si-btn-ai-generate').prop('disabled', false);
+            }
+        }).fail(function () {
+            $('#si-text-ai-generate').text(i18n.error);
+            $('#si-btn-ai-generate').prop('disabled', false);
+        });
+    }
+
 })(jQuery);

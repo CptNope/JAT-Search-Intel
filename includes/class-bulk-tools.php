@@ -31,6 +31,7 @@ class Bulk_Tools {
 
         add_action( 'wp_ajax_si_bulk_rescore', [ $this, 'ajax_bulk_rescore' ] );
         add_action( 'wp_ajax_si_bulk_regenerate', [ $this, 'ajax_bulk_regenerate' ] );
+        add_action( 'wp_ajax_si_bulk_ai_generate', [ $this, 'ajax_bulk_ai_generate' ] );
         add_action( 'wp_ajax_si_bulk_sitemap_warm', [ $this, 'ajax_bulk_sitemap_warm' ] );
         add_action( 'wp_ajax_si_export_settings', [ $this, 'ajax_export_settings' ] );
         add_action( 'wp_ajax_si_import_settings', [ $this, 'ajax_import_settings' ] );
@@ -200,6 +201,131 @@ class Bulk_Tools {
 
         wp_send_json_success( [
             'processed'   => $processed,
+            'offset'      => $offset,
+            'next_offset' => $has_more ? $next_offset : null,
+            'has_more'    => $has_more,
+            'total'       => $total,
+            'done'        => min( $next_offset, $total ),
+        ] );
+    }
+
+    // ── AJAX: Bulk AI Content Generation ────────────────────────────────────
+
+    /**
+     * AJAX handler for bulk AI content generation.
+     * Processes one post per request to stay within rate limits.
+     */
+    public function ajax_bulk_ai_generate(): void {
+        check_ajax_referer( 'si_bulk_tools', 'nonce' );
+
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => 'Unauthorized.' ], 403 );
+        }
+
+        if ( empty( $this->settings['enable_ai_engine'] ) ) {
+            wp_send_json_error( [ 'message' => 'AI Engine is not enabled. Enable it in Settings → AI Engine.' ] );
+        }
+
+        $ai_engine = $this->core->ai_engine;
+        if ( ! $ai_engine->is_configured() ) {
+            wp_send_json_error( [ 'message' => 'AI provider is not configured. Add an API key in Settings → AI Engine.' ] );
+        }
+
+        $offset    = absint( $_POST['offset'] ?? 0 );
+        $post_type = sanitize_text_field( wp_unslash( $_POST['post_type'] ?? 'post' ) );
+        $mode      = sanitize_text_field( wp_unslash( $_POST['mode'] ?? 'empty_only' ) );
+        $fields    = array_map( 'sanitize_text_field', (array) ( $_POST['fields'] ?? [] ) );
+
+        $valid_fields = [ 'meta_description', 'ai_summary', 'focus_keyword' ];
+        $fields       = array_intersect( $fields, $valid_fields );
+
+        if ( empty( $fields ) ) {
+            wp_send_json_error( [ 'message' => 'No valid fields selected.' ] );
+        }
+
+        // Process 1 post at a time (AI requests are slow and rate-limited).
+        $batch_size = 1;
+
+        $posts = get_posts( [
+            'post_type'      => $post_type,
+            'post_status'    => 'publish',
+            'posts_per_page' => $batch_size,
+            'offset'         => $offset,
+            'orderby'        => 'ID',
+            'order'          => 'ASC',
+        ] );
+
+        $total_obj = wp_count_posts( $post_type );
+        $total     = (int) $total_obj->publish;
+
+        $generated = 0;
+        $errors    = 0;
+
+        foreach ( $posts as $post ) {
+            $content = wp_strip_all_tags( $post->post_content );
+            $title   = $post->post_title;
+            $keyword = get_post_meta( $post->ID, '_search_intel_focus_keyword', true ) ?: '';
+
+            // Generate meta description.
+            if ( in_array( 'meta_description', $fields, true ) ) {
+                $existing = get_post_meta( $post->ID, '_search_intel_description', true );
+                if ( 'overwrite_all' === $mode || empty( $existing ) ) {
+                    $result = $ai_engine->generate_meta_description( $content, $keyword, $title );
+                    if ( $result['success'] && ! empty( $result['text'] ) ) {
+                        update_post_meta( $post->ID, '_search_intel_description', sanitize_text_field( $result['text'] ) );
+                        $generated++;
+                    } else {
+                        $errors++;
+                    }
+                }
+            }
+
+            // Generate AI summary.
+            if ( in_array( 'ai_summary', $fields, true ) ) {
+                $existing = get_post_meta( $post->ID, '_search_intel_ai_summary', true );
+                if ( 'overwrite_all' === $mode || empty( $existing ) ) {
+                    $system = 'You are an SEO content strategist. Write a concise, factual summary of the following article. '
+                            . 'The summary should be 40-60 words, written for AI systems and LLMs to understand the core topic. '
+                            . 'Return ONLY the summary text, no quotes or explanation.';
+                    $user   = "Title: {$title}\n\nContent:\n" . mb_substr( $content, 0, 3000 );
+
+                    $result = $ai_engine->chat( $system, $user, [ 'max_tokens' => 150, 'temperature' => 0.3 ] );
+                    if ( $result['success'] && ! empty( $result['text'] ) ) {
+                        update_post_meta( $post->ID, '_search_intel_ai_summary', sanitize_text_field( $result['text'] ) );
+                        $generated++;
+                    } else {
+                        $errors++;
+                    }
+                }
+            }
+
+            // Generate focus keyword.
+            if ( in_array( 'focus_keyword', $fields, true ) ) {
+                $existing = get_post_meta( $post->ID, '_search_intel_focus_keyword', true );
+                if ( 'overwrite_all' === $mode || empty( $existing ) ) {
+                    $system = 'You are an SEO keyword researcher. Identify the single best focus keyword or keyphrase '
+                            . '(2-4 words) for this article. The keyword should have search intent and be specific enough to rank for. '
+                            . 'Return ONLY the keyword/keyphrase, nothing else.';
+                    $user   = "Title: {$title}\n\nContent:\n" . mb_substr( $content, 0, 2000 );
+
+                    $result = $ai_engine->chat( $system, $user, [ 'max_tokens' => 30, 'temperature' => 0.2 ] );
+                    if ( $result['success'] && ! empty( $result['text'] ) ) {
+                        $kw = strtolower( trim( $result['text'], " \t\n\r\0\x0B\"'" ) );
+                        update_post_meta( $post->ID, '_search_intel_focus_keyword', sanitize_text_field( $kw ) );
+                        $generated++;
+                    } else {
+                        $errors++;
+                    }
+                }
+            }
+        }
+
+        $next_offset = $offset + $batch_size;
+        $has_more    = $next_offset < $total;
+
+        wp_send_json_success( [
+            'generated'   => $generated,
+            'errors'      => $errors,
             'offset'      => $offset,
             'next_offset' => $has_more ? $next_offset : null,
             'has_more'    => $has_more,

@@ -4,7 +4,7 @@ Tags: seo, aeo, geo, schema, structured-data, ai-optimization, llms, featured-sn
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 3.3.1
+Stable tag: 3.3.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -131,6 +131,11 @@ llms.txt is a proposed standard (similar to robots.txt) that provides a machine-
 No. Search Intel outputs lightweight meta tags and JSON-LD schema directly in the page head. There are no frontend JavaScript files or CSS loaded on the public site.
 
 == Changelog ==
+
+= 3.3.2 =
+* Added: AI Engine settings page with provider selection, encrypted API key management, rate limiting, and token budgets
+* Added: Bulk AI Content Generation in Bulk Tools (meta descriptions, AI summaries, focus keywords)
+* Fixed: Sitemap 404 — rewrite rules now registered before flush on activation
 
 = 3.3.1 =
 * Fixed: PHPCS, PHPStan level 6, ESLint, Psalm, and Playwright E2E test issues
@@ -269,6 +274,9 @@ No. Search Intel outputs lightweight meta tags and JSON-LD schema directly in th
 * User profile E-E-A-T fields
 
 == Upgrade Notice ==
+
+= 3.3.2 =
+New: AI Engine settings page with API key management, Bulk AI Content Generation for meta descriptions/summaries/keywords, fixed sitemap 404 on activation.
 
 = 3.3.1 =
 Maintenance: Resolved all CI linter errors (PHPCS, PHPStan, ESLint, Psalm, Playwright), security hardening for Custom Reports, updated CI workflow.
