@@ -48,8 +48,7 @@ jobs:
         run: composer install --no-interaction --prefer-dist --ignore-platform-req=php
 
       - name: Run PHPCS
-        run: vendor/bin/phpcs --standard=WordPress-Core --extensions=php --ignore=vendor,tests,node_modules includes/ admin/ search-intel.php uninstall.php --report=checkstyle | cs2pr
-        continue-on-error: true
+        run: vendor/bin/phpcs --report=checkstyle | cs2pr
 
   phpstan:
     name: PHPStan (Level 6)

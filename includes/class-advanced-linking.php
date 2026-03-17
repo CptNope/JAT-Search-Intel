@@ -545,7 +545,7 @@ class Advanced_Linking {
             $path     = wp_parse_url( $url, PHP_URL_PATH );
             $redirect = $core->redirects->find_matching_redirect( $path ?? '' );
             if ( $redirect ) {
-                return "A redirect exists for this URL. Update the link to point directly to the redirect target.";
+                return 'A redirect exists for this URL. Update the link to point directly to the redirect target.';
             }
         }
 

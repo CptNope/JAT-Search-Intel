@@ -295,7 +295,7 @@ class Redirect_Manager {
 		$where = '';
 		if ( $search ) {
 			$like  = '%' . $wpdb->esc_like( $search ) . '%';
-			$where = $wpdb->prepare( " WHERE source_url LIKE %s OR target_url LIKE %s OR note LIKE %s", $like, $like, $like );
+			$where = $wpdb->prepare( ' WHERE source_url LIKE %s OR target_url LIKE %s OR note LIKE %s', $like, $like, $like );
 		}
 
 		$total = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}{$where}" );

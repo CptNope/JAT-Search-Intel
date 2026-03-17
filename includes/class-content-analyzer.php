@@ -257,7 +257,9 @@ class Content_Analyzer {
         // 9. Images with alt text (8 pts)
         if ( preg_match_all( '/<img[^>]+alt=["\']([^"\']*)["\'][^>]*>/i', $content, $img_matches ) ) {
             $total_imgs = count( $img_matches[0] );
-            $with_alt   = count( array_filter( $img_matches[1], function ( $alt ) { return strlen( trim( $alt ) ) > 0; } ) );
+            $with_alt   = count( array_filter( $img_matches[1], function ( $alt ) {
+                return strlen( trim( $alt ) ) > 0;
+            } ) );
             if ( $with_alt === $total_imgs ) {
                 $score += 8;
                 $checks[] = [ 'pass' => true, 'label' => __( 'All images have alt text', 'search-intel' ) ];

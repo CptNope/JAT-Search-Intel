@@ -7,7 +7,8 @@
   "globals": {
     "wp": "readonly",
     "ajaxurl": "readonly",
-    "searchIntel": "readonly"
+    "searchIntel": "readonly",
+    "tinymce": "readonly"
   },
   "parserOptions": {
     "ecmaVersion": 2020,

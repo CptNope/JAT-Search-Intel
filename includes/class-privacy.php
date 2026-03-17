@@ -149,11 +149,13 @@ class Privacy {
 			'items_removed'  => $items_removed > 0,
 			'items_retained' => false,
 			'messages'       => $items_removed > 0
-				? [ sprintf(
-					/* translators: %d: number of meta fields removed */
-					__( 'Removed %d Search Intel author data field(s).', 'search-intel' ),
-					$items_removed
-				) ]
+				? [
+					sprintf(
+										/* translators: %d: number of meta fields removed */
+                        __( 'Removed %d Search Intel author data field(s).', 'search-intel' ),
+                        $items_removed
+                    ),
+				]
 				: [],
 			'done'           => true,
 		];
