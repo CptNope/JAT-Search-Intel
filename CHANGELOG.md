@@ -6,6 +6,18 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.3.4] — 2026-03-17
+
+### Fixed
+- **Settings Persistence**: `sanitize_settings()` now handles ALL keys from `get_default_settings()` — sitemap taxonomies, IndexNow providers, API keys, numeric fields, white-label fields, notification settings, and 30+ other fields that were silently dropped on save
+- **Sitemap CPT/Taxonomy**: Custom post type and taxonomy selections now persist correctly across saves
+
+### Added
+- **Core Web Vitals Configuration**: Inline PSI API key setup with save button and manual scan trigger directly on the Web Vitals page
+- **GA4 Configuration**: Inline GA4 Property ID setup with save button directly on the GA4 Insights page
+
+---
+
 ## [3.3.3] — 2026-03-17
 
 ### Added

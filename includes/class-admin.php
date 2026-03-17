@@ -171,6 +171,7 @@ class Admin {
             'enable_aeo', 'enable_faq_schema', 'enable_howto_schema', 'enable_speakable',
             'enable_geo', 'enable_llms_txt', 'enable_ai_meta', 'enable_entity_markup',
             'content_freshness', 'enable_rest_api', 'enable_sitemap', 'enable_analyzer',
+            'ping_search_engines',
             // Advanced SEO (v2.0)
             'enable_redirects', 'enable_indexnow', 'enable_robots_editor',
             'enable_link_checker', 'enable_internal_linker', 'enable_local_business',
@@ -180,14 +181,15 @@ class Admin {
             'enable_schema_types', 'enable_qa_detector', 'enable_faq_generator',
             // Advanced GEO (v2.5)
             'enable_visibility_dashboard', 'enable_citation_graph', 'enable_authority_map',
+            // Enterprise (v3.0)
+            'enable_rbac', 'enable_settings_lock', 'enable_multilang',
+            'enable_white_label', 'wl_hide_branding', 'enable_scale',
             // AI & Content Intelligence (v3.2)
-            'enable_ai_engine', 'enable_content_decay', 'enable_cannibalization',
-            'enable_advanced_linking',
+            'enable_ai_engine', 'enable_content_decay', 'decay_auto_queue',
+            'enable_cannibalization', 'enable_advanced_linking',
             // Analytics & Reporting (v3.3)
             'enable_historical_analytics', 'enable_ga4', 'enable_cwv',
             'enable_custom_reports', 'enable_notifications',
-            // Enterprise (v3.0)
-            'enable_rbac', 'enable_multilang', 'enable_white_label', 'enable_scale',
         ];
 
         foreach ( $bool_keys as $key ) {
@@ -199,7 +201,16 @@ class Admin {
             'separator', 'site_name', 'knowledge_type', 'knowledge_name',
             'knowledge_logo', 'twitter_card_type', 'twitter_site',
             'schema_article_type', 'author_expertise',
+            'default_og_image', 'description_fallback', 'robots_default',
+            'default_content_intent', 'default_audience',
             'ai_provider', 'ai_model', 'ai_endpoint',
+            // v2.0+
+            'indexnow_api_key', 'faq_ai_api_key',
+            'gsc_access_token', 'gsc_site_url', 'bing_api_key', 'bing_site_url',
+            'wl_plugin_name', 'wl_plugin_uri', 'wl_author_name', 'wl_author_uri',
+            'wl_description', 'wl_logo_url', 'wl_brand_color',
+            'notification_email', 'slack_webhook_url',
+            'ga4_property_id', 'psi_api_key',
         ];
 
         foreach ( $text_keys as $key ) {
@@ -219,11 +230,43 @@ class Admin {
             $sanitized['sitemap_post_types'] = $defaults['sitemap_post_types'];
         }
 
-        // Numeric
-        $sanitized['sitemap_max_urls']    = absint( $input['sitemap_max_urls'] ?? 2000 );
-        $sanitized['target_readability']  = absint( $input['target_readability'] ?? 60 );
-        $sanitized['ai_rate_limit']       = absint( $input['ai_rate_limit'] ?? 10 );
-        $sanitized['ai_token_budget']     = absint( $input['ai_token_budget'] ?? 0 );
+        if ( isset( $input['sitemap_taxonomies'] ) && is_array( $input['sitemap_taxonomies'] ) ) {
+            $sanitized['sitemap_taxonomies'] = array_map( 'sanitize_text_field', $input['sitemap_taxonomies'] );
+        } else {
+            $sanitized['sitemap_taxonomies'] = $defaults['sitemap_taxonomies'];
+        }
+
+        if ( isset( $input['indexnow_providers'] ) && is_array( $input['indexnow_providers'] ) ) {
+            $sanitized['indexnow_providers'] = array_map( 'sanitize_text_field', $input['indexnow_providers'] );
+        } else {
+            $sanitized['indexnow_providers'] = $defaults['indexnow_providers'];
+        }
+
+        if ( isset( $input['local_business_locations'] ) && is_array( $input['local_business_locations'] ) ) {
+            $sanitized['local_business_locations'] = $input['local_business_locations'];
+        } else {
+            $sanitized['local_business_locations'] = $defaults['local_business_locations'];
+        }
+
+        // Numeric (int)
+        $int_keys = [
+            'sitemap_max_urls'    => 2000,
+            'target_readability'  => 60,
+            'ai_rate_limit'       => 30,
+            'ai_token_budget'     => 0,
+            'description_max_length' => 160,
+            'ai_summary_word_count'  => 50,
+            'alert_threshold_seo'    => 50,
+            'alert_threshold_aeo'    => 50,
+            'alert_threshold_geo'    => 50,
+            'decay_lookback_days'    => 30,
+        ];
+        foreach ( $int_keys as $key => $fallback ) {
+            $sanitized[ $key ] = absint( $input[ $key ] ?? $fallback );
+        }
+
+        // Numeric (float)
+        $sanitized['decay_threshold'] = (float) ( $input['decay_threshold'] ?? 10.0 );
 
         // Speakable selectors
         if ( isset( $input['speakable_selectors'] ) ) {
@@ -235,6 +278,13 @@ class Admin {
             }
         } else {
             $sanitized['speakable_selectors'] = $defaults['speakable_selectors'];
+        }
+
+        // Title templates (associative array of template strings).
+        if ( isset( $input['title_templates'] ) && is_array( $input['title_templates'] ) ) {
+            $sanitized['title_templates'] = array_map( 'sanitize_text_field', $input['title_templates'] );
+        } else {
+            $sanitized['title_templates'] = $defaults['title_templates'];
         }
 
         return $sanitized;

@@ -4,7 +4,7 @@ Tags: seo, aeo, geo, schema, structured-data, ai-optimization, llms, featured-sn
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 3.3.3
+Stable tag: 3.3.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -131,6 +131,12 @@ llms.txt is a proposed standard (similar to robots.txt) that provides a machine-
 No. Search Intel outputs lightweight meta tags and JSON-LD schema directly in the page head. There are no frontend JavaScript files or CSS loaded on the public site.
 
 == Changelog ==
+
+= 3.3.4 =
+* Fixed: sanitize_settings() now handles ALL settings keys — sitemap taxonomies, API keys, numeric fields, and v2.0+ text fields no longer silently dropped on save
+* Added: Core Web Vitals page now has inline PSI API key configuration and manual scan button
+* Added: GA4 Insights page now has inline Property ID configuration
+* Fixed: Sitemap CPT and taxonomy selections now persist correctly
 
 = 3.3.3 =
 * Added: 27 feature module toggles in General Settings (Advanced SEO, AEO, GEO, AI, Analytics, Enterprise, Security)
@@ -279,6 +285,9 @@ No. Search Intel outputs lightweight meta tags and JSON-LD schema directly in th
 * User profile E-E-A-T fields
 
 == Upgrade Notice ==
+
+= 3.3.4 =
+Fix: Settings now fully persist — sitemap CPT/taxonomy, CWV API key, GA4 property ID, and 30+ other fields. Inline configuration added to CWV and GA4 pages.
 
 = 3.3.3 =
 New: 27 feature module toggles expose all v2.0+ admin pages (12 new menu items) via General Settings.

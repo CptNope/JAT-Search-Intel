@@ -57,7 +57,24 @@ class GA4_Integration {
 
         if ( is_admin() ) {
             add_action( 'admin_menu', [ $this, 'register_admin_page' ] );
+            add_action( 'wp_ajax_si_save_ga4_settings', [ $this, 'ajax_save_settings' ] );
         }
+    }
+
+    /**
+     * AJAX handler: save GA4 property ID.
+     */
+    public function ajax_save_settings(): void {
+        check_ajax_referer( 'si_ga4_settings', 'nonce' );
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => 'Unauthorized.' ] );
+        }
+        $property_id = sanitize_text_field( wp_unslash( $_POST['ga4_property_id'] ?? '' ) );
+        $settings    = get_option( 'search_intel_settings', [] );
+        $settings['ga4_property_id'] = $property_id;
+        update_option( 'search_intel_settings', $settings );
+        $this->settings['ga4_property_id'] = $property_id;
+        wp_send_json_success( [ 'message' => $property_id !== '' ? 'Property ID saved.' : 'Property ID cleared.' ] );
     }
 
     /*----------------------------------------------------------------------
@@ -404,15 +421,32 @@ class GA4_Integration {
      * Render the GA4 insights admin page.
      */
     public function render_admin_page(): void {
+        $property_id = $this->get_property_id();
+        $nonce       = wp_create_nonce( 'si_ga4_settings' );
         ?>
         <div class="wrap">
             <h1>GA4 Insights</h1>
 
+            <div class="si-settings-card" style="max-width:700px;margin-bottom:20px;padding:15px 20px;background:#fff;border:1px solid #c3c4c7;box-shadow:0 1px 1px rgba(0,0,0,.04);">
+                <h2 style="margin-top:0;">Configuration</h2>
+                <table class="form-table" style="margin-top:0;">
+                    <tr>
+                        <th><label for="si_ga4_property_id">GA4 Property ID</label></th>
+                        <td>
+                            <div style="display:flex;gap:8px;align-items:center;">
+                                <input type="text" id="si_ga4_property_id" class="regular-text" value="<?php echo esc_attr( $property_id ); ?>" placeholder="properties/123456789" />
+                                <button type="button" id="si-save-ga4" class="button button-primary">Save</button>
+                                <span id="si-ga4-status"><?php if ( $property_id !== '' ) : ?><span style="color:#00a32a;font-weight:600;">&#10003; Configured</span><?php endif; ?></span>
+                            </div>
+                            <p class="description">Find your Property ID in <a href="https://analytics.google.com/" target="_blank">Google Analytics</a> → Admin → Property Settings. Format: <code>properties/123456789</code></p>
+                        </td>
+                    </tr>
+                </table>
+                <p class="description" style="margin-top:8px;">GA4 data is fetched automatically via daily cron. Ensure your site has a valid GA4 Data API service account or OAuth token configured.</p>
+            </div>
+
             <?php if ( ! $this->is_configured() ) : ?>
-                <div class="notice notice-warning">
-                    <p>GA4 is not configured. Please set your Property ID and connect your Google account in
-                       <a href="<?php echo esc_url( admin_url( 'admin.php?page=search-intel' ) ); ?>">Settings</a>.</p>
-                </div>
+                <div class="notice notice-warning"><p>Enter your GA4 Property ID above to start correlating organic traffic with SEO scores.</p></div>
             <?php else : ?>
 
             <h2>Distribution Opportunities</h2>
@@ -425,6 +459,26 @@ class GA4_Integration {
 
             <?php endif; ?>
         </div>
+        <script>
+        jQuery(function($){
+            var ajaxUrl = '<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>';
+            var nonce   = '<?php echo esc_js( $nonce ); ?>';
+
+            $('#si-save-ga4').on('click', function(){
+                var btn = $(this), val = $('#si_ga4_property_id').val();
+                btn.prop('disabled', true);
+                $('#si-ga4-status').html('<span style="color:#dba617;">Saving...</span>');
+                $.post(ajaxUrl, { action: 'si_save_ga4_settings', nonce: nonce, ga4_property_id: val }, function(r){
+                    btn.prop('disabled', false);
+                    if (r.success) {
+                        $('#si-ga4-status').html('<span style="color:#00a32a;">&#10003; ' + r.data.message + '</span>');
+                    } else {
+                        $('#si-ga4-status').html('<span style="color:#d63638;">' + r.data.message + '</span>');
+                    }
+                });
+            });
+        });
+        </script>
         <?php
     }
 

@@ -54,7 +54,40 @@ class Core_Web_Vitals {
 
         if ( is_admin() ) {
             add_action( 'admin_menu', [ $this, 'register_admin_page' ] );
+            add_action( 'wp_ajax_si_save_psi_key', [ $this, 'ajax_save_psi_key' ] );
+            add_action( 'wp_ajax_si_run_cwv_scan', [ $this, 'ajax_run_scan' ] );
         }
+    }
+
+    /**
+     * AJAX handler: save PSI API key.
+     */
+    public function ajax_save_psi_key(): void {
+        check_ajax_referer( 'si_cwv_settings', 'nonce' );
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => 'Unauthorized.' ] );
+        }
+        $key      = sanitize_text_field( wp_unslash( $_POST['psi_api_key'] ?? '' ) );
+        $settings = get_option( 'search_intel_settings', [] );
+        $settings['psi_api_key'] = $key;
+        update_option( 'search_intel_settings', $settings );
+        $this->settings['psi_api_key'] = $key;
+        wp_send_json_success( [ 'message' => $key !== '' ? 'API key saved.' : 'API key cleared.' ] );
+    }
+
+    /**
+     * AJAX handler: run a manual CWV scan.
+     */
+    public function ajax_run_scan(): void {
+        check_ajax_referer( 'si_cwv_settings', 'nonce' );
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => 'Unauthorized.' ] );
+        }
+        if ( ! $this->is_configured() ) {
+            wp_send_json_error( [ 'message' => 'PSI API key not configured.' ] );
+        }
+        $stats = $this->run_scan();
+        wp_send_json_success( [ 'message' => 'Scanned ' . (int) $stats['scanned'] . ' posts (' . (int) $stats['success'] . ' OK, ' . (int) $stats['failed'] . ' failed). Reload to see results.' ] );
     }
 
     /*----------------------------------------------------------------------
@@ -398,18 +431,42 @@ class Core_Web_Vitals {
      * Render the CWV dashboard admin page.
      */
     public function render_admin_page(): void {
-        $report = $this->get_correlation_report( 50 );
+        $report  = $this->get_correlation_report( 50 );
+        $api_key = $this->get_api_key();
+        $nonce   = wp_create_nonce( 'si_cwv_settings' );
         ?>
         <div class="wrap">
             <h1>Core Web Vitals</h1>
 
+            <div class="si-settings-card" style="max-width:700px;margin-bottom:20px;padding:15px 20px;background:#fff;border:1px solid #c3c4c7;box-shadow:0 1px 1px rgba(0,0,0,.04);">
+                <h2 style="margin-top:0;">Configuration</h2>
+                <table class="form-table" style="margin-top:0;">
+                    <tr>
+                        <th><label for="si_psi_api_key">PageSpeed Insights API Key</label></th>
+                        <td>
+                            <div style="display:flex;gap:8px;align-items:center;">
+                                <input type="password" id="si_psi_api_key" class="regular-text" value="<?php echo $api_key !== '' ? '••••••••••••••••' : ''; ?>" placeholder="Enter your Google PSI API key" />
+                                <button type="button" id="si-save-psi-key" class="button button-primary">Save Key</button>
+                                <span id="si-psi-status"><?php if ( $api_key !== '' ) : ?><span style="color:#00a32a;font-weight:600;">&#10003; Configured</span><?php endif; ?></span>
+                            </div>
+                            <p class="description"><a href="https://developers.google.com/speed/docs/insights/v5/get-started" target="_blank">Get a free PSI API key from Google →</a></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Manual Scan</th>
+                        <td>
+                            <button type="button" id="si-run-cwv-scan" class="button" <?php echo $api_key === '' ? 'disabled' : ''; ?>>Run CWV Scan Now</button>
+                            <span id="si-scan-status"></span>
+                            <p class="description">Scans all published posts via the PageSpeed Insights API. Weekly scans also run automatically.</p>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
             <?php if ( ! $this->is_configured() ) : ?>
-                <div class="notice notice-warning">
-                    <p>PageSpeed Insights API key not configured. Add it in
-                       <a href="<?php echo esc_url( admin_url( 'admin.php?page=search-intel' ) ); ?>">Settings</a>.</p>
-                </div>
+                <div class="notice notice-warning"><p>Enter your PageSpeed Insights API key above to start tracking Core Web Vitals.</p></div>
             <?php elseif ( empty( $report ) ) : ?>
-                <div class="notice notice-info"><p>No CWV data yet. The first scan will run automatically, or you can trigger it manually.</p></div>
+                <div class="notice notice-info"><p>No CWV data yet. Click "Run CWV Scan Now" above, or wait for the weekly automatic scan.</p></div>
             <?php else : ?>
                 <table class="wp-list-table widefat fixed striped">
                     <thead>
@@ -441,6 +498,45 @@ class Core_Web_Vitals {
                 </table>
             <?php endif; ?>
         </div>
+        <script>
+        jQuery(function($){
+            var ajaxUrl = '<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>';
+            var nonce   = '<?php echo esc_js( $nonce ); ?>';
+
+            $('#si-save-psi-key').on('click', function(){
+                var btn = $(this), val = $('#si_psi_api_key').val();
+                if (!val || val === '••••••••••••••••') { $('#si-psi-status').html('<span style="color:#d63638;">Enter a key first.</span>'); return; }
+                btn.prop('disabled', true);
+                $('#si-psi-status').html('<span style="color:#dba617;">Saving...</span>');
+                $.post(ajaxUrl, { action: 'si_save_psi_key', nonce: nonce, psi_api_key: val }, function(r){
+                    btn.prop('disabled', false);
+                    if (r.success) {
+                        $('#si-psi-status').html('<span style="color:#00a32a;">&#10003; ' + r.data.message + '</span>');
+                        $('#si_psi_api_key').val('••••••••••••••••');
+                        $('#si-run-cwv-scan').prop('disabled', false);
+                    } else {
+                        $('#si-psi-status').html('<span style="color:#d63638;">' + r.data.message + '</span>');
+                    }
+                });
+            });
+
+            $('#si_psi_api_key').on('focus', function(){ if ($(this).val() === '••••••••••••••••') $(this).val('').attr('type','text'); }).on('blur', function(){ $(this).attr('type','password'); });
+
+            $('#si-run-cwv-scan').on('click', function(){
+                var btn = $(this);
+                btn.prop('disabled', true);
+                $('#si-scan-status').html('<span style="color:#dba617;">Scanning... this may take a minute.</span>');
+                $.post(ajaxUrl, { action: 'si_run_cwv_scan', nonce: nonce }, function(r){
+                    btn.prop('disabled', false);
+                    if (r.success) {
+                        $('#si-scan-status').html('<span style="color:#00a32a;">&#10003; ' + r.data.message + '</span>');
+                    } else {
+                        $('#si-scan-status').html('<span style="color:#d63638;">' + r.data.message + '</span>');
+                    }
+                });
+            });
+        });
+        </script>
         <?php
     }
 }
