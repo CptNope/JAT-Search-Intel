@@ -236,8 +236,14 @@ class Bulk_Tools {
         $mode      = sanitize_text_field( wp_unslash( $_POST['mode'] ?? 'empty_only' ) );
         $fields    = array_map( 'sanitize_text_field', (array) ( $_POST['fields'] ?? [] ) );
 
-        $valid_fields = [ 'meta_description', 'ai_summary', 'focus_keyword' ];
-        $fields       = array_intersect( $fields, $valid_fields );
+        $valid_fields = [
+            'seo_title', 'meta_description', 'focus_keyword', 'secondary_keywords',
+            'social_title', 'social_description',
+            'direct_answer',
+            'ai_summary', 'key_topics', 'entities', 'content_type', 'content_intent',
+            'audience', 'expertise_level',
+        ];
+        $fields = array_intersect( $fields, $valid_fields );
 
         if ( empty( $fields ) ) {
             wp_send_json_error( [ 'message' => 'No valid fields selected.' ] );
@@ -265,8 +271,30 @@ class Bulk_Tools {
             $content = wp_strip_all_tags( $post->post_content );
             $title   = $post->post_title;
             $keyword = get_post_meta( $post->ID, '_search_intel_focus_keyword', true ) ?: '';
+            $snippet = mb_substr( $content, 0, 3000 );
 
-            // Generate meta description.
+            // ── SEO Fields ──────────────────────────────────────────────
+
+            // SEO Title.
+            if ( in_array( 'seo_title', $fields, true ) ) {
+                $existing = get_post_meta( $post->ID, '_search_intel_title', true );
+                if ( 'overwrite_all' === $mode || empty( $existing ) ) {
+                    $system = 'You are an SEO copywriter. Write a click-optimized SEO title for this article. '
+                            . 'It must be 50-60 characters, include the main topic, and be compelling for search results. '
+                            . 'Return ONLY the title, no quotes or explanation.';
+                    $user   = "Title: {$title}\nKeyword: {$keyword}\n\nContent:\n" . mb_substr( $content, 0, 2000 );
+
+                    $result = $ai_engine->chat( $system, $user, [ 'max_tokens' => 80, 'temperature' => 0.4 ] );
+                    if ( $result['success'] && ! empty( $result['text'] ) ) {
+                        update_post_meta( $post->ID, '_search_intel_title', sanitize_text_field( trim( $result['text'], " \t\n\r\"'" ) ) );
+                        $generated++;
+                    } else {
+                        $errors++;
+                    }
+                }
+            }
+
+            // Meta description.
             if ( in_array( 'meta_description', $fields, true ) ) {
                 $existing = get_post_meta( $post->ID, '_search_intel_description', true );
                 if ( 'overwrite_all' === $mode || empty( $existing ) ) {
@@ -280,26 +308,7 @@ class Bulk_Tools {
                 }
             }
 
-            // Generate AI summary.
-            if ( in_array( 'ai_summary', $fields, true ) ) {
-                $existing = get_post_meta( $post->ID, '_search_intel_ai_summary', true );
-                if ( 'overwrite_all' === $mode || empty( $existing ) ) {
-                    $system = 'You are an SEO content strategist. Write a concise, factual summary of the following article. '
-                            . 'The summary should be 40-60 words, written for AI systems and LLMs to understand the core topic. '
-                            . 'Return ONLY the summary text, no quotes or explanation.';
-                    $user   = "Title: {$title}\n\nContent:\n" . mb_substr( $content, 0, 3000 );
-
-                    $result = $ai_engine->chat( $system, $user, [ 'max_tokens' => 150, 'temperature' => 0.3 ] );
-                    if ( $result['success'] && ! empty( $result['text'] ) ) {
-                        update_post_meta( $post->ID, '_search_intel_ai_summary', sanitize_text_field( $result['text'] ) );
-                        $generated++;
-                    } else {
-                        $errors++;
-                    }
-                }
-            }
-
-            // Generate focus keyword.
+            // Focus keyword.
             if ( in_array( 'focus_keyword', $fields, true ) ) {
                 $existing = get_post_meta( $post->ID, '_search_intel_focus_keyword', true );
                 if ( 'overwrite_all' === $mode || empty( $existing ) ) {
@@ -312,6 +321,248 @@ class Bulk_Tools {
                     if ( $result['success'] && ! empty( $result['text'] ) ) {
                         $kw = strtolower( trim( $result['text'], " \t\n\r\0\x0B\"'" ) );
                         update_post_meta( $post->ID, '_search_intel_focus_keyword', sanitize_text_field( $kw ) );
+                        $generated++;
+                    } else {
+                        $errors++;
+                    }
+                }
+            }
+
+            // Secondary keywords.
+            if ( in_array( 'secondary_keywords', $fields, true ) ) {
+                $existing = get_post_meta( $post->ID, '_search_intel_secondary_keywords', true );
+                if ( 'overwrite_all' === $mode || empty( $existing ) ) {
+                    $system = 'You are an SEO keyword researcher. Identify 3-5 secondary keywords or keyphrases related to this article. '
+                            . 'These should be semantically related terms that support the main topic. '
+                            . 'Return ONLY a comma-separated list, nothing else.';
+                    $user   = "Title: {$title}\nFocus keyword: {$keyword}\n\nContent:\n" . mb_substr( $content, 0, 2000 );
+
+                    $result = $ai_engine->chat( $system, $user, [ 'max_tokens' => 80, 'temperature' => 0.3 ] );
+                    if ( $result['success'] && ! empty( $result['text'] ) ) {
+                        $kws = strtolower( trim( $result['text'], " \t\n\r\"'" ) );
+                        update_post_meta( $post->ID, '_search_intel_secondary_keywords', sanitize_text_field( $kws ) );
+                        $generated++;
+                    } else {
+                        $errors++;
+                    }
+                }
+            }
+
+            // Social/OG title.
+            if ( in_array( 'social_title', $fields, true ) ) {
+                $existing = get_post_meta( $post->ID, '_search_intel_social_title', true );
+                if ( 'overwrite_all' === $mode || empty( $existing ) ) {
+                    $system = 'You are a social media copywriter. Write an engaging share title for this article '
+                            . 'that would perform well on Facebook, LinkedIn, and X/Twitter. Max 70 characters. '
+                            . 'It should spark curiosity or highlight a key benefit. Return ONLY the title.';
+                    $user   = "Title: {$title}\n\nContent:\n" . mb_substr( $content, 0, 1500 );
+
+                    $result = $ai_engine->chat( $system, $user, [ 'max_tokens' => 80, 'temperature' => 0.5 ] );
+                    if ( $result['success'] && ! empty( $result['text'] ) ) {
+                        update_post_meta( $post->ID, '_search_intel_social_title', sanitize_text_field( trim( $result['text'], " \t\n\r\"'" ) ) );
+                        $generated++;
+                    } else {
+                        $errors++;
+                    }
+                }
+            }
+
+            // Social/OG description.
+            if ( in_array( 'social_description', $fields, true ) ) {
+                $existing = get_post_meta( $post->ID, '_search_intel_social_description', true );
+                if ( 'overwrite_all' === $mode || empty( $existing ) ) {
+                    $system = 'You are a social media copywriter. Write a compelling share description for this article. '
+                            . '100-150 characters, optimized for social media engagement. Return ONLY the description.';
+                    $user   = "Title: {$title}\n\nContent:\n" . mb_substr( $content, 0, 1500 );
+
+                    $result = $ai_engine->chat( $system, $user, [ 'max_tokens' => 100, 'temperature' => 0.4 ] );
+                    if ( $result['success'] && ! empty( $result['text'] ) ) {
+                        update_post_meta( $post->ID, '_search_intel_social_description', sanitize_text_field( trim( $result['text'], " \t\n\r\"'" ) ) );
+                        $generated++;
+                    } else {
+                        $errors++;
+                    }
+                }
+            }
+
+            // ── AEO Fields ──────────────────────────────────────────────
+
+            // Direct answer.
+            if ( in_array( 'direct_answer', $fields, true ) ) {
+                $existing = get_post_meta( $post->ID, '_search_intel_direct_answer', true );
+                if ( 'overwrite_all' === $mode || empty( $existing ) ) {
+                    $system = 'You are a featured snippet optimizer. Write a concise, direct answer to the main question '
+                            . 'this article addresses. The answer should be 40-60 words, factual, self-contained, and suitable '
+                            . 'for a Google featured snippet or voice assistant response. Return ONLY the answer.';
+                    $user   = "Title: {$title}\n\nContent:\n{$snippet}";
+
+                    $result = $ai_engine->chat( $system, $user, [ 'max_tokens' => 150, 'temperature' => 0.2 ] );
+                    if ( $result['success'] && ! empty( $result['text'] ) ) {
+                        update_post_meta( $post->ID, '_search_intel_direct_answer', sanitize_text_field( trim( $result['text'], " \t\n\r\"'" ) ) );
+                        $generated++;
+                    } else {
+                        $errors++;
+                    }
+                }
+            }
+
+            // ── GEO Fields ──────────────────────────────────────────────
+
+            // AI summary.
+            if ( in_array( 'ai_summary', $fields, true ) ) {
+                $existing = get_post_meta( $post->ID, '_search_intel_ai_summary', true );
+                if ( 'overwrite_all' === $mode || empty( $existing ) ) {
+                    $system = 'You are an SEO content strategist. Write a concise, factual summary of the following article. '
+                            . 'The summary should be 40-60 words, written for AI systems and LLMs to understand the core topic. '
+                            . 'Return ONLY the summary text, no quotes or explanation.';
+                    $user   = "Title: {$title}\n\nContent:\n{$snippet}";
+
+                    $result = $ai_engine->chat( $system, $user, [ 'max_tokens' => 150, 'temperature' => 0.3 ] );
+                    if ( $result['success'] && ! empty( $result['text'] ) ) {
+                        update_post_meta( $post->ID, '_search_intel_ai_summary', sanitize_text_field( $result['text'] ) );
+                        $generated++;
+                    } else {
+                        $errors++;
+                    }
+                }
+            }
+
+            // Key topics.
+            if ( in_array( 'key_topics', $fields, true ) ) {
+                $existing = get_post_meta( $post->ID, '_search_intel_topics', true );
+                if ( 'overwrite_all' === $mode || empty( $existing ) ) {
+                    $system = 'You are a content taxonomist. Identify 3-7 key topics covered in this article. '
+                            . 'These are the core subject tags an AI system would use to index this content. '
+                            . 'Return ONLY a comma-separated list of topics, nothing else.';
+                    $user   = "Title: {$title}\n\nContent:\n{$snippet}";
+
+                    $result = $ai_engine->chat( $system, $user, [ 'max_tokens' => 80, 'temperature' => 0.2 ] );
+                    if ( $result['success'] && ! empty( $result['text'] ) ) {
+                        $topics = array_filter( array_map( 'trim', explode( ',', $result['text'] ) ) );
+                        $topics = array_map( 'sanitize_text_field', $topics );
+                        update_post_meta( $post->ID, '_search_intel_topics', $topics );
+                        $generated++;
+                    } else {
+                        $errors++;
+                    }
+                }
+            }
+
+            // Entities.
+            if ( in_array( 'entities', $fields, true ) ) {
+                $existing = get_post_meta( $post->ID, '_search_intel_entities', true );
+                if ( 'overwrite_all' === $mode || empty( $existing ) ) {
+                    $system = 'You are a named entity extraction system. Extract the key entities mentioned in this article. '
+                            . 'For each entity, provide name and type (Person, Organization, Place, Product, Concept, Event, Technology). '
+                            . 'Return a JSON array of objects with "name" and "type" keys. '
+                            . 'Example: [{"name":"WordPress","type":"Technology"},{"name":"Google","type":"Organization"}] '
+                            . 'Return ONLY valid JSON, nothing else.';
+                    $user   = "Title: {$title}\n\nContent:\n{$snippet}";
+
+                    $result = $ai_engine->chat( $system, $user, [ 'max_tokens' => 300, 'temperature' => 0.1 ] );
+                    if ( $result['success'] && ! empty( $result['text'] ) ) {
+                        $json_text = trim( $result['text'] );
+                        // Strip markdown code fences if present.
+                        $json_text = preg_replace( '/^```(?:json)?\s*/i', '', $json_text );
+                        $json_text = preg_replace( '/\s*```$/', '', $json_text );
+                        $parsed    = json_decode( $json_text, true );
+                        if ( is_array( $parsed ) ) {
+                            $entities = [];
+                            foreach ( $parsed as $entity ) {
+                                if ( ! empty( $entity['name'] ) ) {
+                                    $entities[] = [
+                                        'name' => sanitize_text_field( $entity['name'] ),
+                                        'type' => sanitize_text_field( $entity['type'] ?? 'Thing' ),
+                                        'url'  => '',
+                                    ];
+                                }
+                            }
+                            if ( ! empty( $entities ) ) {
+                                update_post_meta( $post->ID, '_search_intel_entities', $entities );
+                                $generated++;
+                            }
+                        } else {
+                            $errors++;
+                        }
+                    } else {
+                        $errors++;
+                    }
+                }
+            }
+
+            // Content type.
+            if ( in_array( 'content_type', $fields, true ) ) {
+                $existing = get_post_meta( $post->ID, '_search_intel_content_type', true );
+                if ( 'overwrite_all' === $mode || empty( $existing ) ) {
+                    $system = 'Classify this article into exactly one content type. '
+                            . 'Choose from: article, guide, tutorial, review, opinion, news, case-study, comparison, listicle, reference. '
+                            . 'Return ONLY the single content type word, nothing else.';
+                    $user   = "Title: {$title}\n\nContent:\n" . mb_substr( $content, 0, 1500 );
+
+                    $result = $ai_engine->chat( $system, $user, [ 'max_tokens' => 15, 'temperature' => 0.1 ] );
+                    if ( $result['success'] && ! empty( $result['text'] ) ) {
+                        $ct = strtolower( trim( $result['text'], " \t\n\r\"'" ) );
+                        update_post_meta( $post->ID, '_search_intel_content_type', sanitize_text_field( $ct ) );
+                        $generated++;
+                    } else {
+                        $errors++;
+                    }
+                }
+            }
+
+            // Content intent.
+            if ( in_array( 'content_intent', $fields, true ) ) {
+                $existing = get_post_meta( $post->ID, '_search_intel_content_intent', true );
+                if ( 'overwrite_all' === $mode || empty( $existing ) ) {
+                    $system = 'Classify the search intent of this article into exactly one category. '
+                            . 'Choose from: informational, commercial, navigational, transactional. '
+                            . 'Return ONLY the single intent word, nothing else.';
+                    $user   = "Title: {$title}\n\nContent:\n" . mb_substr( $content, 0, 1500 );
+
+                    $result = $ai_engine->chat( $system, $user, [ 'max_tokens' => 15, 'temperature' => 0.1 ] );
+                    if ( $result['success'] && ! empty( $result['text'] ) ) {
+                        $intent = strtolower( trim( $result['text'], " \t\n\r\"'" ) );
+                        update_post_meta( $post->ID, '_search_intel_content_intent', sanitize_text_field( $intent ) );
+                        $generated++;
+                    } else {
+                        $errors++;
+                    }
+                }
+            }
+
+            // Target audience.
+            if ( in_array( 'audience', $fields, true ) ) {
+                $existing = get_post_meta( $post->ID, '_search_intel_audience', true );
+                if ( 'overwrite_all' === $mode || empty( $existing ) ) {
+                    $system = 'Identify the target audience for this article in a brief phrase (3-8 words). '
+                            . 'Examples: "WordPress developers", "small business owners", "beginner photographers", "marketing professionals". '
+                            . 'Return ONLY the audience phrase, nothing else.';
+                    $user   = "Title: {$title}\n\nContent:\n" . mb_substr( $content, 0, 1500 );
+
+                    $result = $ai_engine->chat( $system, $user, [ 'max_tokens' => 30, 'temperature' => 0.2 ] );
+                    if ( $result['success'] && ! empty( $result['text'] ) ) {
+                        $aud = strtolower( trim( $result['text'], " \t\n\r\"'" ) );
+                        update_post_meta( $post->ID, '_search_intel_audience', sanitize_text_field( $aud ) );
+                        $generated++;
+                    } else {
+                        $errors++;
+                    }
+                }
+            }
+
+            // Expertise level.
+            if ( in_array( 'expertise_level', $fields, true ) ) {
+                $existing = get_post_meta( $post->ID, '_search_intel_expertise_level', true );
+                if ( 'overwrite_all' === $mode || empty( $existing ) ) {
+                    $system = 'Assess the expertise level required to understand this article. '
+                            . 'Choose from: beginner, intermediate, advanced, expert. '
+                            . 'Return ONLY the single level word, nothing else.';
+                    $user   = "Title: {$title}\n\nContent:\n" . mb_substr( $content, 0, 1500 );
+
+                    $result = $ai_engine->chat( $system, $user, [ 'max_tokens' => 15, 'temperature' => 0.1 ] );
+                    if ( $result['success'] && ! empty( $result['text'] ) ) {
+                        $level = strtolower( trim( $result['text'], " \t\n\r\"'" ) );
+                        update_post_meta( $post->ID, '_search_intel_expertise_level', sanitize_text_field( $level ) );
                         $generated++;
                     } else {
                         $errors++;
