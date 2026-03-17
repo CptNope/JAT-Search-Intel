@@ -14,6 +14,12 @@ define( 'SEARCH_INTEL_DIR', __DIR__ . '/' );
 define( 'SEARCH_INTEL_URL', '' );
 define( 'SEARCH_INTEL_BASENAME', 'search-intel/search-intel.php' );
 
+// WordPress database constants.
+define( 'ARRAY_A', 'ARRAY_A' );
+define( 'ARRAY_N', 'ARRAY_N' );
+define( 'OBJECT', 'OBJECT' );
+define( 'OBJECT_K', 'OBJECT_K' );
+
 // WordPress time constants.
 define( 'MINUTE_IN_SECONDS', 60 );
 define( 'HOUR_IN_SECONDS', 3600 );
