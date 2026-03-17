@@ -178,6 +178,16 @@
 
     // ── Bulk AI Content Generation ─────────────────────────────────────────
 
+    // Select / Deselect All toggle.
+    $('#si-ai-gen-select-all').on('change', function () {
+        $('.si-ai-gen-field').prop('checked', $(this).is(':checked'));
+    });
+    $('.si-ai-gen-field').on('change', function () {
+        var total = $('.si-ai-gen-field').length;
+        var checked = $('.si-ai-gen-field:checked').length;
+        $('#si-ai-gen-select-all').prop('checked', checked === total);
+    });
+
     $('#si-btn-ai-generate').on('click', function () {
         var fields = [];
         $('.si-ai-gen-field:checked').each(function () {

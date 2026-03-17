@@ -241,7 +241,11 @@ class AI_Engine {
      * @return bool True if requests should be throttled.
      */
     public function is_rate_limited(): bool {
-        $data  = get_transient( self::RATE_LIMIT_KEY );
+        // Local models have no external rate limits.
+        if ( 'ollama' === $this->get_active_provider() ) {
+            return false;
+        }
+        $data = get_transient( self::RATE_LIMIT_KEY );
         if ( false === $data ) {
             return false;
         }
@@ -252,12 +256,24 @@ class AI_Engine {
      * Record a request for rate-limiting purposes.
      */
     private function record_request(): void {
+        // Local models have no external rate limits.
+        if ( 'ollama' === $this->get_active_provider() ) {
+            return;
+        }
         $data = get_transient( self::RATE_LIMIT_KEY );
         if ( false === $data ) {
-            $data = [ 'count' => 0 ];
+            // Start a new 60-second window.
+            set_transient( self::RATE_LIMIT_KEY, [ 'count' => 1 ], 60 );
+            return;
         }
+        // Increment count without renewing the TTL.
         $data['count'] = ( $data['count'] ?? 0 ) + 1;
-        set_transient( self::RATE_LIMIT_KEY, $data, 60 ); // 1-minute window.
+        $GLOBALS['wpdb']->update(
+            $GLOBALS['wpdb']->options,
+            [ 'option_value' => maybe_serialize( $data ) ],
+            [ 'option_name' => '_transient_' . self::RATE_LIMIT_KEY ]
+        );
+        wp_cache_set( self::RATE_LIMIT_KEY, $data, 'transient' );
     }
 
     /**

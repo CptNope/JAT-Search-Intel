@@ -67,23 +67,83 @@ $post_types = get_post_types( [ 'public' => true ], 'objects' );
                 <a href="<?php echo esc_url( admin_url( 'admin.php?page=search-intel-ai' ) ); ?>"><?php esc_html_e( 'Enable it and add an API key →', 'search-intel' ); ?></a></p>
             </div>
         <?php else : ?>
-            <p><?php esc_html_e( 'Use AI to generate SEO meta descriptions, AI summaries, and focus keywords for all published posts. Only empty fields are filled — existing content is never overwritten.', 'search-intel' ); ?></p>
+            <p><?php esc_html_e( 'Use AI to generate content for all published posts across SEO, AEO, and GEO fields. Select which fields to fill below.', 'search-intel' ); ?></p>
             <table class="form-table">
                 <tr>
                     <th><?php esc_html_e( 'Generate', 'search-intel' ); ?></th>
                     <td>
-                        <label style="display:block; margin-bottom:6px;">
-                            <input type="checkbox" class="si-ai-gen-field" value="meta_description" checked />
-                            <?php esc_html_e( 'Meta Descriptions (120-155 chars, keyword-optimized)', 'search-intel' ); ?>
+                        <label style="display:block; margin-bottom:8px; font-weight:600;">
+                            <input type="checkbox" id="si-ai-gen-select-all" />
+                            <?php esc_html_e( 'Select / Deselect All', 'search-intel' ); ?>
                         </label>
-                        <label style="display:block; margin-bottom:6px;">
-                            <input type="checkbox" class="si-ai-gen-field" value="ai_summary" checked />
-                            <?php esc_html_e( 'AI Summaries (concise factual overview for LLMs)', 'search-intel' ); ?>
-                        </label>
-                        <label style="display:block; margin-bottom:6px;">
-                            <input type="checkbox" class="si-ai-gen-field" value="focus_keyword" />
-                            <?php esc_html_e( 'Focus Keywords (primary SEO target keyword)', 'search-intel' ); ?>
-                        </label>
+
+                        <fieldset style="margin:8px 0 12px; padding:8px 12px; border:1px solid #ccd0d4; border-radius:4px;">
+                            <legend style="font-weight:600; padding:0 6px;"><?php esc_html_e( 'SEO', 'search-intel' ); ?></legend>
+                            <label style="display:block; margin-bottom:4px;">
+                                <input type="checkbox" class="si-ai-gen-field" value="seo_title" />
+                                <?php esc_html_e( 'SEO Title (click-optimized, ≤60 chars)', 'search-intel' ); ?>
+                            </label>
+                            <label style="display:block; margin-bottom:4px;">
+                                <input type="checkbox" class="si-ai-gen-field" value="meta_description" checked />
+                                <?php esc_html_e( 'Meta Description (120-155 chars, keyword-optimized)', 'search-intel' ); ?>
+                            </label>
+                            <label style="display:block; margin-bottom:4px;">
+                                <input type="checkbox" class="si-ai-gen-field" value="focus_keyword" checked />
+                                <?php esc_html_e( 'Focus Keyword (primary SEO target keyword)', 'search-intel' ); ?>
+                            </label>
+                            <label style="display:block; margin-bottom:4px;">
+                                <input type="checkbox" class="si-ai-gen-field" value="secondary_keywords" />
+                                <?php esc_html_e( 'Secondary Keywords (3-5 related terms)', 'search-intel' ); ?>
+                            </label>
+                            <label style="display:block; margin-bottom:4px;">
+                                <input type="checkbox" class="si-ai-gen-field" value="social_title" />
+                                <?php esc_html_e( 'Social/OG Title (engaging share title)', 'search-intel' ); ?>
+                            </label>
+                            <label style="display:block; margin-bottom:4px;">
+                                <input type="checkbox" class="si-ai-gen-field" value="social_description" />
+                                <?php esc_html_e( 'Social/OG Description (share-optimized summary)', 'search-intel' ); ?>
+                            </label>
+                        </fieldset>
+
+                        <fieldset style="margin:0 0 12px; padding:8px 12px; border:1px solid #ccd0d4; border-radius:4px;">
+                            <legend style="font-weight:600; padding:0 6px;"><?php esc_html_e( 'AEO (Answer Engine)', 'search-intel' ); ?></legend>
+                            <label style="display:block; margin-bottom:4px;">
+                                <input type="checkbox" class="si-ai-gen-field" value="direct_answer" />
+                                <?php esc_html_e( 'Direct Answer (featured snippet / voice assistant answer, ≤300 chars)', 'search-intel' ); ?>
+                            </label>
+                        </fieldset>
+
+                        <fieldset style="margin:0 0 8px; padding:8px 12px; border:1px solid #ccd0d4; border-radius:4px;">
+                            <legend style="font-weight:600; padding:0 6px;"><?php esc_html_e( 'GEO (Generative Engine)', 'search-intel' ); ?></legend>
+                            <label style="display:block; margin-bottom:4px;">
+                                <input type="checkbox" class="si-ai-gen-field" value="ai_summary" checked />
+                                <?php esc_html_e( 'AI Summary (concise factual overview for LLMs)', 'search-intel' ); ?>
+                            </label>
+                            <label style="display:block; margin-bottom:4px;">
+                                <input type="checkbox" class="si-ai-gen-field" value="key_topics" />
+                                <?php esc_html_e( 'Key Topics (comma-separated topic tags for AI indexing)', 'search-intel' ); ?>
+                            </label>
+                            <label style="display:block; margin-bottom:4px;">
+                                <input type="checkbox" class="si-ai-gen-field" value="entities" />
+                                <?php esc_html_e( 'Entities (people, orgs, places, concepts mentioned)', 'search-intel' ); ?>
+                            </label>
+                            <label style="display:block; margin-bottom:4px;">
+                                <input type="checkbox" class="si-ai-gen-field" value="content_type" />
+                                <?php esc_html_e( 'Content Type (article, guide, tutorial, review, etc.)', 'search-intel' ); ?>
+                            </label>
+                            <label style="display:block; margin-bottom:4px;">
+                                <input type="checkbox" class="si-ai-gen-field" value="content_intent" />
+                                <?php esc_html_e( 'Content Intent (informational, commercial, navigational, transactional)', 'search-intel' ); ?>
+                            </label>
+                            <label style="display:block; margin-bottom:4px;">
+                                <input type="checkbox" class="si-ai-gen-field" value="audience" />
+                                <?php esc_html_e( 'Target Audience (who this content is written for)', 'search-intel' ); ?>
+                            </label>
+                            <label style="display:block; margin-bottom:4px;">
+                                <input type="checkbox" class="si-ai-gen-field" value="expertise_level" />
+                                <?php esc_html_e( 'Expertise Level (beginner, intermediate, advanced, expert)', 'search-intel' ); ?>
+                            </label>
+                        </fieldset>
                     </td>
                 </tr>
                 <tr>
