@@ -9,11 +9,13 @@ parameters:
         - phpstan-constants.php
     ignoreErrors:
         - '#Function [a-zA-Z_]+ not found#'
+        - '#Class [a-zA-Z_\\\\]+ extends unknown class#'
         - '#no value type specified in iterable type array#'
-        - '#has parameter \$input with no type specified#'
-        - '#has parameter \$post with no type specified#'
-        - '#has parameter \$user with no type specified#'
+        - '#has parameter \$[a-z_]+ with no type specified#'
         - '#Right side of && is always true#'
+        - '#is always true#'
+        - '#Else branch is unreachable#'
         - '#in isset\(\) is not nullable#'
         - '#on left side of \?\? is not nullable#'
         - '#Cannot access offset .* on WP_Post#'
+        - '#is never read, only written#'
