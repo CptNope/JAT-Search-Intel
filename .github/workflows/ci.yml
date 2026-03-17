@@ -14,7 +14,7 @@ jobs:
       matrix:
         php: ['8.1', '8.2', '8.3']
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -36,7 +36,7 @@ jobs:
     name: PHP_CodeSniffer
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -48,14 +48,13 @@ jobs:
         run: composer install --no-interaction --prefer-dist --ignore-platform-req=php
 
       - name: Run PHPCS
-        run: vendor/bin/phpcs --standard=WordPress-Core --extensions=php --ignore=vendor,tests,node_modules includes/ admin/ search-intel.php uninstall.php --report=checkstyle | cs2pr
-        continue-on-error: true
+        run: vendor/bin/phpcs -q --report=checkstyle | cs2pr
 
   phpstan:
     name: PHPStan (Level 6)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -67,18 +66,17 @@ jobs:
 
       - name: Run PHPStan
         run: vendor/bin/phpstan analyse --configuration=phpstan.neon --no-progress
-        continue-on-error: true
 
   eslint:
     name: ESLint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Install dependencies
         run: npm ci
@@ -91,7 +89,7 @@ jobs:
     name: Psalm (Level 4)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -108,12 +106,12 @@ jobs:
     name: Stylelint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Install dependencies
         run: npm ci
@@ -126,7 +124,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [phpunit]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -145,12 +143,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: [phpunit]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2

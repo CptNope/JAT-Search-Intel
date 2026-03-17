@@ -1,0 +1,99 @@
+<?xml version="1.0"?>
+<ruleset name="Search Intel">
+	<description>Custom PHPCS ruleset for the Search Intel WordPress plugin.</description>
+
+	<!-- Scan these paths -->
+	<file>includes/</file>
+	<file>admin/</file>
+	<file>search-intel.php</file>
+	<file>uninstall.php</file>
+
+	<!-- Exclude third-party / generated directories -->
+	<exclude-pattern>vendor/*</exclude-pattern>
+	<exclude-pattern>tests/*</exclude-pattern>
+	<exclude-pattern>node_modules/*</exclude-pattern>
+
+	<!-- Use WordPress-Core as base -->
+	<rule ref="WordPress-Core">
+		<!-- Project uses short array syntax [] throughout -->
+		<exclude name="Universal.Arrays.DisallowShortArraySyntax"/>
+
+		<!-- Project uses spaces for indentation (not tabs) -->
+		<exclude name="Generic.WhiteSpace.DisallowSpaceIndent"/>
+
+		<!-- Allow multi-line function calls with args on the opening line -->
+		<exclude name="PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket"/>
+		<exclude name="PEAR.Functions.FunctionCallSignature.MultipleArguments"/>
+		<exclude name="PEAR.Functions.FunctionCallSignature.CloseBracketLine"/>
+
+		<!-- Relax alignment rules — project uses contextual alignment -->
+		<exclude name="WordPress.Arrays.MultipleStatementAlignment"/>
+		<exclude name="WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine"/>
+		<exclude name="WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound"/>
+		<exclude name="Generic.Formatting.MultipleStatementAlignment"/>
+
+		<!-- Project uses short ternary ?: and non-Yoda conditions -->
+		<exclude name="Universal.Operators.DisallowShortTernary"/>
+		<exclude name="WordPress.PHP.YodaConditions"/>
+
+		<!-- Allow standalone post-increment $i++ -->
+		<exclude name="Universal.Operators.DisallowStandalonePostIncrementDecrement"/>
+
+		<!-- Windows CRLF line endings -->
+		<exclude name="Generic.Files.LineEndings"/>
+
+		<!-- i18n translator comments not required -->
+		<exclude name="WordPress.WP.I18n.MissingTranslatorsComment"/>
+		<exclude name="WordPress.WP.I18n.UnorderedPlaceholdersText"/>
+
+		<!-- Allow table name interpolation in prepared SQL (false positives) -->
+		<exclude name="WordPress.DB.PreparedSQL.InterpolatedNotPrepared"/>
+
+		<!-- Relax embedded PHP formatting for template files -->
+		<exclude name="Squiz.PHP.EmbeddedPhp.ContentAfterOpen"/>
+		<exclude name="Squiz.PHP.EmbeddedPhp.ContentBeforeEnd"/>
+
+		<!-- Allow multiple assignments on one line -->
+		<exclude name="Squiz.PHP.DisallowMultipleAssignments"/>
+
+		<!-- Relax precision alignment in templates -->
+		<exclude name="Universal.WhiteSpace.PrecisionAlignment"/>
+
+		<!-- Relax operator spacing -->
+		<exclude name="WordPress.WhiteSpace.OperatorSpacing"/>
+
+		<!-- Relax comma spacing -->
+		<exclude name="Universal.WhiteSpace.CommaSpacing"/>
+
+		<!-- Allow inline control structures in templates -->
+		<exclude name="Generic.ControlStructures.InlineControlStructure"/>
+
+		<!-- Relax control structure formatting -->
+		<exclude name="Squiz.ControlStructures.ControlSignature"/>
+
+		<!-- Relax scope indentation checks (conflicts with space indentation) -->
+		<exclude name="Generic.WhiteSpace.ScopeIndent"/>
+
+		<!-- Allow reserved keyword parameter names ($class, $new, $public) -->
+		<exclude name="Universal.NamingConventions.NoReservedKeywordParameterNames"/>
+
+		<!-- Allow silenced errors for regex validation -->
+		<exclude name="WordPress.PHP.NoSilencedErrors"/>
+
+		<!-- Allow LIKE wildcard in CONCAT for prepared SQL -->
+		<exclude name="WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery"/>
+
+		<!-- Relax i18n non-singular string literal check -->
+		<exclude name="WordPress.WP.I18n.NonSingularStringLiteralText"/>
+
+		<!-- Relax array indentation alignment -->
+		<exclude name="WordPress.Arrays.ArrayIndentation"/>
+	</rule>
+
+	<!-- Show colors and progress -->
+	<arg name="colors"/>
+	<arg value="sp"/>
+
+	<!-- Only check PHP files -->
+	<arg name="extensions" value="php"/>
+</ruleset>

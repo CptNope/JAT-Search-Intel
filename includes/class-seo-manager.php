@@ -216,12 +216,10 @@ class SEO_Manager {
         $directives[] = 'max-image-preview:large';
         $directives[] = 'max-video-preview:-1';
 
-        if ( ! empty( $directives ) ) {
-            printf(
-                '<meta name="robots" content="%s" />' . "\n",
-                esc_attr( implode( ', ', array_unique( $directives ) ) )
-            );
-        }
+        printf(
+            '<meta name="robots" content="%s" />' . "\n",
+            esc_attr( implode( ', ', array_unique( $directives ) ) )
+        );
     }
 
     /**
@@ -256,7 +254,7 @@ class SEO_Manager {
             if ( 'article' === $tags['og:type'] ) {
                 $tags['article:published_time'] = get_the_date( 'c', $post_id );
                 $tags['article:modified_time']  = get_the_modified_date( 'c', $post_id );
-                $tags['article:author']         = get_author_posts_url( $post->post_author );
+                $tags['article:author']         = get_author_posts_url( (int) $post->post_author );
 
                 $categories = get_the_category( $post_id );
                 if ( $categories ) {

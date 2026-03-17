@@ -1,6 +1,6 @@
 {
   "name": "search-intel",
-  "version": "3.3.0",
+  "version": "3.3.1",
   "private": true,
   "description": "Search Intel WordPress SEO Plugin",
   "scripts": {
@@ -40,7 +40,6 @@
     "@babel/runtime": "^7.26.10",
     "serialize-javascript": "^7.0.3",
     "minimatch": "^10.0.0",
-    "ajv": "^8.17.2",
     "webpack-dev-server": "^5.2.1",
     "@tootallnate/once": "^3.0.1"
   }

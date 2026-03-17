@@ -376,9 +376,12 @@ class Custom_Reports {
      */
     public function save_schedule( array $schedule ): int {
         $schedules   = $this->get_schedules();
+        $allowed_frequencies = [ 'daily', 'weekly', 'monthly' ];
+        $frequency = $schedule['frequency'] ?? 'weekly';
+
         $schedules[] = [
             'email'     => sanitize_email( $schedule['email'] ?? '' ),
-            'frequency' => $schedule['frequency'] ?? 'weekly',
+            'frequency' => in_array( $frequency, $allowed_frequencies, true ) ? $frequency : 'weekly',
             'config'    => $schedule['config'] ?? [],
             'last_sent' => 0,
             'created'   => time(),
@@ -468,13 +471,15 @@ class Custom_Reports {
      * @return array Report config.
      */
     private function get_config_from_request(): array {
+        // phpcs:disable WordPress.Security.NonceVerification.Recommended -- Nonce verified in calling AJAX handler.
         return [
-            'modules'    => isset( $_REQUEST['modules'] ) ? array_map( 'sanitize_text_field', (array) $_REQUEST['modules'] ) : [ 'seo', 'aeo', 'geo' ],
-            'post_types' => isset( $_REQUEST['post_types'] ) ? array_map( 'sanitize_text_field', (array) $_REQUEST['post_types'] ) : [],
-            'date_from'  => sanitize_text_field( $_REQUEST['date_from'] ?? '' ),
-            'date_to'    => sanitize_text_field( $_REQUEST['date_to'] ?? '' ),
+            'modules'    => isset( $_REQUEST['modules'] ) ? array_map( 'sanitize_text_field', wp_unslash( (array) $_REQUEST['modules'] ) ) : [ 'seo', 'aeo', 'geo' ],
+            'post_types' => isset( $_REQUEST['post_types'] ) ? array_map( 'sanitize_text_field', wp_unslash( (array) $_REQUEST['post_types'] ) ) : [],
+            'date_from'  => isset( $_REQUEST['date_from'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['date_from'] ) ) : '',
+            'date_to'    => isset( $_REQUEST['date_to'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['date_to'] ) ) : '',
             'limit'      => absint( $_REQUEST['limit'] ?? 100 ),
         ];
+        // phpcs:enable WordPress.Security.NonceVerification.Recommended
     }
 
     /*----------------------------------------------------------------------
@@ -557,7 +562,12 @@ class Custom_Reports {
                             <tr>
                                 <td><?php echo esc_html( $s['email'] ?? '' ); ?></td>
                                 <td><?php echo esc_html( ucfirst( $s['frequency'] ?? 'weekly' ) ); ?></td>
-                                <td><?php echo (int) ( $s['last_sent'] ?? 0 ) > 0 ? esc_html( gmdate( 'Y-m-d H:i', (int) $s['last_sent'] ) ) : '<em>Never</em>'; ?></td>
+                                <td>
+                                    <?php
+                                    $last = (int) ( $s['last_sent'] ?? 0 );
+                                    echo $last > 0 ? esc_html( gmdate( 'Y-m-d H:i', $last ) ) : '<em>Never</em>';
+                                    ?>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>

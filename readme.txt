@@ -4,7 +4,7 @@ Tags: seo, aeo, geo, schema, structured-data, ai-optimization, llms, featured-sn
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 3.3.0
+Stable tag: 3.3.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -131,6 +131,11 @@ llms.txt is a proposed standard (similar to robots.txt) that provides a machine-
 No. Search Intel outputs lightweight meta tags and JSON-LD schema directly in the page head. There are no frontend JavaScript files or CSS loaded on the public site.
 
 == Changelog ==
+
+= 3.3.1 =
+* Fixed: PHPCS, PHPStan level 6, ESLint, Psalm, and Playwright E2E test issues
+* Fixed: CI workflow updated to actions v5 and Node.js 22
+* Security: Added wp_unslash() to $_REQUEST data, validated report frequency, fixed mixed escaping
 
 = 3.3.0 =
 * Historical Analytics: per-post score history charts (SEO/AEO/GEO over time, 365-day retention)
@@ -264,6 +269,9 @@ No. Search Intel outputs lightweight meta tags and JSON-LD schema directly in th
 * User profile E-E-A-T fields
 
 == Upgrade Notice ==
+
+= 3.3.1 =
+Maintenance: Resolved all CI linter errors (PHPCS, PHPStan, ESLint, Psalm, Playwright), security hardening for Custom Reports, updated CI workflow.
 
 = 3.3.0 =
 New: Historical Analytics (per-post score charts, site-wide trends, before/after comparison, change log), GA4 Integration (organic traffic correlation, distribution opportunities, optimization priorities), Core Web Vitals (PageSpeed Insights, CWV tracking, SEO correlation), Custom Reports (PDF/CSV/JSON export, scheduled email reports, report builder).

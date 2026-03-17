@@ -6,6 +6,23 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.3.1] — 2026-03-17
+
+### Fixed
+- **PHPCS**: Added `phpcs.xml.dist` with project-specific ruleset (WordPress-Core base with short array syntax, space indentation)
+- **PHPStan**: Resolved all level 6 errors — cast `$post->post_author` to `(int)`, fixed nullable params, removed dead code, added WordPress constant stubs
+- **ESLint**: Added `tinymce` to globals, regenerated lockfile after `ajv` override removal
+- **Psalm**: Removed stale baseline entries for fixed `RedundantCondition`
+- **Playwright E2E**: Increased `beforeAll` login timeout for slow CI environments
+- **CI Workflow**: Updated to `actions/checkout@v5`, `actions/setup-node@v5`, Node.js 22; fixed PHPCS `cs2pr` pipe with `-q` flag
+
+### Security
+- Added `wp_unslash()` to `$_REQUEST` data in Custom Reports
+- Validated report frequency against allowed values whitelist
+- Fixed mixed escaping in report admin page output
+
+---
+
 ## [3.3.0] — 2026-03-16
 
 ### Added

@@ -294,7 +294,7 @@ class Schema_Manager {
         ];
 
         // Author
-        $author_id = $post->post_author;
+        $author_id = (int) $post->post_author;
         $schema['author'] = [
             '@type' => 'Person',
             '@id'   => get_author_posts_url( $author_id ) . '#author',
@@ -399,7 +399,7 @@ class Schema_Manager {
 
         // v1.1: Author expertise notes
         $expertise_notes = get_post_meta( $post_id, '_search_intel_author_expertise_notes', true );
-        if ( $expertise_notes && isset( $schema['author'] ) ) {
+        if ( $expertise_notes && ! empty( $schema['author'] ) ) {
             $schema['author']['knowsAbout'] = sanitize_text_field( $expertise_notes );
         }
 

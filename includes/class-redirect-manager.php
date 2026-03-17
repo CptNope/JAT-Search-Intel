@@ -295,7 +295,7 @@ class Redirect_Manager {
 		$where = '';
 		if ( $search ) {
 			$like  = '%' . $wpdb->esc_like( $search ) . '%';
-			$where = $wpdb->prepare( " WHERE source_url LIKE %s OR target_url LIKE %s OR note LIKE %s", $like, $like, $like );
+			$where = $wpdb->prepare( ' WHERE source_url LIKE %s OR target_url LIKE %s OR note LIKE %s', $like, $like, $like );
 		}
 
 		$total = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}{$where}" );
@@ -489,7 +489,7 @@ class Redirect_Manager {
 	 * @param \WP_Post $post    Post object.
 	 * @param \WP_Post $post_before Previous post object.
 	 */
-	public function detect_slug_change( int $post_id, $post, $post_before ): void {
+	public function detect_slug_change( int $post_id, $post, $post_before = null ): void {
 		if ( ! $post_before || $post->post_name === $post_before->post_name ) {
 			return;
 		}
