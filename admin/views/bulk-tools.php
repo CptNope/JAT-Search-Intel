@@ -18,6 +18,7 @@ $post_types = get_post_types( [ 'public' => true ], 'objects' );
                 <th><label for="si-bulk-post-type"><?php esc_html_e( 'Target Post Type', 'search-intel' ); ?></label></th>
                 <td>
                     <select id="si-bulk-post-type">
+                        <option value="all"><?php esc_html_e( 'All Public Post Types', 'search-intel' ); ?></option>
                         <?php foreach ( $post_types as $pt ) : ?>
                             <option value="<?php echo esc_attr( $pt->name ); ?>"><?php echo esc_html( $pt->labels->name ); ?> (<?php echo esc_html( wp_count_posts( $pt->name )->publish ); ?>)</option>
                         <?php endforeach; ?>

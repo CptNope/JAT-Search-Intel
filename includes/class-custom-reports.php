@@ -526,6 +526,7 @@ class Custom_Reports {
                             <label><input type="checkbox" name="modules[]" value="seo" checked> SEO</label>
                             <label><input type="checkbox" name="modules[]" value="aeo" checked> AEO</label>
                             <label><input type="checkbox" name="modules[]" value="geo" checked> GEO</label>
+                            <label><input type="checkbox" name="modules[]" value="readability"> Readability</label>
                         </td>
                     </tr>
                     <tr>
