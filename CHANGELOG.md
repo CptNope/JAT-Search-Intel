@@ -6,6 +6,52 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.3.0] — 2026-03-16
+
+### Added
+
+#### Historical Analytics (`class-historical-analytics.php`)
+- Per-post score history recording (SEO/AEO/GEO over time, 365-day retention)
+- Chart-ready data generation for single-module or all-module views (30/60/90 days)
+- Site-wide daily score aggregation via cron for trend dashboards
+- Before/after comparison around a target date with delta calculation
+- Score change log per post (what changed, when, by whom, old vs new scores)
+- Recent changes summary across all posts with configurable lookback
+- Analytics admin page with period selector and change log table
+
+#### Google Analytics 4 Integration (`class-ga4-integration.php`)
+- GA4 Data API connection via OAuth access tokens
+- Organic traffic fetch with per-URL session and engaged session counts
+- Post-level traffic lookup with permalink-to-path matching
+- Score-traffic correlation report (scores alongside 30-day organic sessions)
+- Distribution opportunities: high-score / low-traffic posts for promotion
+- Optimization priorities: low-score / high-traffic posts for quick wins
+- GA4 Insights admin page with opportunity and priority tables
+
+#### Core Web Vitals Monitoring (`class-core-web-vitals.php`)
+- PageSpeed Insights API integration with mobile/desktop strategy support
+- Per-post CWV data storage (LCP, CLS, INP, performance score, 90-day history)
+- Metric classification (good / needs-improvement / poor) using Google thresholds
+- CWV trend data for charting per-post performance over time
+- CWV-vs-SEO correlation report (CWV metrics alongside SEO/AEO/GEO scores)
+- Weekly batch scan via cron (randomized post selection)
+- Web Vitals admin dashboard with color-coded metric classification
+
+#### Custom Reports & Export (`class-custom-reports.php`)
+- Report builder: configurable modules, post types, date range, and limit
+- CSV export with proper headers and data formatting
+- JSON export with pretty-printed structure
+- PDF-ready HTML generation with styled tables and summary
+- Scheduled reports: daily/weekly/monthly email delivery with HTML reports
+- Schedule management: save, delete, and process due schedules
+- Reports admin page with export form and schedule overview
+
+### Tests
+- 828 unit tests, 1,880 assertions (63 new tests)
+- Psalm level 4: 0 errors
+
+---
+
 ## [3.2.0] — 2026-03-13
 
 ### Added

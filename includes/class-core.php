@@ -133,6 +133,18 @@ class Core {
     /** @var Advanced_Linking */
     public $advanced_linking;
 
+    /** @var Historical_Analytics */
+    public $historical_analytics;
+
+    /** @var GA4_Integration */
+    public $ga4_integration;
+
+    /** @var Core_Web_Vitals */
+    public $core_web_vitals;
+
+    /** @var Custom_Reports */
+    public $custom_reports;
+
     /**
      * Get singleton instance.
      */
@@ -256,6 +268,18 @@ class Core {
 
         // Advanced Internal Linking — suggestions, orphan alerts, equity flow, broken links.
         $this->advanced_linking = new Advanced_Linking( $settings );
+
+        // Historical Analytics — per-post charts, site-wide trends, before/after, change log.
+        $this->historical_analytics = new Historical_Analytics( $settings );
+
+        // GA4 Integration — organic traffic correlation, distribution opportunities, optimization priorities.
+        $this->ga4_integration = new GA4_Integration( $settings );
+
+        // Core Web Vitals — PageSpeed Insights, CWV tracking, SEO correlation.
+        $this->core_web_vitals = new Core_Web_Vitals( $settings );
+
+        // Custom Reports — PDF generation, scheduled email, CSV/JSON export, report builder.
+        $this->custom_reports = new Custom_Reports( $settings );
 
         // Auto-redirect on slug change.
         add_action( 'post_updated', [ $this->redirects, 'detect_slug_change' ], 10, 3 );
@@ -525,6 +549,20 @@ class Core {
 
             // Advanced Internal Linking (v3.2)
             'enable_advanced_linking' => false,
+
+            // Historical Analytics (v3.3)
+            'enable_historical_analytics' => false,
+
+            // Google Analytics 4 Integration (v3.3)
+            'enable_ga4'             => false,
+            'ga4_property_id'        => '',
+
+            // Core Web Vitals Monitoring (v3.3)
+            'enable_cwv'             => false,
+            'psi_api_key'            => '',
+
+            // Custom Reports & Export (v3.3)
+            'enable_custom_reports'  => false,
         ];
     }
 }

@@ -160,6 +160,10 @@
       <code><![CDATA[$content_decay]]></code>
       <code><![CDATA[$keyword_cannibalization]]></code>
       <code><![CDATA[$advanced_linking]]></code>
+      <code><![CDATA[$historical_analytics]]></code>
+      <code><![CDATA[$ga4_integration]]></code>
+      <code><![CDATA[$core_web_vitals]]></code>
+      <code><![CDATA[$custom_reports]]></code>
     </PossiblyUnusedProperty>
     <UndefinedConstant>
       <code><![CDATA[SEARCH_INTEL_BASENAME]]></code>
@@ -552,6 +556,56 @@
     <PossiblyUnusedReturnValue>
       <code><![CDATA[array]]></code>
     </PossiblyUnusedReturnValue>
+    <UnusedProperty>
+      <code><![CDATA[$settings]]></code>
+    </UnusedProperty>
+  </file>
+  <file src="includes/class-historical-analytics.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[get_chart_data]]></code>
+      <code><![CDATA[get_before_after]]></code>
+      <code><![CDATA[log_change]]></code>
+      <code><![CDATA[get_change_log]]></code>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedParam>
+      <code><![CDATA[$days]]></code>
+    </PossiblyUnusedParam>
+    <UndefinedConstant>
+      <code><![CDATA[DAY_IN_SECONDS]]></code>
+      <code><![CDATA[DAY_IN_SECONDS]]></code>
+      <code><![CDATA[DAY_IN_SECONDS]]></code>
+    </UndefinedConstant>
+    <UnusedProperty>
+      <code><![CDATA[$settings]]></code>
+    </UnusedProperty>
+  </file>
+  <file src="includes/class-ga4-integration.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[save_tokens]]></code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="includes/class-core-web-vitals.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[get_cwv_trends]]></code>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[array]]></code>
+    </PossiblyUnusedReturnValue>
+    <UndefinedConstant>
+      <code><![CDATA[DAY_IN_SECONDS]]></code>
+    </UndefinedConstant>
+  </file>
+  <file src="includes/class-custom-reports.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[save_schedule]]></code>
+      <code><![CDATA[delete_schedule]]></code>
+    </PossiblyUnusedMethod>
+    <UndefinedConstant>
+      <code><![CDATA[DAY_IN_SECONDS]]></code>
+      <code><![CDATA[WEEK_IN_SECONDS]]></code>
+      <code><![CDATA[DAY_IN_SECONDS]]></code>
+      <code><![CDATA[WEEK_IN_SECONDS]]></code>
+    </UndefinedConstant>
     <UnusedProperty>
       <code><![CDATA[$settings]]></code>
     </UnusedProperty>

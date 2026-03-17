@@ -21,6 +21,7 @@ define( 'ABSPATH', dirname( __DIR__, 3 ) . '/' );
 define( 'MINUTE_IN_SECONDS', 60 );
 define( 'HOUR_IN_SECONDS', 3600 );
 define( 'DAY_IN_SECONDS', 86400 );
+define( 'WEEK_IN_SECONDS', 604800 );
 
 define( 'SEARCH_INTEL_BASENAME', 'search-intel/search-intel.php' );
 
