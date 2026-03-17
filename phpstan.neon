@@ -9,17 +9,28 @@ parameters:
         - phpstan-constants.php
     excludePaths:
         - includes/class-cli.php
+    treatPhpDocTypesAsCertain: false
     ignoreErrors:
-        - '#Function .+ not found#'
-        - '#extends unknown class#'
-        - '#on an unknown class#'
+        # Array value types — WordPress arrays are loosely typed.
         - '#no value type specified in iterable type array#'
+
+        # Write-only $settings — stored for subclass/runtime access.
+        - '#is never read, only written#'
+
+        # Untyped hook params — WordPress actions/filters pass mixed types.
         - '#with no type specified#'
-        - '#has no return type specified#'
-        - '#is always true#'
-        - '#Else branch is unreachable#'
+
+        # Defensive isset/??/empty on WP_Post — guards against edge cases.
         - '#in isset\(\) is not nullable#'
         - '#on left side of \?\? is not nullable#'
+        - '#in empty\(\) always exists and is not falsy#'
         - '#Cannot access offset .* on WP_Post#'
-        - '#is never read, only written#'
+
+        # Always-true comparisons in defensive code.
+        - '#is always true#'
+
+        # Unused class constants — used externally or reserved for future.
         - '#is unused#'
+
+        # Optional WooCommerce dependency.
+        - '#Function get_woocommerce_currency not found#'

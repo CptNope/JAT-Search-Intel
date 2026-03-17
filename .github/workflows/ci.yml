@@ -64,13 +64,8 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --no-interaction --prefer-dist --ignore-platform-req=php
 
-      - name: Generate PHPStan baseline
-        run: vendor/bin/phpstan analyse --configuration=phpstan.neon --generate-baseline=phpstan-baseline.neon --no-progress --allow-empty-baseline
-        continue-on-error: true
-
       - name: Run PHPStan
-        run: vendor/bin/phpstan analyse --configuration=phpstan.neon --no-progress --error-format=table
-        continue-on-error: true
+        run: vendor/bin/phpstan analyse --configuration=phpstan.neon --no-progress
 
   eslint:
     name: ESLint

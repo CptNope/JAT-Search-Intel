@@ -11,7 +11,7 @@
 define( 'SEARCH_INTEL_VERSION', '3.3.0' );
 define( 'SEARCH_INTEL_FILE', __FILE__ );
 define( 'SEARCH_INTEL_DIR', __DIR__ . '/' );
-define( 'SEARCH_INTEL_URL', '' );
+define( 'SEARCH_INTEL_URL', 'https://example.com/wp-content/plugins/search-intel/' );
 define( 'SEARCH_INTEL_BASENAME', 'search-intel/search-intel.php' );
 
 // WordPress database constants.

@@ -614,7 +614,7 @@ class GEO_Manager {
         }
 
         // Check 4: Author has E-E-A-T data (15 points)
-        $author_id   = $post->post_author;
+        $author_id   = (int) $post->post_author;
         $author_bio  = get_the_author_meta( 'description', $author_id );
         $credentials = get_user_meta( $author_id, 'search_intel_credentials', true );
         if ( $author_bio && strlen( $author_bio ) > 50 ) {
