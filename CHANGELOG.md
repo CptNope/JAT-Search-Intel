@@ -6,6 +6,16 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.3.5] — 2026-03-17
+
+### Fixed
+- **llms.txt 404**: Rewrite rules for `llms.txt` and `llms-full.txt` were never flushed on activation — added to activation hook alongside sitemap rules
+- **llms.txt served by wrong plugin**: `template_redirect` handler now runs at priority 1 so Search Intel's llms.txt takes precedence over other plugins
+- **Reports showing zero scores**: `build_report()` was reading from a non-existent `_search_intel_scores` meta key — fixed to read from individual `_search_intel_seo_score`, `_search_intel_aeo_score`, `_search_intel_geo_score`, `_search_intel_readability_score` keys
+- **Psalm CI failure**: Removed stale `PossiblyUnusedReturnValue` baseline entry for `class-core-web-vitals.php`
+
+---
+
 ## [3.3.4] — 2026-03-17
 
 ### Fixed

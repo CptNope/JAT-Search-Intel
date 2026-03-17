@@ -31,8 +31,12 @@ class GEO_Manager {
 
         // llms.txt endpoint
         if ( ! empty( $settings['enable_llms_txt'] ) ) {
-            add_action( 'init', [ $this, 'register_llms_txt_endpoint' ] );
-            add_action( 'template_redirect', [ $this, 'serve_llms_txt' ] );
+            // Register late so our rewrite rule lands on top of other plugins' rules.
+            add_action( 'init', [ $this, 'register_llms_txt_endpoint' ], 999 );
+            add_action( 'template_redirect', [ $this, 'serve_llms_txt' ], 1 );
+            // Remove static llms.txt files written by other plugins (e.g. AIOSEO)
+            // so our dynamic rewrite rule takes effect.
+            add_action( 'init', [ $this, 'cleanup_static_llms_txt' ], 0 );
         }
 
         // Entity and authority signals in content
@@ -218,6 +222,27 @@ class GEO_Manager {
     }
 
     /**
+     * Remove static llms.txt files from the web root.
+     *
+     * Some plugins (e.g. All in One SEO) write a physical llms.txt file that
+     * the web server serves directly, bypassing WordPress entirely. We delete
+     * these so our dynamic rewrite rule can take effect instead.
+     */
+    public function cleanup_static_llms_txt(): void {
+        $abspath = defined( 'ABSPATH' ) ? ABSPATH : '';
+        if ( $abspath === '' ) {
+            return;
+        }
+
+        $files = [ $abspath . 'llms.txt', $abspath . 'llms-full.txt' ];
+        foreach ( $files as $file ) {
+            if ( is_file( $file ) && is_writable( $file ) ) {
+                wp_delete_file( $file );
+            }
+        }
+    }
+
+    /**
      * Register the llms.txt rewrite endpoint.
      */
     public function register_llms_txt_endpoint(): void {
@@ -240,8 +265,11 @@ class GEO_Manager {
      * - Contact/attribution info
      */
     public function serve_llms_txt(): void {
-        $is_llms      = get_query_var( 'search_intel_llms_txt' );
-        $is_llms_full = get_query_var( 'search_intel_llms_full_txt' );
+        // Check REQUEST_URI directly instead of query vars so we serve
+        // our version regardless of which plugin's rewrite rule matched.
+        $path         = trim( wp_parse_url( $_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH ) ?: '', '/' );
+        $is_llms      = ( 'llms.txt' === $path );
+        $is_llms_full = ( 'llms-full.txt' === $path );
 
         if ( ! $is_llms && ! $is_llms_full ) {
             return;
