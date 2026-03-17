@@ -239,7 +239,9 @@ class AIEngineTest extends TestCase {
             'search_intel_ai_rate_limit' => [ 'count' => 999 ],
         ];
 
-        $ai = $this->make( [ 'ai_provider' => 'ollama' ] ); // Ollama needs no key.
+        // Use OpenAI with a saved key — Ollama skips rate limiting by design.
+        $ai = $this->make( [ 'ai_provider' => 'openai' ] );
+        $ai->save_api_key( 'openai', 'sk-fake-test-key' );
         $result = $ai->chat( 'system', 'user' );
 
         $this->assertFalse( $result['success'] );
