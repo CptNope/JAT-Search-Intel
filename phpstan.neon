@@ -22,3 +22,4 @@ parameters:
         - '#on left side of \?\? is not nullable#'
         - '#Cannot access offset .* on WP_Post#'
         - '#is never read, only written#'
+        - '#is unused#'
