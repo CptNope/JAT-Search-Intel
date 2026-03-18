@@ -49,8 +49,8 @@ class Historical_Analytics {
             return;
         }
 
-        // Record score on every analysis.
-        add_action( 'search_intel_post_analyzed', [ $this, 'record_score' ], 10, 2 );
+        // Record score and change log on every analysis.
+        add_action( 'search_intel_post_analyzed', [ $this, 'on_post_analyzed' ], 10, 4 );
 
         // Daily site-wide aggregate cron.
         add_action( 'search_intel_daily_aggregate', [ $this, 'compute_site_aggregate' ] );
@@ -70,20 +70,46 @@ class Historical_Analytics {
      *--------------------------------------------------------------------*/
 
     /**
+     * Handle the search_intel_post_analyzed action.
+     *
+     * Records score history and logs changes.
+     *
+     * @param int   $post_id    Post ID.
+     * @param array $new_scores New scores (seo, aeo, geo, readability).
+     * @param array $old_scores Previous scores (seo, aeo, geo, readability).
+     * @param array $results    Full analysis results.
+     */
+    public function on_post_analyzed( int $post_id, array $new_scores, array $old_scores = [], array $results = [] ): void {
+        $this->record_score( $post_id, $new_scores );
+
+        // Log change if scores actually changed.
+        if ( $old_scores !== $new_scores ) {
+            $action = 'Content analyzed';
+            if ( defined( 'DOING_CRON' ) && DOING_CRON ) {
+                $action = 'Bulk rescore (cron)';
+            } elseif ( wp_doing_ajax() ) {
+                $action = 'Bulk rescore';
+            }
+            $this->log_change( $post_id, $action, $old_scores, $new_scores, get_current_user_id() );
+        }
+    }
+
+    /**
      * Record a score snapshot for a post.
      *
      * @param int   $post_id Post ID.
-     * @param array $scores  Associative array with 'seo', 'aeo', 'geo' keys.
+     * @param array $scores  Associative array with 'seo', 'aeo', 'geo', 'readability' keys.
      */
     public function record_score( int $post_id, array $scores ): void {
         $history = $this->get_post_history( $post_id );
 
         $entry = [
-            'date' => gmdate( 'Y-m-d' ),
-            'ts'   => time(),
-            'seo'  => (float) ( $scores['seo'] ?? 0 ),
-            'aeo'  => (float) ( $scores['aeo'] ?? 0 ),
-            'geo'  => (float) ( $scores['geo'] ?? 0 ),
+            'date'        => gmdate( 'Y-m-d' ),
+            'ts'          => time(),
+            'seo'         => (float) ( $scores['seo'] ?? 0 ),
+            'aeo'         => (float) ( $scores['aeo'] ?? 0 ),
+            'geo'         => (float) ( $scores['geo'] ?? 0 ),
+            'readability' => (float) ( $scores['readability'] ?? 0 ),
         ];
 
         // Avoid duplicate entries for the same day — overwrite.
@@ -180,7 +206,7 @@ class Historical_Analytics {
             return;
         }
 
-        $totals = [ 'seo' => 0.0, 'aeo' => 0.0, 'geo' => 0.0 ];
+        $totals = [ 'seo' => 0.0, 'aeo' => 0.0, 'geo' => 0.0, 'readability' => 0.0 ];
         $count  = 0;
 
         foreach ( $post_ids as $pid ) {
@@ -189,9 +215,10 @@ class Historical_Analytics {
                 continue;
             }
             $latest = end( $history );
-            $totals['seo'] += (float) ( $latest['seo'] ?? 0 );
-            $totals['aeo'] += (float) ( $latest['aeo'] ?? 0 );
-            $totals['geo'] += (float) ( $latest['geo'] ?? 0 );
+            $totals['seo']         += (float) ( $latest['seo'] ?? 0 );
+            $totals['aeo']         += (float) ( $latest['aeo'] ?? 0 );
+            $totals['geo']         += (float) ( $latest['geo'] ?? 0 );
+            $totals['readability'] += (float) ( $latest['readability'] ?? 0 );
             $count++;
         }
 
@@ -200,12 +227,13 @@ class Historical_Analytics {
         }
 
         $aggregate = [
-            'date'  => gmdate( 'Y-m-d' ),
-            'ts'    => time(),
-            'seo'   => round( $totals['seo'] / $count, 1 ),
-            'aeo'   => round( $totals['aeo'] / $count, 1 ),
-            'geo'   => round( $totals['geo'] / $count, 1 ),
-            'posts' => $count,
+            'date'        => gmdate( 'Y-m-d' ),
+            'ts'          => time(),
+            'seo'         => round( $totals['seo'] / $count, 1 ),
+            'aeo'         => round( $totals['aeo'] / $count, 1 ),
+            'geo'         => round( $totals['geo'] / $count, 1 ),
+            'readability' => round( $totals['readability'] / $count, 1 ),
+            'posts'       => $count,
         ];
 
         $aggregates = get_option( self::SITE_AGGREGATE_KEY, [] );
@@ -255,9 +283,10 @@ class Historical_Analytics {
         return [
             'labels'   => array_column( $filtered, 'date' ),
             'datasets' => [
-                'seo' => array_column( $filtered, 'seo' ),
-                'aeo' => array_column( $filtered, 'aeo' ),
-                'geo' => array_column( $filtered, 'geo' ),
+                'seo'         => array_column( $filtered, 'seo' ),
+                'aeo'         => array_column( $filtered, 'aeo' ),
+                'geo'         => array_column( $filtered, 'geo' ),
+                'readability' => array_column( $filtered, 'readability' ),
             ],
             'days' => $days,
         ];
@@ -297,7 +326,7 @@ class Historical_Analytics {
 
         $delta = [];
         if ( $before && $after ) {
-            foreach ( [ 'seo', 'aeo', 'geo' ] as $mod ) {
+            foreach ( [ 'seo', 'aeo', 'geo', 'readability' ] as $mod ) {
                 $b = (float) ( $before[ $mod ] ?? 0 );
                 $a = (float) ( $after[ $mod ] ?? 0 );
                 $delta[ $mod ] = [
@@ -323,8 +352,8 @@ class Historical_Analytics {
      *
      * @param int    $post_id Post ID.
      * @param string $action  Description of what changed.
-     * @param array  $old     Old scores (seo, aeo, geo).
-     * @param array  $new     New scores (seo, aeo, geo).
+     * @param array  $old     Old scores (seo, aeo, geo, readability).
+     * @param array  $new     New scores (seo, aeo, geo, readability).
      * @param int    $user_id User who triggered the change (0 for system/cron).
      */
     public function log_change( int $post_id, string $action, array $old, array $new, int $user_id = 0 ): void {
@@ -339,14 +368,16 @@ class Historical_Analytics {
             'action'  => $action,
             'user_id' => $user_id,
             'old'     => [
-                'seo' => (float) ( $old['seo'] ?? 0 ),
-                'aeo' => (float) ( $old['aeo'] ?? 0 ),
-                'geo' => (float) ( $old['geo'] ?? 0 ),
+                'seo'         => (float) ( $old['seo'] ?? 0 ),
+                'aeo'         => (float) ( $old['aeo'] ?? 0 ),
+                'geo'         => (float) ( $old['geo'] ?? 0 ),
+                'readability' => (float) ( $old['readability'] ?? 0 ),
             ],
             'new'     => [
-                'seo' => (float) ( $new['seo'] ?? 0 ),
-                'aeo' => (float) ( $new['aeo'] ?? 0 ),
-                'geo' => (float) ( $new['geo'] ?? 0 ),
+                'seo'         => (float) ( $new['seo'] ?? 0 ),
+                'aeo'         => (float) ( $new['aeo'] ?? 0 ),
+                'geo'         => (float) ( $new['geo'] ?? 0 ),
+                'readability' => (float) ( $new['readability'] ?? 0 ),
             ],
         ];
 
@@ -476,6 +507,7 @@ class Historical_Analytics {
                             <th>SEO</th>
                             <th>AEO</th>
                             <th>GEO</th>
+                            <th>Readability</th>
                             <th>When</th>
                             <th>By</th>
                         </tr>
@@ -492,6 +524,7 @@ class Historical_Analytics {
                                 <td><?php echo esc_html( (string) ( $c['old']['seo'] ?? 0 ) ); ?> → <?php echo esc_html( (string) ( $c['new']['seo'] ?? 0 ) ); ?></td>
                                 <td><?php echo esc_html( (string) ( $c['old']['aeo'] ?? 0 ) ); ?> → <?php echo esc_html( (string) ( $c['new']['aeo'] ?? 0 ) ); ?></td>
                                 <td><?php echo esc_html( (string) ( $c['old']['geo'] ?? 0 ) ); ?> → <?php echo esc_html( (string) ( $c['new']['geo'] ?? 0 ) ); ?></td>
+                                <td><?php echo esc_html( (string) ( $c['old']['readability'] ?? 0 ) ); ?> → <?php echo esc_html( (string) ( $c['new']['readability'] ?? 0 ) ); ?></td>
                                 <td><?php echo esc_html( $c['date'] ?? '' ); ?></td>
                                 <td>
                                     <?php

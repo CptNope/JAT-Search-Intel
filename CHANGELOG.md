@@ -6,6 +6,20 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.4.0] — 2026-03-17
+
+### Added
+- **AI Optimizer**: New score-driven AI content improvement engine — after scoring, the AI analyzes failing SEO/AEO/GEO/Readability checks and generates actionable suggestions (meta descriptions, FAQ schema, AI summaries, focus keywords, entity extraction, question-style headings, readability rewrites) with one-click "Apply" for auto-applicable fixes
+- **AI Optimizer meta box**: Sidebar widget in the post editor shows current scores, issue count, and AI-generated suggestions with Apply/Review actions
+- **Readability tracking**: Score history, site-wide aggregates, before/after comparisons, and change logs now include readability alongside SEO/AEO/GEO
+
+### Fixed
+- **Analytics history never populated**: `search_intel_post_analyzed` action was never fired — now fires from both `analyze_on_save` and bulk rescore, so score history, change logs, and site-wide trends actually populate
+- **Bulk rescore wrong result keys**: Bulk rescore read `$results['seo']['score']` instead of `$results['seo_score']['score']`, causing scores to silently save as 0
+- **Change log never recorded**: `log_change()` existed but was never called — now automatically logs every score change with old→new values, action context, and user ID
+
+---
+
 ## [3.3.6] — 2026-03-17
 
 ### Fixed

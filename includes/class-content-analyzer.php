@@ -57,10 +57,35 @@ class Content_Analyzer {
 
         $results = $this->analyze( $post_id, $content, $title, $keyword, $description );
 
-        update_post_meta( $post_id, '_search_intel_seo_score', $results['seo_score']['score'] ?? 0 );
-        update_post_meta( $post_id, '_search_intel_aeo_score', $results['aeo_score']['score'] ?? 0 );
-        update_post_meta( $post_id, '_search_intel_geo_score', $results['geo_score']['score'] ?? 0 );
-        update_post_meta( $post_id, '_search_intel_readability_score', $results['readability']['score'] ?? 0 );
+        // Capture old scores before overwriting — used by change log.
+        $old_scores = [
+            'seo'         => (float) get_post_meta( $post_id, '_search_intel_seo_score', true ),
+            'aeo'         => (float) get_post_meta( $post_id, '_search_intel_aeo_score', true ),
+            'geo'         => (float) get_post_meta( $post_id, '_search_intel_geo_score', true ),
+            'readability' => (float) get_post_meta( $post_id, '_search_intel_readability_score', true ),
+        ];
+
+        $new_scores = [
+            'seo'         => (float) ( $results['seo_score']['score'] ?? 0 ),
+            'aeo'         => (float) ( $results['aeo_score']['score'] ?? 0 ),
+            'geo'         => (float) ( $results['geo_score']['score'] ?? 0 ),
+            'readability' => (float) ( $results['readability']['score'] ?? 0 ),
+        ];
+
+        update_post_meta( $post_id, '_search_intel_seo_score', $new_scores['seo'] );
+        update_post_meta( $post_id, '_search_intel_aeo_score', $new_scores['aeo'] );
+        update_post_meta( $post_id, '_search_intel_geo_score', $new_scores['geo'] );
+        update_post_meta( $post_id, '_search_intel_readability_score', $new_scores['readability'] );
+
+        /**
+         * Fires after a post has been analyzed and scores saved.
+         *
+         * @param int   $post_id    Post ID.
+         * @param array $new_scores New scores (seo, aeo, geo, readability).
+         * @param array $old_scores Previous scores (seo, aeo, geo, readability).
+         * @param array $results    Full analysis results including checks.
+         */
+        do_action( 'search_intel_post_analyzed', $post_id, $new_scores, $old_scores, $results );
 
         // Flag critical issues for admin notice
         $critical = [];

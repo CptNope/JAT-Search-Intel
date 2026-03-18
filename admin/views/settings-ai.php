@@ -139,6 +139,54 @@ $usage     = $ai_engine->get_token_usage();
             </table>
         </div>
 
+        <!-- Plugin Updates (GitHub Token) -->
+        <div class="si-settings-card">
+            <h2><?php esc_html_e( 'Plugin Updates', 'search-intel' ); ?></h2>
+            <p class="description" style="margin-bottom: 12px;">
+                <?php esc_html_e( 'A GitHub Personal Access Token is required to receive automatic plugin updates from the private repository. The token is encrypted before storage.', 'search-intel' ); ?>
+            </p>
+            <?php
+            $has_constant = defined( 'SEARCH_INTEL_GITHUB_TOKEN' ) && SEARCH_INTEL_GITHUB_TOKEN;
+            $has_token    = \Search_Intel\Admin::get_github_token() !== '';
+            ?>
+            <?php if ( $has_constant ) : ?>
+                <div class="notice notice-info inline" style="margin:0 0 12px;">
+                    <p><?php esc_html_e( 'Token is set via SEARCH_INTEL_GITHUB_TOKEN constant in wp-config.php. The field below is overridden.', 'search-intel' ); ?></p>
+                </div>
+            <?php endif; ?>
+            <table class="form-table">
+                <tr>
+                    <th><label for="si_github_token"><?php esc_html_e( 'GitHub Token', 'search-intel' ); ?></label></th>
+                    <td>
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            <input type="password" id="si_github_token" class="regular-text" placeholder="ghp_..." value="<?php echo $has_token ? '••••••••••••••••' : ''; ?>" autocomplete="off" <?php echo $has_constant ? 'disabled' : ''; ?> />
+                            <button type="button" class="button" id="si-save-github-token" <?php echo $has_constant ? 'disabled' : ''; ?>><?php esc_html_e( 'Save Token', 'search-intel' ); ?></button>
+                            <button type="button" class="button" id="si-test-github-token"><?php esc_html_e( 'Test', 'search-intel' ); ?></button>
+                            <span id="si-github-token-status">
+                                <?php if ( $has_token ) : ?>
+                                    <span class="si-status-saved">&#10003; <?php esc_html_e( 'Configured', 'search-intel' ); ?></span>
+                                <?php endif; ?>
+                            </span>
+                        </div>
+                        <p class="description">
+                            <a href="https://github.com/settings/tokens/new?scopes=repo&description=Search+Intel+Plugin+Updates" target="_blank"><?php esc_html_e( 'Generate a token with "repo" scope →', 'search-intel' ); ?></a>
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <th><?php esc_html_e( 'Current Version', 'search-intel' ); ?></th>
+                    <td>
+                        <strong><?php echo esc_html( SEARCH_INTEL_VERSION ); ?></strong>
+                        &nbsp;&nbsp;
+                        <a href="<?php echo esc_url( \Search_Intel\Plugin_Updater::get_force_check_url() ); ?>" class="button button-secondary">
+                            <?php esc_html_e( 'Check for Updates Now', 'search-intel' ); ?>
+                        </a>
+                        <p class="description"><?php esc_html_e( 'Clears the update cache and checks GitHub immediately. You will be redirected to the Updates page.', 'search-intel' ); ?></p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
         <!-- Rate Limiting & Budget -->
         <div class="si-settings-card">
             <h2><?php esc_html_e( 'Rate Limiting & Budget', 'search-intel' ); ?></h2>
@@ -261,6 +309,72 @@ jQuery(function ($) {
 
     // Clear placeholder on focus.
     $('.si-api-key-input').on('focus', function () {
+        if ($(this).val() === '••••••••••••••••') {
+            $(this).val('').attr('type', 'text');
+        }
+    }).on('blur', function () {
+        $(this).attr('type', 'password');
+    });
+
+    // GitHub token — save.
+    $('#si-save-github-token').on('click', function () {
+        var btn    = $(this);
+        var input  = $('#si_github_token');
+        var token  = input.val();
+        var status = $('#si-github-token-status');
+
+        if (!token || token === '••••••••••••••••') {
+            status.html('<span class="si-status-error">Enter a new token first.</span>');
+            return;
+        }
+
+        btn.prop('disabled', true);
+        status.html('<span class="si-status-testing">Saving...</span>');
+
+        $.post(ajaxUrl, {
+            action: 'si_save_github_token',
+            nonce: nonce,
+            github_token: token
+        }, function (response) {
+            btn.prop('disabled', false);
+            if (response.success) {
+                status.html('<span class="si-status-saved">&#10003; ' + response.data.message + '</span>');
+                input.val('••••••••••••••••');
+            } else {
+                status.html('<span class="si-status-error">' + (response.data.message || 'Error') + '</span>');
+            }
+        }).fail(function () {
+            btn.prop('disabled', false);
+            status.html('<span class="si-status-error">Request failed.</span>');
+        });
+    });
+
+    // GitHub token — test.
+    $('#si-test-github-token').on('click', function () {
+        var btn    = $(this);
+        var status = $('#si-github-token-status');
+
+        btn.prop('disabled', true);
+        status.html('<span class="si-status-testing">Testing...</span>');
+
+        $.post(ajaxUrl, {
+            action: 'si_test_github_token',
+            nonce: nonce
+        }, function (response) {
+            btn.prop('disabled', false);
+            if (response.success) {
+                status.html('<span class="si-status-saved">&#10003; ' + response.data.message + '</span>');
+            } else {
+                status.html('<span class="si-status-error">&#10007; ' + (response.data.message || 'Connection failed') + '</span>');
+            }
+        }).fail(function () {
+            btn.prop('disabled', false);
+            status.html('<span class="si-status-error">Request failed.</span>');
+        });
+    });
+
+    // GitHub token — clear placeholder on focus.
+    $('#si_github_token').on('focus', function () {
         if ($(this).val() === '••••••••••••••••') {
             $(this).val('').attr('type', 'text');
         }
