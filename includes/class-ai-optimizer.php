@@ -645,6 +645,7 @@ class AI_Optimizer {
 			'message'       => 'Suggestion applied successfully.',
 			'suggestion_id' => $suggestion_id,
 			'meta_key'      => $meta_key,
+			'value'         => is_string( $value ) ? $value : '',
 		] );
 	}
 

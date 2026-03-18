@@ -32,14 +32,14 @@ class FAQ_Generator {
 		$this->settings = $settings;
 		$this->detector = $detector;
 
-		if ( ! empty( $settings['enable_faq_generator'] ) ) {
-			if ( is_admin() ) {
-				add_action( 'add_meta_boxes', [ $this, 'register_metabox' ] );
-			}
-
-			add_action( 'wp_ajax_si_generate_faqs', [ $this, 'ajax_generate' ] );
-			add_action( 'wp_ajax_si_save_faqs', [ $this, 'ajax_save' ] );
+		// Separate FAQ Generator metabox (optional).
+		if ( ! empty( $settings['enable_faq_generator'] ) && is_admin() ) {
+			add_action( 'add_meta_boxes', [ $this, 'register_metabox' ] );
 		}
+
+		// AJAX handlers always active — the main metabox AEO tab uses these.
+		add_action( 'wp_ajax_si_generate_faqs', [ $this, 'ajax_generate' ] );
+		add_action( 'wp_ajax_si_save_faqs', [ $this, 'ajax_save' ] );
 	}
 
 	/**
@@ -234,66 +234,52 @@ class FAQ_Generator {
 	}
 
 	/**
-	 * Enhance FAQ suggestions using an AI API (optional).
+	 * Enhance FAQ suggestions using the AI Engine abstraction.
 	 *
-	 * @param int    $post_id Post ID.
-	 * @param string $api_key User-provided API key.
+	 * @param int $post_id Post ID.
 	 * @return array Enhanced FAQ suggestions.
 	 */
-	public function enhance_with_ai( int $post_id, string $api_key ): array {
+	public function enhance_with_ai( int $post_id ): array {
+		$core = Core::get_instance();
+		$ai   = $core->ai_engine;
+
+		if ( ! $ai->is_configured() ) {
+			return [];
+		}
+
 		$post = get_post( $post_id );
-		if ( ! $post || ! $api_key ) {
+		if ( ! $post ) {
 			return [];
 		}
 
 		$content = wp_strip_all_tags( $post->post_content );
 		$title   = $post->post_title;
+		$snippet = mb_substr( $content, 0, 3000 );
 
-		// Build prompt.
-		$prompt = sprintf(
-			"Based on this article titled \"%s\", generate 5 frequently asked questions with concise answers.\n\nContent:\n%s\n\nReturn JSON array: [{\"question\": \"...\", \"answer\": \"...\"}]",
-			$title,
-			wp_trim_words( $content, 500, '...' )
-		);
+		$system = 'You are an FAQ content strategist. Based on the article below, generate 5 frequently asked questions '
+				. 'with concise, factual answers (2-3 sentences each). '
+				. 'Return ONLY a JSON array: [{"question":"...","answer":"..."}]. No markdown fences, no explanation.';
+		$user   = "Title: {$title}\n\nContent:\n{$snippet}";
 
-		$response = wp_remote_post( 'https://api.openai.com/v1/chat/completions', [
-			'headers' => [
-				'Authorization' => 'Bearer ' . $api_key,
-				'Content-Type'  => 'application/json',
-			],
-			'body'    => (string) wp_json_encode( [
-				'model'       => 'gpt-3.5-turbo',
-				'messages'    => [
-					[ 'role' => 'user', 'content' => $prompt ],
-				],
-				'temperature' => 0.7,
-				'max_tokens'  => 1000,
-			] ),
-			'timeout' => 30,
-		] );
+		$result = $ai->chat( $system, $user, [ 'max_tokens' => 800, 'temperature' => 0.4 ] );
 
-		if ( is_wp_error( $response ) ) {
+		if ( ! $result['success'] || empty( $result['text'] ) ) {
 			return [];
 		}
 
-		$body = wp_remote_retrieve_body( $response );
-		$data = json_decode( $body, true );
-
-		if ( empty( $data['choices'][0]['message']['content'] ) ) {
-			return [];
-		}
-
-		$ai_content = $data['choices'][0]['message']['content'];
-		$faqs       = json_decode( $ai_content, true );
+		$json_text = trim( $result['text'] );
+		$json_text = preg_replace( '/^```(?:json)?\s*/i', '', $json_text );
+		$json_text = preg_replace( '/\s*```$/', '', $json_text );
+		$faqs      = json_decode( $json_text, true );
 
 		if ( ! is_array( $faqs ) ) {
 			return [];
 		}
 
-		$result = [];
+		$out = [];
 		foreach ( $faqs as $faq ) {
 			if ( ! empty( $faq['question'] ) && ! empty( $faq['answer'] ) ) {
-				$result[] = [
+				$out[] = [
 					'question' => sanitize_text_field( $faq['question'] ),
 					'answer'   => sanitize_text_field( $faq['answer'] ),
 					'source'   => 'ai',
@@ -302,7 +288,7 @@ class FAQ_Generator {
 			}
 		}
 
-		return $result;
+		return $out;
 	}
 
 	/**
@@ -318,10 +304,9 @@ class FAQ_Generator {
 
 		$faqs = $this->generate( $post_id );
 
-		// Optionally enhance with AI if key is provided.
-		$api_key = $this->settings['faq_ai_api_key'] ?? '';
-		if ( $api_key && ! empty( $_POST['use_ai'] ) ) {
-			$ai_faqs = $this->enhance_with_ai( $post_id, $api_key );
+		// Optionally enhance with AI if the AI Engine is configured.
+		if ( ! empty( $_POST['use_ai'] ) ) {
+			$ai_faqs = $this->enhance_with_ai( $post_id );
 			$faqs    = array_merge( $faqs, $ai_faqs );
 			$faqs    = $this->deduplicate( $faqs );
 		}

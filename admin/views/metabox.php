@@ -130,7 +130,19 @@ if ( ! defined( 'ABSPATH' ) ) {
             endif;
             ?>
         </div>
-        <button type="button" class="button" id="si-add-faq"><?php esc_html_e( '+ Add FAQ Item', 'search-intel' ); ?></button>
+        <div style="display:flex; gap:8px; align-items:center; margin-top:8px;">
+            <button type="button" class="button" id="si-add-faq"><?php esc_html_e( '+ Add FAQ Item', 'search-intel' ); ?></button>
+            <button type="button" class="button button-primary" id="si-generate-faqs"><?php esc_html_e( 'Generate FAQs', 'search-intel' ); ?></button>
+            <?php
+            $ai_available = \Search_Intel\Core::get_instance()->ai_engine->is_configured();
+            if ( $ai_available ) : ?>
+                <label style="margin-left:4px;">
+                    <input type="checkbox" id="si-faq-use-ai" value="1" checked />
+                    <?php esc_html_e( 'Enhance with AI', 'search-intel' ); ?>
+                </label>
+            <?php endif; ?>
+            <span id="si-faq-status"></span>
+        </div>
         <input type="hidden" name="si_faqs" id="si_faqs" value="<?php echo esc_attr( wp_json_encode( $faqs ?: [] ) ); ?>" />
 
         <hr />
@@ -328,30 +340,73 @@ if ( ! defined( 'ABSPATH' ) ) {
     <div class="si-tab-content" data-tab="analysis">
         <div class="si-analysis-scores" id="si-analysis-scores">
             <div class="si-score-ring" id="si-seo-ring">
-                <div class="si-score-value">—</div>
+                <div class="si-score-value"><?php echo esc_html( get_post_meta( $post->ID, '_search_intel_seo_score', true ) ?: '—' ); ?></div>
                 <div class="si-score-label"><?php esc_html_e( 'SEO', 'search-intel' ); ?></div>
             </div>
             <div class="si-score-ring" id="si-aeo-ring">
-                <div class="si-score-value">—</div>
+                <div class="si-score-value"><?php echo esc_html( get_post_meta( $post->ID, '_search_intel_aeo_score', true ) ?: '—' ); ?></div>
                 <div class="si-score-label"><?php esc_html_e( 'AEO', 'search-intel' ); ?></div>
             </div>
             <div class="si-score-ring" id="si-geo-ring">
-                <div class="si-score-value">—</div>
+                <div class="si-score-value"><?php echo esc_html( get_post_meta( $post->ID, '_search_intel_geo_score', true ) ?: '—' ); ?></div>
                 <div class="si-score-label"><?php esc_html_e( 'GEO', 'search-intel' ); ?></div>
             </div>
             <div class="si-score-ring" id="si-readability-ring">
-                <div class="si-score-value">—</div>
+                <div class="si-score-value"><?php echo esc_html( get_post_meta( $post->ID, '_search_intel_readability_score', true ) ?: '—' ); ?></div>
                 <div class="si-score-label"><?php esc_html_e( 'Readability', 'search-intel' ); ?></div>
             </div>
         </div>
 
-        <button type="button" class="button button-primary" id="si-run-analysis"><?php esc_html_e( 'Run Analysis', 'search-intel' ); ?></button>
+        <div style="display:flex; gap:8px; align-items:center; margin:12px 0;">
+            <button type="button" class="button button-primary" id="si-run-analysis"><?php esc_html_e( 'Run Analysis', 'search-intel' ); ?></button>
+            <?php if ( \Search_Intel\Core::get_instance()->ai_engine->is_configured() ) : ?>
+                <button type="button" class="button" id="si-ai-suggestions"><?php esc_html_e( 'AI Suggest Edits', 'search-intel' ); ?></button>
+            <?php endif; ?>
+        </div>
 
         <div id="si-analysis-details" class="si-analysis-details" style="display:none;">
             <div class="si-analysis-section" id="si-seo-checks"></div>
             <div class="si-analysis-section" id="si-aeo-checks"></div>
             <div class="si-analysis-section" id="si-geo-checks"></div>
         </div>
+
+        <!-- AI Suggestions -->
+        <div id="si-ai-suggestions-panel" style="display:none; margin-top:12px;">
+            <h4><?php esc_html_e( 'AI Suggestions', 'search-intel' ); ?></h4>
+            <div id="si-ai-suggestions-list"></div>
+        </div>
+
+        <!-- Score History -->
+        <?php
+        $history = get_post_meta( $post->ID, '_search_intel_analytics_history', true );
+        if ( ! empty( $history ) && is_array( $history ) ) :
+            $recent = array_slice( $history, -10 );
+        ?>
+        <hr />
+        <h4><?php esc_html_e( 'Score History', 'search-intel' ); ?></h4>
+        <table class="widefat striped" style="margin-top:8px;">
+            <thead>
+                <tr>
+                    <th><?php esc_html_e( 'Date', 'search-intel' ); ?></th>
+                    <th><?php esc_html_e( 'SEO', 'search-intel' ); ?></th>
+                    <th><?php esc_html_e( 'AEO', 'search-intel' ); ?></th>
+                    <th><?php esc_html_e( 'GEO', 'search-intel' ); ?></th>
+                    <th><?php esc_html_e( 'Read.', 'search-intel' ); ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ( array_reverse( $recent ) as $entry ) : ?>
+                <tr>
+                    <td><?php echo esc_html( $entry['date'] ?? '—' ); ?></td>
+                    <td><?php echo esc_html( $entry['seo'] ?? '—' ); ?></td>
+                    <td><?php echo esc_html( $entry['aeo'] ?? '—' ); ?></td>
+                    <td><?php echo esc_html( $entry['geo'] ?? '—' ); ?></td>
+                    <td><?php echo esc_html( $entry['readability'] ?? '—' ); ?></td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+        <?php endif; ?>
     </div>
 
 </div>

@@ -345,10 +345,12 @@ class Admin {
             );
 
             wp_localize_script( 'search-intel-admin', 'searchIntel', [
-                'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-                'nonce'   => wp_create_nonce( 'search_intel_nonce' ),
-                'postId'  => get_the_ID(),
-                'i18n'    => [
+                'ajaxUrl'      => admin_url( 'admin-ajax.php' ),
+                'nonce'        => wp_create_nonce( 'search_intel_nonce' ),
+                'faqNonce'     => wp_create_nonce( 'si_faq_nonce' ),
+                'postId'       => get_the_ID(),
+                'aiConfigured' => $this->core->ai_engine->is_configured(),
+                'i18n'         => [
                     'analyzing' => __( 'Analyzing...', 'search-intel' ),
                     'seoScore'  => __( 'SEO Score', 'search-intel' ),
                     'aeoScore'  => __( 'AEO Score', 'search-intel' ),

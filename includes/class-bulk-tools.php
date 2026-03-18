@@ -285,7 +285,7 @@ class Bulk_Tools {
         $valid_fields = [
             'seo_title', 'meta_description', 'focus_keyword', 'secondary_keywords',
             'social_title', 'social_description',
-            'direct_answer',
+            'direct_answer', 'faqs',
             'ai_summary', 'key_topics', 'entities', 'content_type', 'content_intent',
             'audience', 'expertise_level',
         ];
@@ -445,6 +445,44 @@ class Bulk_Tools {
                     if ( $result['success'] && ! empty( $result['text'] ) ) {
                         update_post_meta( $post->ID, '_search_intel_direct_answer', sanitize_text_field( trim( $result['text'], " \t\n\r\"'" ) ) );
                         $generated++;
+                    } else {
+                        $errors++;
+                    }
+                }
+            }
+
+            // FAQs.
+            if ( in_array( 'faqs', $fields, true ) ) {
+                $existing = get_post_meta( $post->ID, '_search_intel_faqs', true );
+                if ( 'overwrite_all' === $mode || empty( $existing ) ) {
+                    $system = 'You are an FAQ content strategist. Based on the article below, generate 5 frequently asked questions '
+                            . 'with concise, factual answers (2-3 sentences each). '
+                            . 'Return ONLY a JSON array: [{"question":"...","answer":"..."}]. No markdown fences, no explanation.';
+                    $user   = "Title: {$title}\n\nContent:\n{$snippet}";
+
+                    $result = $ai_engine->chat( $system, $user, [ 'max_tokens' => 800, 'temperature' => 0.4 ] );
+                    if ( $result['success'] && ! empty( $result['text'] ) ) {
+                        $json_text = trim( $result['text'] );
+                        $json_text = preg_replace( '/^```(?:json)?\s*/i', '', $json_text );
+                        $json_text = preg_replace( '/\s*```$/', '', $json_text );
+                        $parsed    = json_decode( $json_text, true );
+                        if ( is_array( $parsed ) ) {
+                            $faq_items = [];
+                            foreach ( $parsed as $faq ) {
+                                if ( ! empty( $faq['question'] ) && ! empty( $faq['answer'] ) ) {
+                                    $faq_items[] = [
+                                        'question' => sanitize_text_field( $faq['question'] ),
+                                        'answer'   => wp_kses_post( $faq['answer'] ),
+                                    ];
+                                }
+                            }
+                            if ( ! empty( $faq_items ) ) {
+                                update_post_meta( $post->ID, '_search_intel_faqs', $faq_items );
+                                $generated++;
+                            }
+                        } else {
+                            $errors++;
+                        }
                     } else {
                         $errors++;
                     }

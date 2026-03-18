@@ -333,6 +333,146 @@
         });
     });
 
+    /* ========== FAQ Generation ========== */
+
+    $(document).on('click', '#si-generate-faqs', function () {
+        var $btn = $(this);
+        var $status = $('#si-faq-status');
+        var useAi = $('#si-faq-use-ai').is(':checked') ? 1 : 0;
+
+        $btn.prop('disabled', true);
+        $status.html('<em>Generating...</em>');
+
+        $.ajax({
+            url: SI.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'si_generate_faqs',
+                nonce: SI.faqNonce,
+                post_id: SI.postId,
+                use_ai: useAi
+            },
+            success: function (response) {
+                if (response.success && response.data.faqs) {
+                    var faqs = response.data.faqs;
+                    var $repeater = $('#si-faq-repeater');
+                    $repeater.empty();
+
+                    faqs.forEach(function (faq, i) {
+                        var html = '<div class="si-faq-item-row" data-index="' + i + '">' +
+                            '<input type="text" class="widefat si-faq-question" placeholder="Question" value="' + $('<span/>').text(faq.question).html() + '" />' +
+                            '<textarea class="widefat si-faq-answer" rows="2" placeholder="Answer">' + $('<span/>').text(faq.answer).html() + '</textarea>' +
+                            '<button type="button" class="button si-remove-faq">Remove</button>' +
+                            '</div>';
+                        $repeater.append(html);
+                    });
+
+                    updateFaqsJson();
+                    $status.html('<span style="color:green;">&#10003; ' + faqs.length + ' FAQs generated</span>');
+                } else {
+                    $status.html('<span style="color:red;">No FAQs found.</span>');
+                }
+            },
+            error: function () {
+                $status.html('<span style="color:red;">Generation failed.</span>');
+            },
+            complete: function () {
+                $btn.prop('disabled', false);
+            }
+        });
+    });
+
+    /* ========== AI Suggestions ========== */
+
+    $(document).on('click', '#si-ai-suggestions', function () {
+        var $btn = $(this);
+        var $panel = $('#si-ai-suggestions-panel');
+        var $list = $('#si-ai-suggestions-list');
+
+        $btn.prop('disabled', true).text('Loading...');
+        $list.html('<em>Generating AI suggestions from analysis results...</em>');
+        $panel.show();
+
+        $.ajax({
+            url: SI.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'si_ai_get_suggestions',
+                nonce: SI.nonce,
+                post_id: SI.postId,
+                force: 1
+            },
+            success: function (response) {
+                if (response.success && response.data.suggestions && response.data.suggestions.length) {
+                    var html = '';
+                    response.data.suggestions.forEach(function (s) {
+                        var isApply = s.action === 'apply';
+                        var cls = isApply ? 'si-suggestion-apply' : 'si-suggestion-info';
+                        html += '<div class="si-suggestion-item ' + cls + '" style="margin-bottom:10px; padding:10px; background:#f9f9f9; border:1px solid #ddd; border-radius:4px;">';
+                        html += '<strong>' + $('<span/>').text(s.title).html() + '</strong>';
+                        html += '<p style="margin:6px 0 0; white-space:pre-wrap;">' + $('<span/>').text(s.text).html() + '</p>';
+                        if (isApply && s.apply_data && s.apply_data.meta_key) {
+                            html += '<button type="button" class="button si-apply-suggestion" data-suggestion-id="' + s.id + '" style="margin-top:6px;">Apply</button>';
+                        }
+                        html += '</div>';
+                    });
+                    $list.html(html);
+                } else if (response.success) {
+                    $list.html('<p>No suggestions — run analysis first to identify issues.</p>');
+                } else {
+                    $list.html('<p style="color:red;">' + (response.data.message || 'Failed to get suggestions.') + '</p>');
+                }
+            },
+            error: function () {
+                $list.html('<p style="color:red;">Request failed.</p>');
+            },
+            complete: function () {
+                $btn.prop('disabled', false).text('AI Suggest Edits');
+            }
+        });
+    });
+
+    $(document).on('click', '.si-apply-suggestion', function () {
+        var $btn = $(this);
+        var suggestionId = $btn.data('suggestion-id');
+
+        $btn.prop('disabled', true).text('Applying...');
+
+        $.ajax({
+            url: SI.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'si_ai_apply_suggestion',
+                nonce: SI.nonce,
+                post_id: SI.postId,
+                suggestion_id: suggestionId
+            },
+            success: function (response) {
+                if (response.success) {
+                    $btn.replaceWith('<span style="color:green;">&#10003; Applied</span>');
+
+                    // Update the corresponding field in the metabox if visible.
+                    var metaKey = response.data.meta_key || '';
+                    var value = response.data.value || '';
+                    if (metaKey === '_search_intel_description') {
+                        $('#si_description').val(value);
+                        updateSerpPreview();
+                        updateCharCounts();
+                    } else if (metaKey === '_search_intel_title') {
+                        $('#si_title').val(value);
+                        updateSerpPreview();
+                        updateCharCounts();
+                    } else if (metaKey === '_search_intel_focus_keyword') {
+                        $('#si_focus_keyword').val(value);
+                    }
+                } else {
+                    $btn.prop('disabled', false).text('Apply');
+                    $btn.after('<span style="color:red;margin-left:8px;">' + (response.data.message || 'Failed') + '</span>');
+                }
+            }
+        });
+    });
+
     /* ========== Init ========== */
 
     $(document).ready(function () {
