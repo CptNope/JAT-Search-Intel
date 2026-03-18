@@ -8,7 +8,7 @@
  * @phpstan-ignore-next-line
  */
 
-define( 'SEARCH_INTEL_VERSION', '3.3.6' );
+define( 'SEARCH_INTEL_VERSION', '3.4.0' );
 define( 'SEARCH_INTEL_FILE', __FILE__ );
 define( 'SEARCH_INTEL_DIR', __DIR__ . '/' );
 define( 'SEARCH_INTEL_URL', 'https://example.com/wp-content/plugins/search-intel/' );
@@ -19,6 +19,9 @@ define( 'ARRAY_A', 'ARRAY_A' );
 define( 'ARRAY_N', 'ARRAY_N' );
 define( 'OBJECT', 'OBJECT' );
 define( 'OBJECT_K', 'OBJECT_K' );
+
+// WordPress path constants.
+define( 'WP_PLUGIN_DIR', '/var/www/html/wp-content/plugins' );
 
 // WordPress time constants.
 define( 'MINUTE_IN_SECONDS', 60 );

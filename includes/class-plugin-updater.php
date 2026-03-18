@@ -140,7 +140,7 @@ class Plugin_Updater {
 		$remote_version = ltrim( $release['tag_name'] ?? '', 'vV' );
 		if ( ! $remote_version || version_compare( $this->version, $remote_version, '>=' ) ) {
 			// No update available — add to no_update so WP knows we checked.
-			$transient->no_update[ $this->basename ] = (object) [
+			$transient->no_update[ $this->basename ] = (object) [ // @phpstan-ignore property.notFound
 				'id'            => $this->basename,
 				'slug'          => dirname( $this->basename ),
 				'plugin'        => $this->basename,
@@ -156,7 +156,7 @@ class Plugin_Updater {
 			return $transient;
 		}
 
-		$transient->response[ $this->basename ] = (object) [
+		$transient->response[ $this->basename ] = (object) [ // @phpstan-ignore property.notFound
 			'id'            => $this->basename,
 			'slug'          => dirname( $this->basename ),
 			'plugin'        => $this->basename,
