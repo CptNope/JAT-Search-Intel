@@ -6,6 +6,21 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.4.1] — 2026-03-17
+
+### Added
+- **FAQ Generation button**: "Generate FAQs" button with "Enhance with AI" toggle in the AEO tab — works with any configured AI provider via the AI Engine abstraction
+- **AI Suggest Edits**: New button in the Analysis tab generates revision suggestions based on failing SEO/AEO/GEO/Readability checks
+- **Score history**: Analysis tab now shows a table of the last 10 analysis runs with date and all four scores
+- **Bulk FAQs**: FAQs field added to Bulk Tools AI generation (AEO section) — generates 5 Q&A pairs per post
+- **Pre-populated scores**: Score rings in the Analysis tab load saved scores on page load instead of showing dashes
+
+### Fixed
+- **FAQ generation broken**: `enhance_with_ai()` was calling the OpenAI API directly with a separate `faq_ai_api_key` setting — refactored to use the AI Engine abstraction
+- **FAQ AJAX handlers gated**: `si_generate_faqs` and `si_save_faqs` were only registered when `enable_faq_generator` was true — now always available for the main metabox AEO tab
+
+---
+
 ## [3.4.0] — 2026-03-17
 
 ### Added

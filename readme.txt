@@ -4,7 +4,7 @@ Tags: seo, aeo, geo, schema, structured-data, ai-optimization, llms, featured-sn
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 3.3.6
+Stable tag: 3.4.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -131,6 +131,23 @@ llms.txt is a proposed standard (similar to robots.txt) that provides a machine-
 No. Search Intel outputs lightweight meta tags and JSON-LD schema directly in the page head. There are no frontend JavaScript files or CSS loaded on the public site.
 
 == Changelog ==
+
+= 3.4.1 =
+* Fixed: FAQ generation now uses AI Engine abstraction instead of direct OpenAI calls — works with any configured provider
+* Fixed: FAQ AJAX handlers always registered so Generate FAQs button works from the main AEO tab
+* Added: "Generate FAQs" button with AI enhancement toggle in AEO tab
+* Added: "AI Suggest Edits" button in Analysis tab — generates revision suggestions from failing checks
+* Added: Score history table in Analysis tab (last 10 analysis runs)
+* Added: FAQs field in Bulk Tools AI generation (AEO section)
+* Added: Score rings pre-populated with saved scores on page load
+
+= 3.4.0 =
+* Added: AI Optimizer — score-driven content improvement engine with one-click Apply for auto-applicable fixes
+* Added: AI Optimizer meta box in post editor with current scores, issue count, and AI suggestions
+* Added: Readability tracking in score history, site-wide aggregates, and change logs
+* Fixed: Analytics history now populated — `search_intel_post_analyzed` fires from both save and bulk rescore
+* Fixed: Bulk rescore reads correct result keys (was silently saving 0)
+* Fixed: Change log now automatically records every score change
 
 = 3.3.6 =
 * Fixed: Bulk rescore/regenerate/AI generate now supports "All Public Post Types" — processes posts, pages, and CPTs in one run
