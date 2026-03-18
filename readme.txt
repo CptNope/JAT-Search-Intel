@@ -4,7 +4,7 @@ Tags: seo, aeo, geo, schema, structured-data, ai-optimization, llms, featured-sn
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 3.4.1
+Stable tag: 3.4.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -131,6 +131,10 @@ llms.txt is a proposed standard (similar to robots.txt) that provides a machine-
 No. Search Intel outputs lightweight meta tags and JSON-LD schema directly in the page head. There are no frontend JavaScript files or CSS loaded on the public site.
 
 == Changelog ==
+
+= 3.4.2 =
+* Fixed: Saving settings on one tab no longer wipes boolean toggles from other tabs (page-aware sanitization)
+* Fixed: Reports now display the correct plugin version instead of hardcoded fallback
 
 = 3.4.1 =
 * Fixed: FAQ generation now uses AI Engine abstraction instead of direct OpenAI calls — works with any configured provider

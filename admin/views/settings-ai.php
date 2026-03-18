@@ -14,6 +14,7 @@ $usage     = $ai_engine->get_token_usage();
 
     <form method="post" action="options.php" id="si-ai-settings-form">
         <?php settings_fields( 'search_intel_settings_group' ); ?>
+        <input type="hidden" name="search_intel_settings[_si_page]" value="ai" />
 
         <?php
         // Preserve all non-AI settings as hidden fields.

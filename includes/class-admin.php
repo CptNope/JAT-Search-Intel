@@ -164,9 +164,47 @@ class Admin {
      */
     public function sanitize_settings( $input ): array {
         $defaults  = Core::get_default_settings();
+        $existing  = get_option( 'search_intel_settings', [] );
+        $existing  = wp_parse_args( $existing, $defaults );
         $sanitized = [];
 
-        // Checkboxes (booleans)
+        // Determine which settings page is submitting.
+        $page = $input['_si_page'] ?? '';
+
+        // Map each page to the boolean checkboxes it manages.
+        // Booleans NOT on the current page preserve their existing saved value.
+        $page_bools = [
+            'general' => [
+                'enable_seo', 'enable_schema', 'enable_aeo', 'enable_geo',
+                'enable_sitemap', 'enable_analyzer',
+                'enable_redirects', 'enable_indexnow', 'enable_robots_editor',
+                'enable_link_checker', 'enable_internal_linker', 'enable_local_business',
+                'enable_audit_log', 'enable_csp_headers', 'enable_sri',
+                'enable_schema_types', 'enable_qa_detector', 'enable_faq_generator',
+                'enable_visibility_dashboard', 'enable_citation_graph', 'enable_authority_map',
+                'enable_ai_engine', 'enable_content_decay', 'enable_cannibalization',
+                'enable_advanced_linking',
+                'enable_historical_analytics', 'enable_ga4', 'enable_cwv',
+                'enable_custom_reports', 'enable_notifications',
+                'enable_rbac', 'enable_multilang', 'enable_white_label', 'enable_scale',
+            ],
+            'seo' => [
+                'enable_og', 'enable_twitter', 'enable_canonical', 'enable_robots_meta',
+                'noindex_archives', 'noindex_search', 'noindex_404', 'ping_search_engines',
+                'enable_breadcrumbs', 'enable_sitelinks',
+            ],
+            'aeo' => [
+                'enable_faq_schema', 'enable_howto_schema', 'enable_speakable',
+            ],
+            'geo' => [
+                'enable_llms_txt', 'enable_ai_meta', 'enable_entity_markup',
+                'content_freshness', 'enable_rest_api',
+            ],
+        ];
+
+        $managed_bools = $page_bools[ $page ] ?? [];
+
+        // All boolean keys.
         $bool_keys = [
             // Core
             'enable_seo', 'enable_og', 'enable_twitter', 'enable_canonical',
@@ -197,10 +235,16 @@ class Admin {
         ];
 
         foreach ( $bool_keys as $key ) {
-            $sanitized[ $key ] = ! empty( $input[ $key ] );
+            if ( ! empty( $managed_bools ) && ! in_array( $key, $managed_bools, true ) ) {
+                // Not on this page — preserve existing value.
+                $sanitized[ $key ] = ! empty( $existing[ $key ] );
+            } else {
+                // On this page (or no page marker) — use submitted value.
+                $sanitized[ $key ] = ! empty( $input[ $key ] );
+            }
         }
 
-        // Text fields
+        // Text fields — use submitted value if present, otherwise preserve existing.
         $text_keys = [
             'separator', 'site_name', 'knowledge_type', 'knowledge_name',
             'knowledge_logo', 'twitter_card_type', 'twitter_site',
@@ -218,41 +262,31 @@ class Admin {
         ];
 
         foreach ( $text_keys as $key ) {
-            $sanitized[ $key ] = isset( $input[ $key ] ) ? sanitize_text_field( $input[ $key ] ) : ( $defaults[ $key ] ?? '' );
+            if ( isset( $input[ $key ] ) ) {
+                $sanitized[ $key ] = sanitize_text_field( $input[ $key ] );
+            } else {
+                $sanitized[ $key ] = $existing[ $key ] ?? ( $defaults[ $key ] ?? '' );
+            }
         }
 
-        // Arrays
-        if ( isset( $input['enabled_post_types'] ) && is_array( $input['enabled_post_types'] ) ) {
-            $sanitized['enabled_post_types'] = array_map( 'sanitize_text_field', $input['enabled_post_types'] );
-        } else {
-            $sanitized['enabled_post_types'] = $defaults['enabled_post_types'];
+        // Arrays — use submitted value if present, otherwise preserve existing.
+        $array_keys = [
+            'enabled_post_types', 'sitemap_post_types', 'sitemap_taxonomies',
+            'indexnow_providers', 'local_business_locations',
+        ];
+        foreach ( $array_keys as $key ) {
+            if ( isset( $input[ $key ] ) && is_array( $input[ $key ] ) ) {
+                if ( 'local_business_locations' === $key ) {
+                    $sanitized[ $key ] = $input[ $key ];
+                } else {
+                    $sanitized[ $key ] = array_map( 'sanitize_text_field', $input[ $key ] );
+                }
+            } else {
+                $sanitized[ $key ] = $existing[ $key ] ?? $defaults[ $key ];
+            }
         }
 
-        if ( isset( $input['sitemap_post_types'] ) && is_array( $input['sitemap_post_types'] ) ) {
-            $sanitized['sitemap_post_types'] = array_map( 'sanitize_text_field', $input['sitemap_post_types'] );
-        } else {
-            $sanitized['sitemap_post_types'] = $defaults['sitemap_post_types'];
-        }
-
-        if ( isset( $input['sitemap_taxonomies'] ) && is_array( $input['sitemap_taxonomies'] ) ) {
-            $sanitized['sitemap_taxonomies'] = array_map( 'sanitize_text_field', $input['sitemap_taxonomies'] );
-        } else {
-            $sanitized['sitemap_taxonomies'] = $defaults['sitemap_taxonomies'];
-        }
-
-        if ( isset( $input['indexnow_providers'] ) && is_array( $input['indexnow_providers'] ) ) {
-            $sanitized['indexnow_providers'] = array_map( 'sanitize_text_field', $input['indexnow_providers'] );
-        } else {
-            $sanitized['indexnow_providers'] = $defaults['indexnow_providers'];
-        }
-
-        if ( isset( $input['local_business_locations'] ) && is_array( $input['local_business_locations'] ) ) {
-            $sanitized['local_business_locations'] = $input['local_business_locations'];
-        } else {
-            $sanitized['local_business_locations'] = $defaults['local_business_locations'];
-        }
-
-        // Numeric (int)
+        // Numeric (int) — use submitted value if present, otherwise preserve existing.
         $int_keys = [
             'sitemap_max_urls'    => 2000,
             'target_readability'  => 60,
@@ -266,11 +300,19 @@ class Admin {
             'decay_lookback_days'    => 30,
         ];
         foreach ( $int_keys as $key => $fallback ) {
-            $sanitized[ $key ] = absint( $input[ $key ] ?? $fallback );
+            if ( isset( $input[ $key ] ) ) {
+                $sanitized[ $key ] = absint( $input[ $key ] );
+            } else {
+                $sanitized[ $key ] = (int) ( $existing[ $key ] ?? $fallback );
+            }
         }
 
         // Numeric (float)
-        $sanitized['decay_threshold'] = (float) ( $input['decay_threshold'] ?? 10.0 );
+        if ( isset( $input['decay_threshold'] ) ) {
+            $sanitized['decay_threshold'] = (float) $input['decay_threshold'];
+        } else {
+            $sanitized['decay_threshold'] = (float) ( $existing['decay_threshold'] ?? 10.0 );
+        }
 
         // Speakable selectors
         if ( isset( $input['speakable_selectors'] ) ) {
@@ -281,14 +323,14 @@ class Admin {
                 $sanitized['speakable_selectors'] = array_filter( array_map( 'sanitize_text_field', explode( "\n", $raw ) ) );
             }
         } else {
-            $sanitized['speakable_selectors'] = $defaults['speakable_selectors'];
+            $sanitized['speakable_selectors'] = $existing['speakable_selectors'] ?? $defaults['speakable_selectors'];
         }
 
         // Title templates (associative array of template strings).
         if ( isset( $input['title_templates'] ) && is_array( $input['title_templates'] ) ) {
             $sanitized['title_templates'] = array_map( 'sanitize_text_field', $input['title_templates'] );
         } else {
-            $sanitized['title_templates'] = $defaults['title_templates'];
+            $sanitized['title_templates'] = $existing['title_templates'] ?? $defaults['title_templates'];
         }
 
         return $sanitized;

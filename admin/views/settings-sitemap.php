@@ -10,6 +10,7 @@ $settings = wp_parse_args( $settings, \Search_Intel\Core::get_default_settings()
 
     <form method="post" action="options.php">
         <?php settings_fields( 'search_intel_settings_group' ); ?>
+        <input type="hidden" name="search_intel_settings[_si_page]" value="sitemap" />
 
         <?php
         $sitemap_keys = [ 'sitemap_post_types', 'sitemap_taxonomies', 'sitemap_max_urls' ];

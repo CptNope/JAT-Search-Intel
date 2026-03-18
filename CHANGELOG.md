@@ -6,6 +6,14 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.4.2] — 2026-03-17
+
+### Fixed
+- **Settings wipe on save**: Saving on one settings tab (e.g. General) no longer resets boolean toggles on other tabs (SEO, AEO, GEO). Each form now declares which page it is via `_si_page`, and `sanitize_settings()` only processes booleans belonging to that page — all others preserve their existing saved value.
+- **Reports wrong version**: PDF/HTML reports showed a hardcoded `3.3.0` fallback instead of the actual `SEARCH_INTEL_VERSION` constant.
+
+---
+
 ## [3.4.1] — 2026-03-17
 
 ### Added
