@@ -236,11 +236,26 @@ class FAQGeneratorTest extends TestCase {
 			] ),
 		];
 
-		$result = $this->generator->enhance_with_ai( 1, 'sk-test-key' );
+		// Set up AI Engine with properly encrypted key.
+		$si_test_state['options']['search_intel_settings'] = [ 'ai_provider' => 'openai' ];
+
+		// Reset Core singleton so it picks up the fresh state.
+		$ref = new \ReflectionClass( \Search_Intel\Core::class );
+		$prop = $ref->getProperty( 'instance' );
+		$prop->setAccessible( true );
+		$prop->setValue( null, null );
+
+		// Use AI Engine's own encryption to store the key.
+		\Search_Intel\Core::get_instance()->ai_engine->save_api_key( 'openai', 'sk-test-key' );
+
+		$result = $this->generator->enhance_with_ai( 1 );
 
 		$this->assertCount( 2, $result );
 		$this->assertEquals( 'What is SEO?', $result[0]['question'] );
 		$this->assertEquals( 'ai', $result[0]['source'] );
+
+		// Clean up singleton.
+		$prop->setValue( null, null );
 	}
 
 	public function test_enhance_with_ai_handles_invalid_json(): void {
@@ -258,18 +273,34 @@ class FAQGeneratorTest extends TestCase {
 			] ),
 		];
 
-		$result = $this->generator->enhance_with_ai( 1, 'sk-test-key' );
+		// Set up AI Engine with properly encrypted key.
+		$si_test_state['options']['search_intel_settings'] = [ 'ai_provider' => 'openai' ];
+
+		$ref = new \ReflectionClass( \Search_Intel\Core::class );
+		$prop = $ref->getProperty( 'instance' );
+		$prop->setAccessible( true );
+		$prop->setValue( null, null );
+
+		\Search_Intel\Core::get_instance()->ai_engine->save_api_key( 'openai', 'sk-test-key' );
+
+		$result = $this->generator->enhance_with_ai( 1 );
 		$this->assertEmpty( $result );
+
+		$prop->setValue( null, null );
 	}
 
 	// ── Disabled ─────────────────────────────────────────────────────────────
 
-	public function test_disabled_does_not_register(): void {
+	public function test_disabled_does_not_register_metabox(): void {
 		global $si_test_state;
 		$si_test_state['actions'] = [];
 
 		$gen = new FAQ_Generator( [ 'enable_faq_generator' => false ] );
 
-		$this->assertArrayNotHasKey( 'wp_ajax_si_generate_faqs', $si_test_state['actions'] ?? [] );
+		// AJAX handlers are always registered (used by the main metabox AEO tab).
+		$this->assertArrayHasKey( 'wp_ajax_si_generate_faqs', $si_test_state['actions'] ?? [] );
+
+		// But the separate metabox should NOT be registered when disabled.
+		$this->assertArrayNotHasKey( 'add_meta_boxes', $si_test_state['actions'] ?? [] );
 	}
 }
