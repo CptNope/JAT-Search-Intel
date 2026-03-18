@@ -112,6 +112,10 @@ $post_types = get_post_types( [ 'public' => true ], 'objects' );
                                 <input type="checkbox" class="si-ai-gen-field" value="direct_answer" />
                                 <?php esc_html_e( 'Direct Answer (featured snippet / voice assistant answer, ≤300 chars)', 'search-intel' ); ?>
                             </label>
+                            <label style="display:block; margin-bottom:4px;">
+                                <input type="checkbox" class="si-ai-gen-field" value="faqs" />
+                                <?php esc_html_e( 'FAQs (5 AI-generated Q&A pairs for FAQPage schema)', 'search-intel' ); ?>
+                            </label>
                         </fieldset>
 
                         <fieldset style="margin:0 0 8px; padding:8px 12px; border:1px solid #ccd0d4; border-radius:4px;">
