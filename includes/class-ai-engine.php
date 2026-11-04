@@ -40,7 +40,7 @@ class AI_Engine {
         'anthropic' => [
             'label'    => 'Anthropic',
             'endpoint' => 'https://api.anthropic.com/v1/messages',
-            'model'    => 'claude-3-5-haiku-20241022',
+            'model'    => 'claude-haiku-5-5',
         ],
         'ollama'    => [
             'label'    => 'Ollama (Local)',

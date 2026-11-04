@@ -1,18 +1,20 @@
-=== Search Intel ===
-Contributors: searchintel
-Tags: seo, aeo, geo, schema, structured-data, ai-optimization, llms, featured-snippets, voice-search
-Requires at least: 6.0
-Tested up to: 6.7
+=== JAT Search Intel ===
+Contributors: cptnope
+Tags: seo, schema, llms-txt, ai-search, redirects
+Requires at least: 6.6
+Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.4.2
+Stable tag: 3.5.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-A comprehensive SEO, AEO (Answer Engine Optimization), and GEO (Generative Engine Optimization) plugin for WordPress.
+SEO, answer-engine and AI-search optimization: meta tags, schema, sitemaps, llms.txt, redirects and live SEO/AEO/GEO content scores.
 
 == Description ==
 
-Search Intel is the first WordPress plugin designed from the ground up for the three pillars of modern search visibility:
+JAT Search Intel covers the three pillars of modern search visibility in one plugin: classic SEO, Answer Engine Optimization for featured snippets and voice results, and Generative Engine Optimization for AI answer engines.
+
+Everything runs on your own site. No account, no tracking and no outside requests unless you switch on an optional integration (see External services below).
 
 **SEO — Search Engine Optimization**
 Traditional search optimization with a modern implementation.
@@ -39,7 +41,7 @@ Optimize your content for featured snippets, voice assistants, and People Also A
 * Shortcodes for FAQ and HowTo blocks with built-in schema
 
 **GEO — Generative Engine Optimization**
-The future of search — optimize for AI-powered answer engines like ChatGPT, Perplexity, and Google AI Overviews.
+Optimize for AI-powered answer engines such as ChatGPT, Perplexity and Google AI Overviews.
 
 * AI Summary field — provide a concise, factual summary for LLM consumption
 * llms.txt endpoint — machine-readable site summary following the llms.txt specification
@@ -54,7 +56,7 @@ The future of search — optimize for AI-powered answer engines like ChatGPT, Pe
 **Unified Content Analyzer**
 Real-time scoring dashboard in the post editor with separate SEO, AEO, and GEO scores plus actionable recommendations.
 
-**REST API (v1.3+)**
+**REST API**
 Full REST API under the `search-intel/v1` namespace with toggleable endpoints:
 
 * `GET /scores/{id}` — SEO, AEO, GEO, readability scores
@@ -65,7 +67,7 @@ Full REST API under the `search-intel/v1` namespace with toggleable endpoints:
 * `GET/PUT /settings` — read/write plugin settings (admin only)
 * `POST /sitemap/invalidate` — clear sitemap caches (admin only)
 
-**Bulk Tools (v1.3+)**
+**Bulk Tools**
 Admin page with batch operations and live progress bars:
 
 * Bulk rescore all published content
@@ -73,7 +75,7 @@ Admin page with batch operations and live progress bars:
 * Sitemap cache clear and warm
 * Export/import settings as JSON (merge or overwrite mode)
 
-**WP-CLI Commands (v1.3+)**
+**WP-CLI Commands**
 
 * `wp search-intel analyze <post_id>` — analyze a single post
 * `wp search-intel rescore --all` — bulk rescore with progress bar
@@ -82,7 +84,7 @@ Admin page with batch operations and live progress bars:
 * `wp search-intel export / import` — settings export/import
 * `wp search-intel scores` — display score table (table, CSV, JSON, YAML)
 
-**Gutenberg Sidebar Panel (v1.4+)**
+**Gutenberg Sidebar Panel**
 Native Block Editor integration with a tabbed sidebar panel:
 
 * SEO tab: title, description, keyword, canonical, robots, social overrides, live SERP preview
@@ -90,7 +92,7 @@ Native Block Editor integration with a tabbed sidebar panel:
 * GEO tab: AI summary, key topics, content type, intent, audience, expertise, fact-check date
 * Analysis tab: score ring visualizations + one-click analysis via REST API
 
-**Custom Gutenberg Blocks (v1.4+)**
+**Custom Gutenberg Blocks**
 
 * FAQ block — visual FAQ editor with automatic FAQPage schema
 * How To block — step editor with per-step images and HowTo schema
@@ -99,20 +101,23 @@ Native Block Editor integration with a tabbed sidebar panel:
 * Answer Box — featured snippet-optimized answer formatting
 * Citation — inline source citation with CreativeWork schema
 
+**Optional modules**
+Turn on only what you need under Settings > General > Module Toggles: redirect manager with 404 log, IndexNow, robots.txt editor, broken link checker, internal linking suggestions, Local Business and WooCommerce schema, multilingual hreflang (WPML/Polylang), role-based access, white-label branding, AI writing assistance, content decay and keyword cannibalization reports, Core Web Vitals, GA4 insights and scheduled reports. Disabled modules are not loaded at all.
+
 == Installation ==
 
-1. Upload the `search-intel` folder to `/wp-content/plugins/`
-2. Activate the plugin through the 'Plugins' menu in WordPress
-3. Go to **Search Intel > General** to configure your site settings
-4. Configure SEO, AEO, and GEO settings in their respective tabs
-5. Add social profiles under **Search Intel > Social**
-6. Edit any post or page to access the Search Intel metabox
+1. In WordPress, go to Plugins > Add New, search for "JAT Search Intel", then install and activate it. (Or upload the `jat-search-intel` folder to `/wp-content/plugins/`.)
+2. Open **Search Intel > General** to set your site identity and choose which modules to enable.
+3. Review the SEO, AEO and GEO tabs, and add your social profiles under **Search Intel > Social**.
+4. Edit any post or page: the Search Intel sidebar panel shows live scores and fields.
+
+If you are switching from another SEO plugin, use **Search Intel > Migration** to import titles, descriptions and focus keywords from Yoast SEO, Rank Math, All in One SEO, SEOPress or The SEO Framework, then deactivate the old plugin to avoid duplicate meta tags.
 
 == Frequently Asked Questions ==
 
-= Does this replace Yoast SEO or Rank Math? =
+= Can I use it alongside another SEO plugin? =
 
-Yes. Search Intel provides equivalent SEO functionality plus AEO and GEO features that other plugins don't offer. Deactivate other SEO plugins before activating Search Intel to avoid conflicts.
+It is designed to be your only SEO plugin. Running two will print duplicate meta tags and schema, and the plugin shows a notice if it detects one. Use the built-in migration tool to bring your existing data across first.
 
 = What is AEO? =
 
@@ -124,249 +129,89 @@ Generative Engine Optimization is the practice of optimizing content for AI-powe
 
 = What is llms.txt? =
 
-llms.txt is a proposed standard (similar to robots.txt) that provides a machine-readable summary of your website for Large Language Models. Search Intel auto-generates this file from your site content.
+llms.txt is a proposed standard (similar to robots.txt) that provides a machine-readable summary of your website for Large Language Models. JAT Search Intel auto-generates this file from your site content.
 
 = Will this slow down my site? =
 
-No. Search Intel outputs lightweight meta tags and JSON-LD schema directly in the page head. There are no frontend JavaScript files or CSS loaded on the public site.
+No. It prints lightweight meta tags and JSON-LD in the page head and loads no JavaScript or CSS on the public site. Modules you leave switched off are never loaded, and redirect matching uses a cached index, so normal page views add no extra database queries for redirects.
+
+= Does it send my data anywhere? =
+
+Not by default. Outside requests only happen when you enable and configure an integration listed under External services, and only to that service.
+
+= Where is the source code for the editor scripts? =
+
+The compiled block-editor files in `build/` are generated from the human-readable sources in `src/` (included in the plugin) with `npm install && npm run build`. The full development repository is at https://github.com/CptNope/JAT-Search-Intel.
+
+= What happens to my data if I delete the plugin? =
+
+It is kept, so nothing is lost if you reinstall. To remove everything on deletion, tick **Delete all plugin data** under Settings > General > Data Management first.
+
+== External services ==
+
+JAT Search Intel makes no outside requests by default. Each service below is contacted only after you enable the related module and enter your own credentials, and only from your server.
+
+= OpenAI API (AI Engine, optional) =
+Used to generate meta descriptions, summaries, FAQs and content suggestions when you click an AI button or run a bulk AI task. Sends the post title, content excerpt and the instruction for that task, with your API key. [Terms of use](https://openai.com/policies/terms-of-use/), [Privacy policy](https://openai.com/policies/privacy-policy/).
+
+= Anthropic Claude API (AI Engine, optional) =
+Same purpose and data as above when Anthropic is the selected provider. [Commercial terms](https://www.anthropic.com/legal/commercial-terms), [Privacy policy](https://www.anthropic.com/legal/privacy).
+
+= Ollama (AI Engine, optional) =
+If you choose Ollama, requests go to the endpoint you configure (by default a server on your own machine at localhost). No third party is involved unless you point it at one.
+
+= Google Search Console API (AI Visibility Dashboard, optional) =
+Fetches search query statistics for your site once a day or when you click Refresh. Sends your site URL and the access token you provide. [Google APIs Terms](https://developers.google.com/terms), [Google Privacy Policy](https://policies.google.com/privacy).
+
+= Bing Webmaster Tools API (AI Visibility Dashboard, optional) =
+Fetches query statistics for your site. Sends your site URL and Bing API key. [Microsoft Services Agreement](https://www.microsoft.com/servicesagreement), [Microsoft Privacy Statement](https://privacy.microsoft.com/privacystatement).
+
+= Google Analytics Data API (GA4 Insights, optional) =
+Fetches organic traffic per page once a day. Sends your GA4 property ID and access token. [Google APIs Terms](https://developers.google.com/terms), [Google Privacy Policy](https://policies.google.com/privacy).
+
+= Google PageSpeed Insights API (Core Web Vitals, optional) =
+Measures Core Web Vitals for your public URLs weekly or on demand. Sends the page URLs being tested and your API key. [Google APIs Terms](https://developers.google.com/terms), [Google Privacy Policy](https://policies.google.com/privacy).
+
+= IndexNow (optional) =
+Notifies search engines when you publish or update content. Sends the changed URL and your IndexNow key to the engines you select: Bing ([Services Agreement](https://www.microsoft.com/servicesagreement), [Privacy](https://privacy.microsoft.com/privacystatement)), Yandex ([Terms](https://yandex.com/legal/rules/), [Privacy](https://yandex.com/legal/confidential/)) and Naver ([Terms](https://policy.naver.com/policy/service_en.html), [Privacy](https://policy.naver.com/policy/privacy_en.html)). See [indexnow.org](https://www.indexnow.org/).
+
+= Slack incoming webhooks (Notifications, optional) =
+Posts score-drop alerts and the weekly digest to the Slack webhook URL you enter. Sends post titles, URLs and scores. [Slack Terms](https://slack.com/terms-of-service), [Slack Privacy Policy](https://slack.com/trust/privacy/privacy-policy).
+
+= Broken link checker (optional) =
+Sends an HTTP HEAD request to each external URL linked from your content to check whether it still resolves. Only the linked URL is requested; no site data is sent.
 
 == Changelog ==
 
+= 3.5.0 =
+* First WordPress.org release, renamed JAT Search Intel (text domain `jat-search-intel`).
+* Removed the GitHub self-updater; updates now come from WordPress.org.
+* Performance: disabled modules are no longer loaded on each request.
+* Performance: redirect matching uses a cached index, so pages without a redirect run no redirect queries.
+* Performance: growing logs and queues are no longer autoloaded.
+* Added: opt-in "Delete all plugin data" setting; uninstall now also removes tables, cron events and roles.
+* Added: scheduled tasks are cleared on deactivation, and database tables are created on update as well as activation.
+* Changed: a static llms.txt left by another plugin is no longer deleted automatically; you get a notice with a one-click remove button.
+* Changed: llms.txt no longer publishes the admin email address (use the `search_intel_llms_contact_email` filter to add a contact).
+* Changed: AI-crawler access log stores hashed IPs only.
+* Removed: Google/Bing sitemap ping (both endpoints were retired; use IndexNow).
+* Fixed: background queue cron interval was never registered.
+* Fixed: llms.txt access tracking never ran.
+* Security and coding standards: prepared queries throughout, input sanitization, output escaping and translator comments.
+
 = 3.4.2 =
-* Fixed: Saving settings on one tab no longer wipes boolean toggles from other tabs (page-aware sanitization)
-* Fixed: Reports now display the correct plugin version instead of hardcoded fallback
+* Fixed: saving settings on one tab no longer wipes toggles on other tabs.
+* Fixed: reports show the correct plugin version.
 
 = 3.4.1 =
-* Fixed: FAQ generation now uses AI Engine abstraction instead of direct OpenAI calls — works with any configured provider
-* Fixed: FAQ AJAX handlers always registered so Generate FAQs button works from the main AEO tab
-* Added: "Generate FAQs" button with AI enhancement toggle in AEO tab
-* Added: "AI Suggest Edits" button in Analysis tab — generates revision suggestions from failing checks
-* Added: Score history table in Analysis tab (last 10 analysis runs)
-* Added: FAQs field in Bulk Tools AI generation (AEO section)
-* Added: Score rings pre-populated with saved scores on page load
+* FAQ generation works with any configured AI provider; Generate FAQs and AI Suggest Edits buttons; score history table.
 
 = 3.4.0 =
-* Added: AI Optimizer — score-driven content improvement engine with one-click Apply for auto-applicable fixes
-* Added: AI Optimizer meta box in post editor with current scores, issue count, and AI suggestions
-* Added: Readability tracking in score history, site-wide aggregates, and change logs
-* Fixed: Analytics history now populated — `search_intel_post_analyzed` fires from both save and bulk rescore
-* Fixed: Bulk rescore reads correct result keys (was silently saving 0)
-* Fixed: Change log now automatically records every score change
+* AI Optimizer: score-driven content suggestions with one-click apply.
 
-= 3.3.6 =
-* Fixed: Bulk rescore/regenerate/AI generate now supports "All Public Post Types" — processes posts, pages, and CPTs in one run
-* Added: Readability module checkbox in Reports form
-
-= 3.3.5 =
-* Fixed: llms.txt and llms-full.txt rewrite rules now flushed on activation (resolves 404)
-* Fixed: llms.txt handler runs at priority 1 to take precedence over other plugins
-* Fixed: Reports now correctly read scores from individual post meta keys (bulk scan results visible)
-* Fixed: Psalm CI stale baseline entry removed
-
-= 3.3.4 =
-* Fixed: sanitize_settings() now handles ALL settings keys — sitemap taxonomies, API keys, numeric fields, and v2.0+ text fields no longer silently dropped on save
-* Added: Core Web Vitals page now has inline PSI API key configuration and manual scan button
-* Added: GA4 Insights page now has inline Property ID configuration
-* Fixed: Sitemap CPT and taxonomy selections now persist correctly
-
-= 3.3.3 =
-* Added: 27 feature module toggles in General Settings (Advanced SEO, AEO, GEO, AI, Analytics, Enterprise, Security)
-* Added: All v2.0+ admin pages now accessible via settings toggles (Visibility, Citation Graph, Authority Map, Content Decay, Cannibalization, Analytics, GA4, Web Vitals, Reports, Bulk Editor, Internal Linking, Broken Links)
-* Fixed: sanitize_settings() now persists all enable_* boolean keys
-
-= 3.3.2 =
-* Added: AI Engine settings page with provider selection, encrypted API key management, rate limiting, and token budgets
-* Added: Bulk AI Content Generation in Bulk Tools (meta descriptions, AI summaries, focus keywords)
-* Fixed: Sitemap 404 — rewrite rules now registered before flush on activation
-
-= 3.3.1 =
-* Fixed: PHPCS, PHPStan level 6, ESLint, Psalm, and Playwright E2E test issues
-* Fixed: CI workflow updated to actions v5 and Node.js 22
-* Security: Added wp_unslash() to $_REQUEST data, validated report frequency, fixed mixed escaping
-
-= 3.3.0 =
-* Historical Analytics: per-post score history charts (SEO/AEO/GEO over time, 365-day retention)
-* Historical Analytics: site-wide score trend dashboard (30/60/90 day views)
-* Historical Analytics: before/after comparison for content updates with delta calculation
-* Historical Analytics: score change log (what changed, when, by whom)
-* GA4 Integration: Google Analytics 4 Data API connection via OAuth
-* GA4 Integration: correlate SEO scores with organic traffic per post
-* GA4 Integration: identify high-score/low-traffic posts (distribution opportunities)
-* GA4 Integration: identify low-score/high-traffic posts (optimization priorities)
-* Core Web Vitals: PageSpeed Insights API integration (LCP, CLS, INP)
-* Core Web Vitals: per-page CWV scores with trend tracking (90-day history)
-* Core Web Vitals: CWV correlation with SEO scores
-* Custom Reports: PDF report generation (site health, per-post breakdown)
-* Custom Reports: scheduled PDF reports via email (daily/weekly/monthly)
-* Custom Reports: CSV/JSON export for all report types
-* Custom Reports: report builder (pick modules, date range, post types)
-* 828 unit tests, 1,880 assertions
-
-= 3.2.0 =
-* AI Engine: unified LLM abstraction for OpenAI, Anthropic, and Ollama (local) with encrypted API key storage
-* AI Engine: meta description generation, title suggestions, internal link recommendations, content briefs
-* AI Engine: per-minute rate limiting and monthly token budget controls
-* Content Decay: historical score snapshots per post (90-day retention)
-* Content Decay: detect posts with >10% score drops over 30 days, admin dashboard, auto-queue re-analysis
-* Content Decay: content refresh suggestions based on which modules declined
-* Keyword Cannibalization: detect multiple posts targeting the same focus keyword
-* Keyword Cannibalization: report with score comparison, smart action suggestions (merge/redirect/differentiate)
-* Keyword Cannibalization: Citation Graph integration for link relationships
-* Advanced Linking: content-similarity link suggestion engine with REST API for editor integration
-* Advanced Linking: orphaned content detection, link equity flow visualization
-* Advanced Linking: broken internal link scanner with auto-fix suggestions
-* 765 unit tests, 1,747 assertions
-
-= 3.1.0 =
-* MainWP Child Reporter: expose site scores, feature status, and remote actions via MainWP callback API
-* Notifications: weekly email digest with score averages, worst posts, and recommendations
-* Notifications: score drop alerts when posts fall below configurable thresholds (SEO/AEO/GEO)
-* Notifications: Slack webhook integration for digests and score drop alerts
-* Notifications: admin dashboard widget with site health at a glance
-* WP-CLI: rbac grant/revoke/list, multisite push-defaults/report, queue status/process, white-label export/import
-* Playwright E2E: bulk editor, migration, RBAC, white-label smoke tests (58 total)
-* 690 unit tests, 1,615 assertions
-
-= 3.0.0 =
-* Multisite: network defaults, per-site overrides, centralized reporting, auto-apply to new sites
-* Migration: Yoast, Rank Math, AIOSEO, SEOPress, The SEO Framework with dry-run and merge modes
-* RBAC: SEO Editor role, per-module permissions, view-only mode, settings lock
-* Multi-Language: WPML and Polylang integration, auto hreflang, per-language meta and sitemap
-* White-Label: custom branding, plugin meta filter, reseller config export/import
-* Scale: object caching, background queue, bulk editor table, CDN-friendly assets, headless REST API
-* 665 unit tests, 1,533 assertions
-
-= 2.5.0 =
-* AI Visibility Dashboard: site-wide GEO health score, GSC/Bing API, AI referral tracking, daily trends
-* Citation Graph: internal link graph, topic clusters, pillar pages, orphaned content detection
-* Authority Map: per-topic authority score, content gaps, multimodal analysis
-* 574 unit tests, 1,381 assertions
-
-= 2.1.0 =
-* Schema Types: VideoObject, Recipe, Event, Review, Course, SoftwareApplication, JobPosting
-* Q&A Detector: heading patterns, bold Q/A, definitions, steps, comparisons
-* FAQ Generator: local pattern matching + optional OpenAI API, editable suggestions
-* 509 unit tests, 1,153 assertions
-
-= 2.0.1 =
-* Broken Link Checker: background HTTP HEAD scan, admin page with results
-* Internal Linking Suggestions: keyword extraction, taxonomy matching, relevance scoring
-* CSP Headers: Content Security Policy on admin pages and REST endpoints
-* SRI: SHA-256 integrity hashes for plugin CSS/JS assets
-* 437 unit tests, 987 assertions
-
-= 2.0.0 =
-* Redirect Manager: 301/302/307/410 redirects with exact, prefix, regex matching
-* Redirect Manager: Admin table, hit counter, 404 log, CSV import/export, slug change detection
-* IndexNow: Ping Bing, Yandex, Naver on publish/update with API key management and ping log
-* WooCommerce: Product schema (name, SKU, brand, GTIN, MPN), Offer, AggregateRating
-* WooCommerce: Product breadcrumbs, product sitemap, product metabox
-* Local Business: LocalBusiness schema with 14 subtypes, address, geo, hours, service areas
-* Robots.txt: Visual editor with syntax validation and WordPress robots_txt filter
-* Audit Log: Settings change tracking with diff, user attribution, and IP hashing
-* 372 unit tests, 887 assertions
-
-= 1.5.0 =
-* GDPR: Personal data exporter and eraser for author E-E-A-T meta
-* Privacy policy suggested text via wp_add_privacy_policy_content()
-* Explicit E-E-A-T consent checkbox on user profile
-* Author structured data gated behind consent — no output without opt-in
-* Search engine pinging changed to opt-in (default off)
-* Privacy audit: no cookies, no external calls by default, no tracking, all data local
-* 277 unit tests, 719 assertions
-
-= 1.4.0 =
-* Gutenberg sidebar panel with SEO, AEO, GEO, and Analysis tabs
-* @wordpress/data store for post meta state management
-* 6 custom Gutenberg blocks: FAQ, HowTo, TOC, Breadcrumbs, Answer Box, Citation
-* Server-side rendering for TOC and Breadcrumbs blocks
-* BreadcrumbList and FAQPage schema from blocks
-* 28 post meta keys registered in REST API for all public post types
-* @wordpress/scripts build toolchain with 7 webpack entry points
-* PHP metabox retained as Classic Editor fallback
-
-= 1.3.0 =
-* REST API: 9 endpoints under `search-intel/v1` namespace with permission callbacks
-* REST API: Toggleable via enable_rest_api setting in GEO settings page
-* Bulk Tools: Admin page with batch rescore, regenerate, sitemap cache management
-* Bulk Tools: Settings export/import as JSON with merge and overwrite modes
-* Bulk Tools: AJAX progress bars for all batch operations
-* WP-CLI: 7 commands — analyze, rescore, regenerate, sitemap, export, import, scores
-* 225 unit tests, 441 assertions — all passing
-
-= 1.2.1 =
-* Fix: Psalm CI configuration and PHP 8.0 dropped from test matrix
-* Fix: Composer platform requirement for CI
-
-= 1.2.0 =
-* 193 PHPUnit unit tests, 125 integration tests, 40 Playwright E2E tests
-* Psalm level 4, PHPStan level 6, Stylelint, ESLint static analysis
-* CI pipeline: PHPUnit matrix, static analysis, performance benchmarks, E2E
-* Fix: speakable_selectors sanitize crash
-
-= 1.0.0 =
-* Initial release
-* Full SEO suite: meta tags, Open Graph, Twitter Cards, canonical URLs, robots
-* Schema: Article, Organization, Person, WebSite, BreadcrumbList, Sitelinks SearchBox
-* AEO: FAQ schema, HowTo schema, Speakable, auto-detection, shortcodes
-* GEO: AI meta, llms.txt, entity markup, E-E-A-T signals, freshness
-* Content Analyzer with SEO/AEO/GEO scoring
-* XML Sitemap with image support
-* Social profiles management
-* User profile E-E-A-T fields
+Earlier releases are listed in CHANGELOG.md in the development repository.
 
 == Upgrade Notice ==
 
-= 3.3.6 =
-Fix: Bulk tools now process all post types at once. Reports include readability scores.
-
-= 3.3.5 =
-Fix: llms.txt 404 resolved, reports now show bulk scan scores, Psalm CI green.
-
-= 3.3.4 =
-Fix: Settings now fully persist — sitemap CPT/taxonomy, CWV API key, GA4 property ID, and 30+ other fields. Inline configuration added to CWV and GA4 pages.
-
-= 3.3.3 =
-New: 27 feature module toggles expose all v2.0+ admin pages (12 new menu items) via General Settings.
-
-= 3.3.2 =
-New: AI Engine settings page with API key management, Bulk AI Content Generation for meta descriptions/summaries/keywords, fixed sitemap 404 on activation.
-
-= 3.3.1 =
-Maintenance: Resolved all CI linter errors (PHPCS, PHPStan, ESLint, Psalm, Playwright), security hardening for Custom Reports, updated CI workflow.
-
-= 3.3.0 =
-New: Historical Analytics (per-post score charts, site-wide trends, before/after comparison, change log), GA4 Integration (organic traffic correlation, distribution opportunities, optimization priorities), Core Web Vitals (PageSpeed Insights, CWV tracking, SEO correlation), Custom Reports (PDF/CSV/JSON export, scheduled email reports, report builder).
-
-= 3.2.0 =
-New: AI Engine (OpenAI/Anthropic/Ollama with encrypted keys, rate limiting, token budgets), Content Decay Detection (score history, decay dashboard, refresh suggestions), Keyword Cannibalization Detector (duplicate keywords, smart actions), Advanced Internal Linking (suggestions, orphans, equity flow, broken link scanner).
-
-= 3.1.0 =
-New: MainWP child-side reporter, Notifications system (email digest, score drop alerts, Slack, dashboard widget), 10 new WP-CLI commands, 58 Playwright E2E tests.
-
-= 3.0.0 =
-Major: Multisite support, SEO plugin migration (5 sources), RBAC with SEO Editor role, WPML/Polylang integration, white-label branding, Scale (object cache, background queue, bulk editor).
-
-= 2.5.0 =
-New: AI Visibility Dashboard (GEO health score, GSC/Bing API, AI referral tracking), Citation Graph (link topology, topic clusters), Authority Map (topical authority scoring).
-
-= 2.1.0 =
-New: 7 additional schema types (Video, Recipe, Event, Review, Course, Software, JobPosting), Q&A Detection Engine, AI-assisted FAQ Generator.
-
-= 2.0.1 =
-New: Broken Link Checker, Internal Linking Suggestions, Content Security Policy headers, Subresource Integrity.
-
-= 2.0.0 =
-Major: Redirect Manager (301/302/307/410, 404 log, CSV), IndexNow (Bing/Yandex/Naver), WooCommerce product schema, Local Business schema, robots.txt editor, audit log.
-
-= 1.5.0 =
-New: GDPR compliance (data exporter/eraser, privacy policy text), E-E-A-T consent checkbox, author schema gated behind consent, search engine pinging opt-in.
-
-= 1.4.0 =
-New: Gutenberg sidebar panel (SEO/AEO/GEO/Analysis tabs), 6 custom blocks (FAQ, HowTo, TOC, Breadcrumbs, Answer Box, Citation), @wordpress/data store, server-side rendering.
-
-= 1.3.0 =
-New: REST API (9 endpoints), Bulk Tools admin page, WP-CLI commands (7 subcommands), settings export/import.
-
-= 1.0.0 =
-Initial release of Search Intel.
+= 3.5.0 =
+First WordPress.org release. Removes the GitHub updater, speeds up front-end requests and adds an opt-in data-removal setting.

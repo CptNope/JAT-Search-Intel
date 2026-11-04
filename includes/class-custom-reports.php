@@ -176,7 +176,7 @@ class Custom_Reports {
         foreach ( $modules as $mod ) {
             $headers[] = strtoupper( $mod ) . ' Score';
         }
-        fputcsv( $output, $headers );
+        fputcsv( $output, $headers, ',', '"', '\\' );
 
         // Data rows.
         foreach ( $rows as $row ) {
@@ -190,7 +190,7 @@ class Custom_Reports {
             foreach ( $modules as $mod ) {
                 $line[] = $row[ $mod ] ?? 0;
             }
-            fputcsv( $output, $line );
+            fputcsv( $output, $line, ',', '"', '\\' );
         }
 
         rewind( $output );

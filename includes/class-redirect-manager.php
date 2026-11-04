@@ -574,10 +574,10 @@ class Redirect_Manager {
 		$rows  = $wpdb->get_results( $wpdb->prepare( 'SELECT source_url, target_url, status_code, match_type, enabled, note FROM %i ORDER BY id ASC', $table ), ARRAY_A );
 
 		$output = fopen( 'php://temp', 'r+' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- In-memory stream for fputcsv().
-		fputcsv( $output, [ 'source_url', 'target_url', 'status_code', 'match_type', 'enabled', 'note' ] );
+		fputcsv( $output, [ 'source_url', 'target_url', 'status_code', 'match_type', 'enabled', 'note' ], ',', '"', '\\' );
 
 		foreach ( $rows as $row ) {
-			fputcsv( $output, $row );
+			fputcsv( $output, $row, ',', '"', '\\' );
 		}
 
 		rewind( $output );
@@ -605,7 +605,7 @@ class Redirect_Manager {
 		array_shift( $lines );
 
 		foreach ( $lines as $line ) {
-			$cols = str_getcsv( $line );
+			$cols = str_getcsv( $line, ',', '"', '\\' );
 			if ( count( $cols ) < 2 ) {
 				$result['skipped']++;
 				continue;

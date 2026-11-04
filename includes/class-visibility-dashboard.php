@@ -29,7 +29,7 @@ class Visibility_Dashboard {
 		add_action( 'wp_ajax_search_intel_refresh_visibility', [ $this, 'ajax_refresh' ] );
 
 		// Track llms.txt access via query var detection.
-		add_action( 'template_redirect', [ $this, 'track_llms_access' ], 5 );
+		add_action( 'template_redirect', [ $this, 'track_llms_access' ], 0 ); // Before llms.txt is served (priority 1) and exits.
 
 		// Schedule daily cron for API data sync.
 		add_action( 'init', [ $this, 'schedule_sync' ] );
@@ -417,7 +417,7 @@ class Visibility_Dashboard {
 			'time'       => current_time( 'mysql' ),
 			'endpoint'   => $is_llms_full ? 'llms-full.txt' : 'llms.txt',
 			'user_agent' => $user_agent,
-			'ip'         => $ip,
+			'ip'         => '' !== $ip ? hash( 'sha256', $ip . wp_salt() ) : '', // Hashed: raw IPs are never stored.
 			'bot'        => $bot,
 		];
 
