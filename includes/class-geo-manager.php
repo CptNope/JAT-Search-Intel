@@ -469,7 +469,7 @@ class GEO_Manager {
 
         if ( $full ) {
             $ai    = new AI_Search( $this->settings );
-            $limit = 2 * MB_IN_BYTES;
+            $limit = 2 * 1024 * 1024; // 2 MB.
             foreach ( array_merge( $pages, $posts ) as $item ) {
                 $chunk = "\n---\n\n" . $ai->render_markdown( $item ) . "\n";
                 if ( strlen( $out ) + strlen( $chunk ) > $limit ) {

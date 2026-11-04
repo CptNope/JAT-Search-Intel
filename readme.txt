@@ -141,7 +141,7 @@ llms.txt is a proposed standard (similar to robots.txt) that provides a machine-
 
 = Will this slow down my site? =
 
-No. It prints lightweight meta tags and JSON-LD in the page head and loads no JavaScript or CSS on the public site. Modules you leave switched off are never loaded, and redirect matching uses a cached index, so normal page views add no extra database queries for redirects.
+No. It prints lightweight meta tags and one JSON-LD block in the page head and loads no JavaScript or CSS on the public site. Measured on WordPress 7.1, normal page views run exactly as many database queries with the plugin active as without it: modules you leave off are never loaded, settings are read from WordPress's option cache, and redirects are matched against a cached index.
 
 = Does it send my data anywhere? =
 
@@ -201,6 +201,12 @@ Sends an HTTP HEAD request to each external URL linked from your content to chec
 * Added: Markdown copies of posts for AI agents, per-bot AI crawler rules in robots.txt, and AI crawler / AI referral analytics.
 * Added: Rank Tracker using your Search Console data via a Google service account.
 * Fixed: settings pages no longer round-trip every option through hidden fields, which could flatten nested settings and stop some checkboxes from being turned off.
+* Fixed: title templates using %category%, %search_query% or %sep% were mangled when saved.
+* Fixed: saving the SEO page switched off breadcrumb and site-search schema (they now have their own controls).
+* Fixed: /sitemap.xml could be redirected to /sitemap.xml/; robots.txt now lists your sitemaps.
+* Fixed: a second robots meta tag was printed next to WordPress's own; directives are now merged into one.
+* Performance: home, post, page and archive views run no extra database queries with the plugin active (measured on WordPress 7.1).
+* Changed: llms.txt now lists articles as well as pages, skips noindex content and is cached; llms-full.txt includes the full Markdown of each item.
 * Removed the GitHub self-updater; updates now come from WordPress.org.
 * Performance: disabled modules are no longer loaded on each request.
 * Performance: redirect matching uses a cached index, so pages without a redirect run no redirect queries.
