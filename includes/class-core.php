@@ -163,6 +163,12 @@ class Core {
     /** @var AI_Optimizer */
     public $ai_optimizer;
 
+    /** @var Readiness */
+    public $readiness;
+
+    /** @var Abilities */
+    public $abilities;
+
     /**
      * Get singleton instance.
      */
@@ -268,6 +274,8 @@ class Core {
             'custom_schema'           => [ $on( 'enable_schema' ), Custom_Schema::class ],
             'ai_search'               => [ true, AI_Search::class ],
             'rank_tracker'            => [ $is_admin || $on( 'enable_rank_tracking' ), Rank_Tracker::class ],
+            'readiness'               => [ $is_admin, Readiness::class ],
+            'abilities'               => [ function_exists( 'wp_register_ability' ), Abilities::class ],
         ];
 
         foreach ( $modules as $prop => list( $boot, $class ) ) {
@@ -614,6 +622,7 @@ class Core {
             'enable_markdown_endpoints' => true,
             'enable_ai_crawler_log'  => false,
             'ai_crawler_rules'       => [],
+            'content_signals'        => [ 'search' => '', 'ai-input' => '', 'ai-train' => '' ],
 
             // v3.5 — Rank tracking
             'enable_rank_tracking'   => false,

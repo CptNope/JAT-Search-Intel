@@ -344,6 +344,14 @@ class Admin {
             $sanitized['speakable_selectors'] = $existing['speakable_selectors'] ?? $defaults['speakable_selectors'];
         }
 
+        // IndexNow needs a key; create one the first time it is switched on.
+        if ( ! empty( $sanitized['enable_indexnow'] ) && empty( $sanitized['indexnow_api_key'] ) ) {
+            $sanitized['indexnow_api_key'] = IndexNow::generate_key();
+        }
+        if ( '' !== (string) ( $sanitized['indexnow_api_key'] ?? '' ) && ! preg_match( '/^[A-Za-z0-9-]{8,128}$/', (string) $sanitized['indexnow_api_key'] ) ) {
+            $sanitized['indexnow_api_key'] = IndexNow::generate_key();
+        }
+
         // RSS footer (limited HTML allowed).
         if ( isset( $input['rss_after_content'] ) ) {
             $sanitized['rss_after_content'] = wp_kses_post( $input['rss_after_content'] );
@@ -363,6 +371,18 @@ class Admin {
             $sanitized['ai_crawler_rules'] = $rules;
         } else {
             $sanitized['ai_crawler_rules'] = $existing['ai_crawler_rules'] ?? $defaults['ai_crawler_rules'];
+        }
+
+        // Content Signals (robots.txt): yes / no / unset.
+        if ( isset( $input['content_signals'] ) && is_array( $input['content_signals'] ) ) {
+            $signals = [];
+            foreach ( [ 'search', 'ai-input', 'ai-train' ] as $signal ) {
+                $value              = $input['content_signals'][ $signal ] ?? '';
+                $signals[ $signal ] = in_array( $value, [ 'yes', 'no' ], true ) ? $value : '';
+            }
+            $sanitized['content_signals'] = $signals;
+        } else {
+            $sanitized['content_signals'] = $existing['content_signals'] ?? $defaults['content_signals'];
         }
 
         // Tracked keywords: one per line.

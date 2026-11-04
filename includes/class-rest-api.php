@@ -300,26 +300,7 @@ class Rest_Api {
 			return new \WP_REST_Response( [ 'code' => 'not_found', 'message' => 'Post not found.' ], 404 );
 		}
 
-		$content     = wp_strip_all_tags( $post->post_content );
-		$title       = $post->post_title;
-		$keyword     = get_post_meta( $post_id, '_jat_search_intel_focus_keyword', true ) ?: '';
-		$description = get_post_meta( $post_id, '_jat_search_intel_description', true ) ?: '';
-
-		$results = $this->core->analyzer->analyze( $post_id, $content, $title, $keyword, $description );
-
-		// Store scores in post meta.
-		if ( isset( $results['seo']['score'] ) ) {
-			update_post_meta( $post_id, '_jat_search_intel_seo_score', (int) $results['seo']['score'] );
-		}
-		if ( isset( $results['aeo']['score'] ) ) {
-			update_post_meta( $post_id, '_jat_search_intel_aeo_score', (int) $results['aeo']['score'] );
-		}
-		if ( isset( $results['geo']['score'] ) ) {
-			update_post_meta( $post_id, '_jat_search_intel_geo_score', (int) $results['geo']['score'] );
-		}
-		if ( isset( $results['readability']['score'] ) ) {
-			update_post_meta( $post_id, '_jat_search_intel_readability_score', (int) $results['readability']['score'] );
-		}
+		$results = $this->core->analyzer->analyze_and_store( $post );
 
 		return new \WP_REST_Response( [
 			'post_id' => $post_id,

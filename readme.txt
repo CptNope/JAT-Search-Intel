@@ -16,6 +16,14 @@ JAT Search Intel covers the three pillars of modern search visibility in one plu
 
 Everything runs on your own site. No account, no tracking and no outside requests unless you switch on an optional integration (see External services below).
 
+**AI Search Readiness**
+One screen that answers "can Google, Bing and AI assistants find, read, trust and cite this site?" It checks indexing settings, robots.txt (including whether you are accidentally blocking Googlebot, Bingbot or the AI search crawlers), conflicting SEO plugins, HTTPS, permalinks, sitemaps, IndexNow, llms.txt, Markdown copies, structured data, brand profiles, author bios, meta descriptions and content freshness, then gives a 0–100 score. Anything the plugin controls gets a one-click Fix button.
+
+The Refresh Queue beside it lists the pages that have gone longest without an update, weighted by real Search Console clicks when connected, so you know what to refresh first.
+
+**AI agents and MCP**
+On WordPress 6.9 and later the plugin registers abilities with the WordPress Abilities API, so AI agents connected through the REST API or the MCP Adapter can search your content and read a page's SEO data (both limited to published, indexable pages), and logged-in editors can have an agent analyse posts, update titles and descriptions, run the readiness audit and fetch the refresh queue. Every ability that reads scores or changes data checks WordPress capabilities.
+
 **SEO — Search Engine Optimization**
 Traditional search optimization with a modern implementation.
 
@@ -55,7 +63,9 @@ Optimize for AI-powered answer engines such as ChatGPT, Perplexity and Google AI
 * Content freshness meta tags — signal recency to AI crawlers
 * Content type detection — article, how-to, FAQ, comparison, review, guide
 * Markdown copy of every public post for AI agents (`/post-slug.md`), linked from the page and from llms.txt
-* AI crawler access: allow or block 21 AI bots individually in robots.txt, grouped by purpose (training, AI search, live user fetch)
+* AI crawler access: allow or block 21 AI bots individually in robots.txt, grouped by purpose (training, AI search, live user fetch), with one-click presets
+* Content Signals in robots.txt: say yes or no to search, AI answers and AI training separately
+* One-click IndexNow: Bing (which powers ChatGPT search and Copilot) hears about new and updated pages within minutes, with no key to set up (opt-in, because it sends your URLs to Bing)
 * AI traffic analytics: AI crawler visits and visitors arriving from ChatGPT, Perplexity, Claude, Gemini, Copilot and more
 * Per-post AI crawl directives
 * Fact-check date tracking
@@ -200,6 +210,11 @@ Sends an HTTP HEAD request to each external URL linked from your content to chec
 * Added: automatic image alt text, attachment-page redirects and RSS feed backlinks.
 * Added: Markdown copies of posts for AI agents, per-bot AI crawler rules in robots.txt, and AI crawler / AI referral analytics.
 * Added: Rank Tracker using your Search Console data via a Google service account.
+* Added: AI Search Readiness audit with a 0–100 score and one-click fixes, plus a Refresh Queue of stale pages weighted by Search Console clicks.
+* Added: WordPress Abilities API support (6.9+) for AI agents and MCP: search content, get page SEO data, analyse a post, update SEO fields, run the readiness audit, get the refresh queue.
+* Added: Content Signals (search / ai-input / ai-train) in robots.txt, and crawler presets (allow all, block training only, block AI).
+* Changed: IndexNow generates its key automatically and pings on publish, update and unpublish.
+* Fixed: the REST analyse endpoint and the background rescore job never saved scores.
 * Fixed: settings pages no longer round-trip every option through hidden fields, which could flatten nested settings and stop some checkboxes from being turned off.
 * Fixed: title templates using %category%, %search_query% or %sep% were mangled when saved.
 * Fixed: saving the SEO page switched off breadcrumb and site-search schema (they now have their own controls).
@@ -236,4 +251,4 @@ Earlier releases are listed in CHANGELOG.md in the development repository.
 == Upgrade Notice ==
 
 = 3.5.0 =
-First WordPress.org release. Existing data from the GitHub edition (Search Intel) is migrated automatically. Adds rank tracking, news/video sitemaps, Markdown for AI agents and AI crawler controls.
+First WordPress.org release. Existing data from the GitHub edition (Search Intel) is migrated automatically. Adds an AI Search Readiness audit, rank tracking, AI agent abilities, news/video sitemaps, Markdown for AI agents and AI crawler controls.

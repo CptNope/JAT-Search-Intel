@@ -45,13 +45,48 @@ class IndexNow {
 		$this->settings = $settings;
 
 		if ( ! empty( $settings['enable_indexnow'] ) && ! empty( $settings['indexnow_api_key'] ) ) {
-			add_action( 'publish_post', [ $this, 'ping_on_publish' ] );
-			add_action( 'publish_page', [ $this, 'ping_on_publish' ] );
+			add_action( 'transition_post_status', [ $this, 'on_status_change' ], 10, 3 );
 			add_action( 'post_updated', [ $this, 'ping_on_update' ], 10, 3 );
 		}
 
 		// Serve the API key verification file.
 		add_action( 'init', [ $this, 'serve_key_file' ] );
+	}
+
+	/**
+	 * Generate a new IndexNow key (8–128 hex characters per the protocol).
+	 *
+	 * @return string
+	 */
+	public static function generate_key(): string {
+		return bin2hex( random_bytes( 16 ) );
+	}
+
+	/**
+	 * Whether a post should be submitted (public, enabled type, not noindex).
+	 *
+	 * @param \WP_Post $post Post.
+	 * @return bool
+	 */
+	private function is_submittable( $post ): bool {
+		if ( ! $post instanceof \WP_Post || 'publish' !== $post->post_status || '' !== $post->post_password ) {
+			return false;
+		}
+		$types = (array) ( $this->settings['enabled_post_types'] ?? [ 'post', 'page' ] );
+		return in_array( $post->post_type, $types, true ) && ! get_post_meta( $post->ID, '_jat_search_intel_noindex', true );
+	}
+
+	/**
+	 * Submit on first publish (any enabled post type).
+	 *
+	 * @param string   $new_status New status.
+	 * @param string   $old_status Old status.
+	 * @param \WP_Post $post       Post.
+	 */
+	public function on_status_change( $new_status, $old_status, $post ): void {
+		if ( 'publish' === $new_status && 'publish' !== $old_status && $this->is_submittable( $post ) ) {
+			$this->ping_on_publish( (int) $post->ID );
+		}
 	}
 
 	/**
@@ -83,7 +118,7 @@ class IndexNow {
 		}
 
 		// Only ping if the post was already published (not a new publish).
-		if ( 'publish' !== $post_before->post_status || 'publish' !== $post_after->post_status ) {
+		if ( 'publish' !== $post_before->post_status || ! $this->is_submittable( $post_after ) ) {
 			return;
 		}
 

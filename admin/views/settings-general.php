@@ -125,8 +125,15 @@ $settings = wp_parse_args( $settings, \JAT_Search_Intel\Core::get_default_settin
                         </label>
                         <label style="display:block; margin-bottom:8px;">
                             <input type="checkbox" name="jat_search_intel_settings[enable_indexnow]" value="1" <?php checked( $settings['enable_indexnow'] ); ?> />
-                            <strong><?php esc_html_e( 'IndexNow', 'jat-search-intel' ); ?></strong> — <?php esc_html_e( 'Instant indexing via Bing, Yandex, Naver on publish/update', 'jat-search-intel' ); ?>
+                            <strong><?php esc_html_e( 'IndexNow', 'jat-search-intel' ); ?></strong> — <?php esc_html_e( 'Tell Bing (which powers ChatGPT search and Copilot), Yandex and Naver about new and updated pages instantly. A key is created for you.', 'jat-search-intel' ); ?>
                         </label>
+                        <?php if ( ! empty( $settings['indexnow_api_key'] ) ) : ?>
+                            <p class="description" style="margin:-4px 0 10px 24px;">
+                                <?php esc_html_e( 'Key file:', 'jat-search-intel' ); ?>
+                                <a href="<?php echo esc_url( home_url( '/' . $settings['indexnow_api_key'] . '.txt' ) ); ?>" target="_blank" rel="noopener"><code><?php echo esc_html( '/' . $settings['indexnow_api_key'] . '.txt' ); ?></code></a>
+                                <input type="hidden" name="jat_search_intel_settings[indexnow_api_key]" value="<?php echo esc_attr( $settings['indexnow_api_key'] ); ?>" />
+                            </p>
+                        <?php endif; ?>
                         <label style="display:block; margin-bottom:8px;">
                             <input type="checkbox" name="jat_search_intel_settings[enable_robots_editor]" value="1" <?php checked( $settings['enable_robots_editor'] ); ?> />
                             <strong><?php esc_html_e( 'Robots.txt Editor', 'jat-search-intel' ); ?></strong> — <?php esc_html_e( 'Visual robots.txt editor with syntax validation', 'jat-search-intel' ); ?>

@@ -239,8 +239,10 @@ class RestApiTest extends TestCase {
         $this->rest_api->analyze_post( $request );
 
         global $si_test_state;
-        // Scores should be integers stored in post meta.
-        $this->assertIsInt( $si_test_state['post_meta'][1]['_jat_search_intel_seo_score'] ?? null );
+        // All four scores are re-stored (fixture ints become fresh floats), matching the editor sidebar.
+        foreach ( [ 'seo', 'aeo', 'geo', 'readability' ] as $type ) {
+            $this->assertIsFloat( $si_test_state['post_meta'][1][ '_jat_search_intel_' . $type . '_score' ] ?? null, $type );
+        }
     }
 
     // ── GET /settings ───────────────────────────────────────────────────────

@@ -1545,3 +1545,34 @@ if ( ! class_exists( 'WP_Error' ) ) {
 		}
 	}
 }
+
+if ( ! function_exists( 'remove_all_filters' ) ) {
+	function remove_all_filters( string $tag, $priority = false ): bool {
+		global $si_test_state;
+		unset( $si_test_state['filters'][ $tag ] );
+		return true;
+	}
+}
+
+if ( ! function_exists( 'is_post_type_viewable' ) ) {
+	function is_post_type_viewable( $post_type ): bool {
+		return in_array( $post_type, [ 'post', 'page', 'product' ], true );
+	}
+}
+
+if ( ! function_exists( 'wp_register_ability' ) ) {
+	function wp_register_ability( string $name, array $args ) {
+		$GLOBALS['si_test_state']['abilities'][ $name ] = $args;
+		return null;
+	}
+	function wp_register_ability_category( string $slug, array $args ) {
+		$GLOBALS['si_test_state']['ability_categories'][ $slug ] = $args;
+		return null;
+	}
+}
+
+if ( ! function_exists( '__return_true' ) ) {
+	function __return_true(): bool {
+		return true;
+	}
+}

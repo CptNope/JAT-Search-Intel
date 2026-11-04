@@ -81,7 +81,7 @@ class AI_Search {
 	public function __construct( array $settings ) {
 		$this->settings = $settings;
 
-		if ( $this->get_blocked_bots() ) {
+		if ( $this->get_blocked_bots() || $this->get_content_signals() ) {
 			add_filter( 'robots_txt', [ $this, 'filter_robots_txt' ], 1000, 2 );
 		}
 
@@ -114,6 +114,56 @@ class AI_Search {
 	}
 
 	/**
+	 * Content Signals (contentsignals.org): search, ai-input, ai-train => yes|no.
+	 * Unset signals are omitted.
+	 *
+	 * @return array<string,string>
+	 */
+	public function get_content_signals(): array {
+		return self::signals_from_settings( $this->settings );
+	}
+
+	/**
+	 * Content Signals from a settings array, without booting the module.
+	 *
+	 * @param array $settings Plugin settings.
+	 * @return array<string,string>
+	 */
+	public static function signals_from_settings( array $settings ): array {
+		$signals = [];
+		foreach ( [ 'search', 'ai-input', 'ai-train' ] as $name ) {
+			$value = $settings['content_signals'][ $name ] ?? '';
+			if ( in_array( $value, [ 'yes', 'no' ], true ) ) {
+				$signals[ $name ] = $value;
+			}
+		}
+		return $signals;
+	}
+
+	/**
+	 * Add the Content-Signal line to the `User-agent: *` group.
+	 *
+	 * @param string $output robots.txt content.
+	 * @return string
+	 */
+	private function add_content_signal( string $output ): string {
+		$signals = $this->get_content_signals();
+		if ( ! $signals ) {
+			return $output;
+		}
+		$parts = [];
+		foreach ( $signals as $name => $value ) {
+			$parts[] = $name . '=' . $value;
+		}
+		$line = 'Content-Signal: ' . implode( ', ', $parts );
+
+		if ( preg_match( '/^User-agent:\s*\*\s*$/mi', $output ) ) {
+			return (string) preg_replace( '/^(User-agent:\s*\*\s*)$/mi', '$1' . "\n" . $line, $output, 1 );
+		}
+		return "User-agent: *\n" . $line . "\nAllow: /\n\n" . $output;
+	}
+
+	/**
 	 * Append Disallow groups for blocked AI crawlers.
 	 *
 	 * @param string $output robots.txt content.
@@ -126,6 +176,7 @@ class AI_Search {
 			return $output;
 		}
 
+		$output  = $this->add_content_signal( $output );
 		$blocked = $this->get_blocked_bots();
 		if ( ! $blocked ) {
 			return $output;

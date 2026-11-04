@@ -126,4 +126,27 @@ class AISearchTest extends TestCase {
 		$this->make( [ 'enable_ai_crawler_log' => true ] );
 		$this->assertArrayHasKey( 'template_redirect', $si_test_state['actions'] );
 	}
+
+	// ── Content Signals ─────────────────────────────────────────────────
+
+	public function test_content_signal_goes_into_the_wildcard_group(): void {
+		$ai  = $this->make( [ 'content_signals' => [ 'search' => 'yes', 'ai-input' => 'yes', 'ai-train' => 'no' ] ] );
+		$out = $ai->filter_robots_txt( "User-agent: *\nDisallow: /wp-admin/\n", true );
+
+		$this->assertStringStartsWith( "User-agent: *\nContent-Signal: search=yes, ai-input=yes, ai-train=no\nDisallow: /wp-admin/", $out );
+	}
+
+	public function test_content_signal_creates_group_when_missing_and_skips_unset(): void {
+		$ai  = $this->make( [ 'content_signals' => [ 'search' => 'yes', 'ai-input' => '', 'ai-train' => 'no' ] ] );
+		$out = $ai->filter_robots_txt( "User-agent: Googlebot\nAllow: /\n", true );
+
+		$this->assertStringStartsWith( "User-agent: *\nContent-Signal: search=yes, ai-train=no\nAllow: /", $out );
+	}
+
+	public function test_no_content_signal_by_default(): void {
+		global $si_test_state;
+		$si_test_state['filters'] = [];
+		$this->make();
+		$this->assertArrayNotHasKey( 'robots_txt', $si_test_state['filters'] );
+	}
 }

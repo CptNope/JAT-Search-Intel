@@ -190,24 +190,7 @@ class Scale {
 				if ( $post_id <= 0 ) {
 					return false;
 				}
-				$post = get_post( $post_id );
-				if ( ! $post ) {
-					return false;
-				}
-				$content     = wp_strip_all_tags( $post->post_content );
-				$keyword     = (string) get_post_meta( $post_id, '_jat_search_intel_focus_keyword', true );
-				$description = (string) get_post_meta( $post_id, '_jat_search_intel_description', true );
-				$results     = $core->analyzer->analyze( $post_id, $content, $post->post_title, $keyword, $description );
-				if ( isset( $results['seo']['score'] ) ) {
-					update_post_meta( $post_id, '_jat_search_intel_seo_score', (int) $results['seo']['score'] );
-				}
-				if ( isset( $results['aeo']['score'] ) ) {
-					update_post_meta( $post_id, '_jat_search_intel_aeo_score', (int) $results['aeo']['score'] );
-				}
-				if ( isset( $results['geo']['score'] ) ) {
-					update_post_meta( $post_id, '_jat_search_intel_geo_score', (int) $results['geo']['score'] );
-				}
-				return true;
+				return (bool) $core->analyzer->analyze_and_store( $post_id );
 
 			case 'regenerate':
 				$post_id = (int) ( $job['data']['post_id'] ?? 0 );
