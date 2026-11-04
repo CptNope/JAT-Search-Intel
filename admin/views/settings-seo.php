@@ -13,37 +13,7 @@ $settings = wp_parse_args( $settings, \JAT_Search_Intel\Core::get_default_settin
         <?php settings_fields( 'jat_search_intel_settings_group' ); ?>
         <input type="hidden" name="jat_search_intel_settings[_si_page]" value="seo" />
 
-        <!-- Preserve all other settings as hidden fields -->
-        <?php
-        $preserve_keys = [
-            'site_name', 'separator', 'knowledge_type', 'knowledge_name', 'knowledge_logo',
-            'enable_seo', 'enable_schema', 'enable_aeo', 'enable_geo', 'enable_sitemap', 'enable_analyzer',
-            'enable_faq_schema', 'enable_howto_schema', 'enable_speakable',
-            'enable_llms_txt', 'enable_ai_meta', 'enable_entity_markup', 'content_freshness',
-            'author_expertise', 'schema_article_type', 'enable_breadcrumbs', 'enable_sitelinks',
-            'sitemap_max_urls', 'target_readability',
-        ];
-        foreach ( $preserve_keys as $key ) :
-            if ( is_bool( $settings[ $key ] ) || $settings[ $key ] === '1' || $settings[ $key ] === '' ) :
-                if ( ! empty( $settings[ $key ] ) ) : ?>
-                    <input type="hidden" name="jat_search_intel_settings[<?php echo esc_attr( $key ); ?>]" value="1" />
-                <?php endif;
-            else : ?>
-                <input type="hidden" name="jat_search_intel_settings[<?php echo esc_attr( $key ); ?>]" value="<?php echo esc_attr( is_array( $settings[ $key ] ) ? '' : $settings[ $key ] ); ?>" />
-            <?php endif;
-        endforeach;
-
-        if ( ! empty( $settings['enabled_post_types'] ) ) :
-            foreach ( $settings['enabled_post_types'] as $pt ) : ?>
-                <input type="hidden" name="jat_search_intel_settings[enabled_post_types][]" value="<?php echo esc_attr( $pt ); ?>" />
-            <?php endforeach;
-        endif;
-        if ( ! empty( $settings['sitemap_post_types'] ) ) :
-            foreach ( $settings['sitemap_post_types'] as $pt ) : ?>
-                <input type="hidden" name="jat_search_intel_settings[sitemap_post_types][]" value="<?php echo esc_attr( $pt ); ?>" />
-            <?php endforeach;
-        endif;
-        ?>
+        <?php // Settings from other pages are preserved by the page-scoped sanitizer. ?>
 
         <div class="si-settings-card">
             <h2><?php esc_html_e( 'Open Graph', 'jat-search-intel' ); ?></h2>
@@ -184,6 +154,54 @@ $settings = wp_parse_args( $settings, \JAT_Search_Intel\Core::get_default_settin
             </table>
         </div>
 
+
+        <div class="si-settings-card">
+            <h2><?php esc_html_e( 'Images & Attachments', 'jat-search-intel' ); ?></h2>
+            <table class="form-table">
+                <tr>
+                    <th><?php esc_html_e( 'Automatic Alt Text', 'jat-search-intel' ); ?></th>
+                    <td>
+                        <label>
+                            <input type="checkbox" name="jat_search_intel_settings[enable_image_alt]" value="1" <?php checked( ! empty( $settings['enable_image_alt'] ) ); ?> />
+                            <?php esc_html_e( 'Fill missing image alt text from the image title or file name (on upload and on the front end)', 'jat-search-intel' ); ?>
+                        </label>
+                        <p class="description"><?php esc_html_e( 'Alt text you write yourself is never changed.', 'jat-search-intel' ); ?></p>
+                    </td>
+                </tr>
+                <tr>
+                    <th><?php esc_html_e( 'Attachment Pages', 'jat-search-intel' ); ?></th>
+                    <td>
+                        <label>
+                            <input type="checkbox" name="jat_search_intel_settings[redirect_attachments]" value="1" <?php checked( ! empty( $settings['redirect_attachments'] ) ); ?> />
+                            <?php esc_html_e( 'Redirect media attachment pages to their parent post (or the file) with a 301', 'jat-search-intel' ); ?>
+                        </label>
+                        <p class="description"><?php esc_html_e( 'Attachment pages are thin content; redirecting them avoids index bloat.', 'jat-search-intel' ); ?></p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="si-settings-card">
+            <h2><?php esc_html_e( 'RSS Feed', 'jat-search-intel' ); ?></h2>
+            <table class="form-table">
+                <tr>
+                    <th><?php esc_html_e( 'Feed Backlink', 'jat-search-intel' ); ?></th>
+                    <td>
+                        <label>
+                            <input type="checkbox" name="jat_search_intel_settings[enable_rss_footer]" value="1" <?php checked( ! empty( $settings['enable_rss_footer'] ) ); ?> />
+                            <?php esc_html_e( 'Add a line after every feed item linking back to the original post', 'jat-search-intel' ); ?>
+                        </label>
+                    </td>
+                </tr>
+                <tr>
+                    <th><label for="si_rss_after_content"><?php esc_html_e( 'Text', 'jat-search-intel' ); ?></label></th>
+                    <td>
+                        <textarea id="si_rss_after_content" name="jat_search_intel_settings[rss_after_content]" rows="2" class="large-text"><?php echo esc_textarea( (string) ( $settings['rss_after_content'] ?? '' ) ); ?></textarea>
+                        <p class="description"><?php esc_html_e( 'Placeholders: %%POSTLINK%%, %%BLOGLINK%%, %%BLOGDESCLINK%%, %%AUTHORLINK%%. Scrapers that copy your feed will carry these links back to you.', 'jat-search-intel' ); ?></p>
+                    </td>
+                </tr>
+            </table>
+        </div>
 
         <div class="si-settings-card">
             <h2><?php esc_html_e( 'Title Templates', 'jat-search-intel' ); ?></h2>

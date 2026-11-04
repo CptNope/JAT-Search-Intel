@@ -17,26 +17,7 @@ $usage     = $ai_engine->get_token_usage();
         <?php settings_fields( 'jat_search_intel_settings_group' ); ?>
         <input type="hidden" name="jat_search_intel_settings[_si_page]" value="ai" />
 
-        <?php
-        // Preserve all non-AI settings as hidden fields.
-        $ai_keys = [ 'enable_ai_engine', 'ai_provider', 'ai_model', 'ai_endpoint', 'ai_rate_limit', 'ai_token_budget' ];
-        foreach ( $settings as $key => $val ) :
-            if ( in_array( $key, $ai_keys, true ) ) {
-                continue;
-            }
-            if ( is_array( $val ) ) :
-                foreach ( $val as $v ) : ?>
-                    <input type="hidden" name="jat_search_intel_settings[<?php echo esc_attr( $key ); ?>][]" value="<?php echo esc_attr( $v ); ?>" />
-                <?php endforeach;
-            elseif ( is_bool( $val ) || $val === true ) :
-                if ( $val ) : ?>
-                    <input type="hidden" name="jat_search_intel_settings[<?php echo esc_attr( $key ); ?>]" value="1" />
-                <?php endif;
-            else : ?>
-                <input type="hidden" name="jat_search_intel_settings[<?php echo esc_attr( $key ); ?>]" value="<?php echo esc_attr( $val ); ?>" />
-            <?php endif;
-        endforeach;
-        ?>
+        <?php // Settings from other pages are preserved by the page-scoped sanitizer. ?>
 
         <!-- Enable AI Engine -->
         <div class="si-settings-card">

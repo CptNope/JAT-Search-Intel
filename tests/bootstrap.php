@@ -497,7 +497,10 @@ function do_settings_sections( string $page ): void {}
 
 function submit_button( string $text = '', string $type = 'primary', string $name = 'submit', bool $wrap = true, $other_attributes = null ): void {}
 
-function add_shortcode( string $tag, $callback ): void {}
+function add_shortcode( string $tag, $callback ): void {
+    global $si_test_state;
+    $si_test_state['shortcodes'][ $tag ] = $callback;
+}
 
 function do_shortcode( string $content ): string {
     return $content;
@@ -1321,6 +1324,72 @@ if ( ! function_exists( 'delete_site_option' ) ) {
 		unset( $si_test_state['site_options'][ $option ] );
 		return true;
 	}
+}
+
+function post_type_exists( string $post_type ): bool {
+	return in_array( $post_type, [ 'post', 'page', 'product' ], true );
+}
+
+if ( ! function_exists( 'esc_xml' ) ) {
+	function esc_xml( string $text ): string {
+		return htmlspecialchars( $text, ENT_XML1 | ENT_QUOTES, 'UTF-8' );
+	}
+}
+
+function wp_attachment_is_image( $post = null ): bool {
+	return true;
+}
+
+function get_attached_file( int $attachment_id ): string {
+	return '/uploads/image-' . $attachment_id . '.jpg';
+}
+
+function wp_basename( string $path, string $suffix = '' ): string {
+	return basename( $path, $suffix );
+}
+
+function is_feed( $feeds = '' ): bool {
+	global $si_test_state;
+	return ! empty( $si_test_state['is_feed'] );
+}
+
+function wpautop( string $text, bool $br = true ): string {
+	return '<p>' . trim( $text ) . '</p>';
+}
+
+function shortcode_atts( array $pairs, $atts, string $shortcode = '' ): array {
+	$atts = (array) $atts;
+	$out  = [];
+	foreach ( $pairs as $name => $default ) {
+		$out[ $name ] = array_key_exists( $name, $atts ) ? $atts[ $name ] : $default;
+	}
+	return $out;
+}
+
+function map_deep( $value, callable $callback ) {
+	if ( is_array( $value ) ) {
+		foreach ( $value as $k => $v ) {
+			$value[ $k ] = map_deep( $v, $callback );
+		}
+		return $value;
+	}
+	return $callback( $value );
+}
+
+function get_post_type_object( string $post_type ) {
+	return (object) [ 'name' => $post_type, 'labels' => (object) [ 'name' => ucfirst( $post_type ) . 's' ] ];
+}
+
+function get_post_status( $post = null ) {
+	return 'publish';
+}
+
+function wp_get_post_parent_id( $post = null ): int {
+	return 0;
+}
+
+function is_attachment( $attachment = '' ): bool {
+	return false;
 }
 
 // ── Object cache stubs ──────────────────────────────────────────────────────

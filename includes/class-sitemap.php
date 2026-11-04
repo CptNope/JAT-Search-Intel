@@ -19,6 +19,9 @@ class Sitemap {
     public function __construct( array $settings ) {
         $this->settings = $settings;
 
+        // HTML sitemap shortcode works even when XML sitemaps are off.
+        add_shortcode( 'jat_search_intel_html_sitemap', [ $this, 'html_sitemap_shortcode' ] );
+
         if ( empty( $settings['enable_sitemap'] ) ) {
             return;
         }
@@ -59,6 +62,8 @@ class Sitemap {
     public function register_endpoints(): void {
         add_rewrite_rule( '^sitemap\.xml$', 'index.php?jat_search_intel_sitemap=index', 'top' );
         add_rewrite_rule( '^sitemap-([a-z]+)-?(\d*)\.xml$', 'index.php?jat_search_intel_sitemap=$matches[1]&jat_search_intel_sitemap_page=$matches[2]', 'top' );
+        add_rewrite_rule( '^news-sitemap\.xml$', 'index.php?jat_search_intel_sitemap=_news', 'top' );
+        add_rewrite_rule( '^video-sitemap\.xml$', 'index.php?jat_search_intel_sitemap=_video', 'top' );
 
         add_filter( 'query_vars', function ( $vars ) {
             $vars[] = 'jat_search_intel_sitemap';
@@ -78,6 +83,12 @@ class Sitemap {
 
         $page = max( 1, absint( get_query_var( 'jat_search_intel_sitemap_page' ) ) );
 
+        // News / video sitemaps only exist when switched on.
+        if ( ( '_news' === $type && empty( $this->settings['enable_news_sitemap'] ) )
+            || ( '_video' === $type && empty( $this->settings['enable_video_sitemap'] ) ) ) {
+            return;
+        }
+
         header( 'Content-Type: application/xml; charset=utf-8' );
         header( 'X-Robots-Tag: noindex, follow' );
         header( 'Cache-Control: public, max-age=3600' );
@@ -88,7 +99,15 @@ class Sitemap {
         if ( false !== $cached ) {
             $output = (string) $cached;
         } else {
-            $output = 'index' === $type ? $this->generate_sitemap_index() : $this->generate_sitemap( $type, $page );
+            if ( 'index' === $type ) {
+                $output = $this->generate_sitemap_index();
+            } elseif ( '_news' === $type ) {
+                $output = $this->generate_news_sitemap();
+            } elseif ( '_video' === $type ) {
+                $output = $this->generate_video_sitemap();
+            } else {
+                $output = $this->generate_sitemap( $type, $page );
+            }
             set_transient( $cache_key, $output, self::CACHE_TTL );
         }
 
@@ -132,6 +151,15 @@ class Sitemap {
             if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
                 $xml .= '<sitemap>' . "\n";
                 $xml .= '  <loc>' . esc_url( home_url( "/sitemap-{$tax}.xml" ) ) . '</loc>' . "\n";
+                $xml .= '  <lastmod>' . gmdate( 'c' ) . '</lastmod>' . "\n";
+                $xml .= '</sitemap>' . "\n";
+            }
+        }
+
+        foreach ( [ 'enable_news_sitemap' => 'news-sitemap.xml', 'enable_video_sitemap' => 'video-sitemap.xml' ] as $flag => $file ) {
+            if ( ! empty( $this->settings[ $flag ] ) ) {
+                $xml .= '<sitemap>' . "\n";
+                $xml .= '  <loc>' . esc_url( home_url( '/' . $file ) ) . '</loc>' . "\n";
                 $xml .= '  <lastmod>' . gmdate( 'c' ) . '</lastmod>' . "\n";
                 $xml .= '</sitemap>' . "\n";
             }
@@ -216,9 +244,6 @@ class Sitemap {
             foreach ( $images as $image ) {
                 $xml .= '  <image:image>' . "\n";
                 $xml .= '    <image:loc>' . esc_url( $image['url'] ) . '</image:loc>' . "\n";
-                if ( ! empty( $image['alt'] ) ) {
-                    $xml .= '    <image:title>' . esc_xml( $image['alt'] ) . '</image:title>' . "\n";
-                }
                 $xml .= '  </image:image>' . "\n";
             }
 
@@ -330,5 +355,244 @@ class Sitemap {
         }
 
         return gmdate( 'c' );
+    }
+
+    /**
+     * Google News sitemap: articles published in the last two days.
+     *
+     * @return string
+     */
+    public function generate_news_sitemap(): string {
+        $types = array_values( array_filter( (array) ( $this->settings['news_post_types'] ?? [ 'post' ] ), 'post_type_exists' ) );
+        $name  = $this->settings['news_publication_name'] ?: ( $this->settings['site_name'] ?: get_bloginfo( 'name' ) );
+        $lang  = $this->get_news_language();
+
+        $xml  = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">' . "\n";
+
+        if ( $types ) {
+            $posts = get_posts( [
+                'post_type'              => $types,
+                'post_status'            => 'publish',
+                'has_password'           => false,
+                'numberposts'            => 1000,
+                'orderby'                => 'date',
+                'order'                  => 'DESC',
+                'no_found_rows'          => true,
+                'update_post_term_cache' => false,
+                'date_query'             => [ [ 'after' => '2 days ago', 'inclusive' => true ] ],
+            ] );
+
+            foreach ( $posts as $post ) {
+                if ( get_post_meta( $post->ID, '_jat_search_intel_noindex', true ) ) {
+                    continue;
+                }
+                $xml .= '<url>' . "\n";
+                $xml .= '  <loc>' . esc_url( get_permalink( $post->ID ) ) . '</loc>' . "\n";
+                $xml .= '  <news:news>' . "\n";
+                $xml .= '    <news:publication>' . "\n";
+                $xml .= '      <news:name>' . esc_xml( $name ) . '</news:name>' . "\n";
+                $xml .= '      <news:language>' . esc_xml( $lang ) . '</news:language>' . "\n";
+                $xml .= '    </news:publication>' . "\n";
+                $xml .= '    <news:publication_date>' . esc_xml( get_the_date( 'c', $post->ID ) ) . '</news:publication_date>' . "\n";
+                $xml .= '    <news:title>' . esc_xml( get_the_title( $post->ID ) ) . '</news:title>' . "\n";
+                $xml .= '  </news:news>' . "\n";
+                $xml .= '</url>' . "\n";
+            }
+        }
+
+        return $xml . '</urlset>';
+    }
+
+    /**
+     * ISO 639 language code Google News expects (zh-cn / zh-tw kept).
+     *
+     * @return string
+     */
+    private function get_news_language(): string {
+        $locale = strtolower( str_replace( '_', '-', get_locale() ) );
+        if ( in_array( $locale, [ 'zh-cn', 'zh-tw' ], true ) ) {
+            return $locale;
+        }
+        return substr( $locale, 0, 2 );
+    }
+
+    /**
+     * Video sitemap built from YouTube, Vimeo and self-hosted videos in content.
+     *
+     * @return string
+     */
+    public function generate_video_sitemap(): string {
+        global $wpdb;
+
+        $types = array_values( array_filter( (array) ( $this->settings['sitemap_post_types'] ?? [ 'post', 'page' ] ), 'post_type_exists' ) );
+
+        $xml  = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">' . "\n";
+
+        if ( ! $types ) {
+            return $xml . '</urlset>';
+        }
+
+        $placeholders = implode( ',', array_fill( 0, count( $types ), '%s' ) );
+        // phpcs:disable WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $placeholders is a list of %s built above.
+        $ids = $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- Content scan; result is cached with the sitemap.
+            $wpdb->prepare(
+                "SELECT ID FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_password = '' AND post_type IN ({$placeholders})
+                AND ( post_content LIKE %s OR post_content LIKE %s OR post_content LIKE %s OR post_content LIKE %s )
+                ORDER BY post_modified_gmt DESC LIMIT 1000",
+                array_merge( $types, [ '%youtube.com/%', '%youtu.be/%', '%vimeo.com/%', '%<video%' ] )
+            )
+        );
+        // phpcs:enable WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+        foreach ( (array) $ids as $post_id ) {
+            $post_id = (int) $post_id;
+            if ( get_post_meta( $post_id, '_jat_search_intel_noindex', true ) ) {
+                continue;
+            }
+            $videos = self::extract_videos( (string) get_post_field( 'post_content', $post_id ) );
+            if ( ! $videos ) {
+                continue;
+            }
+
+            $title       = get_the_title( $post_id );
+            $description = (string) get_post_meta( $post_id, '_jat_search_intel_description', true );
+            if ( '' === $description ) {
+                $description = wp_trim_words( wp_strip_all_tags( strip_shortcodes( (string) get_post_field( 'post_content', $post_id ) ) ), 40, '...' );
+            }
+            $fallback_thumb = (string) get_the_post_thumbnail_url( $post_id, 'large' );
+
+            $entries = '';
+            foreach ( $videos as $video ) {
+                $thumb = $video['thumbnail'] ?: $fallback_thumb;
+                if ( ! $thumb ) {
+                    continue; // Thumbnail is required by the video sitemap spec.
+                }
+                $entries .= '  <video:video>' . "\n";
+                $entries .= '    <video:thumbnail_loc>' . esc_url( $thumb ) . '</video:thumbnail_loc>' . "\n";
+                $entries .= '    <video:title>' . esc_xml( $title ) . '</video:title>' . "\n";
+                $entries .= '    <video:description>' . esc_xml( mb_substr( $description ?: $title, 0, 2048 ) ) . '</video:description>' . "\n";
+                if ( ! empty( $video['content_loc'] ) ) {
+                    $entries .= '    <video:content_loc>' . esc_url( $video['content_loc'] ) . '</video:content_loc>' . "\n";
+                }
+                if ( ! empty( $video['player_loc'] ) ) {
+                    $entries .= '    <video:player_loc>' . esc_url( $video['player_loc'] ) . '</video:player_loc>' . "\n";
+                }
+                $entries .= '    <video:publication_date>' . esc_xml( get_the_date( 'c', $post_id ) ) . '</video:publication_date>' . "\n";
+                $entries .= '  </video:video>' . "\n";
+            }
+
+            if ( '' !== $entries ) {
+                $xml .= '<url>' . "\n" . '  <loc>' . esc_url( get_permalink( $post_id ) ) . '</loc>' . "\n" . $entries . '</url>' . "\n";
+            }
+        }
+
+        return $xml . '</urlset>';
+    }
+
+    /**
+     * Find embedded videos in post content.
+     *
+     * @param string $content Post content.
+     * @return array<int,array{player_loc:string,content_loc:string,thumbnail:string}>
+     */
+    public static function extract_videos( string $content ): array {
+        $videos = [];
+        $seen   = [];
+
+        if ( preg_match_all( '~(?:youtube\.com/(?:watch\?v=|embed/|shorts/|live/)|youtu\.be/)([A-Za-z0-9_-]{11})~', $content, $m ) ) {
+            foreach ( array_unique( $m[1] ) as $id ) {
+                $seen[ 'yt' . $id ] = true;
+                $videos[]           = [
+                    'player_loc'  => 'https://www.youtube.com/embed/' . $id,
+                    'content_loc' => '',
+                    'thumbnail'   => 'https://i.ytimg.com/vi/' . $id . '/hqdefault.jpg',
+                ];
+            }
+        }
+
+        if ( preg_match_all( '~(?:player\.)?vimeo\.com/(?:video/)?(\d{6,12})~', $content, $m ) ) {
+            foreach ( array_unique( $m[1] ) as $id ) {
+                $videos[] = [
+                    'player_loc'  => 'https://player.vimeo.com/video/' . $id,
+                    'content_loc' => '',
+                    'thumbnail'   => '',
+                ];
+            }
+        }
+
+        if ( preg_match_all( '~<video[^>]*?\ssrc="([^"]+)"[^>]*?(?:\sposter="([^"]*)")?~i', $content, $m, PREG_SET_ORDER ) ) {
+            foreach ( $m as $match ) {
+                $poster = '';
+                if ( preg_match( '~\sposter="([^"]+)"~i', $match[0], $pm ) ) {
+                    $poster = $pm[1];
+                }
+                $videos[] = [
+                    'player_loc'  => '',
+                    'content_loc' => html_entity_decode( $match[1] ),
+                    'thumbnail'   => $poster ? html_entity_decode( $poster ) : '',
+                ];
+            }
+        }
+
+        return $videos;
+    }
+
+    /**
+     * [jat_search_intel_html_sitemap post_types="page,post" limit="500"]
+     *
+     * @param array|string $atts Shortcode attributes.
+     * @return string
+     */
+    public function html_sitemap_shortcode( $atts ): string {
+        $atts = shortcode_atts(
+            [
+                'post_types' => implode( ',', (array) ( $this->settings['sitemap_post_types'] ?? [ 'page', 'post' ] ) ),
+                'limit'      => 500,
+            ],
+            $atts,
+            'jat_search_intel_html_sitemap'
+        );
+
+        $types = array_values( array_filter( array_map( 'sanitize_key', explode( ',', (string) $atts['post_types'] ) ), 'post_type_exists' ) );
+        $limit = max( 1, min( 2000, absint( $atts['limit'] ) ) );
+        $key   = 'jat_search_intel_sitemap_html_' . md5( implode( ',', $types ) . '|' . $limit );
+
+        $cached = get_transient( $key );
+        if ( false !== $cached ) {
+            return (string) $cached;
+        }
+
+        $html = '<div class="jat-search-intel-html-sitemap">';
+        foreach ( $types as $type ) {
+            $object = get_post_type_object( $type );
+            $posts  = get_posts( [
+                'post_type'      => $type,
+                'post_status'    => 'publish',
+                'has_password'   => false,
+                'numberposts'    => $limit,
+                'orderby'        => 'page' === $type ? 'menu_order title' : 'date',
+                'order'          => 'page' === $type ? 'ASC' : 'DESC',
+                'no_found_rows'  => true,
+                'meta_query'     => [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Cached for 12 hours.
+                    'relation' => 'OR',
+                    [ 'key' => '_jat_search_intel_noindex', 'compare' => 'NOT EXISTS' ],
+                    [ 'key' => '_jat_search_intel_noindex', 'value' => '1', 'compare' => '!=' ],
+                ],
+            ] );
+            if ( ! $posts ) {
+                continue;
+            }
+            $html .= '<h2>' . esc_html( $object ? $object->labels->name : $type ) . '</h2><ul>';
+            foreach ( $posts as $post ) {
+                $html .= '<li><a href="' . esc_url( get_permalink( $post ) ) . '">' . esc_html( get_the_title( $post ) ) . '</a></li>';
+            }
+            $html .= '</ul>';
+        }
+        $html .= '</div>';
+
+        set_transient( $key, $html, self::CACHE_TTL );
+        return $html;
     }
 }

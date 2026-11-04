@@ -184,11 +184,13 @@ class Admin {
                 'enable_historical_analytics', 'enable_ga4', 'enable_cwv',
                 'enable_custom_reports', 'enable_notifications',
                 'enable_rbac', 'enable_multilang', 'enable_white_label', 'enable_scale',
+                'enable_rank_tracking',
             ],
             'seo' => [
                 'enable_og', 'enable_twitter', 'enable_canonical', 'enable_robots_meta',
                 'noindex_archives', 'noindex_search', 'noindex_404',
                 'enable_breadcrumbs', 'enable_sitelinks',
+                'enable_image_alt', 'redirect_attachments', 'enable_rss_footer',
             ],
             'aeo' => [
                 'enable_faq_schema', 'enable_howto_schema', 'enable_speakable',
@@ -196,9 +198,19 @@ class Admin {
             'geo' => [
                 'enable_llms_txt', 'enable_ai_meta', 'enable_entity_markup',
                 'content_freshness', 'enable_rest_api',
+                'enable_markdown_endpoints', 'enable_ai_crawler_log',
+            ],
+            'sitemap' => [
+                'enable_news_sitemap', 'enable_video_sitemap',
+            ],
+            'ai' => [
+                'enable_ai_engine',
             ],
         ];
 
+        // A known page manages only its own checkboxes; an unknown page marker
+        // manages none (all preserved); no marker (import/REST) manages all.
+        $has_page      = '' !== $page;
         $managed_bools = $page_bools[ $page ] ?? [];
 
         // All boolean keys.
@@ -229,10 +241,14 @@ class Admin {
             // Analytics & Reporting (v3.3)
             'enable_historical_analytics', 'enable_ga4', 'enable_cwv',
             'enable_custom_reports', 'enable_notifications',
+            // v3.5
+            'enable_news_sitemap', 'enable_video_sitemap', 'enable_image_alt',
+            'redirect_attachments', 'enable_rss_footer', 'enable_markdown_endpoints',
+            'enable_ai_crawler_log', 'enable_rank_tracking',
         ];
 
         foreach ( $bool_keys as $key ) {
-            if ( ! empty( $managed_bools ) && ! in_array( $key, $managed_bools, true ) ) {
+            if ( $has_page && ! in_array( $key, $managed_bools, true ) ) {
                 // Not on this page — preserve existing value.
                 $sanitized[ $key ] = ! empty( $existing[ $key ] );
             } else {
@@ -256,6 +272,8 @@ class Admin {
             'wl_description', 'wl_logo_url', 'wl_brand_color',
             'notification_email', 'slack_webhook_url',
             'ga4_property_id', 'psi_api_key',
+            // v3.5
+            'news_publication_name',
         ];
 
         foreach ( $text_keys as $key ) {
@@ -270,11 +288,12 @@ class Admin {
         $array_keys = [
             'enabled_post_types', 'sitemap_post_types', 'sitemap_taxonomies',
             'indexnow_providers', 'local_business_locations',
+            'news_post_types',
         ];
         foreach ( $array_keys as $key ) {
             if ( isset( $input[ $key ] ) && is_array( $input[ $key ] ) ) {
                 if ( 'local_business_locations' === $key ) {
-                    $sanitized[ $key ] = $input[ $key ];
+                    $sanitized[ $key ] = map_deep( wp_unslash( $input[ $key ] ), 'sanitize_text_field' );
                 } else {
                     $sanitized[ $key ] = array_map( 'sanitize_text_field', $input[ $key ] );
                 }
@@ -321,6 +340,38 @@ class Admin {
             }
         } else {
             $sanitized['speakable_selectors'] = $existing['speakable_selectors'] ?? $defaults['speakable_selectors'];
+        }
+
+        // RSS footer (limited HTML allowed).
+        if ( isset( $input['rss_after_content'] ) ) {
+            $sanitized['rss_after_content'] = wp_kses_post( $input['rss_after_content'] );
+        } else {
+            $sanitized['rss_after_content'] = $existing['rss_after_content'] ?? $defaults['rss_after_content'];
+        }
+
+        // AI crawler rules: bot token => allow|block.
+        if ( isset( $input['ai_crawler_rules'] ) && is_array( $input['ai_crawler_rules'] ) ) {
+            $rules = [];
+            foreach ( $input['ai_crawler_rules'] as $bot => $rule ) {
+                $bot = preg_replace( '/[^A-Za-z0-9._-]/', '', (string) $bot );
+                if ( '' !== $bot ) {
+                    $rules[ $bot ] = 'block' === $rule ? 'block' : 'allow';
+                }
+            }
+            $sanitized['ai_crawler_rules'] = $rules;
+        } else {
+            $sanitized['ai_crawler_rules'] = $existing['ai_crawler_rules'] ?? $defaults['ai_crawler_rules'];
+        }
+
+        // Tracked keywords: one per line.
+        if ( isset( $input['tracked_keywords'] ) ) {
+            $raw  = is_array( $input['tracked_keywords'] ) ? $input['tracked_keywords'] : explode( "\n", (string) $input['tracked_keywords'] );
+            $list = array_values( array_unique( array_filter( array_map( static function ( $kw ) {
+                return mb_strtolower( trim( sanitize_text_field( $kw ) ) );
+            }, $raw ) ) ) );
+            $sanitized['tracked_keywords'] = array_slice( $list, 0, 500 );
+        } else {
+            $sanitized['tracked_keywords'] = $existing['tracked_keywords'] ?? $defaults['tracked_keywords'];
         }
 
         // Title templates (associative array of template strings).

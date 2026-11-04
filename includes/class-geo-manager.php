@@ -501,7 +501,7 @@ class GEO_Manager {
         if ( $author_schema ) {
             printf(
                 '<script type="application/ld+json">%s</script>' . "\n",
-                wp_json_encode( $author_schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT )
+                wp_json_encode( $author_schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_PRETTY_PRINT )
             );
         }
     }

@@ -145,6 +145,15 @@ class Core {
     /** @var Custom_Reports */
     public $custom_reports;
 
+    /** @var Media_SEO */
+    public $media_seo;
+
+    /** @var Feed_SEO */
+    public $feed_seo;
+
+    /** @var Custom_Schema */
+    public $custom_schema;
+
     /** @var AI_Optimizer */
     public $ai_optimizer;
 
@@ -248,6 +257,9 @@ class Core {
             'ga4_integration'         => [ $on( 'enable_ga4' ), GA4_Integration::class ],
             'core_web_vitals'         => [ $on( 'enable_cwv' ), Core_Web_Vitals::class ],
             'custom_reports'          => [ $on( 'enable_custom_reports' ), Custom_Reports::class ],
+            'media_seo'               => [ $on( 'enable_image_alt' ) || $on( 'redirect_attachments' ), Media_SEO::class ],
+            'feed_seo'                => [ $on( 'enable_rss_footer' ), Feed_SEO::class ],
+            'custom_schema'           => [ $on( 'enable_schema' ), Custom_Schema::class ],
         ];
 
         foreach ( $modules as $prop => list( $boot, $class ) ) {
@@ -579,6 +591,25 @@ class Core {
 
             // Data management
             'delete_data_on_uninstall' => false,
+
+            // v3.5 — SEO
+            'enable_news_sitemap'    => false,
+            'news_post_types'        => [ 'post' ],
+            'news_publication_name'  => '',
+            'enable_video_sitemap'   => false,
+            'enable_image_alt'       => true,
+            'redirect_attachments'   => true,
+            'enable_rss_footer'      => true,
+            'rss_after_content'      => 'The post %%POSTLINK%% appeared first on %%BLOGLINK%%.',
+
+            // v3.5 — AEO/GEO
+            'enable_markdown_endpoints' => true,
+            'enable_ai_crawler_log'  => false,
+            'ai_crawler_rules'       => [],
+
+            // v3.5 — Rank tracking
+            'enable_rank_tracking'   => false,
+            'tracked_keywords'       => [],
         ];
     }
 }

@@ -13,23 +13,7 @@ $settings = wp_parse_args( $settings, \JAT_Search_Intel\Core::get_default_settin
         <?php settings_fields( 'jat_search_intel_settings_group' ); ?>
         <input type="hidden" name="jat_search_intel_settings[_si_page]" value="sitemap" />
 
-        <?php
-        $sitemap_keys = [ 'sitemap_post_types', 'sitemap_taxonomies', 'sitemap_max_urls' ];
-        foreach ( $settings as $key => $val ) :
-            if ( in_array( $key, $sitemap_keys, true ) ) continue;
-            if ( is_array( $val ) ) :
-                foreach ( $val as $v ) : ?>
-                    <input type="hidden" name="jat_search_intel_settings[<?php echo esc_attr( $key ); ?>][]" value="<?php echo esc_attr( $v ); ?>" />
-                <?php endforeach;
-            elseif ( is_bool( $val ) || $val === true ) :
-                if ( $val ) : ?>
-                    <input type="hidden" name="jat_search_intel_settings[<?php echo esc_attr( $key ); ?>]" value="1" />
-                <?php endif;
-            else : ?>
-                <input type="hidden" name="jat_search_intel_settings[<?php echo esc_attr( $key ); ?>]" value="<?php echo esc_attr( $val ); ?>" />
-            <?php endif;
-        endforeach;
-        ?>
+        <?php // Settings from other pages are preserved by the page-scoped sanitizer. ?>
 
         <div class="si-settings-card">
             <h2><?php esc_html_e( 'Sitemap Configuration', 'jat-search-intel' ); ?></h2>
@@ -91,6 +75,62 @@ $settings = wp_parse_args( $settings, \JAT_Search_Intel\Core::get_default_settin
                     <td>
                         <input type="number" id="si_sitemap_max_urls" name="jat_search_intel_settings[sitemap_max_urls]" value="<?php echo esc_attr( $settings['sitemap_max_urls'] ); ?>" min="100" max="50000" step="100" class="small-text" />
                         <p class="description"><?php esc_html_e( 'Sitemaps will be paginated if the number of URLs exceeds this limit. Google recommends max 50,000.', 'jat-search-intel' ); ?></p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="si-settings-card">
+            <h2><?php esc_html_e( 'News & Video Sitemaps', 'jat-search-intel' ); ?></h2>
+            <table class="form-table">
+                <tr>
+                    <th><?php esc_html_e( 'Google News Sitemap', 'jat-search-intel' ); ?></th>
+                    <td>
+                        <label>
+                            <input type="checkbox" name="jat_search_intel_settings[enable_news_sitemap]" value="1" <?php checked( ! empty( $settings['enable_news_sitemap'] ) ); ?> />
+                            <?php esc_html_e( 'Publish /news-sitemap.xml with articles from the last 48 hours', 'jat-search-intel' ); ?>
+                        </label>
+                        <p class="description"><?php esc_html_e( 'For publishers in Google News. Submit it in Search Console once enabled.', 'jat-search-intel' ); ?></p>
+                    </td>
+                </tr>
+                <tr>
+                    <th><label for="si_news_publication_name"><?php esc_html_e( 'Publication Name', 'jat-search-intel' ); ?></label></th>
+                    <td>
+                        <input type="text" id="si_news_publication_name" name="jat_search_intel_settings[news_publication_name]" value="<?php echo esc_attr( (string) ( $settings['news_publication_name'] ?? '' ) ); ?>" class="regular-text" placeholder="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>" />
+                    </td>
+                </tr>
+                <tr>
+                    <th><?php esc_html_e( 'News Post Types', 'jat-search-intel' ); ?></th>
+                    <td>
+                        <?php
+                        $news_types = (array) ( $settings['news_post_types'] ?? [ 'post' ] );
+                        foreach ( get_post_types( [ 'public' => true ], 'objects' ) as $news_pt ) :
+                            if ( 'attachment' === $news_pt->name ) {
+                                continue;
+                            }
+                            ?>
+                            <label style="display:block; margin-bottom:6px;">
+                                <input type="checkbox" name="jat_search_intel_settings[news_post_types][]" value="<?php echo esc_attr( $news_pt->name ); ?>" <?php checked( in_array( $news_pt->name, $news_types, true ) ); ?> />
+                                <?php echo esc_html( $news_pt->label ); ?>
+                            </label>
+                        <?php endforeach; ?>
+                    </td>
+                </tr>
+                <tr>
+                    <th><?php esc_html_e( 'Video Sitemap', 'jat-search-intel' ); ?></th>
+                    <td>
+                        <label>
+                            <input type="checkbox" name="jat_search_intel_settings[enable_video_sitemap]" value="1" <?php checked( ! empty( $settings['enable_video_sitemap'] ) ); ?> />
+                            <?php esc_html_e( 'Publish /video-sitemap.xml for posts with YouTube, Vimeo or self-hosted videos', 'jat-search-intel' ); ?>
+                        </label>
+                        <p class="description"><?php esc_html_e( 'Vimeo and self-hosted videos use the featured image of the post as the thumbnail.', 'jat-search-intel' ); ?></p>
+                    </td>
+                </tr>
+                <tr>
+                    <th><?php esc_html_e( 'HTML Sitemap', 'jat-search-intel' ); ?></th>
+                    <td>
+                        <code>[jat_search_intel_html_sitemap]</code>
+                        <p class="description"><?php esc_html_e( 'Add this shortcode to any page for a visitor-facing sitemap. Optional: post_types="page,post" limit="500".', 'jat-search-intel' ); ?></p>
                     </td>
                 </tr>
             </table>

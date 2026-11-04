@@ -14,24 +14,7 @@ $settings = wp_parse_args( $settings, \JAT_Search_Intel\Core::get_default_settin
         <?php settings_fields( 'jat_search_intel_settings_group' ); ?>
         <input type="hidden" name="jat_search_intel_settings[_si_page]" value="geo" />
 
-        <?php
-        // Preserve all non-GEO settings as hidden
-        $geo_keys = [ 'enable_llms_txt', 'enable_ai_meta', 'enable_entity_markup', 'content_freshness', 'enable_rest_api', 'author_expertise', 'ai_summary_word_count', 'default_content_intent', 'default_audience' ];
-        foreach ( $settings as $key => $val ) :
-            if ( in_array( $key, $geo_keys, true ) ) continue;
-            if ( is_array( $val ) ) :
-                foreach ( $val as $v ) : ?>
-                    <input type="hidden" name="jat_search_intel_settings[<?php echo esc_attr( $key ); ?>][]" value="<?php echo esc_attr( $v ); ?>" />
-                <?php endforeach;
-            elseif ( is_bool( $val ) || $val === true ) :
-                if ( $val ) : ?>
-                    <input type="hidden" name="jat_search_intel_settings[<?php echo esc_attr( $key ); ?>]" value="1" />
-                <?php endif;
-            else : ?>
-                <input type="hidden" name="jat_search_intel_settings[<?php echo esc_attr( $key ); ?>]" value="<?php echo esc_attr( $val ); ?>" />
-            <?php endif;
-        endforeach;
-        ?>
+        <?php // Settings from other pages are preserved by the page-scoped sanitizer. ?>
 
         <div class="si-settings-card">
             <h2><?php esc_html_e( 'AI Meta Tags', 'jat-search-intel' ); ?></h2>

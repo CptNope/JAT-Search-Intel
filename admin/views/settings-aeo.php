@@ -14,25 +14,7 @@ $settings = wp_parse_args( $settings, \JAT_Search_Intel\Core::get_default_settin
         <?php settings_fields( 'jat_search_intel_settings_group' ); ?>
         <input type="hidden" name="jat_search_intel_settings[_si_page]" value="aeo" />
 
-        <?php
-        // Preserve all non-AEO settings
-        $all = $settings;
-        $aeo_keys = [ 'enable_faq_schema', 'enable_howto_schema', 'enable_speakable', 'speakable_selectors' ];
-        foreach ( $all as $key => $val ) :
-            if ( in_array( $key, $aeo_keys, true ) ) continue;
-            if ( is_array( $val ) ) :
-                foreach ( $val as $v ) : ?>
-                    <input type="hidden" name="jat_search_intel_settings[<?php echo esc_attr( $key ); ?>][]" value="<?php echo esc_attr( $v ); ?>" />
-                <?php endforeach;
-            elseif ( is_bool( $val ) || $val === true ) :
-                if ( $val ) : ?>
-                    <input type="hidden" name="jat_search_intel_settings[<?php echo esc_attr( $key ); ?>]" value="1" />
-                <?php endif;
-            else : ?>
-                <input type="hidden" name="jat_search_intel_settings[<?php echo esc_attr( $key ); ?>]" value="<?php echo esc_attr( $val ); ?>" />
-            <?php endif;
-        endforeach;
-        ?>
+        <?php // Settings from other pages are preserved by the page-scoped sanitizer. ?>
 
         <div class="si-settings-card">
             <h2><?php esc_html_e( 'FAQ Schema', 'jat-search-intel' ); ?></h2>
