@@ -191,6 +191,10 @@ class Redirect_Manager {
 		$table = $wpdb->prefix . self::TABLE_404_LOG;
 		$url   = $this->get_request_path();
 
+		if ( self::is_probe_path( $url ) ) {
+			return; // Vulnerability scanners, not missing content: skip the two DB writes.
+		}
+
 		// Hash the IP for privacy (don't store raw IPs).
 		$ip_hash    = hash( 'sha256', $this->get_client_ip() . wp_salt() );
 		$referrer   = isset( $_SERVER['HTTP_REFERER'] ) ? esc_url_raw( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : '';
@@ -228,6 +232,20 @@ class Redirect_Manager {
 				[ '%s', '%s', '%s', '%s' ]
 			);
 		}
+	}
+
+	/**
+	 * Whether a 404 path looks like a bot probing for files rather than a
+	 * visitor following a broken link.
+	 *
+	 * @param string $path Request path.
+	 * @return bool
+	 */
+	public static function is_probe_path( string $path ): bool {
+		return (bool) preg_match(
+			'~(\.(php\d?|phtml|env|git|svn|bak|old|orig|sql|zip|tar|gz|rar|7z|ini|log|asp|aspx|jsp|cgi|pl|py|sh|yml|yaml|config|cfg|swp|DS_Store)$)|/(\.git|\.env|\.aws|\.ssh|wp-admin|wp-includes|wp-content/plugins|cgi-bin|vendor/phpunit|xmlrpc)~i',
+			$path
+		);
 	}
 
 	/**

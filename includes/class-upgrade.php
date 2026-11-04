@@ -68,6 +68,9 @@ class Upgrade {
 		if ( get_option( self::VERSION_OPTION ) !== JAT_SEARCH_INTEL_VERSION ) {
 			Redirect_Manager::create_tables();
 			Rank_Tracker::create_table();
+			// Autoloaded defaults read on every page view.
+			add_option( 'jat_search_intel_ai_permissions', 'allow', '', true );
+			add_option( self::FLUSH_FLAG, 0, '', true );
 			update_option( self::VERSION_OPTION, JAT_SEARCH_INTEL_VERSION );
 			self::request_rewrite_flush();
 		}
@@ -77,15 +80,17 @@ class Upgrade {
 	 * Ask for rewrite rules to be flushed after they are registered on init.
 	 */
 	public static function request_rewrite_flush(): void {
-		update_option( self::FLUSH_FLAG, 1 );
+		update_option( self::FLUSH_FLAG, 1, true );
 	}
 
 	/**
 	 * Flush rewrite rules if requested (hooked late on init).
 	 */
 	public static function maybe_flush_rewrites(): void {
+		// Kept as an autoloaded 0 rather than deleted, so normal requests read it from
+		// the options cache instead of querying for a missing row.
 		if ( get_option( self::FLUSH_FLAG ) ) {
-			delete_option( self::FLUSH_FLAG );
+			update_option( self::FLUSH_FLAG, 0, true );
 			flush_rewrite_rules( false );
 		}
 	}

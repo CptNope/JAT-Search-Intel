@@ -328,7 +328,8 @@ function is_singular( $post_types = '' ): bool {
 }
 
 function is_admin(): bool {
-    return false;
+    global $si_test_state;
+    return ! empty( $si_test_state['is_admin'] );
 }
 
 function is_front_page(): bool {
@@ -1390,6 +1391,10 @@ function wp_get_post_parent_id( $post = null ): int {
 
 function is_attachment( $attachment = '' ): bool {
 	return false;
+}
+
+function is_object_in_taxonomy( $object_type, string $taxonomy ): bool {
+	return 'post' === $object_type && in_array( $taxonomy, [ 'category', 'post_tag' ], true );
 }
 
 // ── Object cache stubs ──────────────────────────────────────────────────────

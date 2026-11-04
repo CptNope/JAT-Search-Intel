@@ -674,15 +674,15 @@ class GEO_Manager {
 
         $topics = [];
 
-        // Get categories and tags
-        $categories = get_the_category( $post_id );
+        // Get categories and tags (only for post types that use them).
+        $categories = is_object_in_taxonomy( $post->post_type, 'category' ) ? get_the_category( $post_id ) : [];
         foreach ( $categories as $cat ) {
             if ( 'Uncategorized' !== $cat->name ) {
                 $topics[] = $cat->name;
             }
         }
 
-        $tags = get_the_tags( $post_id );
+        $tags = is_object_in_taxonomy( $post->post_type, 'post_tag' ) ? get_the_tags( $post_id ) : false;
         if ( $tags ) {
             foreach ( $tags as $tag ) {
                 $topics[] = $tag->name;

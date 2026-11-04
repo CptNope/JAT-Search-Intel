@@ -20,6 +20,7 @@ class BlocksTest extends TestCase {
 			'filters'      => [],
 			'posts'        => [],
 			'current_user' => 1,
+			'is_admin'     => true, // Editor assets are registered in wp-admin.
 		];
 
 		$si_registered_meta    = [];
@@ -408,5 +409,17 @@ class BlocksTest extends TestCase {
 		$this->assertStringContainsString( 'content="1"', $result );
 		$this->assertStringContainsString( 'content="2"', $result );
 		$this->assertStringContainsString( 'content="3"', $result );
+	}
+
+	public function test_front_end_registers_only_dynamic_blocks_without_assets(): void {
+		global $si_test_state, $si_registered_blocks, $si_registered_scripts;
+		$si_test_state['is_admin'] = false;
+		$si_registered_blocks      = [];
+		$si_registered_scripts     = [];
+
+		( new \JAT_Search_Intel\Blocks() )->register_blocks();
+
+		$this->assertSame( [ 'jat-search-intel/toc', 'jat-search-intel/breadcrumbs' ], array_keys( $si_registered_blocks ) );
+		$this->assertSame( [], $si_registered_scripts );
 	}
 }

@@ -378,7 +378,12 @@ class Admin {
 
         // Title templates (associative array of template strings).
         if ( isset( $input['title_templates'] ) && is_array( $input['title_templates'] ) ) {
-            $sanitized['title_templates'] = array_map( 'sanitize_text_field', $input['title_templates'] );
+            // Not sanitize_text_field(): it strips "%ca"/"%se"-style sequences as
+            // URL-encoded octets, which mangles %category%, %search_query% and %sep%.
+            $sanitized['title_templates'] = array_map( static function ( $template ) {
+                $template = wp_strip_all_tags( (string) $template );
+                return trim( (string) preg_replace( '/[\r\n\t]+/', ' ', $template ) );
+            }, wp_unslash( $input['title_templates'] ) );
         } else {
             $sanitized['title_templates'] = $existing['title_templates'] ?? $defaults['title_templates'];
         }
