@@ -13,11 +13,11 @@ import { useSelect } from '@wordpress/data';
 import { useEffect, useState } from '@wordpress/element';
 
 registerBlockType( 'search-intel/toc', {
-	title: __( 'Table of Contents', 'search-intel' ),
-	description: __( 'Auto-generated table of contents from headings in the post.', 'search-intel' ),
+	title: __( 'Table of Contents', 'jat-search-intel' ),
+	description: __( 'Auto-generated table of contents from headings in the post.', 'jat-search-intel' ),
 	category: 'widgets',
 	icon: 'list-view',
-	keywords: [ __( 'toc', 'search-intel' ), __( 'contents', 'search-intel' ), __( 'navigation', 'search-intel' ) ],
+	keywords: [ __( 'toc', 'jat-search-intel' ), __( 'contents', 'jat-search-intel' ), __( 'navigation', 'jat-search-intel' ) ],
 	supports: {
 		html: false,
 		align: [ 'wide' ],
@@ -71,16 +71,16 @@ registerBlockType( 'search-intel/toc', {
 		return (
 			<div { ...blockProps }>
 				<InspectorControls>
-					<PanelBody title={ __( 'TOC Settings', 'search-intel' ) }>
+					<PanelBody title={ __( 'TOC Settings', 'jat-search-intel' ) }>
 						<RangeControl
-							label={ __( 'Max Heading Depth', 'search-intel' ) }
+							label={ __( 'Max Heading Depth', 'jat-search-intel' ) }
 							value={ maxDepth }
 							onChange={ ( val ) => setAttributes( { maxDepth: val } ) }
 							min={ 1 }
 							max={ 6 }
 						/>
 						<ToggleControl
-							label={ __( 'Ordered List', 'search-intel' ) }
+							label={ __( 'Ordered List', 'jat-search-intel' ) }
 							checked={ ordered }
 							onChange={ ( val ) => setAttributes( { ordered: val } ) }
 						/>
@@ -89,12 +89,12 @@ registerBlockType( 'search-intel/toc', {
 
 				<div className="si-toc-block__header">
 					<span className="si-toc-block__icon">📑</span>
-					<span className="si-toc-block__title">{ __( 'Table of Contents', 'search-intel' ) }</span>
+					<span className="si-toc-block__title">{ __( 'Table of Contents', 'jat-search-intel' ) }</span>
 				</div>
 
 				{ headings.length === 0 ? (
 					<p className="si-toc-block__empty">
-						{ __( 'Add headings to your post to generate the table of contents.', 'search-intel' ) }
+						{ __( 'Add headings to your post to generate the table of contents.', 'jat-search-intel' ) }
 					</p>
 				) : (
 					<ListTag className="si-toc-list">
@@ -104,7 +104,7 @@ registerBlockType( 'search-intel/toc', {
 								className={ `si-toc-item si-toc-item--h${ heading.level }` }
 								style={ { marginLeft: `${ ( heading.level - 2 ) * 16 }px` } }
 							>
-								{ heading.content || __( '(empty heading)', 'search-intel' ) }
+								{ heading.content || __( '(empty heading)', 'jat-search-intel' ) }
 							</li>
 						) ) }
 					</ListTag>

@@ -29,12 +29,6 @@ class Sitemap {
         // Disable WP core sitemaps to avoid conflicts
         add_filter( 'wp_sitemaps_enabled', '__return_false' );
 
-        // Ping search engines on post publish (respect setting)
-        if ( ! empty( $settings['ping_search_engines'] ) ) {
-            add_action( 'publish_post', [ $this, 'ping_search_engines' ] );
-            add_action( 'publish_page', [ $this, 'ping_search_engines' ] );
-        }
-
         // Cache invalidation on content changes
         add_action( 'save_post', [ $this, 'invalidate_cache' ] );
         add_action( 'delete_post', [ $this, 'invalidate_cache' ] );
@@ -48,8 +42,8 @@ class Sitemap {
      */
     public function invalidate_cache(): void {
         global $wpdb;
-        $like        = $wpdb->esc_like( '_transient_si_sitemap_' ) . '%';
-        $like_timeout = $wpdb->esc_like( '_transient_timeout_si_sitemap_' ) . '%';
+        $like        = $wpdb->esc_like( '_transient_search_intel_sitemap_' ) . '%';
+        $like_timeout = $wpdb->esc_like( '_transient_timeout_search_intel_sitemap_' ) . '%';
         $wpdb->query(
             $wpdb->prepare(
                 "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
@@ -88,20 +82,18 @@ class Sitemap {
         header( 'X-Robots-Tag: noindex, follow' );
         header( 'Cache-Control: public, max-age=3600' );
 
-        $cache_key = 'si_sitemap_' . $type . '_' . $page;
+        $cache_key = 'search_intel_sitemap_' . $type . '_' . $page;
         $cached    = get_transient( $cache_key );
 
         if ( false !== $cached ) {
-            echo $cached;
-        } elseif ( 'index' === $type ) {
-            $output = $this->generate_sitemap_index();
-            set_transient( $cache_key, $output, self::CACHE_TTL );
-            echo $output;
+            $output = (string) $cached;
         } else {
-            $output = $this->generate_sitemap( $type, $page );
+            $output = 'index' === $type ? $this->generate_sitemap_index() : $this->generate_sitemap( $type, $page );
             set_transient( $cache_key, $output, self::CACHE_TTL );
-            echo $output;
         }
+
+        // XML document; every value is escaped with esc_url()/esc_xml() as it is built.
+        echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
         exit;
     }
@@ -340,26 +332,4 @@ class Sitemap {
         return gmdate( 'c' );
     }
 
-    /**
-     * Ping search engines after new content is published.
-     */
-    public function ping_search_engines( int $post_id ): void {
-        if ( wp_is_post_revision( $post_id ) || defined( 'DOING_AUTOSAVE' ) ) {
-            return;
-        }
-
-        $sitemap_url = home_url( '/sitemap.xml' );
-
-        // Ping Google
-        wp_remote_get( 'https://www.google.com/ping?sitemap=' . urlencode( $sitemap_url ), [
-            'blocking' => false,
-            'timeout'  => 3,
-        ] );
-
-        // Ping Bing / IndexNow
-        wp_remote_get( 'https://www.bing.com/ping?sitemap=' . urlencode( $sitemap_url ), [
-            'blocking' => false,
-            'timeout'  => 3,
-        ] );
-    }
 }

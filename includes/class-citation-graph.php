@@ -26,7 +26,7 @@ class Citation_Graph {
 
 		add_action( 'save_post', [ $this, 'update_post_graph' ], 20, 2 );
 		add_action( 'admin_menu', [ $this, 'register_admin_page' ] );
-		add_action( 'wp_ajax_si_rebuild_graph', [ $this, 'ajax_rebuild' ] );
+		add_action( 'wp_ajax_search_intel_rebuild_graph', [ $this, 'ajax_rebuild' ] );
 	}
 
 	// ── Internal Link Graph ──────────────────────────────────────────────────
@@ -486,11 +486,11 @@ class Citation_Graph {
 				printf(
 					'<tr><td>%s</td><td>%d</td><td>%d</td><td>%.1f%%</td><td>%s</td><td>%d/100</td></tr>',
 					esc_html( $c['category'] ),
-					$c['post_count'],
-					$c['internal_links'],
-					$c['link_density'] * 100,
+					absint( $c['post_count'] ),
+					absint( $c['internal_links'] ),
+					(float) ( $c['link_density'] * 100 ),
 					esc_html( $c['pillar_title'] ),
-					$c['linking_score']
+					absint( $c['linking_score'] )
 				);
 			}
 			echo '</tbody></table>';
@@ -508,10 +508,10 @@ class Citation_Graph {
 				printf(
 					'<tr><td>%s</td><td>%d</td><td>%d</td><td>%s</td><td>%d</td></tr>',
 					esc_html( $p['title'] ),
-					$p['inbound_count'],
-					$p['outbound_count'],
+					absint( $p['inbound_count'] ),
+					absint( $p['outbound_count'] ),
 					number_format( $p['word_count'] ),
-					$p['score']
+					absint( $p['score'] )
 				);
 			}
 			echo '</tbody></table>';

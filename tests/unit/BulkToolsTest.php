@@ -54,11 +54,11 @@ class BulkToolsTest extends TestCase {
 
         $actions = array_keys( $si_test_state['actions'] );
 
-        $this->assertContains( 'wp_ajax_si_bulk_rescore', $actions );
-        $this->assertContains( 'wp_ajax_si_bulk_regenerate', $actions );
-        $this->assertContains( 'wp_ajax_si_bulk_sitemap_warm', $actions );
-        $this->assertContains( 'wp_ajax_si_export_settings', $actions );
-        $this->assertContains( 'wp_ajax_si_import_settings', $actions );
+        $this->assertContains( 'wp_ajax_search_intel_bulk_rescore', $actions );
+        $this->assertContains( 'wp_ajax_search_intel_bulk_regenerate', $actions );
+        $this->assertContains( 'wp_ajax_search_intel_bulk_sitemap_warm', $actions );
+        $this->assertContains( 'wp_ajax_search_intel_export_settings', $actions );
+        $this->assertContains( 'wp_ajax_search_intel_import_settings', $actions );
     }
 
     // ── Export Settings ─────────────────────────────────────────────────────

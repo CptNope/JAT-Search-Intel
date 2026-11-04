@@ -29,12 +29,12 @@ class Bulk_Tools {
         $this->settings = $settings;
         $this->core     = $core;
 
-        add_action( 'wp_ajax_si_bulk_rescore', [ $this, 'ajax_bulk_rescore' ] );
-        add_action( 'wp_ajax_si_bulk_regenerate', [ $this, 'ajax_bulk_regenerate' ] );
-        add_action( 'wp_ajax_si_bulk_ai_generate', [ $this, 'ajax_bulk_ai_generate' ] );
-        add_action( 'wp_ajax_si_bulk_sitemap_warm', [ $this, 'ajax_bulk_sitemap_warm' ] );
-        add_action( 'wp_ajax_si_export_settings', [ $this, 'ajax_export_settings' ] );
-        add_action( 'wp_ajax_si_import_settings', [ $this, 'ajax_import_settings' ] );
+        add_action( 'wp_ajax_search_intel_bulk_rescore', [ $this, 'ajax_bulk_rescore' ] );
+        add_action( 'wp_ajax_search_intel_bulk_regenerate', [ $this, 'ajax_bulk_regenerate' ] );
+        add_action( 'wp_ajax_search_intel_bulk_ai_generate', [ $this, 'ajax_bulk_ai_generate' ] );
+        add_action( 'wp_ajax_search_intel_bulk_sitemap_warm', [ $this, 'ajax_bulk_sitemap_warm' ] );
+        add_action( 'wp_ajax_search_intel_export_settings', [ $this, 'ajax_export_settings' ] );
+        add_action( 'wp_ajax_search_intel_import_settings', [ $this, 'ajax_import_settings' ] );
     }
 
     /**
@@ -53,12 +53,12 @@ class Bulk_Tools {
             'ajaxUrl' => admin_url( 'admin-ajax.php' ),
             'nonce'   => wp_create_nonce( 'si_bulk_tools' ),
             'i18n'    => [
-                'processing'  => __( 'Processing...', 'search-intel' ),
-                'complete'    => __( 'Complete!', 'search-intel' ),
-                'error'       => __( 'An error occurred.', 'search-intel' ),
-                'confirm'     => __( 'Are you sure? This will overwrite current settings.', 'search-intel' ),
-                'exported'    => __( 'Settings exported successfully.', 'search-intel' ),
-                'imported'    => __( 'Settings imported successfully.', 'search-intel' ),
+                'processing'  => __( 'Processing...', 'jat-search-intel' ),
+                'complete'    => __( 'Complete!', 'jat-search-intel' ),
+                'error'       => __( 'An error occurred.', 'jat-search-intel' ),
+                'confirm'     => __( 'Are you sure? This will overwrite current settings.', 'jat-search-intel' ),
+                'exported'    => __( 'Settings exported successfully.', 'jat-search-intel' ),
+                'imported'    => __( 'Settings imported successfully.', 'jat-search-intel' ),
             ],
         ] );
     }
@@ -701,7 +701,7 @@ class Bulk_Tools {
             'warmed'  => $warmed,
             'message' => sprintf(
                 /* translators: %d: number of sitemaps warmed */
-                __( 'Cleared and queued %d sitemap caches for regeneration.', 'search-intel' ),
+                __( 'Cleared and queued %d sitemap caches for regeneration.', 'jat-search-intel' ),
                 count( $warmed )
             ),
         ] );
@@ -746,7 +746,7 @@ class Bulk_Tools {
         $data = json_decode( $json, true );
 
         if ( ! is_array( $data ) || empty( $data['plugin'] ) || 'search-intel' !== $data['plugin'] ) {
-            wp_send_json_error( [ 'message' => __( 'Invalid Search Intel settings file.', 'search-intel' ) ] );
+            wp_send_json_error( [ 'message' => __( 'Invalid Search Intel settings file.', 'jat-search-intel' ) ] );
         }
 
         $mode = sanitize_text_field( $_POST['import_mode'] ?? 'merge' );
@@ -794,7 +794,7 @@ class Bulk_Tools {
         wp_send_json_success( [
             'message' => sprintf(
                 /* translators: %s: merge or overwrite */
-                __( 'Settings imported (%s mode).', 'search-intel' ),
+                __( 'Settings imported (%s mode).', 'jat-search-intel' ),
                 $mode
             ),
         ] );

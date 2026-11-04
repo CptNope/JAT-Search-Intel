@@ -49,12 +49,8 @@ class Admin {
         add_action( 'edit_user_profile_update', [ $this, 'save_user_eeat_fields' ] );
 
         // AI Engine AJAX handlers
-        add_action( 'wp_ajax_si_save_ai_api_key', [ $this, 'ajax_save_ai_api_key' ] );
-        add_action( 'wp_ajax_si_test_ai_connection', [ $this, 'ajax_test_ai_connection' ] );
-
-        // GitHub token AJAX handlers
-        add_action( 'wp_ajax_si_save_github_token', [ $this, 'ajax_save_github_token' ] );
-        add_action( 'wp_ajax_si_test_github_token', [ $this, 'ajax_test_github_token' ] );
+        add_action( 'wp_ajax_search_intel_save_ai_api_key', [ $this, 'ajax_save_ai_api_key' ] );
+        add_action( 'wp_ajax_search_intel_test_ai_connection', [ $this, 'ajax_test_ai_connection' ] );
     }
 
     /**
@@ -62,8 +58,8 @@ class Admin {
      */
     public function register_menu(): void {
         add_menu_page(
-            __( 'Search Intel', 'search-intel' ),
-            __( 'Search Intel', 'search-intel' ),
+            __( 'Search Intel', 'jat-search-intel' ),
+            __( 'Search Intel', 'jat-search-intel' ),
             'manage_options',
             'search-intel',
             [ $this, 'render_settings_page' ],
@@ -73,8 +69,8 @@ class Admin {
 
         add_submenu_page(
             'search-intel',
-            __( 'General Settings', 'search-intel' ),
-            __( 'General', 'search-intel' ),
+            __( 'General Settings', 'jat-search-intel' ),
+            __( 'General', 'jat-search-intel' ),
             'manage_options',
             'search-intel',
             [ $this, 'render_settings_page' ]
@@ -82,8 +78,8 @@ class Admin {
 
         add_submenu_page(
             'search-intel',
-            __( 'SEO Settings', 'search-intel' ),
-            __( 'SEO', 'search-intel' ),
+            __( 'SEO Settings', 'jat-search-intel' ),
+            __( 'SEO', 'jat-search-intel' ),
             'manage_options',
             'search-intel-seo',
             [ $this, 'render_seo_settings_page' ]
@@ -91,8 +87,8 @@ class Admin {
 
         add_submenu_page(
             'search-intel',
-            __( 'AEO Settings', 'search-intel' ),
-            __( 'AEO', 'search-intel' ),
+            __( 'AEO Settings', 'jat-search-intel' ),
+            __( 'AEO', 'jat-search-intel' ),
             'manage_options',
             'search-intel-aeo',
             [ $this, 'render_aeo_settings_page' ]
@@ -100,8 +96,8 @@ class Admin {
 
         add_submenu_page(
             'search-intel',
-            __( 'GEO Settings', 'search-intel' ),
-            __( 'GEO', 'search-intel' ),
+            __( 'GEO Settings', 'jat-search-intel' ),
+            __( 'GEO', 'jat-search-intel' ),
             'manage_options',
             'search-intel-geo',
             [ $this, 'render_geo_settings_page' ]
@@ -109,8 +105,8 @@ class Admin {
 
         add_submenu_page(
             'search-intel',
-            __( 'Sitemap', 'search-intel' ),
-            __( 'Sitemap', 'search-intel' ),
+            __( 'Sitemap', 'jat-search-intel' ),
+            __( 'Sitemap', 'jat-search-intel' ),
             'manage_options',
             'search-intel-sitemap',
             [ $this, 'render_sitemap_settings_page' ]
@@ -118,8 +114,8 @@ class Admin {
 
         add_submenu_page(
             'search-intel',
-            __( 'Social Profiles', 'search-intel' ),
-            __( 'Social', 'search-intel' ),
+            __( 'Social Profiles', 'jat-search-intel' ),
+            __( 'Social', 'jat-search-intel' ),
             'manage_options',
             'search-intel-social',
             [ $this, 'render_social_settings_page' ]
@@ -127,8 +123,8 @@ class Admin {
 
         add_submenu_page(
             'search-intel',
-            __( 'AI Engine', 'search-intel' ),
-            __( 'AI Engine', 'search-intel' ),
+            __( 'AI Engine', 'jat-search-intel' ),
+            __( 'AI Engine', 'jat-search-intel' ),
             'manage_options',
             'search-intel-ai',
             [ $this, 'render_ai_settings_page' ]
@@ -136,8 +132,8 @@ class Admin {
 
         add_submenu_page(
             'search-intel',
-            __( 'Bulk Tools', 'search-intel' ),
-            __( 'Bulk Tools', 'search-intel' ),
+            __( 'Bulk Tools', 'jat-search-intel' ),
+            __( 'Bulk Tools', 'jat-search-intel' ),
             'manage_options',
             'search-intel-bulk-tools',
             [ $this, 'render_bulk_tools_page' ]
@@ -180,6 +176,7 @@ class Admin {
                 'enable_redirects', 'enable_indexnow', 'enable_robots_editor',
                 'enable_link_checker', 'enable_internal_linker', 'enable_local_business',
                 'enable_audit_log', 'enable_csp_headers', 'enable_sri',
+                'delete_data_on_uninstall',
                 'enable_schema_types', 'enable_qa_detector', 'enable_faq_generator',
                 'enable_visibility_dashboard', 'enable_citation_graph', 'enable_authority_map',
                 'enable_ai_engine', 'enable_content_decay', 'enable_cannibalization',
@@ -190,7 +187,7 @@ class Admin {
             ],
             'seo' => [
                 'enable_og', 'enable_twitter', 'enable_canonical', 'enable_robots_meta',
-                'noindex_archives', 'noindex_search', 'noindex_404', 'ping_search_engines',
+                'noindex_archives', 'noindex_search', 'noindex_404',
                 'enable_breadcrumbs', 'enable_sitelinks',
             ],
             'aeo' => [
@@ -213,7 +210,7 @@ class Admin {
             'enable_aeo', 'enable_faq_schema', 'enable_howto_schema', 'enable_speakable',
             'enable_geo', 'enable_llms_txt', 'enable_ai_meta', 'enable_entity_markup',
             'content_freshness', 'enable_rest_api', 'enable_sitemap', 'enable_analyzer',
-            'ping_search_engines',
+            'ping_search_engines', 'delete_data_on_uninstall',
             // Advanced SEO (v2.0)
             'enable_redirects', 'enable_indexnow', 'enable_robots_editor',
             'enable_link_checker', 'enable_internal_linker', 'enable_local_business',
@@ -393,10 +390,10 @@ class Admin {
                 'postId'       => get_the_ID(),
                 'aiConfigured' => $this->core->ai_engine->is_configured(),
                 'i18n'         => [
-                    'analyzing' => __( 'Analyzing...', 'search-intel' ),
-                    'seoScore'  => __( 'SEO Score', 'search-intel' ),
-                    'aeoScore'  => __( 'AEO Score', 'search-intel' ),
-                    'geoScore'  => __( 'GEO Score', 'search-intel' ),
+                    'analyzing' => __( 'Analyzing...', 'jat-search-intel' ),
+                    'seoScore'  => __( 'SEO Score', 'jat-search-intel' ),
+                    'aeoScore'  => __( 'AEO Score', 'jat-search-intel' ),
+                    'geoScore'  => __( 'GEO Score', 'jat-search-intel' ),
                 ],
             ] );
         }
@@ -411,7 +408,7 @@ class Admin {
         foreach ( $post_types as $pt ) {
             add_meta_box(
                 'search-intel-seo',
-                __( 'Search Intel — SEO, AEO & GEO', 'search-intel' ),
+                __( 'Search Intel — SEO, AEO & GEO', 'jat-search-intel' ),
                 [ $this, 'render_metabox' ],
                 $pt,
                 'normal',
@@ -559,7 +556,7 @@ class Admin {
         foreach ( $columns as $key => $label ) {
             $new[ $key ] = $label;
             if ( 'title' === $key ) {
-                $new['si_scores'] = __( 'Search Intel', 'search-intel' );
+                $new['si_scores'] = __( 'Search Intel', 'jat-search-intel' );
             }
         }
         return $new;
@@ -601,7 +598,7 @@ class Admin {
      * Plugin action links.
      */
     public function plugin_action_links( array $links ): array {
-        $settings_link = '<a href="' . admin_url( 'admin.php?page=search-intel' ) . '">' . __( 'Settings', 'search-intel' ) . '</a>';
+        $settings_link = '<a href="' . admin_url( 'admin.php?page=search-intel' ) . '">' . __( 'Settings', 'jat-search-intel' ) . '</a>';
         array_unshift( $links, $settings_link );
         return $links;
     }
@@ -611,45 +608,45 @@ class Admin {
      */
     public function render_user_eeat_fields( $user ): void {
         ?>
-        <h2><?php esc_html_e( 'Search Intel — E-E-A-T Author Data', 'search-intel' ); ?></h2>
+        <h2><?php esc_html_e( 'Search Intel — E-E-A-T Author Data', 'jat-search-intel' ); ?></h2>
         <?php wp_nonce_field( 'search_intel_user_eeat', 'search_intel_user_eeat_nonce' ); ?>
-        <p class="description"><?php esc_html_e( 'This information enhances your author authority signals for search engines and AI systems.', 'search-intel' ); ?></p>
+        <p class="description"><?php esc_html_e( 'This information enhances your author authority signals for search engines and AI systems.', 'jat-search-intel' ); ?></p>
         <table class="form-table">
             <tr>
-                <th><?php esc_html_e( 'Data Consent', 'search-intel' ); ?></th>
+                <th><?php esc_html_e( 'Data Consent', 'jat-search-intel' ); ?></th>
                 <td>
                     <label for="si_eeat_consent">
                         <input type="checkbox" name="si_eeat_consent" id="si_eeat_consent" value="1" <?php checked( get_user_meta( $user->ID, 'search_intel_eeat_consent', true ), '1' ); ?> />
-                        <?php esc_html_e( 'I consent to Search Intel storing and displaying my E-E-A-T author data as structured data (JSON-LD) on published content.', 'search-intel' ); ?>
+                        <?php esc_html_e( 'I consent to Search Intel storing and displaying my E-E-A-T author data as structured data (JSON-LD) on published content.', 'jat-search-intel' ); ?>
                     </label>
-                    <p class="description"><?php esc_html_e( 'Your credentials, expertise, and profile URLs will appear in the HTML source of posts you author. You can withdraw consent at any time by unchecking this box.', 'search-intel' ); ?></p>
+                    <p class="description"><?php esc_html_e( 'Your credentials, expertise, and profile URLs will appear in the HTML source of posts you author. You can withdraw consent at any time by unchecking this box.', 'jat-search-intel' ); ?></p>
                 </td>
             </tr>
             <tr>
-                <th><label for="si_credentials"><?php esc_html_e( 'Credentials / Qualifications', 'search-intel' ); ?></label></th>
+                <th><label for="si_credentials"><?php esc_html_e( 'Credentials / Qualifications', 'jat-search-intel' ); ?></label></th>
                 <td>
                     <textarea name="si_credentials" id="si_credentials" rows="3" cols="50"><?php echo esc_textarea( implode( "\n", (array) get_user_meta( $user->ID, 'search_intel_credentials', true ) ) ); ?></textarea>
-                    <p class="description"><?php esc_html_e( 'One per line (e.g., "PhD in Computer Science", "Certified Financial Planner")', 'search-intel' ); ?></p>
+                    <p class="description"><?php esc_html_e( 'One per line (e.g., "PhD in Computer Science", "Certified Financial Planner")', 'jat-search-intel' ); ?></p>
                 </td>
             </tr>
             <tr>
-                <th><label for="si_expertise_areas"><?php esc_html_e( 'Areas of Expertise', 'search-intel' ); ?></label></th>
+                <th><label for="si_expertise_areas"><?php esc_html_e( 'Areas of Expertise', 'jat-search-intel' ); ?></label></th>
                 <td>
                     <textarea name="si_expertise_areas" id="si_expertise_areas" rows="3" cols="50"><?php echo esc_textarea( implode( "\n", (array) get_user_meta( $user->ID, 'search_intel_expertise_areas', true ) ) ); ?></textarea>
-                    <p class="description"><?php esc_html_e( 'One per line (e.g., "Machine Learning", "Digital Marketing")', 'search-intel' ); ?></p>
+                    <p class="description"><?php esc_html_e( 'One per line (e.g., "Machine Learning", "Digital Marketing")', 'jat-search-intel' ); ?></p>
                 </td>
             </tr>
             <tr>
-                <th><label for="si_years_experience"><?php esc_html_e( 'Years of Experience', 'search-intel' ); ?></label></th>
+                <th><label for="si_years_experience"><?php esc_html_e( 'Years of Experience', 'jat-search-intel' ); ?></label></th>
                 <td>
                     <input type="number" name="si_years_experience" id="si_years_experience" value="<?php echo esc_attr( get_user_meta( $user->ID, 'search_intel_years_experience', true ) ); ?>" min="0" max="99" />
                 </td>
             </tr>
             <tr>
-                <th><label for="si_social_profiles"><?php esc_html_e( 'Social / Professional Profiles', 'search-intel' ); ?></label></th>
+                <th><label for="si_social_profiles"><?php esc_html_e( 'Social / Professional Profiles', 'jat-search-intel' ); ?></label></th>
                 <td>
                     <textarea name="si_social_profiles" id="si_social_profiles" rows="4" cols="50"><?php echo esc_textarea( implode( "\n", (array) get_user_meta( $user->ID, 'search_intel_social_profiles', true ) ) ); ?></textarea>
-                    <p class="description"><?php esc_html_e( 'One URL per line (LinkedIn, GitHub, Google Scholar, etc.)', 'search-intel' ); ?></p>
+                    <p class="description"><?php esc_html_e( 'One URL per line (LinkedIn, GitHub, Google Scholar, etc.)', 'jat-search-intel' ); ?></p>
                 </td>
             </tr>
         </table>
@@ -797,97 +794,6 @@ class Admin {
         } else {
             wp_send_json_error( [ 'message' => $result['error'] ] );
         }
-    }
-
-    /**
-     * AJAX: Save the GitHub personal access token (encrypted).
-     */
-    public function ajax_save_github_token(): void {
-        check_ajax_referer( 'si_ai_settings', 'nonce' );
-
-        if ( ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( [ 'message' => 'Unauthorized.' ], 403 );
-        }
-
-        $token = sanitize_text_field( wp_unslash( $_POST['github_token'] ?? '' ) );
-        if ( empty( $token ) ) {
-            wp_send_json_error( [ 'message' => 'Token cannot be empty.' ] );
-        }
-
-        // Store encrypted using the AI Engine's encryption.
-        $encrypted = $this->core->ai_engine->encrypt( $token );
-        update_option( 'search_intel_github_token', $encrypted, false );
-
-        // Clear the cached release so the updater picks up the new token.
-        delete_transient( 'search_intel_github_release' );
-
-        wp_send_json_success( [ 'message' => 'GitHub token saved.' ] );
-    }
-
-    /**
-     * AJAX: Test the GitHub token by hitting the repo API.
-     */
-    public function ajax_test_github_token(): void {
-        check_ajax_referer( 'si_ai_settings', 'nonce' );
-
-        if ( ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( [ 'message' => 'Unauthorized.' ], 403 );
-        }
-
-        $token = self::get_github_token();
-        if ( empty( $token ) ) {
-            wp_send_json_error( [ 'message' => 'No token saved. Save a token first.' ] );
-        }
-
-        $response = wp_remote_get( 'https://api.github.com/repos/CptNope/Search-Intel/releases/latest', [
-            'timeout' => 10,
-            'headers' => [
-                'Accept'        => 'application/vnd.github.v3+json',
-                'Authorization' => 'Bearer ' . $token,
-                'User-Agent'    => 'Search-Intel-Updater/' . SEARCH_INTEL_VERSION,
-            ],
-        ] );
-
-        if ( is_wp_error( $response ) ) {
-            wp_send_json_error( [ 'message' => 'Connection failed: ' . $response->get_error_message() ] );
-        }
-
-        $code = wp_remote_retrieve_response_code( $response );
-        if ( $code === 200 ) {
-            $body    = json_decode( wp_remote_retrieve_body( $response ), true );
-            $tag     = $body['tag_name'] ?? 'unknown';
-            $current = SEARCH_INTEL_VERSION;
-            $remote  = ltrim( $tag, 'vV' );
-            $status  = version_compare( $current, $remote, '>=' ) ? 'up to date' : 'update available: ' . $remote;
-            wp_send_json_success( [ 'message' => 'Connected! Latest release: ' . $tag . ' (' . $status . ')' ] );
-        } elseif ( $code === 404 ) {
-            wp_send_json_error( [ 'message' => 'Repo not found — check token has "repo" scope.' ] );
-        } elseif ( $code === 401 ) {
-            wp_send_json_error( [ 'message' => 'Authentication failed — token may be expired or invalid.' ] );
-        } else {
-            wp_send_json_error( [ 'message' => 'GitHub API returned HTTP ' . $code . '.' ] );
-        }
-    }
-
-    /**
-     * Get the decrypted GitHub token (static helper for Plugin_Updater).
-     *
-     * @return string Decrypted token or empty string.
-     */
-    public static function get_github_token(): string {
-        // 1. wp-config.php constant takes priority.
-        if ( defined( 'SEARCH_INTEL_GITHUB_TOKEN' ) && SEARCH_INTEL_GITHUB_TOKEN ) {
-            return (string) SEARCH_INTEL_GITHUB_TOKEN;
-        }
-
-        // 2. Encrypted option saved via admin UI.
-        $encrypted = get_option( 'search_intel_github_token', '' );
-        if ( empty( $encrypted ) ) {
-            return '';
-        }
-
-        $core = Core::get_instance();
-        return $core->ai_engine->decrypt( $encrypted );
     }
 
     /**

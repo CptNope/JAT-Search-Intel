@@ -184,7 +184,7 @@ class Schema_Manager {
         $crumbs[] = [
             '@type'    => 'ListItem',
             'position' => $position++,
-            'name'     => __( 'Home', 'search-intel' ),
+            'name'     => __( 'Home', 'jat-search-intel' ),
             'item'     => home_url( '/' ),
         ];
 

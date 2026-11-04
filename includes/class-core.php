@@ -148,9 +148,6 @@ class Core {
     /** @var AI_Optimizer */
     public $ai_optimizer;
 
-    /** @var Plugin_Updater */
-    public $plugin_updater;
-
     /**
      * Get singleton instance.
      */
@@ -165,8 +162,6 @@ class Core {
      * Constructor — boot all modules.
      */
     private function __construct() {
-        $this->load_textdomain();
-
         $settings = $this->get_settings();
 
         $this->seo          = new SEO_Manager( $settings );
@@ -290,9 +285,6 @@ class Core {
         // AI Optimizer — score-driven content improvement suggestions.
         $this->ai_optimizer = new AI_Optimizer( $settings, $this );
 
-        // Plugin Updater — GitHub-based auto-update via WP native update system.
-        $this->plugin_updater = new Plugin_Updater();
-
         // Auto-redirect on slug change.
         add_action( 'post_updated', [ $this->redirects, 'detect_slug_change' ], 10, 3 );
 
@@ -335,10 +327,10 @@ class Core {
         if ( ! empty( $conflicts ) ) {
             add_action( 'admin_notices', function () use ( $conflicts ) {
                 echo '<div class="notice notice-warning is-dismissible"><p>';
-                echo '<strong>' . esc_html__( 'Search Intel:', 'search-intel' ) . '</strong> ';
+                echo '<strong>' . esc_html__( 'Search Intel:', 'jat-search-intel' ) . '</strong> ';
                 printf(
                     /* translators: %s: comma-separated list of plugin names */
-                    esc_html__( 'Potential SEO plugin conflicts detected: %s. Consider disabling overlapping features to avoid duplicate meta tags.', 'search-intel' ),
+                    esc_html__( 'Potential SEO plugin conflicts detected: %s. Consider disabling overlapping features to avoid duplicate meta tags.', 'jat-search-intel' ),
                     '<strong>' . esc_html( implode( ', ', $conflicts ) ) . '</strong>'
                 );
                 echo '</p></div>';
@@ -357,7 +349,6 @@ class Core {
             'all-in-one-seo-pack/all_in_one_seo_pack.php' => 'All in One SEO',
             'seo-by-rank-math/rank-math.php'         => 'Rank Math',
             'autodescription/autodescription.php'     => 'The SEO Framework',
-            'flavor/flavor.php'                       => 'flavor',
         ];
 
         $conflicts = [];
@@ -371,13 +362,6 @@ class Core {
         }
 
         return $conflicts;
-    }
-
-    /**
-     * Load plugin text domain.
-     */
-    private function load_textdomain(): void {
-        load_plugin_textdomain( 'search-intel', false, dirname( SEARCH_INTEL_BASENAME ) . '/languages' );
     }
 
     /**
@@ -575,6 +559,9 @@ class Core {
 
             // Custom Reports & Export (v3.3)
             'enable_custom_reports'  => false,
+
+            // Data management
+            'delete_data_on_uninstall' => false,
         ];
     }
 }

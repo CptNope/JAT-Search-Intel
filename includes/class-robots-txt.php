@@ -34,8 +34,8 @@ class Robots_Txt {
 
 		if ( is_admin() ) {
 			add_action( 'admin_menu', [ $this, 'register_admin_page' ] );
-			add_action( 'wp_ajax_si_save_robots_txt', [ $this, 'ajax_save' ] );
-			add_action( 'wp_ajax_si_validate_robots_txt', [ $this, 'ajax_validate' ] );
+			add_action( 'wp_ajax_search_intel_save_robots_txt', [ $this, 'ajax_save' ] );
+			add_action( 'wp_ajax_search_intel_validate_robots_txt', [ $this, 'ajax_validate' ] );
 		}
 	}
 
@@ -159,8 +159,8 @@ class Robots_Txt {
 	public function register_admin_page(): void {
 		add_submenu_page(
 			'search-intel',
-			__( 'Robots.txt', 'search-intel' ),
-			__( 'Robots.txt', 'search-intel' ),
+			__( 'Robots.txt', 'jat-search-intel' ),
+			__( 'Robots.txt', 'jat-search-intel' ),
 			'manage_options',
 			'search-intel-robots',
 			[ $this, 'render_admin_page' ]
@@ -178,8 +178,8 @@ class Robots_Txt {
 		$content = $this->get_content();
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'Search Intel — Robots.txt Editor', 'search-intel' ); ?></h1>
-			<p class="description"><?php esc_html_e( 'Edit your virtual robots.txt file. WordPress generates robots.txt dynamically — this editor overrides the default output.', 'search-intel' ); ?></p>
+			<h1><?php esc_html_e( 'Search Intel — Robots.txt Editor', 'jat-search-intel' ); ?></h1>
+			<p class="description"><?php esc_html_e( 'Edit your virtual robots.txt file. WordPress generates robots.txt dynamically — this editor overrides the default output.', 'jat-search-intel' ); ?></p>
 
 			<div style="margin-top:20px;">
 				<textarea id="si-robots-txt" rows="20" class="large-text code" style="font-family:monospace;"><?php echo esc_textarea( $content ); ?></textarea>
@@ -188,9 +188,9 @@ class Robots_Txt {
 			<div id="si-robots-validation" style="margin-top:10px;"></div>
 
 			<p style="margin-top:15px;">
-				<button class="button button-primary" id="si-save-robots"><?php esc_html_e( 'Save', 'search-intel' ); ?></button>
-				<button class="button" id="si-validate-robots"><?php esc_html_e( 'Validate', 'search-intel' ); ?></button>
-				<button class="button" id="si-reset-robots"><?php esc_html_e( 'Reset to Default', 'search-intel' ); ?></button>
+				<button class="button button-primary" id="si-save-robots"><?php esc_html_e( 'Save', 'jat-search-intel' ); ?></button>
+				<button class="button" id="si-validate-robots"><?php esc_html_e( 'Validate', 'jat-search-intel' ); ?></button>
+				<button class="button" id="si-reset-robots"><?php esc_html_e( 'Reset to Default', 'jat-search-intel' ); ?></button>
 			</p>
 
 			<?php wp_nonce_field( 'si_robots_nonce', 'si_robots_nonce_field' ); ?>

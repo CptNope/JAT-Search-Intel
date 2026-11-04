@@ -238,8 +238,8 @@ class Link_Checker {
 	public function register_admin_page(): void {
 		add_submenu_page(
 			'search-intel',
-			__( 'Broken Links', 'search-intel' ),
-			__( 'Broken Links', 'search-intel' ),
+			__( 'Broken Links', 'jat-search-intel' ),
+			__( 'Broken Links', 'jat-search-intel' ),
 			'manage_options',
 			'search-intel-broken-links',
 			[ $this, 'render_admin_page' ]
@@ -254,33 +254,33 @@ class Link_Checker {
 		$last_scan = $this->get_last_scan_time();
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'Broken Link Checker', 'search-intel' ); ?></h1>
+			<h1><?php esc_html_e( 'Broken Link Checker', 'jat-search-intel' ); ?></h1>
 			<p>
 				<?php
 				if ( $last_scan ) {
 					printf(
-						esc_html__( 'Last full scan: %s. Found %d broken links.', 'search-intel' ),
+						esc_html__( 'Last full scan: %s. Found %d broken links.', 'jat-search-intel' ),
 						'<strong>' . esc_html( $last_scan ) . '</strong>',
 						count( $links )
 					);
 				} else {
-					esc_html_e( 'No scan completed yet. The checker runs hourly via WP-Cron.', 'search-intel' );
+					esc_html_e( 'No scan completed yet. The checker runs hourly via WP-Cron.', 'jat-search-intel' );
 				}
 				?>
 			</p>
 			<table class="wp-list-table widefat fixed striped">
 				<thead>
 					<tr>
-						<th style="width:10%"><?php esc_html_e( 'Status', 'search-intel' ); ?></th>
-						<th style="width:40%"><?php esc_html_e( 'URL', 'search-intel' ); ?></th>
-						<th style="width:25%"><?php esc_html_e( 'Found In', 'search-intel' ); ?></th>
-						<th style="width:15%"><?php esc_html_e( 'Error', 'search-intel' ); ?></th>
-						<th style="width:10%"><?php esc_html_e( 'Checked', 'search-intel' ); ?></th>
+						<th style="width:10%"><?php esc_html_e( 'Status', 'jat-search-intel' ); ?></th>
+						<th style="width:40%"><?php esc_html_e( 'URL', 'jat-search-intel' ); ?></th>
+						<th style="width:25%"><?php esc_html_e( 'Found In', 'jat-search-intel' ); ?></th>
+						<th style="width:15%"><?php esc_html_e( 'Error', 'jat-search-intel' ); ?></th>
+						<th style="width:10%"><?php esc_html_e( 'Checked', 'jat-search-intel' ); ?></th>
 					</tr>
 				</thead>
 				<tbody>
 				<?php if ( empty( $links ) ) : ?>
-					<tr><td colspan="5"><?php esc_html_e( 'No broken links found.', 'search-intel' ); ?></td></tr>
+					<tr><td colspan="5"><?php esc_html_e( 'No broken links found.', 'jat-search-intel' ); ?></td></tr>
 				<?php else : ?>
 					<?php foreach ( $links as $link ) : ?>
 						<tr>

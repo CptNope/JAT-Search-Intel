@@ -24,7 +24,7 @@ class Authority_Map {
 		}
 
 		add_action( 'admin_menu', [ $this, 'register_admin_page' ] );
-		add_action( 'wp_ajax_si_refresh_authority', [ $this, 'ajax_refresh' ] );
+		add_action( 'wp_ajax_search_intel_refresh_authority', [ $this, 'ajax_refresh' ] );
 	}
 
 	// ── Authority Score ──────────────────────────────────────────────────────
@@ -533,7 +533,7 @@ class Authority_Map {
 		echo '<div class="wrap"><h1>Topical Authority Map</h1>';
 
 		// Site-wide authority.
-		printf( '<h2>Site Authority Score: %d/100</h2>', $dashboard['site_authority'] );
+		printf( '<h2>Site Authority Score: %d/100</h2>', absint( $dashboard['site_authority'] ) );
 
 		// Cluster table.
 		echo '<h3>Topic Clusters</h3>';
@@ -543,7 +543,7 @@ class Authority_Map {
 			printf(
 				'<tr><td>%s</td><td>%d/100</td><td>%s</td><td>%d</td></tr>',
 				esc_html( $c['name'] ),
-				$c['authority']['score'],
+				esc_html( $c['authority']['score'] ),
 				esc_html( $c['authority']['grade'] ),
 				count( $c['posts'] )
 			);
@@ -567,11 +567,11 @@ class Authority_Map {
 		echo '<h3>Multimodal Optimization</h3>';
 		$s = $multimodal['summary'];
 		printf( '<p>Alt text coverage: %d%% | Schema coverage: %d%% | Videos detected: %d</p>',
-			$s['alt_coverage'], $s['schema_coverage'], $s['posts_with_video']
+			esc_html( $s['alt_coverage'] ), esc_html( $s['schema_coverage'] ), esc_html( $s['posts_with_video'] )
 		);
 
 		if ( $s['missing_alt_count'] > 0 ) {
-			printf( '<p class="notice notice-warning">%d image(s) across your content are missing alt text.</p>', $s['missing_alt_count'] );
+			printf( '<p class="notice notice-warning">%d image(s) across your content are missing alt text.</p>', absint( $s['missing_alt_count'] ) );
 		}
 
 		if ( ! empty( $multimodal['posts'] ) ) {

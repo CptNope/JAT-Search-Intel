@@ -57,7 +57,7 @@ class GA4_Integration {
 
         if ( is_admin() ) {
             add_action( 'admin_menu', [ $this, 'register_admin_page' ] );
-            add_action( 'wp_ajax_si_save_ga4_settings', [ $this, 'ajax_save_settings' ] );
+            add_action( 'wp_ajax_search_intel_save_ga4_settings', [ $this, 'ajax_save_settings' ] );
         }
     }
 
@@ -468,7 +468,7 @@ class GA4_Integration {
                 var btn = $(this), val = $('#si_ga4_property_id').val();
                 btn.prop('disabled', true);
                 $('#si-ga4-status').html('<span style="color:#dba617;">Saving...</span>');
-                $.post(ajaxUrl, { action: 'si_save_ga4_settings', nonce: nonce, ga4_property_id: val }, function(r){
+                $.post(ajaxUrl, { action: 'search_intel_save_ga4_settings', nonce: nonce, ga4_property_id: val }, function(r){
                     btn.prop('disabled', false);
                     if (r.success) {
                         $('#si-ga4-status').html('<span style="color:#00a32a;">&#10003; ' + r.data.message + '</span>');

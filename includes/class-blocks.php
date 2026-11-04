@@ -105,6 +105,8 @@ class Blocks {
 			$asset['version']
 		);
 
+		wp_set_script_translations( 'search-intel-sidebar', 'jat-search-intel' );
+
 		// Pass theme.json color palette to JS for score ring theming.
 		wp_localize_script( 'search-intel-sidebar', 'searchIntelTheme', [
 			'colors' => $this->get_theme_json_colors(),
@@ -177,6 +179,7 @@ class Blocks {
 				$asset['version'],
 				true
 			);
+			wp_set_script_translations( $script_handle, 'jat-search-intel' );
 
 			$style_path = SEARCH_INTEL_DIR . "build/blocks/{$slug}/index.css";
 			$style_handle = null;
@@ -237,8 +240,8 @@ class Blocks {
 		}
 
 		$list_tag = $ordered ? 'ol' : 'ul';
-		$output   = '<nav class="si-toc" aria-label="' . esc_attr__( 'Table of Contents', 'search-intel' ) . '">';
-		$output  .= '<h3 class="si-toc__title">' . esc_html__( 'Table of Contents', 'search-intel' ) . '</h3>';
+		$output   = '<nav class="si-toc" aria-label="' . esc_attr__( 'Table of Contents', 'jat-search-intel' ) . '">';
+		$output  .= '<h3 class="si-toc__title">' . esc_html__( 'Table of Contents', 'jat-search-intel' ) . '</h3>';
 		$output  .= "<{$list_tag} class=\"si-toc-list\">";
 
 		foreach ( $matches as $match ) {
@@ -275,7 +278,7 @@ class Blocks {
 		global $post;
 
 		$separator  = esc_html( $attributes['separator'] ?? '›' );
-		$home_label = esc_html( $attributes['homeLabel'] ?? __( 'Home', 'search-intel' ) );
+		$home_label = esc_html( $attributes['homeLabel'] ?? __( 'Home', 'jat-search-intel' ) );
 
 		$items = [];
 
@@ -314,7 +317,7 @@ class Blocks {
 		}
 
 		// Build HTML with BreadcrumbList schema.
-		$output  = '<nav class="si-breadcrumbs" aria-label="' . esc_attr__( 'Breadcrumb', 'search-intel' ) . '">';
+		$output  = '<nav class="si-breadcrumbs" aria-label="' . esc_attr__( 'Breadcrumb', 'jat-search-intel' ) . '">';
 		$output .= '<ol class="si-breadcrumbs__list" itemscope itemtype="https://schema.org/BreadcrumbList">';
 
 		foreach ( $items as $i => $item ) {

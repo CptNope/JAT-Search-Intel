@@ -526,7 +526,7 @@ class Migration {
 			printf(
 				'<div class="card" style="max-width:600px;margin-bottom:16px"><h2>%s</h2><p><strong>%d</strong> posts with data</p><p>Fields: %s</p><button class="button" data-action="dryrun" data-source="%s">Preview Migration</button> <button class="button button-primary" data-action="migrate" data-source="%s">Migrate Now</button> <label style="margin-left:12px"><input type="checkbox" data-overwrite="%s"> Overwrite existing</label><div class="si-migration-result" data-result="%s"></div></div>',
 				esc_html( $info['label'] ),
-				$info['posts'],
+				absint( $info['posts'] ),
 				esc_html( implode( ', ', $info['meta'] ) ),
 				esc_attr( $key ),
 				esc_attr( $key ),

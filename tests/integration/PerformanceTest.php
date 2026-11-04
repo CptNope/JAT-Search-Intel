@@ -182,7 +182,7 @@ class PerformanceTest extends TestCase {
     public function test_sitemap_cached_under_5ms(): void {
         global $si_test_state;
         // Simulate cached sitemap
-        $si_test_state['transients']['si_sitemap_index'] = '<?xml version="1.0" encoding="UTF-8"?><sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></sitemapindex>';
+        $si_test_state['transients']['search_intel_sitemap_index'] = '<?xml version="1.0" encoding="UTF-8"?><sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></sitemapindex>';
 
         $sitemap = new Sitemap( Core::get_default_settings() );
 

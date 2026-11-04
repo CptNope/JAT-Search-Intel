@@ -66,10 +66,10 @@ class AI_Optimizer {
 		}
 
 		// AJAX endpoints.
-		add_action( 'wp_ajax_si_ai_get_suggestions', [ $this, 'ajax_get_suggestions' ] );
-		add_action( 'wp_ajax_si_ai_apply_suggestion', [ $this, 'ajax_apply_suggestion' ] );
-		add_action( 'wp_ajax_si_ai_auto_optimize', [ $this, 'ajax_auto_optimize' ] );
-		add_action( 'wp_ajax_si_ai_rollback', [ $this, 'ajax_rollback' ] );
+		add_action( 'wp_ajax_search_intel_ai_get_suggestions', [ $this, 'ajax_get_suggestions' ] );
+		add_action( 'wp_ajax_search_intel_ai_apply_suggestion', [ $this, 'ajax_apply_suggestion' ] );
+		add_action( 'wp_ajax_search_intel_ai_auto_optimize', [ $this, 'ajax_auto_optimize' ] );
+		add_action( 'wp_ajax_search_intel_ai_rollback', [ $this, 'ajax_rollback' ] );
 	}
 
 	/*----------------------------------------------------------------------
@@ -963,7 +963,7 @@ class AI_Optimizer {
 		foreach ( $post_types as $pt ) {
 			add_meta_box(
 				'search-intel-ai-optimizer',
-				__( 'Search Intel — AI Optimizer', 'search-intel' ),
+				__( 'Search Intel — AI Optimizer', 'jat-search-intel' ),
 				[ $this, 'render_meta_box' ],
 				$pt,
 				'side',
@@ -998,29 +998,29 @@ class AI_Optimizer {
 		?>
 		<div id="si-ai-optimizer" data-post-id="<?php echo esc_attr( (string) $post->ID ); ?>">
 			<div class="si-ai-scores" style="margin-bottom:12px;">
-				<span class="si-score-badge" style="background:<?php echo $this->score_color( $scores['seo'] ); ?>">SEO <?php echo esc_html( (string) $scores['seo'] ); ?></span>
-				<span class="si-score-badge" style="background:<?php echo $this->score_color( $scores['aeo'] ); ?>">AEO <?php echo esc_html( (string) $scores['aeo'] ); ?></span>
-				<span class="si-score-badge" style="background:<?php echo $this->score_color( $scores['geo'] ); ?>">GEO <?php echo esc_html( (string) $scores['geo'] ); ?></span>
-				<span class="si-score-badge" style="background:<?php echo $this->score_color( $scores['readability'] ); ?>">READ <?php echo esc_html( (string) $scores['readability'] ); ?></span>
+				<span class="si-score-badge" style="background:<?php echo esc_attr( $this->score_color( $scores['seo'] ) ); ?>">SEO <?php echo esc_html( (string) $scores['seo'] ); ?></span>
+				<span class="si-score-badge" style="background:<?php echo esc_attr( $this->score_color( $scores['aeo'] ) ); ?>">AEO <?php echo esc_html( (string) $scores['aeo'] ); ?></span>
+				<span class="si-score-badge" style="background:<?php echo esc_attr( $this->score_color( $scores['geo'] ) ); ?>">GEO <?php echo esc_html( (string) $scores['geo'] ); ?></span>
+				<span class="si-score-badge" style="background:<?php echo esc_attr( $this->score_color( $scores['readability'] ) ); ?>">READ <?php echo esc_html( (string) $scores['readability'] ); ?></span>
 			</div>
 
 			<?php if ( $fail_count > 0 ) : ?>
 				<p style="color:#d63638;margin:0 0 8px;">
-					<strong><?php echo esc_html( (string) $fail_count ); ?></strong> <?php esc_html_e( 'issues found', 'search-intel' ); ?>
+					<strong><?php echo esc_html( (string) $fail_count ); ?></strong> <?php esc_html_e( 'issues found', 'jat-search-intel' ); ?>
 				</p>
 			<?php else : ?>
-				<p style="color:#00a32a;margin:0 0 8px;"><?php esc_html_e( 'All checks passing!', 'search-intel' ); ?></p>
+				<p style="color:#00a32a;margin:0 0 8px;"><?php esc_html_e( 'All checks passing!', 'jat-search-intel' ); ?></p>
 			<?php endif; ?>
 
 			<div class="si-ai-actions" style="margin-bottom:10px;">
 				<button type="button" class="button button-primary" id="si-ai-auto-optimize-btn" <?php echo $fail_count === 0 ? 'disabled' : ''; ?>
 					title="AI will rewrite content, title, meta, FAQ, and summary to fix all failing checks. A rollback snapshot is created first.">
-					<?php esc_html_e( 'Auto-Optimize', 'search-intel' ); ?>
+					<?php esc_html_e( 'Auto-Optimize', 'jat-search-intel' ); ?>
 				</button>
 
 				<button type="button" class="button" id="si-ai-rollback-btn" <?php echo $has_snapshots ? '' : 'disabled'; ?>
 					title="Undo the last AI optimization and restore the previous version.">
-					<?php esc_html_e( 'Rollback', 'search-intel' ); ?>
+					<?php esc_html_e( 'Rollback', 'jat-search-intel' ); ?>
 					<?php if ( $snap_count > 0 ) : ?>
 						<span class="si-rollback-count">(<?php echo esc_html( (string) $snap_count ); ?>)</span>
 					<?php endif; ?>
@@ -1030,7 +1030,7 @@ class AI_Optimizer {
 			<?php if ( $has_snapshots && $last_snap ) : ?>
 				<div id="si-ai-snapshot-info" class="si-snapshot-info">
 					<?php /* translators: %s: snapshot date */ ?>
-					<?php printf( esc_html__( 'Last snapshot: %s', 'search-intel' ), esc_html( $last_snap['date'] ?? '' ) ); ?>
+					<?php printf( esc_html__( 'Last snapshot: %s', 'jat-search-intel' ), esc_html( $last_snap['date'] ?? '' ) ); ?>
 				</div>
 			<?php else : ?>
 				<div id="si-ai-snapshot-info" class="si-snapshot-info" style="display:none;"></div>
@@ -1041,7 +1041,7 @@ class AI_Optimizer {
 			<hr style="margin:10px 0;">
 
 			<button type="button" class="button" id="si-ai-generate-btn" <?php echo $fail_count === 0 ? 'disabled' : ''; ?> style="width:100%;">
-				<?php echo $has_cached ? esc_html__( 'Regenerate AI Suggestions', 'search-intel' ) : esc_html__( 'Generate AI Suggestions', 'search-intel' ); ?>
+				<?php echo $has_cached ? esc_html__( 'Regenerate AI Suggestions', 'jat-search-intel' ) : esc_html__( 'Generate AI Suggestions', 'jat-search-intel' ); ?>
 			</button>
 
 			<div id="si-ai-suggestions-list" style="margin-top:12px;">
@@ -1052,7 +1052,7 @@ class AI_Optimizer {
 
 			<div id="si-ai-loading" style="display:none;margin-top:10px;">
 				<span class="spinner is-active" style="float:none;margin:0 5px 0 0;"></span>
-				<span id="si-ai-loading-text"><?php esc_html_e( 'Generating AI suggestions…', 'search-intel' ); ?></span>
+				<span id="si-ai-loading-text"><?php esc_html_e( 'Generating AI suggestions…', 'jat-search-intel' ); ?></span>
 			</div>
 		</div>
 
@@ -1085,7 +1085,7 @@ class AI_Optimizer {
 	 */
 	private function render_suggestions( array $suggestions ): void {
 		if ( empty( $suggestions ) ) {
-			echo '<p>' . esc_html__( 'No suggestions at this time.', 'search-intel' ) . '</p>';
+			echo '<p>' . esc_html__( 'No suggestions at this time.', 'jat-search-intel' ) . '</p>';
 			return;
 		}
 
@@ -1103,10 +1103,10 @@ class AI_Optimizer {
 				<p><?php echo esc_html( $s['text'] ?? '' ); ?></p>
 				<?php if ( ( $s['action'] ?? '' ) === 'apply' && ! empty( $s['apply_data'] ) ) : ?>
 					<button type="button" class="button si-ai-apply-btn" data-suggestion-id="<?php echo esc_attr( $s['id'] ?? '' ); ?>">
-						<?php esc_html_e( 'Apply', 'search-intel' ); ?>
+						<?php esc_html_e( 'Apply', 'jat-search-intel' ); ?>
 					</button>
 				<?php elseif ( ( $s['action'] ?? '' ) === 'review' ) : ?>
-					<em style="font-size:11px;color:#646970;"><?php esc_html_e( 'Review and apply manually', 'search-intel' ); ?></em>
+					<em style="font-size:11px;color:#646970;"><?php esc_html_e( 'Review and apply manually', 'jat-search-intel' ); ?></em>
 				<?php endif; ?>
 			</div>
 			<?php

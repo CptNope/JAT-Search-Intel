@@ -63,11 +63,11 @@ class Redirect_Manager {
 
 		if ( is_admin() ) {
 			add_action( 'admin_menu', [ $this, 'register_admin_page' ] );
-			add_action( 'wp_ajax_si_save_redirect', [ $this, 'ajax_save_redirect' ] );
-			add_action( 'wp_ajax_si_delete_redirect', [ $this, 'ajax_delete_redirect' ] );
-			add_action( 'wp_ajax_si_export_redirects', [ $this, 'ajax_export_csv' ] );
-			add_action( 'wp_ajax_si_import_redirects', [ $this, 'ajax_import_csv' ] );
-			add_action( 'wp_ajax_si_clear_404_log', [ $this, 'ajax_clear_404_log' ] );
+			add_action( 'wp_ajax_search_intel_save_redirect', [ $this, 'ajax_save_redirect' ] );
+			add_action( 'wp_ajax_search_intel_delete_redirect', [ $this, 'ajax_delete_redirect' ] );
+			add_action( 'wp_ajax_search_intel_export_redirects', [ $this, 'ajax_export_csv' ] );
+			add_action( 'wp_ajax_search_intel_import_redirects', [ $this, 'ajax_import_csv' ] );
+			add_action( 'wp_ajax_search_intel_clear_404_log', [ $this, 'ajax_clear_404_log' ] );
 		}
 	}
 
@@ -157,7 +157,8 @@ class Redirect_Manager {
 			return;
 		}
 
-		wp_redirect( $target, (int) $redirect->status_code );
+		// Admin-defined rules may legitimately point at external hosts, so wp_safe_redirect() is not usable here.
+		wp_redirect( $target, (int) $redirect->status_code ); // phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect
 		exit;
 	}
 
@@ -528,8 +529,8 @@ class Redirect_Manager {
 	public function register_admin_page(): void {
 		add_submenu_page(
 			'search-intel',
-			__( 'Redirects', 'search-intel' ),
-			__( 'Redirects', 'search-intel' ),
+			__( 'Redirects', 'jat-search-intel' ),
+			__( 'Redirects', 'jat-search-intel' ),
 			'manage_options',
 			'search-intel-redirects',
 			[ $this, 'render_admin_page' ]
@@ -544,19 +545,19 @@ class Redirect_Manager {
 			return;
 		}
 
-		$tab = sanitize_text_field( $_GET['tab'] ?? 'redirects' );
+		$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'redirects'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only view/pagination parameter.
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'Search Intel — Redirects', 'search-intel' ); ?></h1>
+			<h1><?php esc_html_e( 'Search Intel — Redirects', 'jat-search-intel' ); ?></h1>
 
 			<nav class="nav-tab-wrapper">
 				<a href="?page=search-intel-redirects&tab=redirects"
 				   class="nav-tab <?php echo 'redirects' === $tab ? 'nav-tab-active' : ''; ?>">
-					<?php esc_html_e( 'Redirect Rules', 'search-intel' ); ?>
+					<?php esc_html_e( 'Redirect Rules', 'jat-search-intel' ); ?>
 				</a>
 				<a href="?page=search-intel-redirects&tab=404log"
 				   class="nav-tab <?php echo '404log' === $tab ? 'nav-tab-active' : ''; ?>">
-					<?php esc_html_e( '404 Log', 'search-intel' ); ?>
+					<?php esc_html_e( '404 Log', 'jat-search-intel' ); ?>
 				</a>
 			</nav>
 
@@ -575,10 +576,10 @@ class Redirect_Manager {
 	 * Render the Redirect Rules tab.
 	 */
 	private function render_redirects_tab(): void {
-		$page     = max( 1, (int) ( $_GET['paged'] ?? 1 ) );
-		$search   = sanitize_text_field( $_GET['s'] ?? '' );
-		$orderby  = sanitize_key( $_GET['orderby'] ?? 'id' );
-		$order    = sanitize_key( $_GET['order'] ?? 'DESC' );
+		$page     = max( 1, (int) ( $_GET['paged'] ?? 1 ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only view/pagination parameter.
+		$search   = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only view/pagination parameter.
+		$orderby  = sanitize_key( $_GET['orderby'] ?? 'id' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only view/pagination parameter.
+		$order    = sanitize_key( $_GET['order'] ?? 'DESC' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only view/pagination parameter.
 		$result   = $this->get_redirects( $page, 25, $search, $orderby, $order );
 		$total    = $result['total'];
 		$items    = $result['items'];
@@ -590,31 +591,31 @@ class Redirect_Manager {
 				<form method="get" style="display:flex; gap:8px; align-items:center;">
 					<input type="hidden" name="page" value="search-intel-redirects" />
 					<input type="search" name="s" value="<?php echo esc_attr( $search ); ?>"
-						   placeholder="<?php esc_attr_e( 'Search redirects…', 'search-intel' ); ?>" class="regular-text" />
-					<button type="submit" class="button"><?php esc_html_e( 'Search', 'search-intel' ); ?></button>
+						   placeholder="<?php esc_attr_e( 'Search redirects…', 'jat-search-intel' ); ?>" class="regular-text" />
+					<button type="submit" class="button"><?php esc_html_e( 'Search', 'jat-search-intel' ); ?></button>
 				</form>
 				<div style="display:flex; gap:8px;">
-					<button type="button" class="button" id="si-import-csv"><?php esc_html_e( 'Import CSV', 'search-intel' ); ?></button>
-					<button type="button" class="button" id="si-export-csv"><?php esc_html_e( 'Export CSV', 'search-intel' ); ?></button>
-					<button type="button" class="button button-primary" id="si-add-redirect"><?php esc_html_e( 'Add Redirect', 'search-intel' ); ?></button>
+					<button type="button" class="button" id="si-import-csv"><?php esc_html_e( 'Import CSV', 'jat-search-intel' ); ?></button>
+					<button type="button" class="button" id="si-export-csv"><?php esc_html_e( 'Export CSV', 'jat-search-intel' ); ?></button>
+					<button type="button" class="button button-primary" id="si-add-redirect"><?php esc_html_e( 'Add Redirect', 'jat-search-intel' ); ?></button>
 				</div>
 			</div>
 
 			<table class="wp-list-table widefat fixed striped">
 				<thead>
 					<tr>
-						<th style="width:30%"><?php esc_html_e( 'Source URL', 'search-intel' ); ?></th>
-						<th style="width:25%"><?php esc_html_e( 'Target URL', 'search-intel' ); ?></th>
-						<th style="width:8%"><?php esc_html_e( 'Code', 'search-intel' ); ?></th>
-						<th style="width:8%"><?php esc_html_e( 'Type', 'search-intel' ); ?></th>
-						<th style="width:7%"><?php esc_html_e( 'Hits', 'search-intel' ); ?></th>
-						<th style="width:10%"><?php esc_html_e( 'Last Hit', 'search-intel' ); ?></th>
-						<th style="width:12%"><?php esc_html_e( 'Actions', 'search-intel' ); ?></th>
+						<th style="width:30%"><?php esc_html_e( 'Source URL', 'jat-search-intel' ); ?></th>
+						<th style="width:25%"><?php esc_html_e( 'Target URL', 'jat-search-intel' ); ?></th>
+						<th style="width:8%"><?php esc_html_e( 'Code', 'jat-search-intel' ); ?></th>
+						<th style="width:8%"><?php esc_html_e( 'Type', 'jat-search-intel' ); ?></th>
+						<th style="width:7%"><?php esc_html_e( 'Hits', 'jat-search-intel' ); ?></th>
+						<th style="width:10%"><?php esc_html_e( 'Last Hit', 'jat-search-intel' ); ?></th>
+						<th style="width:12%"><?php esc_html_e( 'Actions', 'jat-search-intel' ); ?></th>
 					</tr>
 				</thead>
 				<tbody>
 				<?php if ( empty( $items ) ) : ?>
-					<tr><td colspan="7"><?php esc_html_e( 'No redirect rules found.', 'search-intel' ); ?></td></tr>
+					<tr><td colspan="7"><?php esc_html_e( 'No redirect rules found.', 'jat-search-intel' ); ?></td></tr>
 				<?php else : ?>
 					<?php foreach ( $items as $item ) : ?>
 						<tr data-id="<?php echo esc_attr( $item->id ); ?>">
@@ -625,8 +626,8 @@ class Redirect_Manager {
 							<td><?php echo esc_html( number_format_i18n( $item->hit_count ) ); ?></td>
 							<td><?php echo $item->last_hit ? esc_html( human_time_diff( strtotime( $item->last_hit ) ) . ' ago' ) : '—'; ?></td>
 							<td>
-								<button class="button button-small si-edit-redirect" data-id="<?php echo esc_attr( $item->id ); ?>"><?php esc_html_e( 'Edit', 'search-intel' ); ?></button>
-								<button class="button button-small button-link-delete si-delete-redirect" data-id="<?php echo esc_attr( $item->id ); ?>"><?php esc_html_e( 'Delete', 'search-intel' ); ?></button>
+								<button class="button button-small si-edit-redirect" data-id="<?php echo esc_attr( $item->id ); ?>"><?php esc_html_e( 'Edit', 'jat-search-intel' ); ?></button>
+								<button class="button button-small button-link-delete si-delete-redirect" data-id="<?php echo esc_attr( $item->id ); ?>"><?php esc_html_e( 'Delete', 'jat-search-intel' ); ?></button>
 							</td>
 						</tr>
 					<?php endforeach; ?>
@@ -638,12 +639,12 @@ class Redirect_Manager {
 				<div class="tablenav bottom">
 					<div class="tablenav-pages">
 						<?php
-						echo paginate_links( [
+						echo wp_kses_post( (string) paginate_links( [
 							'base'    => add_query_arg( 'paged', '%#%' ),
 							'format'  => '',
 							'current' => $page,
 							'total'   => $pages,
-						] );
+						] ) );
 						?>
 					</div>
 				</div>
@@ -654,19 +655,19 @@ class Redirect_Manager {
 		<div id="si-redirect-modal" style="display:none;">
 			<div class="si-modal-backdrop"></div>
 			<div class="si-modal-content" style="max-width:550px;margin:50px auto;background:#fff;padding:25px;border-radius:6px;position:relative;z-index:100001;">
-				<h2 id="si-modal-title"><?php esc_html_e( 'Add Redirect', 'search-intel' ); ?></h2>
+				<h2 id="si-modal-title"><?php esc_html_e( 'Add Redirect', 'jat-search-intel' ); ?></h2>
 				<input type="hidden" id="si-redirect-id" value="0" />
 				<table class="form-table">
 					<tr>
-						<th><label for="si-source-url"><?php esc_html_e( 'Source URL', 'search-intel' ); ?></label></th>
+						<th><label for="si-source-url"><?php esc_html_e( 'Source URL', 'jat-search-intel' ); ?></label></th>
 						<td><input type="text" id="si-source-url" class="large-text" placeholder="/old-page" /></td>
 					</tr>
 					<tr>
-						<th><label for="si-target-url"><?php esc_html_e( 'Target URL', 'search-intel' ); ?></label></th>
+						<th><label for="si-target-url"><?php esc_html_e( 'Target URL', 'jat-search-intel' ); ?></label></th>
 						<td><input type="text" id="si-target-url" class="large-text" placeholder="/new-page" /></td>
 					</tr>
 					<tr>
-						<th><label for="si-status-code"><?php esc_html_e( 'Status Code', 'search-intel' ); ?></label></th>
+						<th><label for="si-status-code"><?php esc_html_e( 'Status Code', 'jat-search-intel' ); ?></label></th>
 						<td>
 							<select id="si-status-code">
 								<?php foreach ( self::STATUS_CODES as $code => $label ) : ?>
@@ -676,7 +677,7 @@ class Redirect_Manager {
 						</td>
 					</tr>
 					<tr>
-						<th><label for="si-match-type"><?php esc_html_e( 'Match Type', 'search-intel' ); ?></label></th>
+						<th><label for="si-match-type"><?php esc_html_e( 'Match Type', 'jat-search-intel' ); ?></label></th>
 						<td>
 							<select id="si-match-type">
 								<?php foreach ( self::MATCH_TYPES as $type => $label ) : ?>
@@ -686,17 +687,17 @@ class Redirect_Manager {
 						</td>
 					</tr>
 					<tr>
-						<th><label for="si-redirect-note"><?php esc_html_e( 'Note', 'search-intel' ); ?></label></th>
+						<th><label for="si-redirect-note"><?php esc_html_e( 'Note', 'jat-search-intel' ); ?></label></th>
 						<td><input type="text" id="si-redirect-note" class="large-text" /></td>
 					</tr>
 					<tr>
-						<th><?php esc_html_e( 'Enabled', 'search-intel' ); ?></th>
-						<td><label><input type="checkbox" id="si-redirect-enabled" checked /> <?php esc_html_e( 'Active', 'search-intel' ); ?></label></td>
+						<th><?php esc_html_e( 'Enabled', 'jat-search-intel' ); ?></th>
+						<td><label><input type="checkbox" id="si-redirect-enabled" checked /> <?php esc_html_e( 'Active', 'jat-search-intel' ); ?></label></td>
 					</tr>
 				</table>
 				<p>
-					<button class="button button-primary" id="si-save-redirect"><?php esc_html_e( 'Save Redirect', 'search-intel' ); ?></button>
-					<button class="button si-close-modal"><?php esc_html_e( 'Cancel', 'search-intel' ); ?></button>
+					<button class="button button-primary" id="si-save-redirect"><?php esc_html_e( 'Save Redirect', 'jat-search-intel' ); ?></button>
+					<button class="button si-close-modal"><?php esc_html_e( 'Cancel', 'jat-search-intel' ); ?></button>
 				</p>
 			</div>
 		</div>
@@ -710,7 +711,7 @@ class Redirect_Manager {
 	 * Render the 404 Log tab.
 	 */
 	private function render_404_log_tab(): void {
-		$page   = max( 1, (int) ( $_GET['paged'] ?? 1 ) );
+		$page   = max( 1, (int) ( $_GET['paged'] ?? 1 ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only view/pagination parameter.
 		$result = $this->get_404_log( $page, 50 );
 		$items  = $result['items'];
 		$total  = $result['total'];
@@ -718,22 +719,22 @@ class Redirect_Manager {
 		?>
 		<div style="margin-top: 20px;">
 			<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-				<p><?php printf( esc_html__( '%s unique 404 URLs logged.', 'search-intel' ), '<strong>' . number_format_i18n( $total ) . '</strong>' ); ?></p>
-				<button type="button" class="button" id="si-clear-404-log"><?php esc_html_e( 'Clear Log', 'search-intel' ); ?></button>
+				<p><?php printf( esc_html__( '%s unique 404 URLs logged.', 'jat-search-intel' ), '<strong>' . esc_html( number_format_i18n( $total ) ) . '</strong>' ); ?></p>
+				<button type="button" class="button" id="si-clear-404-log"><?php esc_html_e( 'Clear Log', 'jat-search-intel' ); ?></button>
 			</div>
 			<table class="wp-list-table widefat fixed striped">
 				<thead>
 					<tr>
-						<th style="width:40%"><?php esc_html_e( 'URL', 'search-intel' ); ?></th>
-						<th style="width:10%"><?php esc_html_e( 'Hits', 'search-intel' ); ?></th>
-						<th style="width:15%"><?php esc_html_e( 'Last Hit', 'search-intel' ); ?></th>
-						<th style="width:25%"><?php esc_html_e( 'Referrer', 'search-intel' ); ?></th>
-						<th style="width:10%"><?php esc_html_e( 'Action', 'search-intel' ); ?></th>
+						<th style="width:40%"><?php esc_html_e( 'URL', 'jat-search-intel' ); ?></th>
+						<th style="width:10%"><?php esc_html_e( 'Hits', 'jat-search-intel' ); ?></th>
+						<th style="width:15%"><?php esc_html_e( 'Last Hit', 'jat-search-intel' ); ?></th>
+						<th style="width:25%"><?php esc_html_e( 'Referrer', 'jat-search-intel' ); ?></th>
+						<th style="width:10%"><?php esc_html_e( 'Action', 'jat-search-intel' ); ?></th>
 					</tr>
 				</thead>
 				<tbody>
 				<?php if ( empty( $items ) ) : ?>
-					<tr><td colspan="5"><?php esc_html_e( 'No 404 errors logged yet.', 'search-intel' ); ?></td></tr>
+					<tr><td colspan="5"><?php esc_html_e( 'No 404 errors logged yet.', 'jat-search-intel' ); ?></td></tr>
 				<?php else : ?>
 					<?php foreach ( $items as $item ) : ?>
 						<tr>
@@ -744,7 +745,7 @@ class Redirect_Manager {
 							<td>
 								<button class="button button-small si-create-redirect-from-404"
 										data-source="<?php echo esc_attr( $item->url ); ?>">
-									<?php esc_html_e( 'Redirect', 'search-intel' ); ?>
+									<?php esc_html_e( 'Redirect', 'jat-search-intel' ); ?>
 								</button>
 							</td>
 						</tr>
@@ -756,12 +757,12 @@ class Redirect_Manager {
 			<div class="tablenav bottom">
 				<div class="tablenav-pages">
 					<?php
-					echo paginate_links( [
+					echo wp_kses_post( (string) paginate_links( [
 						'base'    => add_query_arg( 'paged', '%#%' ),
 						'format'  => '',
 						'current' => $page,
 						'total'   => $total_pages,
-					] );
+					] ) );
 					?>
 				</div>
 			</div>
@@ -827,7 +828,7 @@ class Redirect_Manager {
 
 		header( 'Content-Type: text/csv; charset=utf-8' );
 		header( 'Content-Disposition: attachment; filename=search-intel-redirects-' . gmdate( 'Y-m-d' ) . '.csv' );
-		echo $csv;
+		echo $csv; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Raw CSV file download, not HTML.
 		exit;
 	}
 

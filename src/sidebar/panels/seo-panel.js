@@ -35,8 +35,8 @@ function usePostMeta( metaKey ) {
  * SERP Preview component.
  */
 function SerpPreview( { title, description, url } ) {
-	const displayTitle = title || __( 'Page Title', 'search-intel' );
-	const displayDesc = description || __( 'Meta description will appear here...', 'search-intel' );
+	const displayTitle = title || __( 'Page Title', 'jat-search-intel' );
+	const displayDesc = description || __( 'Meta description will appear here...', 'jat-search-intel' );
 	const displayUrl = url || 'https://example.com';
 
 	return (
@@ -83,7 +83,7 @@ export default function SeoPanel() {
 			/>
 
 			<TextControl
-				label={ __( 'SEO Title', 'search-intel' ) }
+				label={ __( 'SEO Title', 'jat-search-intel' ) }
 				value={ title }
 				onChange={ setTitle }
 				help={
@@ -94,7 +94,7 @@ export default function SeoPanel() {
 			/>
 
 			<TextareaControl
-				label={ __( 'Meta Description', 'search-intel' ) }
+				label={ __( 'Meta Description', 'jat-search-intel' ) }
 				value={ description }
 				onChange={ setDescription }
 				rows={ 3 }
@@ -106,20 +106,20 @@ export default function SeoPanel() {
 			/>
 
 			<TextControl
-				label={ __( 'Focus Keyword', 'search-intel' ) }
+				label={ __( 'Focus Keyword', 'jat-search-intel' ) }
 				value={ focusKeyword }
 				onChange={ setFocusKeyword }
 			/>
 
 			<TextControl
-				label={ __( 'Secondary Keywords', 'search-intel' ) }
+				label={ __( 'Secondary Keywords', 'jat-search-intel' ) }
 				value={ secondaryKeywords }
 				onChange={ setSecondaryKeywords }
-				help={ __( 'Comma-separated', 'search-intel' ) }
+				help={ __( 'Comma-separated', 'jat-search-intel' ) }
 			/>
 
 			<TextControl
-				label={ __( 'Canonical URL', 'search-intel' ) }
+				label={ __( 'Canonical URL', 'jat-search-intel' ) }
 				value={ canonicalUrl }
 				onChange={ setCanonicalUrl }
 				type="url"
@@ -127,39 +127,39 @@ export default function SeoPanel() {
 
 			<div className="si-toggles">
 				<ToggleControl
-					label={ __( 'noindex', 'search-intel' ) }
+					label={ __( 'noindex', 'jat-search-intel' ) }
 					checked={ noindex === '1' || noindex === true }
 					onChange={ ( val ) => setNoindex( val ? '1' : '' ) }
 				/>
 				<ToggleControl
-					label={ __( 'nofollow', 'search-intel' ) }
+					label={ __( 'nofollow', 'jat-search-intel' ) }
 					checked={ nofollow === '1' || nofollow === true }
 					onChange={ ( val ) => setNofollow( val ? '1' : '' ) }
 				/>
 			</div>
 
 			<PanelBody
-				title={ __( 'Social Overrides', 'search-intel' ) }
+				title={ __( 'Social Overrides', 'jat-search-intel' ) }
 				initialOpen={ false }
 				className="si-social-overrides"
 			>
 				<TextControl
-					label={ __( 'OG Title', 'search-intel' ) }
+					label={ __( 'OG Title', 'jat-search-intel' ) }
 					value={ ogTitle }
 					onChange={ setOgTitle }
 				/>
 				<TextControl
-					label={ __( 'OG Description', 'search-intel' ) }
+					label={ __( 'OG Description', 'jat-search-intel' ) }
 					value={ ogDescription }
 					onChange={ setOgDescription }
 				/>
 				<TextControl
-					label={ __( 'Twitter Title', 'search-intel' ) }
+					label={ __( 'Twitter Title', 'jat-search-intel' ) }
 					value={ twitterTitle }
 					onChange={ setTwitterTitle }
 				/>
 				<TextControl
-					label={ __( 'Twitter Description', 'search-intel' ) }
+					label={ __( 'Twitter Description', 'jat-search-intel' ) }
 					value={ twitterDescription }
 					onChange={ setTwitterDescription }
 				/>

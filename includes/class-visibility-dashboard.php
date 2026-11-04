@@ -26,7 +26,7 @@ class Visibility_Dashboard {
 
 		// Admin page and AJAX endpoints.
 		add_action( 'admin_menu', [ $this, 'register_admin_page' ] );
-		add_action( 'wp_ajax_si_refresh_visibility', [ $this, 'ajax_refresh' ] );
+		add_action( 'wp_ajax_search_intel_refresh_visibility', [ $this, 'ajax_refresh' ] );
 
 		// Track llms.txt access via query var detection.
 		add_action( 'template_redirect', [ $this, 'track_llms_access' ], 5 );
@@ -796,7 +796,7 @@ class Visibility_Dashboard {
 		printf(
 			'<div class="si-score-card"><h2>GEO Health Score: <span class="grade-%s">%d/100 (%s)</span></h2></div>',
 			esc_attr( strtolower( $health['grade'] ) ),
-			$health['score'],
+			esc_html( $health['score'] ),
 			esc_html( $health['grade'] )
 		);
 
@@ -807,8 +807,8 @@ class Visibility_Dashboard {
 			printf(
 				'<tr><td>%s</td><td>%d / %d</td><td>%s</td></tr>',
 				esc_html( $factor['label'] ),
-				$factor['score'],
-				$factor['max'],
+				esc_html( $factor['score'] ),
+				esc_html( $factor['max'] ),
 				esc_html( $factor['detail'] )
 			);
 		}
@@ -828,11 +828,11 @@ class Visibility_Dashboard {
 		}
 
 		// AI Referral summary.
-		printf( '<h3>AI Referral Traffic (30d)</h3><p>Total: %d visits</p>', $ai_ref['total'] );
+		printf( '<h3>AI Referral Traffic (30d)</h3><p>Total: %d visits</p>', absint( $ai_ref['total'] ) );
 		if ( ! empty( $ai_ref['by_source'] ) ) {
 			echo '<ul>';
 			foreach ( $ai_ref['by_source'] as $src => $cnt ) {
-				printf( '<li>%s: %d</li>', esc_html( $src ), $cnt );
+				printf( '<li>%s: %d</li>', esc_html( $src ), absint( $cnt ) );
 			}
 			echo '</ul>';
 		}

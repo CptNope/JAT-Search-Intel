@@ -22,7 +22,7 @@ class Advanced_Linking {
     private $settings;
 
     /** @var string Transient prefix for link suggestions cache. */
-    private const SUGGEST_CACHE_PREFIX = 'si_link_suggest_';
+    private const SUGGEST_CACHE_PREFIX = 'search_intel_link_suggest_';
 
     /** @var int Suggestion cache TTL (4 hours). */
     private const SUGGEST_TTL = 14400;

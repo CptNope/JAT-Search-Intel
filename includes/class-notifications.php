@@ -508,7 +508,7 @@ class Notifications {
 				. '<div style="background:%s;height:8px;border-radius:4px;width:%s%%"></div>'
 				. '</div></div>',
 				esc_html( $label ),
-				$warn,
+				wp_kses_post( $warn ),
 				esc_attr( $color ),
 				esc_html( (string) $data['avg'] ),
 				esc_attr( $color ),
@@ -519,8 +519,8 @@ class Notifications {
 		// Summary stats.
 		printf(
 			'<p style="margin-top:12px;color:#666">%d posts scored · %d below threshold</p>',
-			$summary['total_posts'],
-			$summary['below_threshold']
+			esc_html( $summary['total_posts'] ),
+			esc_html( $summary['below_threshold'] )
 		);
 
 		// Worst posts.
@@ -531,9 +531,9 @@ class Notifications {
 					'<li><a href="%s">%s</a> — SEO: %d, AEO: %d, GEO: %d</li>',
 					esc_url( get_edit_post_link( $post['post_id'] ) ),
 					esc_html( $post['title'] ),
-					$post['seo'],
-					$post['aeo'],
-					$post['geo']
+					esc_html( $post['seo'] ),
+					esc_html( $post['aeo'] ),
+					esc_html( $post['geo'] )
 				);
 			}
 			echo '</ul>';

@@ -298,7 +298,7 @@ class FAQGeneratorTest extends TestCase {
 		$gen = new FAQ_Generator( [ 'enable_faq_generator' => false ] );
 
 		// AJAX handlers are always registered (used by the main metabox AEO tab).
-		$this->assertArrayHasKey( 'wp_ajax_si_generate_faqs', $si_test_state['actions'] ?? [] );
+		$this->assertArrayHasKey( 'wp_ajax_search_intel_generate_faqs', $si_test_state['actions'] ?? [] );
 
 		// But the separate metabox should NOT be registered when disabled.
 		$this->assertArrayNotHasKey( 'add_meta_boxes', $si_test_state['actions'] ?? [] );

@@ -338,7 +338,7 @@ class Multisite {
 		echo '<div class="wrap">';
 		echo '<h1>Search Intel — Network Settings</h1>';
 
-		if ( isset( $_GET['updated'] ) ) {
+		if ( isset( $_GET['updated'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only view/pagination parameter.
 			echo '<div class="notice notice-success"><p>Network defaults saved.</p></div>';
 		}
 
@@ -355,7 +355,7 @@ class Multisite {
 				printf(
 					'<tr><th><label for="%1$s">%1$s</label></th><td><input type="checkbox" name="search_intel_network[%1$s]" id="%1$s" value="1"%2$s></td></tr>',
 					esc_attr( $key ),
-					$checked
+					esc_attr( $checked )
 				);
 			} elseif ( is_string( $default_val ) ) {
 				$value = $defaults[ $key ] ?? '';
@@ -385,11 +385,11 @@ class Multisite {
 					esc_url( $site['url'] . '/wp-admin/' ),
 					esc_html( $site['domain'] ),
 					esc_html( $site['path'] ),
-					$site['posts'],
-					$site['avg_seo'],
-					$site['avg_aeo'],
-					$site['avg_geo'],
-					$site['overrides']
+					esc_html( $site['posts'] ),
+					esc_html( $site['avg_seo'] ),
+					esc_html( $site['avg_aeo'] ),
+					esc_html( $site['avg_geo'] ),
+					esc_html( $site['overrides'] )
 				);
 			}
 			echo '</tbody></table>';

@@ -214,7 +214,7 @@ class WooCommerce {
 
 		// Home
 		$crumbs[] = [
-			'name' => __( 'Home', 'search-intel' ),
+			'name' => __( 'Home', 'jat-search-intel' ),
 			'url'  => home_url( '/' ),
 		];
 
@@ -277,7 +277,7 @@ class WooCommerce {
 	public function add_product_metabox(): void {
 		add_meta_box(
 			'search-intel-product',
-			__( 'Search Intel — Product Data', 'search-intel' ),
+			__( 'Search Intel — Product Data', 'jat-search-intel' ),
 			[ $this, 'render_product_metabox' ],
 			'product',
 			'side',
@@ -299,23 +299,23 @@ class WooCommerce {
 		$condition = get_post_meta( $post->ID, '_search_intel_product_condition', true ) ?: 'new';
 		?>
 		<p>
-			<label for="si-product-brand"><strong><?php esc_html_e( 'Brand', 'search-intel' ); ?></strong></label><br>
+			<label for="si-product-brand"><strong><?php esc_html_e( 'Brand', 'jat-search-intel' ); ?></strong></label><br>
 			<input type="text" id="si-product-brand" name="si_product_brand" value="<?php echo esc_attr( $brand ); ?>" class="widefat" />
 		</p>
 		<p>
-			<label for="si-product-gtin"><strong><?php esc_html_e( 'GTIN / EAN / UPC', 'search-intel' ); ?></strong></label><br>
+			<label for="si-product-gtin"><strong><?php esc_html_e( 'GTIN / EAN / UPC', 'jat-search-intel' ); ?></strong></label><br>
 			<input type="text" id="si-product-gtin" name="si_product_gtin" value="<?php echo esc_attr( $gtin ); ?>" class="widefat" />
 		</p>
 		<p>
-			<label for="si-product-mpn"><strong><?php esc_html_e( 'MPN', 'search-intel' ); ?></strong></label><br>
+			<label for="si-product-mpn"><strong><?php esc_html_e( 'MPN', 'jat-search-intel' ); ?></strong></label><br>
 			<input type="text" id="si-product-mpn" name="si_product_mpn" value="<?php echo esc_attr( $mpn ); ?>" class="widefat" />
 		</p>
 		<p>
-			<label for="si-product-condition"><strong><?php esc_html_e( 'Condition', 'search-intel' ); ?></strong></label><br>
+			<label for="si-product-condition"><strong><?php esc_html_e( 'Condition', 'jat-search-intel' ); ?></strong></label><br>
 			<select id="si-product-condition" name="si_product_condition" class="widefat">
-				<option value="new" <?php selected( $condition, 'new' ); ?>><?php esc_html_e( 'New', 'search-intel' ); ?></option>
-				<option value="used" <?php selected( $condition, 'used' ); ?>><?php esc_html_e( 'Used', 'search-intel' ); ?></option>
-				<option value="refurbished" <?php selected( $condition, 'refurbished' ); ?>><?php esc_html_e( 'Refurbished', 'search-intel' ); ?></option>
+				<option value="new" <?php selected( $condition, 'new' ); ?>><?php esc_html_e( 'New', 'jat-search-intel' ); ?></option>
+				<option value="used" <?php selected( $condition, 'used' ); ?>><?php esc_html_e( 'Used', 'jat-search-intel' ); ?></option>
+				<option value="refurbished" <?php selected( $condition, 'refurbished' ); ?>><?php esc_html_e( 'Refurbished', 'jat-search-intel' ); ?></option>
 			</select>
 		</p>
 		<?php

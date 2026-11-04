@@ -55,7 +55,7 @@ class Scale {
 		if ( $this->has_object_cache() ) {
 			return wp_cache_get( $key, $group );
 		}
-		return get_transient( 'si_' . $key );
+		return get_transient( 'search_intel_' . $key );
 	}
 
 	/**
@@ -71,7 +71,7 @@ class Scale {
 		if ( $this->has_object_cache() ) {
 			return wp_cache_set( $key, $value, $group, $expiry );
 		}
-		return set_transient( 'si_' . $key, $value, $expiry );
+		return set_transient( 'search_intel_' . $key, $value, $expiry );
 	}
 
 	/**
@@ -85,7 +85,7 @@ class Scale {
 		if ( $this->has_object_cache() ) {
 			return wp_cache_delete( $key, $group );
 		}
-		return delete_transient( 'si_' . $key );
+		return delete_transient( 'search_intel_' . $key );
 	}
 
 	/**
@@ -542,7 +542,7 @@ class Scale {
 	 */
 	public function render_admin_page(): void {
 		$data = $this->get_bulk_editor_data( [
-			'paged' => absint( $_GET['paged'] ?? 1 ),
+			'paged' => absint( $_GET['paged'] ?? 1 ), // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only view/pagination parameter.
 		] );
 
 		echo '<div class="wrap"><h1>Bulk Editor</h1>';
@@ -562,17 +562,17 @@ class Scale {
 		foreach ( $data['posts'] as $row ) {
 			printf(
 				'<tr><td>%d</td><td>%s</td><td><input type="text" name="updates[%d][title]" value="%s" class="regular-text"></td><td><input type="text" name="updates[%d][description]" value="%s" class="regular-text"></td><td><input type="text" name="updates[%d][keyword]" value="%s" style="width:120px"></td><td>%d</td><td>%d</td><td>%d</td></tr>',
-				$row['ID'],
+				absint( $row['ID'] ),
 				esc_html( $row['title'] ),
-				$row['ID'],
+				absint( $row['ID'] ),
 				esc_attr( $row['seo_title'] ),
-				$row['ID'],
+				absint( $row['ID'] ),
 				esc_attr( $row['description'] ),
-				$row['ID'],
+				absint( $row['ID'] ),
 				esc_attr( $row['keyword'] ),
-				$row['seo_score'],
-				$row['aeo_score'],
-				$row['geo_score']
+				absint( $row['seo_score'] ),
+				absint( $row['aeo_score'] ),
+				absint( $row['geo_score'] )
 			);
 		}
 
@@ -587,9 +587,9 @@ class Scale {
 			for ( $i = 1; $i <= $total_pages; $i++ ) {
 				printf(
 					'<a class="page-numbers%s" href="%s">%d</a> ',
-					( $i === absint( $_GET['paged'] ?? 1 ) ) ? ' current' : '',
+					( $i === absint( $_GET['paged'] ?? 1 ) ) ? ' current' : '', // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only view/pagination parameter.
 					esc_url( add_query_arg( 'paged', $i ) ),
-					$i
+					absint( $i )
 				);
 			}
 			echo '</div></div>';
@@ -601,7 +601,7 @@ class Scale {
 			return $j['status'] === 'pending';
 		} ) );
 		if ( $pending > 0 ) {
-			printf( '<div class="notice notice-info"><p>%d background jobs pending.</p></div>', $pending );
+			printf( '<div class="notice notice-info"><p>%d background jobs pending.</p></div>', absint( $pending ) );
 		}
 
 		echo '</div>';

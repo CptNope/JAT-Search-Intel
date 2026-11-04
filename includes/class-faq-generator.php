@@ -38,8 +38,8 @@ class FAQ_Generator {
 		}
 
 		// AJAX handlers always active — the main metabox AEO tab uses these.
-		add_action( 'wp_ajax_si_generate_faqs', [ $this, 'ajax_generate' ] );
-		add_action( 'wp_ajax_si_save_faqs', [ $this, 'ajax_save' ] );
+		add_action( 'wp_ajax_search_intel_generate_faqs', [ $this, 'ajax_generate' ] );
+		add_action( 'wp_ajax_search_intel_save_faqs', [ $this, 'ajax_save' ] );
 	}
 
 	/**
@@ -353,7 +353,7 @@ class FAQ_Generator {
 		foreach ( $post_types as $post_type ) {
 			add_meta_box(
 				'si-faq-generator',
-				__( 'FAQ Generator', 'search-intel' ),
+				__( 'FAQ Generator', 'jat-search-intel' ),
 				[ $this, 'render_metabox' ],
 				$post_type,
 				'normal',
@@ -376,12 +376,12 @@ class FAQ_Generator {
 		<div id="si-faq-generator">
 			<p>
 				<button type="button" class="button button-primary" id="si-generate-faqs">
-					<?php esc_html_e( 'Generate FAQs', 'search-intel' ); ?>
+					<?php esc_html_e( 'Generate FAQs', 'jat-search-intel' ); ?>
 				</button>
 				<?php if ( $has_ai_key ) : ?>
 					<label style="margin-left:12px;">
 						<input type="checkbox" id="si-use-ai" value="1" />
-						<?php esc_html_e( 'Enhance with AI', 'search-intel' ); ?>
+						<?php esc_html_e( 'Enhance with AI', 'jat-search-intel' ); ?>
 					</label>
 				<?php endif; ?>
 			</p>
@@ -390,14 +390,14 @@ class FAQ_Generator {
 				<?php if ( ! empty( $saved_faqs ) && is_array( $saved_faqs ) ) : ?>
 					<?php foreach ( $saved_faqs as $i => $faq ) : ?>
 						<div class="si-faq-item" style="margin-bottom:12px; padding:10px; background:#f9f9f9; border:1px solid #ddd; border-radius:4px;">
-							<label><strong><?php esc_html_e( 'Q:', 'search-intel' ); ?></strong></label>
+							<label><strong><?php esc_html_e( 'Q:', 'jat-search-intel' ); ?></strong></label>
 							<input type="text" name="si_faqs[<?php echo (int) $i; ?>][question]" value="<?php echo esc_attr( $faq['question'] ?? '' ); ?>" style="width:100%; margin:4px 0;" />
-							<label><strong><?php esc_html_e( 'A:', 'search-intel' ); ?></strong></label>
+							<label><strong><?php esc_html_e( 'A:', 'jat-search-intel' ); ?></strong></label>
 							<textarea name="si_faqs[<?php echo (int) $i; ?>][answer]" rows="3" style="width:100%;"><?php echo esc_textarea( $faq['answer'] ?? '' ); ?></textarea>
 						</div>
 					<?php endforeach; ?>
 				<?php else : ?>
-					<p class="description"><?php esc_html_e( 'Click "Generate FAQs" to extract Q&A from your content.', 'search-intel' ); ?></p>
+					<p class="description"><?php esc_html_e( 'Click "Generate FAQs" to extract Q&A from your content.', 'jat-search-intel' ); ?></p>
 				<?php endif; ?>
 			</div>
 		</div>

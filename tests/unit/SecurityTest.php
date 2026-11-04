@@ -166,9 +166,16 @@ class SecurityTest extends TestCase {
         $this->assertStringContainsString( '$wpdb->prepare', $source );
     }
 
-    public function test_uninstall_uses_wpdb_delete(): void {
+    public function test_uninstall_uses_prepared_queries(): void {
         $source = file_get_contents( SEARCH_INTEL_DIR . 'uninstall.php' );
-        $this->assertStringContainsString( '$wpdb->delete', $source );
+        $this->assertStringContainsString( '$wpdb->prepare', $source );
+        $this->assertStringContainsString( '$wpdb->esc_like', $source );
+    }
+
+    public function test_uninstall_is_opt_in(): void {
+        $source = file_get_contents( SEARCH_INTEL_DIR . 'uninstall.php' );
+        $this->assertStringContainsString( 'delete_data_on_uninstall', $source );
+        $this->assertStringContainsString( "defined( 'WP_UNINSTALL_PLUGIN' )", $source );
     }
 
     // ── Output escaping in source ───────────────────────────────────────

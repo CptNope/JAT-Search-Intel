@@ -97,7 +97,7 @@ class Multilang {
 		$plugin = $this->detect_plugin();
 
 		if ( 'wpml' === $plugin ) {
-			$info = apply_filters( 'wpml_post_language_details', null, $post_id );
+			$info = apply_filters( 'wpml_post_language_details', null, $post_id ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WPML public API filter.
 			return is_array( $info ) ? ( $info['language_code'] ?? '' ) : '';
 		}
 
@@ -119,8 +119,8 @@ class Multilang {
 
 		if ( 'wpml' === $plugin ) {
 			$type         = get_post_type( $post_id );
-			$trid         = apply_filters( 'wpml_element_trid', null, $post_id, 'post_' . $type );
-			$translations = apply_filters( 'wpml_get_element_translations', null, $trid, 'post_' . $type );
+			$trid         = apply_filters( 'wpml_element_trid', null, $post_id, 'post_' . $type ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WPML public API filter.
+			$translations = apply_filters( 'wpml_get_element_translations', null, $trid, 'post_' . $type ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WPML public API filter.
 
 			$result = [];
 			if ( is_array( $translations ) ) {
@@ -358,7 +358,7 @@ class Multilang {
 	 * @return array
 	 */
 	private function get_wpml_languages(): array {
-		$languages = apply_filters( 'wpml_active_languages', null, [ 'skip_missing' => 0 ] );
+		$languages = apply_filters( 'wpml_active_languages', null, [ 'skip_missing' => 0 ] ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WPML public API filter.
 		if ( is_array( $languages ) ) {
 			return array_keys( $languages );
 		}

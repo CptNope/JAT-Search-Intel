@@ -137,33 +137,33 @@ class AEO_Manager {
         }
         if ( $has_concise_block ) {
             $score += 25;
-            $checks[] = [ 'pass' => true, 'label' => __( 'Contains concise answer block (20-50 words)', 'search-intel' ) ];
+            $checks[] = [ 'pass' => true, 'label' => __( 'Contains concise answer block (20-50 words)', 'jat-search-intel' ) ];
         } else {
-            $checks[] = [ 'pass' => false, 'label' => __( 'Add a 20-50 word paragraph as a direct answer block', 'search-intel' ) ];
+            $checks[] = [ 'pass' => false, 'label' => __( 'Add a 20-50 word paragraph as a direct answer block', 'jat-search-intel' ) ];
         }
 
         // 2. Ordered/unordered lists — 25 pts
         if ( preg_match( '/<[ou]l/i', $content ) ) {
             $score += 25;
-            $checks[] = [ 'pass' => true, 'label' => __( 'Contains structured lists for list snippets', 'search-intel' ) ];
+            $checks[] = [ 'pass' => true, 'label' => __( 'Contains structured lists for list snippets', 'jat-search-intel' ) ];
         } else {
-            $checks[] = [ 'pass' => false, 'label' => __( 'Add lists (steps, items, features) for list snippet eligibility', 'search-intel' ) ];
+            $checks[] = [ 'pass' => false, 'label' => __( 'Add lists (steps, items, features) for list snippet eligibility', 'jat-search-intel' ) ];
         }
 
         // 3. Definition patterns — 25 pts
         if ( preg_match( '/(is defined as|refers to|is a type of|is the process of|means that)/i', $text ) ) {
             $score += 25;
-            $checks[] = [ 'pass' => true, 'label' => __( 'Contains definition patterns for definition snippets', 'search-intel' ) ];
+            $checks[] = [ 'pass' => true, 'label' => __( 'Contains definition patterns for definition snippets', 'jat-search-intel' ) ];
         } else {
-            $checks[] = [ 'pass' => false, 'label' => __( 'Include "X is defined as..." or "X refers to..." patterns', 'search-intel' ) ];
+            $checks[] = [ 'pass' => false, 'label' => __( 'Include "X is defined as..." or "X refers to..." patterns', 'jat-search-intel' ) ];
         }
 
         // 4. Table data — 25 pts
         if ( preg_match( '/<table/i', $content ) ) {
             $score += 25;
-            $checks[] = [ 'pass' => true, 'label' => __( 'Contains tables for table snippet eligibility', 'search-intel' ) ];
+            $checks[] = [ 'pass' => true, 'label' => __( 'Contains tables for table snippet eligibility', 'jat-search-intel' ) ];
         } else {
-            $checks[] = [ 'pass' => false, 'label' => __( 'Add data tables for table snippet opportunities', 'search-intel' ) ];
+            $checks[] = [ 'pass' => false, 'label' => __( 'Add data tables for table snippet opportunities', 'jat-search-intel' ) ];
         }
 
         return [
@@ -314,7 +314,7 @@ class AEO_Manager {
             }
             $step_schema = [
                 '@type' => 'HowToStep',
-                'name'  => ! empty( $step['name'] ) ? sanitize_text_field( $step['name'] ) : sprintf( __( 'Step %d', 'search-intel' ), $i + 1 ),
+                'name'  => ! empty( $step['name'] ) ? sanitize_text_field( $step['name'] ) : sprintf( __( 'Step %d', 'jat-search-intel' ), $i + 1 ),
                 'text'  => wp_kses_post( $step['text'] ),
                 'url'   => get_permalink( $post_id ) . '#step-' . ( $i + 1 ),
             ];
@@ -510,9 +510,9 @@ class AEO_Manager {
         $has_faqs = ( ! empty( $faqs ) && is_array( $faqs ) ) || ! empty( $auto_faqs );
         if ( $has_faqs ) {
             $score += 20;
-            $checks[] = [ 'pass' => true, 'label' => __( 'FAQ content detected', 'search-intel' ) ];
+            $checks[] = [ 'pass' => true, 'label' => __( 'FAQ content detected', 'jat-search-intel' ) ];
         } else {
-            $checks[] = [ 'pass' => false, 'label' => __( 'Add FAQ content with questions and answers', 'search-intel' ) ];
+            $checks[] = [ 'pass' => false, 'label' => __( 'Add FAQ content with questions and answers', 'jat-search-intel' ) ];
         }
 
         // Check 2: Direct answer in first paragraph (20 points)
@@ -521,12 +521,12 @@ class AEO_Manager {
             // Check if it reads like a direct answer (starts with a statement, not a question)
             if ( ! str_ends_with( trim( $first_para ), '?' ) && strlen( $first_para ) >= 50 ) {
                 $score += 20;
-                $checks[] = [ 'pass' => true, 'label' => __( 'Direct answer in first paragraph', 'search-intel' ) ];
+                $checks[] = [ 'pass' => true, 'label' => __( 'Direct answer in first paragraph', 'jat-search-intel' ) ];
             } else {
-                $checks[] = [ 'pass' => false, 'label' => __( 'Provide a direct, concise answer in the first paragraph', 'search-intel' ) ];
+                $checks[] = [ 'pass' => false, 'label' => __( 'Provide a direct, concise answer in the first paragraph', 'jat-search-intel' ) ];
             }
         } else {
-            $checks[] = [ 'pass' => false, 'label' => __( 'First paragraph should contain a direct answer (50-300 chars)', 'search-intel' ) ];
+            $checks[] = [ 'pass' => false, 'label' => __( 'First paragraph should contain a direct answer (50-300 chars)', 'jat-search-intel' ) ];
         }
 
         // Check 3: Uses heading hierarchy for structure (15 points)
@@ -534,39 +534,39 @@ class AEO_Manager {
         $has_h3 = (bool) preg_match( '/<h3/i', $content );
         if ( $has_h2 && $has_h3 ) {
             $score += 15;
-            $checks[] = [ 'pass' => true, 'label' => __( 'Good heading hierarchy (H2 + H3)', 'search-intel' ) ];
+            $checks[] = [ 'pass' => true, 'label' => __( 'Good heading hierarchy (H2 + H3)', 'jat-search-intel' ) ];
         } elseif ( $has_h2 ) {
             $score += 8;
-            $checks[] = [ 'pass' => false, 'label' => __( 'Add H3 subheadings for better structure', 'search-intel' ) ];
+            $checks[] = [ 'pass' => false, 'label' => __( 'Add H3 subheadings for better structure', 'jat-search-intel' ) ];
         } else {
-            $checks[] = [ 'pass' => false, 'label' => __( 'Use H2 and H3 headings to structure content', 'search-intel' ) ];
+            $checks[] = [ 'pass' => false, 'label' => __( 'Use H2 and H3 headings to structure content', 'jat-search-intel' ) ];
         }
 
         // Check 4: Contains a list (ordered or unordered) for snippet optimization (15 points)
         $has_list = (bool) preg_match( '/<[ou]l/i', $content );
         if ( $has_list ) {
             $score += 15;
-            $checks[] = [ 'pass' => true, 'label' => __( 'Contains structured lists', 'search-intel' ) ];
+            $checks[] = [ 'pass' => true, 'label' => __( 'Contains structured lists', 'jat-search-intel' ) ];
         } else {
-            $checks[] = [ 'pass' => false, 'label' => __( 'Add numbered or bulleted lists for snippet eligibility', 'search-intel' ) ];
+            $checks[] = [ 'pass' => false, 'label' => __( 'Add numbered or bulleted lists for snippet eligibility', 'jat-search-intel' ) ];
         }
 
         // Check 5: Concise meta description set (15 points)
         $desc = get_post_meta( $post_id, '_search_intel_description', true );
         if ( $desc && strlen( $desc ) >= 50 && strlen( $desc ) <= 160 ) {
             $score += 15;
-            $checks[] = [ 'pass' => true, 'label' => __( 'Meta description is optimal length', 'search-intel' ) ];
+            $checks[] = [ 'pass' => true, 'label' => __( 'Meta description is optimal length', 'jat-search-intel' ) ];
         } else {
-            $checks[] = [ 'pass' => false, 'label' => __( 'Set a meta description (50-160 characters)', 'search-intel' ) ];
+            $checks[] = [ 'pass' => false, 'label' => __( 'Set a meta description (50-160 characters)', 'jat-search-intel' ) ];
         }
 
         // Check 6: Content includes a table for data snippets (15 points)
         $has_table = (bool) preg_match( '/<table/i', $content );
         if ( $has_table ) {
             $score += 15;
-            $checks[] = [ 'pass' => true, 'label' => __( 'Contains data tables', 'search-intel' ) ];
+            $checks[] = [ 'pass' => true, 'label' => __( 'Contains data tables', 'jat-search-intel' ) ];
         } else {
-            $checks[] = [ 'pass' => false, 'label' => __( 'Consider adding tables for data-rich snippets', 'search-intel' ) ];
+            $checks[] = [ 'pass' => false, 'label' => __( 'Consider adding tables for data-rich snippets', 'jat-search-intel' ) ];
         }
 
         return [

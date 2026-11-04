@@ -10,7 +10,7 @@
         var btn = $(this);
         btn.prop('disabled', true);
         $('#si-progress-rescore').show();
-        runBatch('si_bulk_rescore', 0, 'rescore');
+        runBatch('search_intel_bulk_rescore', 0, 'rescore');
     });
 
     // ── Bulk Regenerate ─────────────────────────────────────────────────────
@@ -19,7 +19,7 @@
         var btn = $(this);
         btn.prop('disabled', true);
         $('#si-progress-regenerate').show();
-        runBatch('si_bulk_regenerate', 0, 'regenerate');
+        runBatch('search_intel_bulk_regenerate', 0, 'regenerate');
     });
 
     /**
@@ -64,7 +64,7 @@
         btn.prop('disabled', true);
 
         $.post(siBulkTools.ajaxUrl, {
-            action: 'si_bulk_sitemap_warm',
+            action: 'search_intel_bulk_sitemap_warm',
             nonce: siBulkTools.nonce
         }, function (response) {
             btn.prop('disabled', false);
@@ -89,7 +89,7 @@
 
     $('#si-btn-export').on('click', function () {
         $.post(siBulkTools.ajaxUrl, {
-            action: 'si_export_settings',
+            action: 'search_intel_export_settings',
             nonce: siBulkTools.nonce
         }, function (response) {
             if (!response.success) {
@@ -151,7 +151,7 @@
             $('#si-btn-import').prop('disabled', true);
 
             $.post(siBulkTools.ajaxUrl, {
-                action: 'si_import_settings',
+                action: 'search_intel_import_settings',
                 nonce: siBulkTools.nonce,
                 import_data: json,
                 import_mode: mode
@@ -217,7 +217,7 @@
         var postType = $('#si-bulk-post-type').val();
 
         $.post(siBulkTools.ajaxUrl, {
-            action: 'si_bulk_ai_generate',
+            action: 'search_intel_bulk_ai_generate',
             nonce: siBulkTools.nonce,
             offset: offset,
             post_type: postType,

@@ -341,7 +341,7 @@ class QA_Detector {
 				];
 			}
 			// Save as transient so AEO_Manager's auto_detect_faqs can use it.
-			set_transient( 'si_auto_faq_' . $post_id, $faqs, DAY_IN_SECONDS );
+			set_transient( 'search_intel_auto_faq_' . $post_id, $faqs, DAY_IN_SECONDS );
 		}
 
 		return $schema;

@@ -458,6 +458,10 @@ function wp_localize_script( string $handle, string $object_name, array $l10n ):
     return true;
 }
 
+function wp_set_script_translations( string $handle, string $domain = 'default', string $path = '' ): bool {
+    return true;
+}
+
 function wp_enqueue_media( array $args = [] ): void {}
 
 function wp_create_nonce( string $action ): string {

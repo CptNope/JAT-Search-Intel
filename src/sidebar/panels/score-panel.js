@@ -109,22 +109,22 @@ export default function ScorePanel() {
 		<div className="si-panel si-panel--scores">
 			<div className="si-score-rings">
 				<ScoreRing
-					label={ __( 'SEO', 'search-intel' ) }
+					label={ __( 'SEO', 'jat-search-intel' ) }
 					score={ seoScore }
 					color={ getScoreColor( seoScore ) }
 				/>
 				<ScoreRing
-					label={ __( 'AEO', 'search-intel' ) }
+					label={ __( 'AEO', 'jat-search-intel' ) }
 					score={ aeoScore }
 					color={ getScoreColor( aeoScore ) }
 				/>
 				<ScoreRing
-					label={ __( 'GEO', 'search-intel' ) }
+					label={ __( 'GEO', 'jat-search-intel' ) }
 					score={ geoScore }
 					color={ getScoreColor( geoScore ) }
 				/>
 				<ScoreRing
-					label={ __( 'Read', 'search-intel' ) }
+					label={ __( 'Read', 'jat-search-intel' ) }
 					score={ readabilityScore }
 					color={ getScoreColor( readabilityScore ) }
 				/>
@@ -138,10 +138,10 @@ export default function ScorePanel() {
 			>
 				{ isAnalyzing ? (
 					<>
-						<Spinner /> { __( 'Analyzing…', 'search-intel' ) }
+						<Spinner /> { __( 'Analyzing…', 'jat-search-intel' ) }
 					</>
 				) : (
-					__( 'Run Analysis', 'search-intel' )
+					__( 'Run Analysis', 'jat-search-intel' )
 				) }
 			</Button>
 

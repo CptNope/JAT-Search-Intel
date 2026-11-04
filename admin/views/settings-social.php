@@ -2,17 +2,18 @@
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- View template included inside a class method; variables are method-scoped.
 $profiles = get_option( 'search_intel_social_profiles', [] );
 ?>
 <div class="wrap si-settings">
-    <h1><span class="dashicons dashicons-share"></span> <?php esc_html_e( 'Search Intel — Social Profiles', 'search-intel' ); ?></h1>
-    <p class="si-settings-intro"><?php esc_html_e( 'Social profile URLs are added to your Organization/Person schema as sameAs properties, strengthening your knowledge graph presence.', 'search-intel' ); ?></p>
+    <h1><span class="dashicons dashicons-share"></span> <?php esc_html_e( 'Search Intel — Social Profiles', 'jat-search-intel' ); ?></h1>
+    <p class="si-settings-intro"><?php esc_html_e( 'Social profile URLs are added to your Organization/Person schema as sameAs properties, strengthening your knowledge graph presence.', 'jat-search-intel' ); ?></p>
 
     <form method="post" action="options.php">
         <?php settings_fields( 'search_intel_social_group' ); ?>
 
         <div class="si-settings-card">
-            <h2><?php esc_html_e( 'Social Profile URLs', 'search-intel' ); ?></h2>
+            <h2><?php esc_html_e( 'Social Profile URLs', 'jat-search-intel' ); ?></h2>
             <table class="form-table">
                 <?php
                 $platforms = [
@@ -37,6 +38,6 @@ $profiles = get_option( 'search_intel_social_profiles', [] );
             </table>
         </div>
 
-        <?php submit_button( __( 'Save Social Profiles', 'search-intel' ) ); ?>
+        <?php submit_button( __( 'Save Social Profiles', 'jat-search-intel' ) ); ?>
     </form>
 </div>

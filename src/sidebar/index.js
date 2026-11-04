@@ -22,22 +22,22 @@ import './sidebar.css';
 const TABS = [
 	{
 		name: 'seo',
-		title: __( 'SEO', 'search-intel' ),
+		title: __( 'SEO', 'jat-search-intel' ),
 		className: 'si-sidebar-tab',
 	},
 	{
 		name: 'aeo',
-		title: __( 'AEO', 'search-intel' ),
+		title: __( 'AEO', 'jat-search-intel' ),
 		className: 'si-sidebar-tab',
 	},
 	{
 		name: 'geo',
-		title: __( 'GEO', 'search-intel' ),
+		title: __( 'GEO', 'jat-search-intel' ),
 		className: 'si-sidebar-tab',
 	},
 	{
 		name: 'analysis',
-		title: __( 'Analysis', 'search-intel' ),
+		title: __( 'Analysis', 'jat-search-intel' ),
 		className: 'si-sidebar-tab',
 	},
 ];
@@ -56,7 +56,7 @@ function SearchIntelSidebar() {
 	return (
 		<PluginDocumentSettingPanel
 			name="search-intel-panel"
-			title={ __( 'Search Intel', 'search-intel' ) }
+			title={ __( 'Search Intel', 'jat-search-intel' ) }
 			className="search-intel-sidebar"
 		>
 			<TabPanel

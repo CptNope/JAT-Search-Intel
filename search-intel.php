@@ -1,17 +1,18 @@
 <?php
 /**
- * Plugin Name: Search Intel
- * Plugin URI:  https://searchintel.io
- * Description: A comprehensive SEO, AEO (Answer Engine Optimization), and GEO (Generative Engine Optimization) plugin for WordPress. Optimize your content for traditional search engines, voice assistants, featured snippets, and AI-powered answer engines.
- * Version:     3.4.2
- * Author:      Search Intel
- * Author URI:  https://searchintel.io
- * License:     GPL-2.0-or-later
- * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: search-intel
- * Domain Path: /languages
- * Requires at least: 6.0
- * Requires PHP: 7.4
+ * Plugin Name:       JAT Search Intel
+ * Plugin URI:        https://github.com/CptNope/JAT-Search-Intel
+ * Description:       SEO, AEO (Answer Engine Optimization) and GEO (Generative Engine Optimization) for WordPress: meta tags, schema, sitemaps, llms.txt, redirects and real-time content scoring.
+ * Version:           3.5.0
+ * Requires at least: 6.6
+ * Requires PHP:      7.4
+ * Author:            Jeremy Anderson Tech
+ * Author URI:        https://jeremyanderson.tech
+ * License:           GPL-2.0-or-later
+ * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain:       jat-search-intel
+ *
+ * @package JAT_Search_Intel
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -19,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Plugin constants
-define( 'SEARCH_INTEL_VERSION', '3.4.2' );
+define( 'SEARCH_INTEL_VERSION', '3.5.0' );
 define( 'SEARCH_INTEL_FILE', __FILE__ );
 define( 'SEARCH_INTEL_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SEARCH_INTEL_URL', plugin_dir_url( __FILE__ ) );

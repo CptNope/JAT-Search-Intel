@@ -125,7 +125,7 @@ class CSP_Headers {
 	 * @return bool
 	 */
 	public function is_plugin_admin_page(): bool {
-		$page = $_GET['page'] ?? '';
+		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only view/pagination parameter.
 		return in_array( $page, self::PLUGIN_PAGES, true );
 	}
 }

@@ -14,11 +14,11 @@ import { plus, trash } from '@wordpress/icons';
 import './editor.css';
 
 registerBlockType( 'search-intel/howto', {
-	title: __( 'How To', 'search-intel' ),
-	description: __( 'Step-by-step instructions with automatic HowTo schema markup.', 'search-intel' ),
+	title: __( 'How To', 'jat-search-intel' ),
+	description: __( 'Step-by-step instructions with automatic HowTo schema markup.', 'jat-search-intel' ),
 	category: 'widgets',
 	icon: 'editor-ol',
-	keywords: [ __( 'howto', 'search-intel' ), __( 'steps', 'search-intel' ), __( 'tutorial', 'search-intel' ) ],
+	keywords: [ __( 'howto', 'jat-search-intel' ), __( 'steps', 'jat-search-intel' ), __( 'tutorial', 'jat-search-intel' ) ],
 	supports: {
 		html: false,
 		align: [ 'wide', 'full' ],
@@ -68,27 +68,27 @@ registerBlockType( 'search-intel/howto', {
 		return (
 			<div { ...blockProps }>
 				<InspectorControls>
-					<PanelBody title={ __( 'HowTo Settings', 'search-intel' ) }>
+					<PanelBody title={ __( 'HowTo Settings', 'jat-search-intel' ) }>
 						<TextControl
-							label={ __( 'Total Time (ISO 8601)', 'search-intel' ) }
+							label={ __( 'Total Time (ISO 8601)', 'jat-search-intel' ) }
 							value={ totalTime }
 							onChange={ ( val ) => setAttributes( { totalTime: val } ) }
-							help={ __( 'e.g. PT30M for 30 minutes, PT1H for 1 hour', 'search-intel' ) }
+							help={ __( 'e.g. PT30M for 30 minutes, PT1H for 1 hour', 'jat-search-intel' ) }
 							placeholder="PT30M"
 						/>
-						<p><strong>{ steps.filter( ( s ) => s.name && s.text ).length }</strong> { __( 'valid steps', 'search-intel' ) }</p>
+						<p><strong>{ steps.filter( ( s ) => s.name && s.text ).length }</strong> { __( 'valid steps', 'jat-search-intel' ) }</p>
 					</PanelBody>
 				</InspectorControls>
 
 				<div className="si-howto-block__header">
 					<span className="si-howto-block__icon">📋</span>
-					<span className="si-howto-block__label">{ __( 'How To', 'search-intel' ) }</span>
+					<span className="si-howto-block__label">{ __( 'How To', 'jat-search-intel' ) }</span>
 				</div>
 
 				<RichText
 					tagName="h3"
 					className="si-howto-block__title"
-					placeholder={ __( 'How to title…', 'search-intel' ) }
+					placeholder={ __( 'How to title…', 'jat-search-intel' ) }
 					value={ title }
 					onChange={ ( val ) => setAttributes( { title: val } ) }
 					allowedFormats={ [] }
@@ -97,7 +97,7 @@ registerBlockType( 'search-intel/howto', {
 				<RichText
 					tagName="p"
 					className="si-howto-block__description"
-					placeholder={ __( 'Brief description of this how-to…', 'search-intel' ) }
+					placeholder={ __( 'Brief description of this how-to…', 'jat-search-intel' ) }
 					value={ description }
 					onChange={ ( val ) => setAttributes( { description: val } ) }
 					allowedFormats={ [ 'core/bold', 'core/italic' ] }
@@ -107,11 +107,11 @@ registerBlockType( 'search-intel/howto', {
 					<div key={ index } className="si-howto-step">
 						<div className="si-howto-step__header">
 							<span className="si-howto-step__number">
-								{ __( 'Step', 'search-intel' ) } { index + 1 }
+								{ __( 'Step', 'jat-search-intel' ) } { index + 1 }
 							</span>
 							<Button
 								icon={ trash }
-								label={ __( 'Remove Step', 'search-intel' ) }
+								label={ __( 'Remove Step', 'jat-search-intel' ) }
 								onClick={ () => removeStep( index ) }
 								isSmall
 								isDestructive
@@ -121,7 +121,7 @@ registerBlockType( 'search-intel/howto', {
 						<RichText
 							tagName="h4"
 							className="si-howto-step__name"
-							placeholder={ __( 'Step name…', 'search-intel' ) }
+							placeholder={ __( 'Step name…', 'jat-search-intel' ) }
 							value={ step.name }
 							onChange={ ( val ) => updateStep( index, 'name', val ) }
 							allowedFormats={ [ 'core/bold' ] }
@@ -129,7 +129,7 @@ registerBlockType( 'search-intel/howto', {
 						<RichText
 							tagName="div"
 							className="si-howto-step__text"
-							placeholder={ __( 'Step instructions…', 'search-intel' ) }
+							placeholder={ __( 'Step instructions…', 'jat-search-intel' ) }
 							value={ step.text }
 							onChange={ ( val ) => updateStep( index, 'text', val ) }
 							allowedFormats={ [ 'core/bold', 'core/italic', 'core/link' ] }
@@ -154,12 +154,12 @@ registerBlockType( 'search-intel/howto', {
 													updateStep( index, 'imageId', 0 );
 												} }
 											>
-												{ __( 'Remove', 'search-intel' ) }
+												{ __( 'Remove', 'jat-search-intel' ) }
 											</Button>
 										</div>
 									) : (
 										<Button isSmall variant="secondary" onClick={ open }>
-											{ __( 'Add Image', 'search-intel' ) }
+											{ __( 'Add Image', 'jat-search-intel' ) }
 										</Button>
 									)
 								) }
@@ -174,7 +174,7 @@ registerBlockType( 'search-intel/howto', {
 					className="si-howto-block__add"
 					onClick={ addStep }
 				>
-					{ __( 'Add Step', 'search-intel' ) }
+					{ __( 'Add Step', 'jat-search-intel' ) }
 				</Button>
 			</div>
 		);

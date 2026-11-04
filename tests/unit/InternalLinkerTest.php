@@ -134,7 +134,7 @@ class InternalLinkerTest extends TestCase {
 		];
 
 		$first  = $this->linker->get_suggestions( 1 );
-		$cached = $si_test_state['transients']['si_link_suggest_1'] ?? null;
+		$cached = $si_test_state['transients']['search_intel_link_suggest_1'] ?? null;
 
 		$this->assertNotNull( $cached );
 		$this->assertEquals( $first, $cached );
@@ -142,11 +142,11 @@ class InternalLinkerTest extends TestCase {
 
 	public function test_invalidate_cache_removes_transient(): void {
 		global $si_test_state;
-		$si_test_state['transients']['si_link_suggest_5'] = [ 'cached' ];
+		$si_test_state['transients']['search_intel_link_suggest_5'] = [ 'cached' ];
 
 		$this->linker->invalidate_cache( 5 );
 
-		$this->assertArrayNotHasKey( 'si_link_suggest_5', $si_test_state['transients'] );
+		$this->assertArrayNotHasKey( 'search_intel_link_suggest_5', $si_test_state['transients'] );
 	}
 
 	public function test_get_reason_with_shared_terms(): void {

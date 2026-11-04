@@ -6,7 +6,7 @@
 
 // Clear any cached sitemaps.
 global $wpdb;
-$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '%si_sitemap%'" );
+$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '%search_intel_sitemap%'" );
 $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_si_%'" );
 
 $post_count = wp_count_posts( 'post' );
@@ -25,7 +25,7 @@ echo 'HTTP status: ' . $status . PHP_EOL;
 echo 'Body length: ' . strlen( $body ) . ' bytes' . PHP_EOL;
 
 // Benchmark cold post sitemap page 1.
-$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '%si_sitemap%'" );
+$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '%search_intel_sitemap%'" );
 $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_si_%'" );
 
 $start2    = microtime( true );

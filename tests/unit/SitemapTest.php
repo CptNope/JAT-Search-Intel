@@ -43,17 +43,13 @@ class SitemapTest extends TestCase {
         $this->assertArrayNotHasKey( 'init', $si_test_state['actions'] );
     }
 
-    public function test_ping_hooks_when_enabled(): void {
+    public function test_legacy_ping_setting_registers_no_hooks(): void {
+        // Google and Bing retired their sitemap ping endpoints; the legacy
+        // setting must not trigger any outbound requests.
         $this->make_sitemap( [ 'ping_search_engines' => true ] );
 
-        $this->assertArrayHasKey( 'publish_post', $GLOBALS['si_test_state']['actions'] );
-        $this->assertArrayHasKey( 'publish_page', $GLOBALS['si_test_state']['actions'] );
-    }
-
-    public function test_no_ping_hooks_when_disabled(): void {
-        $this->make_sitemap( [ 'ping_search_engines' => false ] );
-
         $this->assertArrayNotHasKey( 'publish_post', $GLOBALS['si_test_state']['actions'] );
+        $this->assertArrayNotHasKey( 'publish_page', $GLOBALS['si_test_state']['actions'] );
     }
 
     public function test_cache_invalidation_hooks_registered(): void {

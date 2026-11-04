@@ -54,8 +54,8 @@ class Core_Web_Vitals {
 
         if ( is_admin() ) {
             add_action( 'admin_menu', [ $this, 'register_admin_page' ] );
-            add_action( 'wp_ajax_si_save_psi_key', [ $this, 'ajax_save_psi_key' ] );
-            add_action( 'wp_ajax_si_run_cwv_scan', [ $this, 'ajax_run_scan' ] );
+            add_action( 'wp_ajax_search_intel_save_psi_key', [ $this, 'ajax_save_psi_key' ] );
+            add_action( 'wp_ajax_search_intel_run_cwv_scan', [ $this, 'ajax_run_scan' ] );
         }
     }
 
@@ -508,7 +508,7 @@ class Core_Web_Vitals {
                 if (!val || val === '••••••••••••••••') { $('#si-psi-status').html('<span style="color:#d63638;">Enter a key first.</span>'); return; }
                 btn.prop('disabled', true);
                 $('#si-psi-status').html('<span style="color:#dba617;">Saving...</span>');
-                $.post(ajaxUrl, { action: 'si_save_psi_key', nonce: nonce, psi_api_key: val }, function(r){
+                $.post(ajaxUrl, { action: 'search_intel_save_psi_key', nonce: nonce, psi_api_key: val }, function(r){
                     btn.prop('disabled', false);
                     if (r.success) {
                         $('#si-psi-status').html('<span style="color:#00a32a;">&#10003; ' + r.data.message + '</span>');
@@ -526,7 +526,7 @@ class Core_Web_Vitals {
                 var btn = $(this);
                 btn.prop('disabled', true);
                 $('#si-scan-status').html('<span style="color:#dba617;">Scanning... this may take a minute.</span>');
-                $.post(ajaxUrl, { action: 'si_run_cwv_scan', nonce: nonce }, function(r){
+                $.post(ajaxUrl, { action: 'search_intel_run_cwv_scan', nonce: nonce }, function(r){
                     btn.prop('disabled', false);
                     if (r.success) {
                         $('#si-scan-status').html('<span style="color:#00a32a;">&#10003; ' + r.data.message + '</span>');

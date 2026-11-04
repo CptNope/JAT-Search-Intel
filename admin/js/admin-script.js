@@ -347,7 +347,7 @@
             url: SI.ajaxUrl,
             type: 'POST',
             data: {
-                action: 'si_generate_faqs',
+                action: 'search_intel_generate_faqs',
                 nonce: SI.faqNonce,
                 post_id: SI.postId,
                 use_ai: useAi
@@ -397,7 +397,7 @@
             url: SI.ajaxUrl,
             type: 'POST',
             data: {
-                action: 'si_ai_get_suggestions',
+                action: 'search_intel_ai_get_suggestions',
                 nonce: SI.nonce,
                 post_id: SI.postId,
                 force: 1
@@ -442,7 +442,7 @@
             url: SI.ajaxUrl,
             type: 'POST',
             data: {
-                action: 'si_ai_apply_suggestion',
+                action: 'search_intel_ai_apply_suggestion',
                 nonce: SI.nonce,
                 post_id: SI.postId,
                 suggestion_id: suggestionId
