@@ -104,6 +104,19 @@ class PassageCoachTest extends TestCase {
 		}
 	}
 
+	public function test_heading_skip_and_image_alt(): void {
+		$content = $this->p( 'Answer.' ) . $this->h( 'Section' ) . $this->h( 'Deep', 4 )
+			. "<!-- wp:image -->\n<figure class=\"wp-block-image\"><img src=\"a.jpg\" alt=\"\"/></figure>\n<!-- /wp:image -->\n\n"
+			. "<!-- wp:image -->\n<figure class=\"wp-block-image\"><img src=\"b.jpg\" alt=\"A red trail shoe\"/></figure>\n<!-- /wp:image -->\n\n";
+		$s = Passage_Coach::analyze( $content );
+		$by_type = [];
+		foreach ( $s as $x ) {
+			$by_type[ $x['type'] ][] = $x['block'];
+		}
+		$this->assertSame( [ 2 ], $by_type['heading-skip'] );
+		$this->assertSame( [ 3 ], $by_type['image-alt'], 'Only the image without alt text' );
+	}
+
 	public function test_empty_content(): void {
 		$this->assertSame( [], Passage_Coach::analyze( '' ) );
 	}

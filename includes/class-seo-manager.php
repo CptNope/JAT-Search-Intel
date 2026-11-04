@@ -75,9 +75,9 @@ class SEO_Manager {
 
             if ( $post ) {
                 if ( 'excerpt' === $fallback ) {
-                    $desc = $post->post_excerpt ?: wp_trim_words( wp_strip_all_tags( $post->post_content ), 30, '...' );
+                    $desc = Content_Guard::excerpt( $post ) ?: wp_trim_words( wp_strip_all_tags( Content_Guard::content( $post ) ), 30, '...' );
                 } else {
-                    $desc = wp_trim_words( wp_strip_all_tags( $post->post_content ), 30, '...' );
+                    $desc = wp_trim_words( wp_strip_all_tags( Content_Guard::content( $post ) ), 30, '...' );
                 }
                 return $this->truncate_description( $desc );
             }

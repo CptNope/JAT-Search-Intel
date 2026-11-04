@@ -142,7 +142,7 @@ class Schema_Types {
 	 */
 	public function get_video_schema( int $post_id ): ?array {
 		$post = get_post( $post_id );
-		if ( ! $post || empty( $post->post_content ) ) {
+		if ( ! $post || '' === Content_Guard::content( $post ) ) {
 			return null;
 		}
 

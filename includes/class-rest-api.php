@@ -46,7 +46,7 @@ class Rest_Api {
 		register_rest_route( self::NAMESPACE, '/scores/(?P<id>\d+)', [
 			'methods'             => 'GET',
 			'callback'            => [ $this, 'get_scores' ],
-			'permission_callback' => [ $this, 'can_read_post' ],
+			'permission_callback' => [ $this, 'can_edit_post' ],
 			'args'                => $this->get_id_args(),
 		] );
 
@@ -138,11 +138,29 @@ class Rest_Api {
 		if ( ! $post ) {
 			return false;
 		}
-		if ( 'publish' === $post->post_status ) {
+		// Anyone may read the SEO data of a page the public can already see.
+		if ( self::is_public_post( $post ) ) {
 			return true;
 		}
-		return current_user_can( 'read_post', $post->ID );
+		return current_user_can( 'edit_post', $post->ID );
 	}
+
+	/**
+	 * Published, not password-protected, and of a viewable post type.
+	 *
+	 * @param \WP_Post|object $post Post.
+	 * @return bool
+	 */
+	public static function is_public_post( $post ): bool {
+		return 'publish' === ( $post->post_status ?? '' )
+			&& '' === (string) ( $post->post_password ?? '' )
+			&& ( ! function_exists( 'is_post_type_viewable' ) || is_post_type_viewable( (string) ( $post->post_type ?? 'post' ) ) );
+	}
+
+	/**
+	 * Fields that are editorial working data, not published on the page.
+	 */
+	private const PRIVATE_FIELDS = [ 'focus_keyword', 'secondary_keywords', 'author_expertise_notes', 'seo_score', 'aeo_score', 'geo_score', 'readability_score' ];
 
 	/**
 	 * Check if the current user can edit the post.
@@ -219,7 +237,8 @@ class Rest_Api {
 			'fact_checked'     => $fact_checked ?: '',
 			'local_relevance'  => (bool) $local_rel,
 			'local_location'   => $local_loc ?: '',
-			'geo_score'        => $geo_score,
+			// Scores are editorial data.
+			'geo_score'        => current_user_can( 'edit_post', $post_id ) ? $geo_score : null,
 		], 200 );
 	}
 
@@ -237,7 +256,11 @@ class Rest_Api {
 		$fields = $this->get_meta_fields();
 		$data   = [ 'post_id' => $post_id ];
 
+		$can_edit = current_user_can( 'edit_post', $post_id );
 		foreach ( $fields as $key => $meta_key ) {
+			if ( ! $can_edit && in_array( $key, self::PRIVATE_FIELDS, true ) ) {
+				continue;
+			}
 			$data[ $key ] = get_post_meta( $post_id, $meta_key, true );
 		}
 

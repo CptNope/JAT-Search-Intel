@@ -69,6 +69,9 @@ class GEO_Manager {
      * Render AI-specific meta tags for better indexing by LLMs and AI search engines.
      */
     public function render_ai_meta(): void {
+        if ( is_singular() && Content_Guard::is_protected( get_queried_object_id() ) ) {
+            return; // Summaries would reveal password-protected content.
+        }
         if ( ! is_singular() ) {
             return;
         }

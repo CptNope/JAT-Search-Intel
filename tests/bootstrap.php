@@ -386,7 +386,8 @@ function is_single(): bool {
 // ── Capabilities ─────────────────────────────────────────────────────────────
 
 function current_user_can( string $capability, ...$args ): bool {
-    return true;
+    global $si_test_state;
+    return ! in_array( $capability, (array) ( $si_test_state['denied_caps'] ?? [] ), true );
 }
 
 function get_current_user_id(): int {

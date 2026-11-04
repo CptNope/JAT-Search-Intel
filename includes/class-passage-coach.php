@@ -226,6 +226,8 @@ class Passage_Coach {
 			}
 		}
 
+		$prev_level  = 0;
+		$alt_found   = 0;
 		$has_table   = false;
 		$has_list    = false;
 		$ext_links   = 0;
@@ -252,6 +254,34 @@ class Passage_Coach {
 				if ( '' !== $link_host && $link_host !== $host ) {
 					$ext_links++;
 				}
+			}
+
+			// Skipped heading levels (H2 straight to H4) break the outline AI and screen readers rely on.
+			if ( 'heading' === $b['kind'] && $b['level'] >= 2 ) {
+				if ( $prev_level && $b['level'] > $prev_level + 1 ) {
+					$add(
+						'heading-skip',
+						'low',
+						/* translators: 1: heading level used, 2: expected level. */
+						sprintf( __( 'Heading jumps to H%1$d; use H%2$d', 'jat-search-intel' ), $b['level'], $prev_level + 1 ),
+						__( 'Headings should step down one level at a time. A clean outline helps search engines, AI assistants and screen readers understand how sections relate.', 'jat-search-intel' ),
+						$i,
+						self::excerpt( $b['text'] )
+					);
+				}
+				$prev_level = $b['level'];
+			}
+
+			// Images without alt text.
+			if ( ( $b['no_alt'] ?? 0 ) > 0 && $alt_found < 3 ) {
+				$alt_found++;
+				$add(
+					'image-alt',
+					'low',
+					__( 'Describe this image in its alt text', 'jat-search-intel' ),
+					__( 'Alt text is how search engines, AI assistants and screen-reader users understand an image. Say what it shows in a short phrase.', 'jat-search-intel' ),
+					$i
+				);
 			}
 
 			// 2. Question headings should be answered in the next block's first sentence.
@@ -454,7 +484,7 @@ class Passage_Coach {
 	 * @param string $name  Block name.
 	 * @param string $html  HTML.
 	 * @param array  $attrs Attributes.
-	 * @return array{kind:string,level:int,text:string,words:int,links:string[]}
+	 * @return array{kind:string,level:int,text:string,words:int,links:string[],no_alt:int}
 	 */
 	private static function describe( string $name, string $html, array $attrs ): array {
 		$map  = [
@@ -481,6 +511,13 @@ class Passage_Coach {
 
 		$text = trim( (string) preg_replace( '/\s+/', ' ', html_entity_decode( wp_strip_all_tags( $html ), ENT_QUOTES, 'UTF-8' ) ) );
 		preg_match_all( '/<a\s[^>]*href=["\']([^"\']+)["\']/i', $html, $links );
+		preg_match_all( '/<img\b[^>]*>/i', $html, $imgs );
+		$no_alt = 0;
+		foreach ( $imgs[0] as $img ) {
+			if ( ! preg_match( '/\balt=["\']\s*[^"\'\s][^"\']*["\']/i', $img ) ) {
+				$no_alt++;
+			}
+		}
 
 		return [
 			'kind'  => $kind,
@@ -488,6 +525,7 @@ class Passage_Coach {
 			'text'  => $text,
 			'words' => '' === $text ? 0 : count( preg_split( '/\s+/u', $text ) ?: [] ),
 			'links' => array_values( array_filter( $links[1] ) ),
+			'no_alt' => $no_alt,
 		];
 	}
 

@@ -356,31 +356,7 @@ class Scale {
 			],
 		] );
 
-		register_rest_route( 'jat-search-intel/v1', '/scores/(?P<id>\d+)', [
-			'methods'             => 'GET',
-			'callback'            => [ $this, 'rest_get_scores' ],
-			'permission_callback' => '__return_true',
-			'args'                => [
-				'id' => [
-					'validate_callback' => function ( $param ) {
-						return is_numeric( $param );
-					},
-				],
-			],
-		] );
 
-		register_rest_route( 'jat-search-intel/v1', '/meta/(?P<id>\d+)', [
-			'methods'             => 'GET',
-			'callback'            => [ $this, 'rest_get_all_meta' ],
-			'permission_callback' => '__return_true',
-			'args'                => [
-				'id' => [
-					'validate_callback' => function ( $param ) {
-						return is_numeric( $param );
-					},
-				],
-			],
-		] );
 	}
 
 	/**
@@ -393,7 +369,7 @@ class Scale {
 		$post_id = (int) $request['id'];
 		$post    = get_post( $post_id );
 
-		if ( ! $post || $post->post_status !== 'publish' ) {
+		if ( ! $post || ! Rest_Api::is_public_post( $post ) ) {
 			return new \WP_REST_Response( [ 'error' => 'Post not found' ], 404 );
 		}
 
@@ -403,7 +379,8 @@ class Scale {
 			'description' => (string) get_post_meta( $post_id, '_jat_search_intel_description', true ),
 			'canonical'   => (string) get_post_meta( $post_id, '_jat_search_intel_canonical', true ) ?: get_permalink( $post_id ),
 			'robots'      => (string) get_post_meta( $post_id, '_jat_search_intel_robots', true ),
-			'keyword'     => (string) get_post_meta( $post_id, '_jat_search_intel_focus_keyword', true ),
+			// Editorial data, only for users who can edit the post.
+			'keyword'     => current_user_can( 'edit_post', $post_id ) ? (string) get_post_meta( $post_id, '_jat_search_intel_focus_keyword', true ) : null,
 			'og_title'    => (string) get_post_meta( $post_id, '_jat_search_intel_og_title', true ),
 			'og_desc'     => (string) get_post_meta( $post_id, '_jat_search_intel_og_description', true ),
 			'og_image'    => (string) get_post_meta( $post_id, '_jat_search_intel_og_image', true ),
@@ -420,7 +397,7 @@ class Scale {
 		$post_id = (int) $request['id'];
 		$post    = get_post( $post_id );
 
-		if ( ! $post || $post->post_status !== 'publish' ) {
+		if ( ! $post || ! Rest_Api::is_public_post( $post ) ) {
 			return new \WP_REST_Response( [ 'error' => 'Post not found' ], 404 );
 		}
 
@@ -432,54 +409,7 @@ class Scale {
 		] );
 	}
 
-	/**
-	 * REST callback: get all scores for a post.
-	 *
-	 * @param \WP_REST_Request $request Request.
-	 * @return \WP_REST_Response
-	 */
-	public function rest_get_scores( $request ): \WP_REST_Response {
-		$post_id = (int) $request['id'];
-		$post    = get_post( $post_id );
 
-		if ( ! $post || $post->post_status !== 'publish' ) {
-			return new \WP_REST_Response( [ 'error' => 'Post not found' ], 404 );
-		}
-
-		return new \WP_REST_Response( [
-			'id'          => $post_id,
-			'seo'         => (int) get_post_meta( $post_id, '_jat_search_intel_seo_score', true ),
-			'aeo'         => (int) get_post_meta( $post_id, '_jat_search_intel_aeo_score', true ),
-			'geo'         => (int) get_post_meta( $post_id, '_jat_search_intel_geo_score', true ),
-			'readability' => (int) get_post_meta( $post_id, '_jat_search_intel_readability_score', true ),
-		] );
-	}
-
-	/**
-	 * REST callback: get all SEO/AEO/GEO meta for a post.
-	 *
-	 * @param \WP_REST_Request $request Request.
-	 * @return \WP_REST_Response
-	 */
-	public function rest_get_all_meta( $request ): \WP_REST_Response {
-		$post_id = (int) $request['id'];
-		$post    = get_post( $post_id );
-
-		if ( ! $post || $post->post_status !== 'publish' ) {
-			return new \WP_REST_Response( [ 'error' => 'Post not found' ], 404 );
-		}
-
-		$seo = $this->rest_get_seo_data( $request )->get_data();
-		$aeo = $this->rest_get_aeo_data( $request )->get_data();
-		$scores = $this->rest_get_scores( $request )->get_data();
-
-		return new \WP_REST_Response( [
-			'id'     => $post_id,
-			'seo'    => $seo,
-			'aeo'    => $aeo,
-			'scores' => $scores,
-		] );
-	}
 
 	// ── CDN-Friendly ─────────────────────────────────────────────────────────
 

@@ -315,6 +315,34 @@ class RestApiTest extends TestCase {
         $this->assertTrue( $this->rest_api->can_read_post( $request ) );
     }
 
+    public function test_visitors_cannot_read_protected_or_draft_posts(): void {
+        global $si_test_state;
+        $si_test_state['denied_caps'] = [ 'edit_post' ];
+        $si_test_state['posts'][40]   = [ 'ID' => 40, 'post_status' => 'publish', 'post_password' => 'secret', 'post_type' => 'post' ];
+        $si_test_state['posts'][41]   = [ 'ID' => 41, 'post_status' => 'draft', 'post_password' => '', 'post_type' => 'post' ];
+
+        foreach ( [ 40, 41 ] as $id ) {
+            $request = new \WP_REST_Request( 'GET' );
+            $request->set_param( 'id', $id );
+            $this->assertFalse( $this->rest_api->can_read_post( $request ), "post {$id}" );
+        }
+        $si_test_state['denied_caps'] = [];
+    }
+
+    public function test_visitors_do_not_get_editorial_fields(): void {
+        global $si_test_state;
+        $si_test_state['denied_caps'] = [ 'edit_post' ];
+        $request = new \WP_REST_Request( 'GET', '/jat-search-intel/v1/meta/1' );
+        $request->set_param( 'id', 1 );
+
+        $data = $this->rest_api->get_meta( $request )->get_data();
+        $si_test_state['denied_caps'] = [];
+
+        $this->assertArrayHasKey( 'description', $data );
+        $this->assertArrayNotHasKey( 'focus_keyword', $data );
+        $this->assertArrayNotHasKey( 'seo_score', $data );
+    }
+
     public function test_can_read_post_returns_false_for_missing(): void {
         $request = new \WP_REST_Request( 'GET' );
         $request->set_param( 'id', 999 );
