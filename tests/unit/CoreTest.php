@@ -141,6 +141,41 @@ class CoreTest extends TestCase {
         $this->assertSame( $a, $b );
     }
 
+    // ── Lazy module loading ─────────────────────────────────────────────
+
+    /**
+     * @return array<string,array{0:string,1:string}>
+     */
+    public function lazy_module_provider(): array {
+        return [
+            'ai_engine'      => [ 'ai_engine', \Search_Intel\AI_Engine::class ],
+            'citation_graph' => [ 'citation_graph', \Search_Intel\Citation_Graph::class ],
+            'scale'          => [ 'scale', \Search_Intel\Scale::class ],
+            'rbac'           => [ 'rbac', \Search_Intel\RBAC::class ],
+            'migration'      => [ 'migration', \Search_Intel\Migration::class ],
+            'qa_detector'    => [ 'qa_detector', \Search_Intel\QA_Detector::class ],
+            'custom_reports' => [ 'custom_reports', \Search_Intel\Custom_Reports::class ],
+        ];
+    }
+
+    /**
+     * @dataProvider lazy_module_provider
+     */
+    public function test_deferred_module_resolves_on_access( string $prop, string $class ): void {
+        $core = Core::get_instance();
+
+        $this->assertTrue( isset( $core->{$prop} ), "{$prop} should report as set" );
+        $first = $core->{$prop};
+        $this->assertInstanceOf( $class, $first );
+        $this->assertSame( $first, $core->{$prop}, "{$prop} should be built once" );
+    }
+
+    public function test_unknown_property_returns_null(): void {
+        $core = Core::get_instance();
+        $this->assertNull( $core->not_a_module );
+        $this->assertFalse( isset( $core->not_a_module ) );
+    }
+
     // ── Module initialization ────────────────────────────────────────────
 
     public function test_core_initializes_seo_manager(): void {

@@ -23,6 +23,22 @@ class Redirect_Manager {
 	private const TABLE_404_LOG = 'search_intel_404_log';
 
 	/**
+	 * Option holding the compiled lookup index of enabled rules.
+	 */
+	private const INDEX_OPTION = 'search_intel_redirect_index';
+
+	/**
+	 * Above this many exact rules the index stops holding them and exact
+	 * lookups go to the (indexed) database column instead.
+	 */
+	private const INDEX_EXACT_LIMIT = 2000;
+
+	/**
+	 * Autoload the index only while it is small.
+	 */
+	private const INDEX_AUTOLOAD_LIMIT = 200;
+
+	/**
 	 * Valid HTTP status codes for redirects.
 	 *
 	 * @var array<int,string>
@@ -215,50 +231,161 @@ class Redirect_Manager {
 	/**
 	 * Find a matching redirect rule for a given request path.
 	 *
+	 * Uses a compiled index of enabled rules so that requests which match
+	 * nothing (the vast majority) cost no database queries at all. The full
+	 * row is fetched by primary key only when a rule matches.
+	 *
 	 * @param string $request_path The incoming request path.
 	 * @return object|null The matching redirect row, or null.
 	 */
 	public function find_matching_redirect( string $request_path ) {
-		global $wpdb;
+		$index  = $this->get_index();
+		$needle = $this->normalize_for_match( $request_path );
+		$id     = 0;
 
-		$table = $wpdb->prefix . self::TABLE_REDIRECTS;
-
-		// 1. Exact match (fastest).
-		$exact = $wpdb->get_row(
-			$wpdb->prepare(
-				"SELECT * FROM {$table} WHERE match_type = 'exact' AND source_url = %s AND enabled = 1 LIMIT 1",
-				$request_path
-			)
-		);
-
-		if ( $exact ) {
-			return $exact;
+		// 1. Exact match.
+		if ( ! empty( $index['exact_in_db'] ) ) {
+			$id = $this->find_exact_in_db( $request_path );
+		} elseif ( isset( $index['exact'][ $needle ] ) ) {
+			$id = (int) $index['exact'][ $needle ];
 		}
 
-		// 2. Prefix match — find longest prefix that matches.
-		$prefixes = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT * FROM {$table} WHERE match_type = 'prefix' AND enabled = 1 AND %s LIKE CONCAT(source_url, '%%') ORDER BY CHAR_LENGTH(source_url) DESC LIMIT 1",
-				$request_path
-			)
-		);
-
-		if ( ! empty( $prefixes ) ) {
-			return $prefixes[0];
-		}
-
-		// 3. Regex match — test each pattern.
-		$regexes = $wpdb->get_results(
-			"SELECT * FROM {$table} WHERE match_type = 'regex' AND enabled = 1"
-		);
-
-		foreach ( $regexes as $rule ) {
-			if ( @preg_match( '#' . $rule->source_url . '#', $request_path ) ) {
-				return $rule;
+		// 2. Prefix match — longest prefix wins (index is pre-sorted).
+		if ( ! $id ) {
+			foreach ( $index['prefix'] as $rule ) {
+				if ( '' !== $rule[0] && 0 === strpos( $needle, $rule[0] ) ) {
+					$id = (int) $rule[1];
+					break;
+				}
 			}
 		}
 
-		return null;
+		// 3. Regex match — first matching pattern in rule order.
+		if ( ! $id ) {
+			foreach ( $index['regex'] as $rule ) {
+				if ( @preg_match( '#' . $rule[0] . '#', $request_path ) ) {
+					$id = (int) $rule[1];
+					break;
+				}
+			}
+		}
+
+		if ( ! $id ) {
+			return null;
+		}
+
+		$row = $this->get_redirect( $id );
+		if ( ! $row || empty( $row->enabled ) ) {
+			// Index is stale (row edited outside the plugin) — rebuild next time.
+			$this->flush_index();
+			return null;
+		}
+
+		return $row;
+	}
+
+	/**
+	 * Case-fold a path the same way the default MySQL collations compare.
+	 *
+	 * @param string $path Path.
+	 * @return string
+	 */
+	private function normalize_for_match( string $path ): string {
+		return function_exists( 'mb_strtolower' ) ? mb_strtolower( $path ) : strtolower( $path );
+	}
+
+	/**
+	 * Exact lookup against the database (used when there are too many exact
+	 * rules to keep in the index).
+	 *
+	 * @param string $request_path Request path.
+	 * @return int Matching rule ID or 0.
+	 */
+	private function find_exact_in_db( string $request_path ): int {
+		global $wpdb;
+		$table = $wpdb->prefix . self::TABLE_REDIRECTS;
+
+		return (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT id FROM {$table} WHERE match_type = 'exact' AND source_url = %s AND enabled = 1 ORDER BY id ASC LIMIT 1",
+				$request_path
+			)
+		);
+	}
+
+	/**
+	 * Get the compiled rule index, building it if needed.
+	 *
+	 * @return array{exact: array<string,int>, exact_in_db: bool, prefix: array<int,array{0:string,1:int}>, regex: array<int,array{0:string,1:int}>}
+	 */
+	public function get_index(): array {
+		$index = get_option( self::INDEX_OPTION, null );
+		if ( is_array( $index ) && isset( $index['exact'], $index['prefix'], $index['regex'] ) ) {
+			return $index;
+		}
+		return $this->rebuild_index();
+	}
+
+	/**
+	 * Rebuild and store the compiled rule index from the redirects table.
+	 *
+	 * @return array{exact: array<string,int>, exact_in_db: bool, prefix: array<int,array{0:string,1:int}>, regex: array<int,array{0:string,1:int}>}
+	 */
+	public function rebuild_index(): array {
+		global $wpdb;
+		$table = $wpdb->prefix . self::TABLE_REDIRECTS;
+
+		$index = [
+			'exact'       => [],
+			'exact_in_db' => false,
+			'prefix'      => [],
+			'regex'       => [],
+		];
+
+		$exact_count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE match_type = 'exact' AND enabled = 1" );
+		$index['exact_in_db'] = $exact_count > self::INDEX_EXACT_LIMIT;
+
+		$types = $index['exact_in_db'] ? "'prefix','regex'" : "'exact','prefix','regex'";
+		$rows  = $wpdb->get_results( "SELECT id, source_url, match_type FROM {$table} WHERE enabled = 1 AND match_type IN ({$types}) ORDER BY id ASC" );
+
+		foreach ( (array) $rows as $row ) {
+			$source = (string) $row->source_url;
+			$id     = (int) $row->id;
+
+			if ( 'exact' === $row->match_type ) {
+				$key = $this->normalize_for_match( $source );
+				if ( ! isset( $index['exact'][ $key ] ) ) {
+					$index['exact'][ $key ] = $id;
+				}
+			} elseif ( 'prefix' === $row->match_type ) {
+				$index['prefix'][] = [ $this->normalize_for_match( $source ), $id ];
+			} elseif ( 'regex' === $row->match_type ) {
+				$index['regex'][] = [ $source, $id ];
+			}
+		}
+
+		// Longest prefix first, ties broken by rule ID.
+		usort(
+			$index['prefix'],
+			static function ( $a, $b ) {
+				return ( strlen( $b[0] ) <=> strlen( $a[0] ) ) ?: ( $a[1] <=> $b[1] );
+			}
+		);
+
+		$size     = count( $index['exact'] ) + count( $index['prefix'] ) + count( $index['regex'] );
+		$autoload = $size <= self::INDEX_AUTOLOAD_LIMIT;
+
+		delete_option( self::INDEX_OPTION );
+		add_option( self::INDEX_OPTION, $index, '', $autoload );
+
+		return $index;
+	}
+
+	/**
+	 * Drop the compiled index so it is rebuilt on the next lookup.
+	 */
+	public function flush_index(): void {
+		delete_option( self::INDEX_OPTION );
 	}
 
 	/**
@@ -364,10 +491,12 @@ class Redirect_Manager {
 
 		if ( $id > 0 ) {
 			$wpdb->update( $table, $row, [ 'id' => $id ], $format, [ '%d' ] );
+			$this->flush_index();
 			return $id;
 		}
 
 		$inserted = $wpdb->insert( $table, $row, $format );
+		$this->flush_index();
 		return $inserted ? (int) $wpdb->insert_id : false;
 	}
 
@@ -380,7 +509,9 @@ class Redirect_Manager {
 	public function delete_redirect( int $id ): bool {
 		global $wpdb;
 		$table = $wpdb->prefix . self::TABLE_REDIRECTS;
-		return (bool) $wpdb->delete( $table, [ 'id' => $id ], [ '%d' ] );
+		$deleted = (bool) $wpdb->delete( $table, [ 'id' => $id ], [ '%d' ] );
+		$this->flush_index();
+		return $deleted;
 	}
 
 	/**

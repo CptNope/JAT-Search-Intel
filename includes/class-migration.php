@@ -399,7 +399,7 @@ class Migration {
 		}
 
 		if ( $count > 0 ) {
-			update_option( 'search_intel_redirects', $existing );
+			update_option( 'search_intel_redirects', $existing, false );
 		}
 
 		return $count;

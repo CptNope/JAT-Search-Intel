@@ -127,12 +127,22 @@ function get_option( string $option, $default = false ) {
     return $si_test_state['options'][ $option ] ?? $default;
 }
 
-function update_option( string $option, $value ): bool {
+function update_option( string $option, $value, $autoload = null ): bool {
     global $si_test_state;
     $si_test_state['options'][ $option ] = $value;
     return true;
 }
 
+
+function add_option( string $option, $value = "", $deprecated = "", $autoload = null ): bool {
+    global $si_test_state;
+    if ( isset( $si_test_state["options"][ $option ] ) ) {
+        return false;
+    }
+    $si_test_state["options"][ $option ] = $value;
+    $si_test_state["autoload"][ $option ] = $autoload;
+    return true;
+}
 function delete_option( string $option ): bool {
     global $si_test_state;
     unset( $si_test_state['options'][ $option ] );

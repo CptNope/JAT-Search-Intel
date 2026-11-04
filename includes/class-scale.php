@@ -119,7 +119,7 @@ class Scale {
 			'created' => current_time( 'mysql' ),
 		];
 
-		update_option( self::QUEUE_OPTION, $queue );
+		update_option( self::QUEUE_OPTION, $queue, false );
 		return $job_id;
 	}
 
@@ -171,7 +171,7 @@ class Scale {
 			return true;
 		} ) );
 
-		update_option( self::QUEUE_OPTION, $queue );
+		update_option( self::QUEUE_OPTION, $queue, false );
 		return $processed;
 	}
 

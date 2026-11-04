@@ -116,7 +116,7 @@ class Notifications {
 			'timestamp'   => current_time( 'mysql' ),
 		];
 
-		update_option( self::SNAPSHOT_OPTION, $snapshots );
+		update_option( self::SNAPSHOT_OPTION, $snapshots, false );
 	}
 
 	/**
