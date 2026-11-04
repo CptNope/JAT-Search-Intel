@@ -31,6 +31,10 @@ class AEO_Manager {
         add_shortcode( 'jat_search_intel_faq', [ $this, 'faq_shortcode' ] );
         add_shortcode( 'jat_search_intel_howto', [ $this, 'howto_shortcode' ] );
 
+        // Legacy shortcode names from the GitHub edition, kept so existing content renders.
+        add_shortcode( 'search_intel_faq', [ $this, 'faq_shortcode' ] );
+        add_shortcode( 'search_intel_howto', [ $this, 'howto_shortcode' ] );
+
         // Auto-generate lead summary when no excerpt exists
         add_filter( 'get_the_excerpt', [ $this, 'auto_lead_summary' ], 10, 2 );
     }

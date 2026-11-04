@@ -45,11 +45,6 @@ spl_autoload_register( function ( $class ) {
 });
 
 /**
- * Database schema version. Bump when a custom table definition changes.
- */
-define( 'JAT_SEARCH_INTEL_DB_VERSION', '2' );
-
-/**
  * Cron hooks the plugin may schedule; cleared on deactivation.
  *
  * @return string[]
@@ -71,26 +66,16 @@ function jat_search_intel_cron_hooks() {
 }
 
 /**
- * Create or upgrade custom tables when the schema version changes.
- *
- * Activation hooks do not run on in-place updates, so this also runs on load.
- */
-function jat_search_intel_maybe_upgrade() {
-    if ( get_option( 'jat_search_intel_db_version' ) === JAT_SEARCH_INTEL_DB_VERSION ) {
-        return;
-    }
-    JAT_Search_Intel\Redirect_Manager::create_tables();
-    update_option( 'jat_search_intel_db_version', JAT_SEARCH_INTEL_DB_VERSION );
-    update_option( 'jat_search_intel_db_version', JAT_SEARCH_INTEL_DB_VERSION );
-}
-
-/**
  * Initialize the plugin.
  */
 function jat_search_intel_init() {
-    jat_search_intel_maybe_upgrade();
+    // Legacy-data migration, table creation and rewrite flush on version change.
+    JAT_Search_Intel\Upgrade::run();
     return JAT_Search_Intel\Core::get_instance();
 }
+
+// Flush rewrite rules once, after every module has registered its rules.
+add_action( 'init', [ 'JAT_Search_Intel\\Upgrade', 'maybe_flush_rewrites' ], 9999 );
 
 // Custom cron interval used by the background queue (Scale module).
 add_filter( 'cron_schedules', function ( $schedules ) {
@@ -103,20 +88,15 @@ add_filter( 'cron_schedules', function ( $schedules ) {
     return $schedules;
 } );
 
-// Activation hook
+// Activation hook — defaults, tables, and a rewrite flush once our rules exist.
 register_activation_hook( __FILE__, function () {
+    JAT_Search_Intel\Upgrade::run();
     $options = get_option( 'jat_search_intel_settings', [] );
     if ( empty( $options ) ) {
         update_option( 'jat_search_intel_settings', JAT_Search_Intel\Core::get_default_settings() );
     }
     JAT_Search_Intel\Redirect_Manager::create_tables();
-
-    // Register rewrite rules before flushing so WP picks them up.
-    add_rewrite_rule( '^sitemap\.xml$', 'index.php?jat_search_intel_sitemap=index', 'top' );
-    add_rewrite_rule( '^sitemap-([a-z]+)-?(\d*)\.xml$', 'index.php?jat_search_intel_sitemap=$matches[1]&jat_search_intel_sitemap_page=$matches[2]', 'top' );
-    add_rewrite_rule( '^llms\.txt$', 'index.php?jat_search_intel_llms_txt=1', 'top' );
-    add_rewrite_rule( '^llms-full\.txt$', 'index.php?jat_search_intel_llms_full_txt=1', 'top' );
-    flush_rewrite_rules();
+    JAT_Search_Intel\Upgrade::request_rewrite_flush();
 });
 
 // Deactivation hook — stop background jobs and drop our rewrite rules.

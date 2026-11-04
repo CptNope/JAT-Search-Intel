@@ -1289,6 +1289,29 @@ function remove_role( string $role ): void {
 	unset( $si_test_state['roles'][ $role ] );
 }
 
+function wp_roles() {
+	global $si_test_state;
+	return (object) [ 'role_objects' => $si_test_state['role_objects'] ?? [] ];
+}
+
+function wp_clear_scheduled_hook( string $hook, array $args = [] ) {
+	global $si_test_state;
+	$si_test_state['cleared_hooks'][] = $hook;
+	return 0;
+}
+
+function is_main_site( $site_id = null ): bool {
+	return true;
+}
+
+if ( ! function_exists( 'delete_site_option' ) ) {
+	function delete_site_option( string $option ): bool {
+		global $si_test_state;
+		unset( $si_test_state['site_options'][ $option ] );
+		return true;
+	}
+}
+
 // ── Object cache stubs ──────────────────────────────────────────────────────
 
 function wp_using_ext_object_cache(): bool {
