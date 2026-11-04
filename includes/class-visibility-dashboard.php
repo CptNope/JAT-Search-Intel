@@ -796,7 +796,7 @@ class Visibility_Dashboard {
 		printf(
 			'<div class="si-score-card"><h2>GEO Health Score: <span class="grade-%s">%d/100 (%s)</span></h2></div>',
 			esc_attr( strtolower( $health['grade'] ) ),
-			esc_html( $health['score'] ),
+			absint( $health['score'] ),
 			esc_html( $health['grade'] )
 		);
 
@@ -807,8 +807,8 @@ class Visibility_Dashboard {
 			printf(
 				'<tr><td>%s</td><td>%d / %d</td><td>%s</td></tr>',
 				esc_html( $factor['label'] ),
-				esc_html( $factor['score'] ),
-				esc_html( $factor['max'] ),
+				absint( $factor['score'] ),
+				absint( $factor['max'] ),
 				esc_html( $factor['detail'] )
 			);
 		}
