@@ -328,7 +328,8 @@ function is_singular( $post_types = '' ): bool {
 }
 
 function is_admin(): bool {
-    return false;
+    global $si_test_state;
+    return ! empty( $si_test_state['is_admin'] );
 }
 
 function is_front_page(): bool {
@@ -1392,6 +1393,10 @@ function is_attachment( $attachment = '' ): bool {
 	return false;
 }
 
+function is_object_in_taxonomy( $object_type, string $taxonomy ): bool {
+	return 'post' === $object_type && in_array( $taxonomy, [ 'category', 'post_tag' ], true );
+}
+
 // ── Object cache stubs ──────────────────────────────────────────────────────
 
 function wp_using_ext_object_cache(): bool {
@@ -1538,5 +1543,81 @@ if ( ! class_exists( 'WP_Error' ) ) {
 		public function get_error_code() {
 			return $this->code;
 		}
+	}
+}
+
+if ( ! function_exists( 'remove_all_filters' ) ) {
+	function remove_all_filters( string $tag, $priority = false ): bool {
+		global $si_test_state;
+		unset( $si_test_state['filters'][ $tag ] );
+		return true;
+	}
+}
+
+if ( ! function_exists( 'is_post_type_viewable' ) ) {
+	function is_post_type_viewable( $post_type ): bool {
+		return in_array( $post_type, [ 'post', 'page', 'product' ], true );
+	}
+}
+
+if ( ! function_exists( 'wp_register_ability' ) ) {
+	function wp_register_ability( string $name, array $args ) {
+		$GLOBALS['si_test_state']['abilities'][ $name ] = $args;
+		return null;
+	}
+	function wp_register_ability_category( string $slug, array $args ) {
+		$GLOBALS['si_test_state']['ability_categories'][ $slug ] = $args;
+		return null;
+	}
+}
+
+if ( ! function_exists( '__return_true' ) ) {
+	function __return_true(): bool {
+		return true;
+	}
+}
+
+if ( ! function_exists( 'parse_blocks' ) ) {
+	/**
+	 * Minimal parse_blocks() for tests: top-level, non-nested blocks plus freeform runs.
+	 */
+	function parse_blocks( string $content ): array {
+		$out    = [];
+		$offset = 0;
+		preg_match_all( '#<!-- wp:([a-z0-9/-]+)(\s+(\{.*?\}))?\s*(/)?-->(.*?)(?:<!-- /wp:\1 -->|(?=<!-- wp:)|$)#s', $content, $m, PREG_SET_ORDER | PREG_OFFSET_CAPTURE );
+		foreach ( $m as $match ) {
+			$start = $match[0][1];
+			if ( $start > $offset ) {
+				$out[] = [ 'blockName' => null, 'attrs' => [], 'innerBlocks' => [], 'innerHTML' => substr( $content, $offset, $start - $offset ) ];
+			}
+			$name  = $match[1][0];
+			$name  = false === strpos( $name, '/' ) ? 'core/' . $name : $name;
+			$out[] = [
+				'blockName'   => $name,
+				'attrs'       => isset( $match[3][0] ) && '' !== $match[3][0] ? (array) json_decode( $match[3][0], true ) : [],
+				'innerBlocks' => [],
+				'innerHTML'   => $match[5][0] ?? '',
+			];
+			$offset = $start + strlen( $match[0][0] );
+		}
+		if ( $offset < strlen( $content ) ) {
+			$out[] = [ 'blockName' => null, 'attrs' => [], 'innerBlocks' => [], 'innerHTML' => substr( $content, $offset ) ];
+		}
+		return $out;
+	}
+}
+
+if ( ! function_exists( 'maybe_unserialize' ) ) {
+	function maybe_unserialize( $data ) {
+		return is_string( $data ) && preg_match( '/^[aOs]:\d+:/', $data ) ? unserialize( $data ) : $data; // phpcs:ignore
+	}
+}
+
+if ( ! function_exists( 'trailingslashit' ) ) {
+	function trailingslashit( $value ): string {
+		return rtrim( (string) $value, '/\\' ) . '/';
+	}
+	function untrailingslashit( $value ): string {
+		return rtrim( (string) $value, '/\\' );
 	}
 }

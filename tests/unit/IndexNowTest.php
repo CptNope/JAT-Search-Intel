@@ -33,10 +33,10 @@ class IndexNowTest extends TestCase {
 
 	public function test_constructor_registers_publish_hooks_when_enabled(): void {
 		global $si_test_state;
-		$hooks = array_column( $si_test_state['actions']['publish_post'] ?? [], 'callback' );
+		$hooks = array_column( $si_test_state['actions']['transition_post_status'] ?? [], 'callback' );
 		$found = false;
 		foreach ( $hooks as $cb ) {
-			if ( is_array( $cb ) && $cb[1] === 'ping_on_publish' ) $found = true;
+			if ( is_array( $cb ) && $cb[1] === 'on_status_change' ) $found = true;
 		}
 		$this->assertTrue( $found );
 	}
@@ -65,8 +65,7 @@ class IndexNowTest extends TestCase {
 		global $si_test_state;
 		$si_test_state['actions'] = [];
 		new IndexNow( [ 'enable_indexnow' => false, 'indexnow_api_key' => '' ] );
-		$hooks = $si_test_state['actions']['publish_post'] ?? [];
-		$this->assertEmpty( $hooks );
+		$this->assertEmpty( $si_test_state['actions']['transition_post_status'] ?? [] );
 	}
 
 	// ── Constants ────────────────────────────────────────────────────────
@@ -172,5 +171,11 @@ class IndexNowTest extends TestCase {
 
 		$this->indexnow->clear_log();
 		$this->assertEmpty( $this->indexnow->get_log() );
+	}
+
+	public function test_generated_key_meets_protocol_format(): void {
+		$key = IndexNow::generate_key();
+		$this->assertMatchesRegularExpression( '/^[a-f0-9]{32}$/', $key );
+		$this->assertNotSame( $key, IndexNow::generate_key() );
 	}
 }

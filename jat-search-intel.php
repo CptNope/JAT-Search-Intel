@@ -97,6 +97,7 @@ register_activation_hook( __FILE__, function () {
         update_option( 'jat_search_intel_settings', JAT_Search_Intel\Core::get_default_settings() );
     }
     JAT_Search_Intel\Redirect_Manager::create_tables();
+    JAT_Search_Intel\Setup_Wizard::on_activation();
     JAT_Search_Intel\Upgrade::request_rewrite_flush();
 });
 

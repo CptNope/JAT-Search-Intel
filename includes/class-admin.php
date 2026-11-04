@@ -175,7 +175,7 @@ class Admin {
                 'enable_sitemap', 'enable_analyzer',
                 'enable_redirects', 'enable_indexnow', 'enable_robots_editor',
                 'enable_link_checker', 'enable_internal_linker', 'enable_local_business',
-                'enable_audit_log', 'enable_csp_headers', 'enable_sri',
+                'enable_audit_log',
                 'delete_data_on_uninstall',
                 'enable_schema_types', 'enable_qa_detector', 'enable_faq_generator',
                 'enable_visibility_dashboard', 'enable_citation_graph', 'enable_authority_map',
@@ -183,7 +183,7 @@ class Admin {
                 'enable_advanced_linking',
                 'enable_historical_analytics', 'enable_ga4', 'enable_cwv',
                 'enable_custom_reports', 'enable_notifications',
-                'enable_rbac', 'enable_multilang', 'enable_white_label', 'enable_scale',
+                'enable_rbac', 'enable_multilang', 'enable_scale',
             ],
             'seo' => [
                 'enable_og', 'enable_twitter', 'enable_canonical', 'enable_robots_meta',
@@ -229,14 +229,13 @@ class Admin {
             'enable_redirects', 'enable_indexnow', 'enable_robots_editor',
             'enable_link_checker', 'enable_internal_linker', 'enable_local_business',
             'enable_audit_log',
-            'enable_csp_headers', 'enable_sri',
             // Advanced AEO (v2.1)
             'enable_schema_types', 'enable_qa_detector', 'enable_faq_generator',
             // Advanced GEO (v2.5)
             'enable_visibility_dashboard', 'enable_citation_graph', 'enable_authority_map',
             // Enterprise (v3.0)
             'enable_rbac', 'enable_settings_lock', 'enable_multilang',
-            'enable_white_label', 'wl_hide_branding', 'enable_scale',
+            'enable_scale',
             // AI & Content Intelligence (v3.2)
             'enable_ai_engine', 'enable_content_decay', 'decay_auto_queue',
             'enable_cannibalization', 'enable_advanced_linking',
@@ -270,8 +269,6 @@ class Admin {
             // v2.0+
             'indexnow_api_key', 'faq_ai_api_key',
             'gsc_access_token', 'gsc_site_url', 'bing_api_key', 'bing_site_url',
-            'wl_plugin_name', 'wl_plugin_uri', 'wl_author_name', 'wl_author_uri',
-            'wl_description', 'wl_logo_url', 'wl_brand_color',
             'notification_email', 'slack_webhook_url',
             'ga4_property_id', 'psi_api_key',
             // v3.5
@@ -344,6 +341,14 @@ class Admin {
             $sanitized['speakable_selectors'] = $existing['speakable_selectors'] ?? $defaults['speakable_selectors'];
         }
 
+        // IndexNow needs a key; create one the first time it is switched on.
+        if ( ! empty( $sanitized['enable_indexnow'] ) && empty( $sanitized['indexnow_api_key'] ) ) {
+            $sanitized['indexnow_api_key'] = IndexNow::generate_key();
+        }
+        if ( '' !== (string) ( $sanitized['indexnow_api_key'] ?? '' ) && ! preg_match( '/^[A-Za-z0-9-]{8,128}$/', (string) $sanitized['indexnow_api_key'] ) ) {
+            $sanitized['indexnow_api_key'] = IndexNow::generate_key();
+        }
+
         // RSS footer (limited HTML allowed).
         if ( isset( $input['rss_after_content'] ) ) {
             $sanitized['rss_after_content'] = wp_kses_post( $input['rss_after_content'] );
@@ -365,6 +370,18 @@ class Admin {
             $sanitized['ai_crawler_rules'] = $existing['ai_crawler_rules'] ?? $defaults['ai_crawler_rules'];
         }
 
+        // Content Signals (robots.txt): yes / no / unset.
+        if ( isset( $input['content_signals'] ) && is_array( $input['content_signals'] ) ) {
+            $signals = [];
+            foreach ( [ 'search', 'ai-input', 'ai-train' ] as $signal ) {
+                $value              = $input['content_signals'][ $signal ] ?? '';
+                $signals[ $signal ] = in_array( $value, [ 'yes', 'no' ], true ) ? $value : '';
+            }
+            $sanitized['content_signals'] = $signals;
+        } else {
+            $sanitized['content_signals'] = $existing['content_signals'] ?? $defaults['content_signals'];
+        }
+
         // Tracked keywords: one per line.
         if ( isset( $input['tracked_keywords'] ) ) {
             $raw  = is_array( $input['tracked_keywords'] ) ? $input['tracked_keywords'] : explode( "\n", (string) $input['tracked_keywords'] );
@@ -378,7 +395,12 @@ class Admin {
 
         // Title templates (associative array of template strings).
         if ( isset( $input['title_templates'] ) && is_array( $input['title_templates'] ) ) {
-            $sanitized['title_templates'] = array_map( 'sanitize_text_field', $input['title_templates'] );
+            // Not sanitize_text_field(): it strips "%ca"/"%se"-style sequences as
+            // URL-encoded octets, which mangles %category%, %search_query% and %sep%.
+            $sanitized['title_templates'] = array_map( static function ( $template ) {
+                $template = wp_strip_all_tags( (string) $template );
+                return trim( (string) preg_replace( '/[\r\n\t]+/', ' ', $template ) );
+            }, wp_unslash( $input['title_templates'] ) );
         } else {
             $sanitized['title_templates'] = $existing['title_templates'] ?? $defaults['title_templates'];
         }

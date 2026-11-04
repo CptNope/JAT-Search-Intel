@@ -73,11 +73,7 @@ class Core {
     /** @var Internal_Linker */
     public $internal_linker;
 
-    /** @var CSP_Headers */
-    public $csp_headers;
 
-    /** @var SRI */
-    public $sri;
 
     /** @var Schema_Types */
     public $schema_types;
@@ -109,14 +105,10 @@ class Core {
     /** @var Multilang */
     public $multilang;
 
-    /** @var White_Label */
-    public $white_label;
 
     /** @var Scale */
     public $scale;
 
-    /** @var MainWP_Reporter */
-    public $mainwp_reporter;
 
     /** @var Notifications */
     public $notifications;
@@ -162,6 +154,27 @@ class Core {
 
     /** @var AI_Optimizer */
     public $ai_optimizer;
+
+    /** @var Passage_Coach */
+    public $passage_coach;
+
+    /** @var Meta_Sync */
+    public $meta_sync;
+
+    /** @var Readiness */
+    public $readiness;
+
+    /** @var Admin_Menu */
+    public $admin_menu;
+
+    /** @var Setup_Wizard */
+    public $setup_wizard;
+
+    /** @var Performance_Report */
+    public $performance_report;
+
+    /** @var Abilities */
+    public $abilities;
 
     /**
      * Get singleton instance.
@@ -221,9 +234,8 @@ class Core {
         // Redirect Manager — also needed for slug-change detection on every save.
         $this->redirects = new Redirect_Manager( $settings );
 
-        // WooCommerce / MainWP / Multisite gate themselves on their environment.
+        // WooCommerce / Multisite gate themselves on their environment.
         $this->woocommerce     = new WooCommerce( $settings );
-        $this->mainwp_reporter = new MainWP_Reporter( $settings );
 
         // AI Optimizer is on unless explicitly disabled.
         $this->ai_optimizer = new AI_Optimizer( $settings, $this );
@@ -243,8 +255,6 @@ class Core {
             'audit_log'               => [ $on( 'enable_audit_log' ), Audit_Log::class ],
             'link_checker'            => [ $on( 'enable_link_checker' ), Link_Checker::class ],
             'internal_linker'         => [ $on( 'enable_internal_linker' ), Internal_Linker::class ],
-            'csp_headers'             => [ $on( 'enable_csp_headers' ), CSP_Headers::class ],
-            'sri'                     => [ $on( 'enable_sri' ), SRI::class ],
             'schema_types'            => [ $on( 'enable_schema_types' ), Schema_Types::class ],
             'qa_detector'             => [ $on( 'enable_qa_detector' ), QA_Detector::class ],
             'visibility_dashboard'    => [ $on( 'enable_visibility_dashboard' ), Visibility_Dashboard::class ],
@@ -252,7 +262,6 @@ class Core {
             'authority_map'           => [ $on( 'enable_authority_map' ), Authority_Map::class ],
             'rbac'                    => [ $on( 'enable_rbac' ), RBAC::class ],
             'multilang'               => [ $on( 'enable_multilang' ), Multilang::class ],
-            'white_label'             => [ $on( 'enable_white_label' ), White_Label::class ],
             'scale'                   => [ $on( 'enable_scale' ), Scale::class ],
             'notifications'           => [ $on( 'enable_notifications' ), Notifications::class ],
             'ai_engine'               => [ false, AI_Engine::class ],
@@ -267,7 +276,14 @@ class Core {
             'feed_seo'                => [ $on( 'enable_rss_footer' ), Feed_SEO::class ],
             'custom_schema'           => [ $on( 'enable_schema' ), Custom_Schema::class ],
             'ai_search'               => [ true, AI_Search::class ],
+            'meta_sync'               => [ true, Meta_Sync::class ],
+            'passage_coach'           => [ $on( 'enable_analyzer' ), Passage_Coach::class ],
             'rank_tracker'            => [ $is_admin || $on( 'enable_rank_tracking' ), Rank_Tracker::class ],
+            'readiness'               => [ $is_admin, Readiness::class ],
+            'admin_menu'              => [ $is_admin, Admin_Menu::class ],
+            'setup_wizard'            => [ $is_admin, Setup_Wizard::class ],
+            'performance_report'      => [ $is_admin, Performance_Report::class ],
+            'abilities'               => [ function_exists( 'wp_register_ability' ), Abilities::class ],
         ];
 
         foreach ( $modules as $prop => list( $boot, $class ) ) {
@@ -506,10 +522,8 @@ class Core {
             'enable_internal_linker' => false,
 
             // Content Security Policy Headers
-            'enable_csp_headers'     => false,
 
             // Subresource Integrity
-            'enable_sri'             => false,
 
             // Additional Schema Types (v2.1)
             'enable_schema_types'    => false,
@@ -542,15 +556,6 @@ class Core {
             'enable_multilang'       => false,
 
             // White-Label (v3.0)
-            'enable_white_label'     => false,
-            'wl_plugin_name'         => '',
-            'wl_plugin_uri'          => '',
-            'wl_author_name'         => '',
-            'wl_author_uri'          => '',
-            'wl_description'         => '',
-            'wl_logo_url'            => '',
-            'wl_brand_color'         => '#2271b1',
-            'wl_hide_branding'       => false,
 
             // Scale (v3.0)
             'enable_scale'           => false,
@@ -614,6 +619,7 @@ class Core {
             'enable_markdown_endpoints' => true,
             'enable_ai_crawler_log'  => false,
             'ai_crawler_rules'       => [],
+            'content_signals'        => [ 'search' => '', 'ai-input' => '', 'ai-train' => '' ],
 
             // v3.5 — Rank tracking
             'enable_rank_tracking'   => false,

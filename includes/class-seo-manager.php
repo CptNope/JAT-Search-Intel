@@ -22,7 +22,12 @@ class SEO_Manager {
 
         add_action( 'wp_head', [ $this, 'render_meta_tags' ], 1 );
         add_action( 'wp_head', [ $this, 'render_canonical' ], 2 );
-        add_action( 'wp_head', [ $this, 'render_robots_meta' ], 3 );
+        if ( function_exists( 'wp_robots' ) ) {
+            // Merge into core's single robots tag instead of printing a second one.
+            add_filter( 'wp_robots', [ $this, 'filter_wp_robots' ], 20 );
+        } else {
+            add_action( 'wp_head', [ $this, 'render_robots_meta' ], 3 );
+        }
 
         if ( ! empty( $settings['enable_og'] ) ) {
             add_action( 'wp_head', [ $this, 'render_open_graph' ], 4 );
@@ -184,6 +189,50 @@ class SEO_Manager {
             return;
         }
 
+        printf(
+            '<meta name="robots" content="%s" />' . "\n",
+            esc_attr( implode( ', ', $this->get_robots_directives() ) )
+        );
+    }
+
+    /**
+     * Merge our directives into core's wp_robots array (WordPress 5.7+).
+     *
+     * @param array<string,bool|string> $robots Core robots directives.
+     * @return array<string,bool|string>
+     */
+    public function filter_wp_robots( $robots ): array {
+        $robots = (array) $robots;
+        if ( empty( $this->settings['enable_robots_meta'] ) ) {
+            return $robots;
+        }
+
+        foreach ( $this->get_robots_directives() as $directive ) {
+            if ( false !== strpos( $directive, ':' ) ) {
+                list( $key, $value ) = explode( ':', $directive, 2 );
+                $robots[ $key ]      = $value;
+            } else {
+                $robots[ $directive ] = true;
+            }
+        }
+
+        // noindex wins over core's "index"/"follow" defaults when both are present.
+        if ( ! empty( $robots['noindex'] ) ) {
+            unset( $robots['index'] );
+        }
+        if ( ! empty( $robots['nofollow'] ) ) {
+            unset( $robots['follow'] );
+        }
+
+        return $robots;
+    }
+
+    /**
+     * Robots directives for the current request.
+     *
+     * @return string[]
+     */
+    public function get_robots_directives(): array {
         $directives = [];
 
         if ( is_singular() ) {
@@ -216,10 +265,7 @@ class SEO_Manager {
         $directives[] = 'max-image-preview:large';
         $directives[] = 'max-video-preview:-1';
 
-        printf(
-            '<meta name="robots" content="%s" />' . "\n",
-            esc_attr( implode( ', ', array_unique( $directives ) ) )
-        );
+        return array_values( array_unique( $directives ) );
     }
 
     /**
@@ -309,12 +355,14 @@ class SEO_Manager {
         if ( is_singular() ) {
             $post_id = get_queried_object_id();
 
-            $social_title = get_post_meta( $post_id, '_jat_search_intel_social_title', true );
-            $social_desc  = get_post_meta( $post_id, '_jat_search_intel_social_description', true );
+            // X-specific overrides from the editor sidebar, then the shared social fields.
+            $social_title = get_post_meta( $post_id, '_jat_search_intel_twitter_title', true ) ?: get_post_meta( $post_id, '_jat_search_intel_social_title', true );
+            $social_desc  = get_post_meta( $post_id, '_jat_search_intel_twitter_description', true ) ?: get_post_meta( $post_id, '_jat_search_intel_social_description', true );
             $tags['twitter:title']       = $social_title ?: $this->get_title( $post_id );
             $tags['twitter:description'] = $social_desc ?: $this->get_description( $post_id );
 
-            $image = $this->get_og_image( $post_id );
+            $twitter_image = (string) get_post_meta( $post_id, '_jat_search_intel_twitter_image', true );
+            $image         = $twitter_image ? [ 'url' => $twitter_image, 'alt' => '' ] : $this->get_og_image( $post_id );
             if ( $image ) {
                 $tags['twitter:image']     = $image['url'];
                 $tags['twitter:image:alt'] = $image['alt'];

@@ -173,6 +173,31 @@ $settings = wp_parse_args( $settings, \JAT_Search_Intel\Core::get_default_settin
                     </td>
                 </tr>
                 <tr>
+                    <th><?php esc_html_e( 'Content Signals', 'jat-search-intel' ); ?></th>
+                    <td>
+                        <?php
+                        $cs_values = (array) ( $settings['content_signals'] ?? [] );
+                        $cs_labels = [
+                            'search'   => __( 'Search results (links and snippets)', 'jat-search-intel' ),
+                            'ai-input' => __( 'AI answers (e.g. AI Overviews, chat answers that cite you)', 'jat-search-intel' ),
+                            'ai-train' => __( 'AI model training', 'jat-search-intel' ),
+                        ];
+                        foreach ( $cs_labels as $cs_key => $cs_label ) :
+                            $cs_value = $cs_values[ $cs_key ] ?? '';
+                            ?>
+                            <label style="display:block; margin-bottom:6px;">
+                                <select name="jat_search_intel_settings[content_signals][<?php echo esc_attr( $cs_key ); ?>]" data-jsi-signal="<?php echo esc_attr( $cs_key ); ?>">
+                                    <option value="" <?php selected( $cs_value, '' ); ?>><?php esc_html_e( 'Not stated', 'jat-search-intel' ); ?></option>
+                                    <option value="yes" <?php selected( $cs_value, 'yes' ); ?>><?php esc_html_e( 'Yes', 'jat-search-intel' ); ?></option>
+                                    <option value="no" <?php selected( $cs_value, 'no' ); ?>><?php esc_html_e( 'No', 'jat-search-intel' ); ?></option>
+                                </select>
+                                <?php echo esc_html( $cs_label ); ?>
+                            </label>
+                        <?php endforeach; ?>
+                        <p class="description"><?php esc_html_e( 'Adds a Content-Signal line to robots.txt stating how your content may be used. It is a public statement of your terms; not every company has committed to honor it, so combine it with the crawler rules below.', 'jat-search-intel' ); ?></p>
+                    </td>
+                </tr>
+                <tr>
                     <th><?php esc_html_e( 'Crawler Access', 'jat-search-intel' ); ?></th>
                     <td>
                         <p>

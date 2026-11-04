@@ -63,7 +63,8 @@ class GEOOutputTest extends TestCase {
     }
 
     public function test_ai_meta_renders_modified_time(): void {
-        $mgr = $this->make_geo();
+        // Printed here only when the SEO module's Open Graph tags are off.
+        $mgr = $this->make_geo( [ 'enable_og' => false ] );
         ob_start();
         $mgr->render_ai_meta();
         $output = ob_get_clean();

@@ -105,20 +105,28 @@ class Title_Engine {
      * Resolve all template variables in a string.
      */
     public function resolve_variables( string $template ): string {
-        $variables = [
-            '%title%'        => $this->get_var_title(),
-            '%sitename%'     => $this->get_var_sitename(),
-            '%sep%'          => $this->get_var_sep(),
-            '%category%'     => $this->get_var_category(),
-            '%tag%'          => $this->get_var_tag(),
-            '%date%'         => $this->get_var_date(),
-            '%author%'       => $this->get_var_author(),
-            '%page%'         => $this->get_var_page(),
-            '%excerpt%'      => $this->get_var_excerpt(),
-            '%search_query%' => $this->get_var_search_query(),
+        // Only resolve variables the template uses (several need extra queries).
+        $resolvers = [
+            '%title%'        => 'get_var_title',
+            '%sitename%'     => 'get_var_sitename',
+            '%sep%'          => 'get_var_sep',
+            '%category%'     => 'get_var_category',
+            '%tag%'          => 'get_var_tag',
+            '%date%'         => 'get_var_date',
+            '%author%'       => 'get_var_author',
+            '%page%'         => 'get_var_page',
+            '%excerpt%'      => 'get_var_excerpt',
+            '%search_query%' => 'get_var_search_query',
         ];
 
-        $resolved = str_replace( array_keys( $variables ), array_values( $variables ), $template );
+        $variables = [];
+        foreach ( $resolvers as $token => $method ) {
+            if ( false !== strpos( $template, $token ) ) {
+                $variables[ $token ] = $this->$method();
+            }
+        }
+
+        $resolved = strtr( $template, $variables );
 
         // Clean up double spaces and trailing separators
         $sep      = $this->get_var_sep();

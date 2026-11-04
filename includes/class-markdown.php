@@ -144,6 +144,38 @@ class Markdown {
 				return "\n\n" . self::list_items( $node, 'ol' === $tag, $depth ) . "\n";
 			case 'table':
 				return "\n\n" . self::table( $node ) . "\n\n";
+			case 'figure':
+				$class = ' ' . $node->getAttribute( 'class' ) . ' ';
+				if ( false !== strpos( $class, 'wp-block-embed' ) ) {
+					$url = '';
+					foreach ( $node->getElementsByTagName( 'iframe' ) as $iframe ) {
+						$url = $iframe->getAttribute( 'src' );
+						break;
+					}
+					if ( '' === $url && preg_match( '~https?://\S+~', $node->textContent, $m ) ) {
+						$url = $m[0];
+					}
+					$caption = '';
+					foreach ( $node->getElementsByTagName( 'figcaption' ) as $fc ) {
+						$caption = trim( $fc->textContent );
+					}
+					return '' === $url ? '' : "\n\n[" . ( '' !== $caption ? $caption : 'Embedded media' ) . '](' . $url . ")\n\n";
+				}
+				return "\n\n" . trim( self::children( $node, $depth ) ) . "\n\n";
+			case 'div':
+			case 'section':
+			case 'article':
+			case 'header':
+			case 'footer':
+			case 'main':
+			case 'aside':
+			case 'details':
+			case 'summary':
+			case 'dl':
+			case 'dt':
+			case 'dd':
+				$inner = trim( self::children( $node, $depth ) );
+				return '' === $inner ? '' : "\n\n" . $inner . "\n\n";
 			case 'figcaption':
 				$text = trim( self::children( $node, $depth ) );
 				return '' === $text ? '' : "\n*" . $text . "*\n";

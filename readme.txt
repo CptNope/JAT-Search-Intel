@@ -16,6 +16,23 @@ JAT Search Intel covers the three pillars of modern search visibility in one plu
 
 Everything runs on your own site. No account, no tracking and no outside requests unless you switch on an optional integration (see External services below).
 
+**Set up in three steps**
+A short wizard after activation covers who you are (organisation or person, logo, official profiles), search engines (indexing, sitemap, IndexNow) and AI assistants (allow AI search but block training, allow everything, or block AI crawlers). It finishes on your Readiness score. Everything lives under six menu entries: Readiness, Settings, Redirects, AI Search, Reports and Tools.
+
+**AI Search Readiness**
+One screen that answers "can Google, Bing and AI assistants find, read, trust and cite this site?" It checks indexing settings, robots.txt (including whether you are accidentally blocking Googlebot, Bingbot or the AI search crawlers), conflicting SEO plugins, HTTPS, permalinks, sitemaps, IndexNow, llms.txt, Markdown copies, structured data, brand profiles, author bios, meta descriptions and content freshness, then gives a 0–100 score. Anything the plugin controls gets a one-click Fix button.
+
+The Refresh Queue beside it lists the pages that have gone longest without an update, weighted by real Search Console clicks when connected, so you know what to refresh first.
+
+**Passage Coach in the editor**
+Search results and AI answers quote single passages, not whole pages. Passage Coach checks each block of the post you are writing and points to the exact passage to improve: an intro that warms up instead of answering, a question heading with no direct answer under it, a statistic with no source, a paragraph too long to quote, a comparison with no table, or a reference to an out-of-date year. "Show passage" jumps to the block; for a missing answer or comparison table it inserts a starter block for you. It runs instantly on your own server, with no AI service needed.
+
+**Page Performance**
+One report puts Search Console clicks and impressions, visits from AI assistants, AI crawler activity, GEO score and freshness side by side for every page, with the next step for each: refresh it, rewrite its title, or make it easier for AI to cite.
+
+**AI agents and MCP**
+On WordPress 6.9 and later the plugin registers abilities with the WordPress Abilities API, so AI agents connected through the REST API or the MCP Adapter can search your content and read a page's SEO data (both limited to published, indexable pages), and logged-in editors can have an agent analyse posts (including Passage Coach findings), update titles and descriptions, run the readiness audit and fetch the refresh queue. Every ability that reads scores or changes data checks WordPress capabilities.
+
 **SEO — Search Engine Optimization**
 Traditional search optimization with a modern implementation.
 
@@ -55,7 +72,9 @@ Optimize for AI-powered answer engines such as ChatGPT, Perplexity and Google AI
 * Content freshness meta tags — signal recency to AI crawlers
 * Content type detection — article, how-to, FAQ, comparison, review, guide
 * Markdown copy of every public post for AI agents (`/post-slug.md`), linked from the page and from llms.txt
-* AI crawler access: allow or block 21 AI bots individually in robots.txt, grouped by purpose (training, AI search, live user fetch)
+* AI crawler access: allow or block 21 AI bots individually in robots.txt, grouped by purpose (training, AI search, live user fetch), with one-click presets
+* Content Signals in robots.txt: say yes or no to search, AI answers and AI training separately
+* One-click IndexNow: Bing (which powers ChatGPT search and Copilot) hears about new and updated pages within minutes, with no key to set up (opt-in, because it sends your URLs to Bing)
 * AI traffic analytics: AI crawler visits and visitors arriving from ChatGPT, Perplexity, Claude, Gemini, Copilot and more
 * Per-post AI crawl directives
 * Fact-check date tracking
@@ -110,16 +129,18 @@ Native Block Editor integration with a tabbed sidebar panel:
 * Citation — inline source citation with CreativeWork schema
 
 **Optional modules**
-Turn on only what you need under Settings > General > Module Toggles: redirect manager with 404 log, IndexNow, robots.txt editor, broken link checker, internal linking suggestions, Local Business and WooCommerce schema, multilingual hreflang (WPML/Polylang), role-based access, white-label branding, AI writing assistance, content decay and keyword cannibalization reports, Core Web Vitals, GA4 insights and scheduled reports. Disabled modules are not loaded at all.
+Turn on only what you need under Settings > General > Module Toggles: redirect manager with 404 log, IndexNow, robots.txt editor, broken link checker, internal linking suggestions, Local Business and WooCommerce schema, multilingual hreflang (WPML/Polylang), role-based access, AI writing assistance, content decay and keyword cannibalization reports, Core Web Vitals, GA4 insights and scheduled reports. Disabled modules are not loaded at all.
 
 == Installation ==
 
 1. In WordPress, go to Plugins > Add New, search for "JAT Search Intel", then install and activate it. (Or upload the `jat-search-intel` folder to `/wp-content/plugins/`.)
-2. Open **JAT Search Intel > General** to set your site identity and choose which modules to enable.
-3. Review the SEO, AEO and GEO tabs, and add your social profiles under **JAT Search Intel > Social**.
-4. Edit any post or page: the JAT Search Intel sidebar panel shows live scores and fields.
+2. Click **Run setup** in the notice that appears (or go to **JAT Search Intel > Tools > Setup Wizard**) and answer the three steps.
+3. Check **JAT Search Intel > Readiness** and use the Fix buttons for anything it flags.
+4. Edit any post or page: the JAT Search Intel sidebar shows live scores and fields, and Passage Coach (in the Post tab) lists the passages to improve.
 
-If you are switching from another SEO plugin, use **JAT Search Intel > Migration** to import titles, descriptions and focus keywords from Yoast SEO, Rank Math, All in One SEO, SEOPress or The SEO Framework, then deactivate the old plugin to avoid duplicate meta tags.
+Optional modules are switched on under **Settings > General**.
+
+If you are switching from another SEO plugin, use **JAT Search Intel > Tools > Migration** to import titles, descriptions and focus keywords from Yoast SEO, Rank Math, All in One SEO, SEOPress or The SEO Framework, then deactivate the old plugin to avoid duplicate meta tags.
 
 == Frequently Asked Questions ==
 
@@ -141,7 +162,7 @@ llms.txt is a proposed standard (similar to robots.txt) that provides a machine-
 
 = Will this slow down my site? =
 
-No. It prints lightweight meta tags and JSON-LD in the page head and loads no JavaScript or CSS on the public site. Modules you leave switched off are never loaded, and redirect matching uses a cached index, so normal page views add no extra database queries for redirects.
+No. It prints lightweight meta tags and one JSON-LD block in the page head and loads no JavaScript or CSS on the public site. Measured on WordPress 7.1, normal page views run exactly as many database queries with the plugin active as without it: modules you leave off are never loaded, settings are read from WordPress's option cache, and redirects are matched against a cached index.
 
 = Does it send my data anywhere? =
 
@@ -200,7 +221,24 @@ Sends an HTTP HEAD request to each external URL linked from your content to chec
 * Added: automatic image alt text, attachment-page redirects and RSS feed backlinks.
 * Added: Markdown copies of posts for AI agents, per-bot AI crawler rules in robots.txt, and AI crawler / AI referral analytics.
 * Added: Rank Tracker using your Search Console data via a Google service account.
+* Added: AI Search Readiness audit with a 0–100 score and one-click fixes, plus a Refresh Queue of stale pages weighted by Search Console clicks.
+* Added: WordPress Abilities API support (6.9+) for AI agents and MCP: search content, get page SEO data, analyse a post, update SEO fields, run the readiness audit, get the refresh queue.
+* Added: Content Signals (search / ai-input / ai-train) in robots.txt, and crawler presets (allow all, block training only, block AI).
+* Changed: IndexNow generates its key automatically and pings on publish, update and unpublish.
+* Fixed: the REST analyse endpoint and the background rescore job never saved scores.
+* Added: three-step setup wizard, offered through a dismissible notice after activation.
+* Added: Passage Coach panel in the block editor, with one-click answer-paragraph and comparison-table inserts.
+* Added: Page Performance report combining Search Console, AI referrals, AI crawler visits, GEO score and freshness per page.
+* Changed: the admin menu is now six entries (Readiness, Settings, Redirects, AI Search, Reports, Tools) with tabs; every page keeps its address.
+* Fixed: canonical URL, social title/description/image, audience, key topics and fact-check date set in the block-editor sidebar were saved under keys the front end never read. They are now kept in sync both ways and existing values are copied over on update. X (Twitter) title, description and image overrides are now used.
+* Removed: CSP headers, Subresource Integrity, white-label branding and the MainWP reporter (outside the scope of an SEO plugin).
 * Fixed: settings pages no longer round-trip every option through hidden fields, which could flatten nested settings and stop some checkboxes from being turned off.
+* Fixed: title templates using %category%, %search_query% or %sep% were mangled when saved.
+* Fixed: saving the SEO page switched off breadcrumb and site-search schema (they now have their own controls).
+* Fixed: /sitemap.xml could be redirected to /sitemap.xml/; robots.txt now lists your sitemaps.
+* Fixed: a second robots meta tag was printed next to WordPress's own; directives are now merged into one.
+* Performance: home, post, page and archive views run no extra database queries with the plugin active (measured on WordPress 7.1).
+* Changed: llms.txt now lists articles as well as pages, skips noindex content and is cached; llms-full.txt includes the full Markdown of each item.
 * Removed the GitHub self-updater; updates now come from WordPress.org.
 * Performance: disabled modules are no longer loaded on each request.
 * Performance: redirect matching uses a cached index, so pages without a redirect run no redirect queries.
@@ -230,4 +268,4 @@ Earlier releases are listed in CHANGELOG.md in the development repository.
 == Upgrade Notice ==
 
 = 3.5.0 =
-First WordPress.org release. Existing data from the GitHub edition (Search Intel) is migrated automatically. Adds rank tracking, news/video sitemaps, Markdown for AI agents and AI crawler controls.
+First WordPress.org release. Existing data from the GitHub edition (Search Intel) is migrated automatically. Adds an AI Search Readiness audit, rank tracking, AI agent abilities, news/video sitemaps, Markdown for AI agents and AI crawler controls.

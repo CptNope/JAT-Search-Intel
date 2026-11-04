@@ -156,6 +156,41 @@ $settings = wp_parse_args( $settings, \JAT_Search_Intel\Core::get_default_settin
 
 
         <div class="si-settings-card">
+            <h2><?php esc_html_e( 'Structured Data', 'jat-search-intel' ); ?></h2>
+            <table class="form-table">
+                <tr>
+                    <th><?php esc_html_e( 'Breadcrumbs', 'jat-search-intel' ); ?></th>
+                    <td>
+                        <label>
+                            <input type="checkbox" name="jat_search_intel_settings[enable_breadcrumbs]" value="1" <?php checked( ! empty( $settings['enable_breadcrumbs'] ) ); ?> />
+                            <?php esc_html_e( 'Add BreadcrumbList schema to every page except the home page', 'jat-search-intel' ); ?>
+                        </label>
+                    </td>
+                </tr>
+                <tr>
+                    <th><?php esc_html_e( 'Site Search', 'jat-search-intel' ); ?></th>
+                    <td>
+                        <label>
+                            <input type="checkbox" name="jat_search_intel_settings[enable_sitelinks]" value="1" <?php checked( ! empty( $settings['enable_sitelinks'] ) ); ?> />
+                            <?php esc_html_e( 'Describe your site search (SearchAction) on the WebSite schema', 'jat-search-intel' ); ?>
+                        </label>
+                    </td>
+                </tr>
+                <tr>
+                    <th><label for="si_schema_article_type"><?php esc_html_e( 'Default Article Type', 'jat-search-intel' ); ?></label></th>
+                    <td>
+                        <select id="si_schema_article_type" name="jat_search_intel_settings[schema_article_type]">
+                            <?php foreach ( [ 'Article', 'BlogPosting', 'NewsArticle', 'TechArticle', 'ScholarlyArticle' ] as $article_type ) : ?>
+                                <option value="<?php echo esc_attr( $article_type ); ?>" <?php selected( $settings['schema_article_type'] ?? 'Article', $article_type ); ?>><?php echo esc_html( $article_type ); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                        <p class="description"><?php esc_html_e( 'Used for posts unless a post sets its own schema type.', 'jat-search-intel' ); ?></p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="si-settings-card">
             <h2><?php esc_html_e( 'Images & Attachments', 'jat-search-intel' ); ?></h2>
             <table class="form-table">
                 <tr>

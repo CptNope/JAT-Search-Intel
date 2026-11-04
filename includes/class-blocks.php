@@ -161,6 +161,18 @@ class Blocks {
 			'breadcrumbs' => [ 'render_callback' => [ $this, 'render_breadcrumbs' ] ],
 		];
 
+		// Editor scripts and styles are only needed where the block editor runs.
+		// On the front end, register the block types (for render callbacks) without
+		// touching the script registry, which saves file reads on every page view.
+		if ( ! is_admin() ) {
+			foreach ( $blocks as $slug => $args ) {
+				if ( ! empty( $args['render_callback'] ) ) {
+					register_block_type( "jat-search-intel/{$slug}", [ 'render_callback' => $args['render_callback'] ] );
+				}
+			}
+			return;
+		}
+
 		foreach ( $blocks as $slug => $args ) {
 			$script_asset = JAT_SEARCH_INTEL_DIR . "build/blocks/{$slug}/index.asset.php";
 

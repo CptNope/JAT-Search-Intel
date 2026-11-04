@@ -119,4 +119,13 @@ class RedirectIndexTest extends TestCase {
 		$this->assertNull( $this->manager->find_matching_redirect( '/old-page' ) );
 		$this->assertArrayNotHasKey( 'jat_search_intel_redirect_index', $si_test_state['options'] );
 	}
+
+	public function test_probe_paths_are_not_logged_as_404s(): void {
+		foreach ( [ '/wp-login.php', '/.env', '/backup.sql', '/.git/config', '/wp-admin/setup-config.php', '/vendor/phpunit/x' ] as $probe ) {
+			$this->assertTrue( Redirect_Manager::is_probe_path( $probe ), $probe );
+		}
+		foreach ( [ '/old-blog-post/', '/products/blue-shoes', '/2019/05/hello/' ] as $real ) {
+			$this->assertFalse( Redirect_Manager::is_probe_path( $real ), $real );
+		}
+	}
 }
