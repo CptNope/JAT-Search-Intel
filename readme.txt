@@ -243,6 +243,8 @@ Sends an HTTP HEAD request to each external URL linked from your content to chec
 * Fixed: /sitemap.xml could be redirected to /sitemap.xml/; robots.txt now lists your sitemaps.
 * Fixed: a second robots meta tag was printed next to WordPress's own; directives are now merged into one.
 * Performance: home, post, page and archive views run no extra database queries with the plugin active (measured on WordPress 7.1).
+* Performance: page views now load 18 plugin files instead of 25 (about 250 KB instead of 405 KB) and register 72 hook callbacks instead of 163; the REST API, Passage Coach, abilities, content analyzer and AI Optimizer are built only when a REST request, save or admin screen needs them, and editor meta fields are registered for REST requests only. Extra memory per page view fell from about 0.37 MB to 0.12 MB.
+* Security: editor meta fields can only be changed by users who can edit that particular post.
 * Changed: llms.txt now lists articles as well as pages, skips noindex content and is cached; llms-full.txt includes the full Markdown of each item.
 * Removed the GitHub self-updater; updates now come from WordPress.org.
 * Performance: disabled modules are no longer loaded on each request.

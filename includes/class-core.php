@@ -217,7 +217,6 @@ class Core {
         $this->schema       = new Schema_Manager( $settings );
         $this->aeo          = new AEO_Manager( $settings );
         $this->geo          = new GEO_Manager( $settings );
-        $this->analyzer     = new Content_Analyzer( $settings );
         $this->sitemap      = new Sitemap( $settings );
 
         if ( $is_admin ) {
@@ -225,26 +224,26 @@ class Core {
             $this->bulk_tools = new Bulk_Tools( $settings, $this );
         }
 
-        // REST API — registers on rest_api_init.
-        $this->rest_api = new Rest_Api( $settings, $this );
-
         // Block editor integration — sidebar, custom blocks, meta registration.
         $this->blocks = new Blocks();
 
         // Redirect Manager — also needed for slug-change detection on every save.
         $this->redirects = new Redirect_Manager( $settings );
 
-        // WooCommerce / Multisite gate themselves on their environment.
-        $this->woocommerce     = new WooCommerce( $settings );
-
-        // AI Optimizer is on unless explicitly disabled.
-        $this->ai_optimizer = new AI_Optimizer( $settings, $this );
-
         /*
-         * Conditionally-booted modules: property => [ boot now?, class ].
+         * Conditionally-booted modules: property => [ boot now?, class, boot-on hooks ].
          * "Boot now" mirrors exactly when the module's constructor would add hooks.
+         * A deferred module with boot-on hooks is built by a one-line listener that runs
+         * just before the hook it serves; its constructor then registers the real callback
+         * at a later priority of the same hook, so it runs in the same pass. Page views
+         * therefore never load admin-, REST- or save-only code.
          */
-        $modules = [
+        $analyzer_on = $on( 'enable_analyzer' );
+        $modules     = [
+            'analyzer'                => [ $is_admin, Content_Analyzer::class, $analyzer_on ? [ 'wp_after_insert_post' => 19 ] : [] ],
+            'rest_api'                => [ $is_admin, Rest_Api::class, [ 'rest_api_init' => 9 ] ],
+            'ai_optimizer'            => [ $is_admin, AI_Optimizer::class, [ 'jat_search_intel_post_analyzed' => 19 ] ],
+            'woocommerce'             => [ class_exists( 'WooCommerce' ), WooCommerce::class ],
             'privacy'                 => [ $is_admin, Privacy::class ],
             'migration'               => [ $is_admin, Migration::class ],
             'robots_txt'              => [ $is_admin || $on( 'enable_robots_editor' ), Robots_Txt::class ],
@@ -277,21 +276,32 @@ class Core {
             'custom_schema'           => [ $on( 'enable_schema' ), Custom_Schema::class ],
             'ai_search'               => [ true, AI_Search::class ],
             'meta_sync'               => [ true, Meta_Sync::class ],
-            'passage_coach'           => [ $on( 'enable_analyzer' ), Passage_Coach::class ],
+            'passage_coach'           => [ $is_admin && $analyzer_on, Passage_Coach::class, $analyzer_on ? [ 'rest_api_init' => 9 ] : [] ],
             'rank_tracker'            => [ $is_admin || $on( 'enable_rank_tracking' ), Rank_Tracker::class ],
             'readiness'               => [ $is_admin, Readiness::class ],
             'admin_menu'              => [ $is_admin, Admin_Menu::class ],
             'setup_wizard'            => [ $is_admin, Setup_Wizard::class ],
             'performance_report'      => [ $is_admin, Performance_Report::class ],
-            'abilities'               => [ function_exists( 'wp_register_ability' ), Abilities::class ],
+            'abilities'               => [ false, Abilities::class, function_exists( 'wp_register_ability' ) ? [ 'wp_abilities_api_categories_init' => 9, 'wp_abilities_api_init' => 9 ] : [] ],
         ];
 
-        foreach ( $modules as $prop => list( $boot, $class ) ) {
+        foreach ( $modules as $prop => $module ) {
+            list( $boot, $class ) = $module;
             if ( $boot ) {
                 $this->{$prop} = $this->build_module( $class );
-            } else {
-                unset( $this->{$prop} );
-                $this->lazy_modules[ $prop ] = $class;
+                continue;
+            }
+            unset( $this->{$prop} );
+            $this->lazy_modules[ $prop ] = $class;
+            foreach ( (array) ( $module[2] ?? [] ) as $hook => $priority ) {
+                add_action(
+                    $hook,
+                    function () use ( $prop ) {
+                        $this->boot( $prop );
+                    },
+                    $priority,
+                    0
+                );
             }
         }
 
@@ -315,10 +325,26 @@ class Core {
         switch ( $class ) {
             case Privacy::class:
                 return new Privacy();
+            case Rest_Api::class:
+            case AI_Optimizer::class:
+                return new $class( $this->boot_settings, $this );
             case FAQ_Generator::class:
                 return new FAQ_Generator( $this->boot_settings, $this->qa_detector );
             default:
                 return new $class( $this->boot_settings );
+        }
+    }
+
+    /**
+     * Build a deferred module now, if it has not been built yet.
+     *
+     * @param string $name Property name.
+     */
+    public function boot( string $name ): void {
+        if ( isset( $this->lazy_modules[ $name ] ) ) {
+            $class = $this->lazy_modules[ $name ];
+            unset( $this->lazy_modules[ $name ] );
+            $this->{$name} = $this->build_module( $class );
         }
     }
 

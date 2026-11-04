@@ -52,15 +52,18 @@ class BlocksTest extends TestCase {
 		$this->assertContains( 'enqueue_block_editor_assets', $actions );
 	}
 
-	public function test_constructor_registers_two_init_callbacks(): void {
+	public function test_blocks_on_init_and_meta_on_rest_api_init(): void {
 		global $si_test_state;
 
-		$init_callbacks = array_map( function ( $action ) {
-			return $action['callback'][1] ?? null;
-		}, $si_test_state['actions']['init'] );
+		$names = static function ( string $hook ) use ( $si_test_state ): array {
+			return array_map( function ( $action ) {
+				return $action['callback'][1] ?? null;
+			}, $si_test_state['actions'][ $hook ] ?? [] );
+		};
 
-		$this->assertContains( 'register_blocks', $init_callbacks );
-		$this->assertContains( 'register_meta', $init_callbacks );
+		$this->assertContains( 'register_blocks', $names( 'init' ) );
+		$this->assertNotContains( 'register_meta', $names( 'init' ), 'Page views do not need meta registered' );
+		$this->assertContains( 'register_meta', $names( 'rest_api_init' ) );
 	}
 
 	public function test_constructor_registers_sidebar_enqueue(): void {

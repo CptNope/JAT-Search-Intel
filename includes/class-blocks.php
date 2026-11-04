@@ -53,7 +53,8 @@ class Blocks {
 	 */
 	public function __construct() {
 		add_action( 'init', [ $this, 'register_blocks' ] );
-		add_action( 'init', [ $this, 'register_meta' ] );
+		// Meta is only read through REST (the block editor loads via REST), so register it there.
+		add_action( 'rest_api_init', [ $this, 'register_meta' ] );
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_sidebar' ] );
 	}
 
@@ -70,12 +71,23 @@ class Blocks {
 					'single'        => true,
 					'type'          => $config['type'],
 					'default'       => $config['default'],
-					'auth_callback' => function () {
-						return current_user_can( 'edit_posts' );
-					},
+					'auth_callback' => [ self::class, 'can_edit_meta' ],
 				] );
 			}
 		}
+	}
+
+	/**
+	 * Meta auth: the user must be able to edit this particular post.
+	 *
+	 * @param bool   $allowed  Default.
+	 * @param string $meta_key Meta key.
+	 * @param int    $post_id  Post ID.
+	 * @return bool
+	 */
+	public static function can_edit_meta( $allowed = false, $meta_key = '', $post_id = 0 ): bool {
+		unset( $allowed, $meta_key );
+		return $post_id ? current_user_can( 'edit_post', (int) $post_id ) : current_user_can( 'edit_posts' );
 	}
 
 	/**
