@@ -355,12 +355,14 @@ class SEO_Manager {
         if ( is_singular() ) {
             $post_id = get_queried_object_id();
 
-            $social_title = get_post_meta( $post_id, '_jat_search_intel_social_title', true );
-            $social_desc  = get_post_meta( $post_id, '_jat_search_intel_social_description', true );
+            // X-specific overrides from the editor sidebar, then the shared social fields.
+            $social_title = get_post_meta( $post_id, '_jat_search_intel_twitter_title', true ) ?: get_post_meta( $post_id, '_jat_search_intel_social_title', true );
+            $social_desc  = get_post_meta( $post_id, '_jat_search_intel_twitter_description', true ) ?: get_post_meta( $post_id, '_jat_search_intel_social_description', true );
             $tags['twitter:title']       = $social_title ?: $this->get_title( $post_id );
             $tags['twitter:description'] = $social_desc ?: $this->get_description( $post_id );
 
-            $image = $this->get_og_image( $post_id );
+            $twitter_image = (string) get_post_meta( $post_id, '_jat_search_intel_twitter_image', true );
+            $image         = $twitter_image ? [ 'url' => $twitter_image, 'alt' => '' ] : $this->get_og_image( $post_id );
             if ( $image ) {
                 $tags['twitter:image']     = $image['url'];
                 $tags['twitter:image:alt'] = $image['alt'];

@@ -648,6 +648,10 @@ class Readiness {
 		$fixed = isset( $_GET['jsi_fixed'] ) ? sanitize_key( wp_unslash( $_GET['jsi_fixed'] ) ) : '';
 
 		echo '<div class="wrap"><h1>' . esc_html__( 'AI Search Readiness', 'jat-search-intel' ) . '</h1>';
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only status flag after redirect.
+		if ( isset( $_GET['jsi_setup'] ) ) {
+			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Setup complete. Here is where your site stands; work through anything marked Fix or Improve.', 'jat-search-intel' ) . '</p></div>';
+		}
 		if ( $fixed && 'none' !== $fixed ) {
 			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Fixed. The check below has been re-run.', 'jat-search-intel' ) . '</p></div>';
 		}

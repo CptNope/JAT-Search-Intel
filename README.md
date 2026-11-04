@@ -124,8 +124,6 @@ graph TD
     CORE --> FAQGEN["FAQ Generator<br/><i>v2.1+ AI-Assisted</i>"]
     CORE --> LINKCHECK["Link Checker<br/><i>v2.0.1+ Broken Links</i>"]
     CORE --> INTLINKER["Internal Linker<br/><i>v2.0.1+ Suggestions</i>"]
-    CORE --> CSPHEADERS["CSP Headers<br/><i>v2.0.1+ Security</i>"]
-    CORE --> SRI["SRI<br/><i>v2.0.1+ Integrity</i>"]
     CORE --> VISDASH["Visibility Dashboard<br/><i>v2.5+ AI Visibility</i>"]
     CORE --> CITGRAPH["Citation Graph<br/><i>v2.5+ Link Topology</i>"]
     CORE --> AUTHMAP["Authority Map<br/><i>v2.5+ Topic Authority</i>"]
@@ -133,9 +131,7 @@ graph TD
     CORE --> MIGRATION["Migration<br/><i>v3.0+ SEO Plugin Import</i>"]
     CORE --> RBAC["RBAC<br/><i>v3.0+ Roles &amp; Caps</i>"]
     CORE --> MULTILANG["Multilang<br/><i>v3.0+ WPML/Polylang</i>"]
-    CORE --> WHITELABEL["White-Label<br/><i>v3.0+ Reseller Branding</i>"]
     CORE --> SCALE["Scale<br/><i>v3.0+ Queue &amp; Cache</i>"]
-    CORE --> MAINWP["MainWP Reporter<br/><i>v3.1+ Child Sync</i>"]
     CORE --> NOTIFY["Notifications<br/><i>v3.1+ Alerts &amp; Digest</i>"]
     CORE --> AIENGINE["AI Engine<br/><i>v3.2+ LLM Abstraction</i>"]
     CORE --> DECAY["Content Decay<br/><i>v3.2+ Score Tracking</i>"]
@@ -270,8 +266,6 @@ classDiagram
         +faq_generator : FAQ_Generator
         +link_checker : Link_Checker
         +internal_linker : Internal_Linker
-        +csp_headers : CSP_Headers
-        +sri : SRI
         +visibility_dashboard : Visibility_Dashboard
         +citation_graph : Citation_Graph
         +authority_map : Authority_Map
@@ -279,9 +273,7 @@ classDiagram
         +migration : Migration
         +rbac : RBAC
         +multilang : Multilang
-        +white_label : White_Label
         +scale : Scale
-        +mainwp_reporter : MainWP_Reporter
         +notifications : Notifications
         +ai_engine : AI_Engine
         +content_decay : Content_Decay
@@ -489,8 +481,6 @@ classDiagram
     Core --> FAQ_Generator
     Core --> Link_Checker
     Core --> Internal_Linker
-    Core --> CSP_Headers
-    Core --> SRI
     Core --> Visibility_Dashboard
     Core --> Citation_Graph
     Core --> Authority_Map
@@ -498,9 +488,7 @@ classDiagram
     Core --> Migration
     Core --> RBAC
     Core --> Multilang
-    Core --> White_Label
     Core --> Scale
-    Core --> MainWP_Reporter
     Core --> Notifications
     Core --> AI_Engine
     Core --> Content_Decay
@@ -510,14 +498,6 @@ classDiagram
     REST_Api --> Core
     Bulk_Tools --> Core
 
-    class MainWP_Reporter {
-        -settings : array
-        +is_mainwp_active() bool
-        +inject_sync_data(data) array
-        +get_site_summary() array
-        +get_aggregate_scores() array
-        +handle_callback(action, data) array
-    }
 
     class Notifications {
         -settings : array
@@ -558,14 +538,6 @@ classDiagram
         +render_admin_page() void
     }
 
-    class White_Label {
-        -settings : array
-        +get_config() array
-        +filter_plugin_meta(plugins) array
-        +get_custom_name() string
-        +export_reseller_config() array
-        +import_reseller_config(config) bool
-    }
 
     class AI_Engine {
         -settings : array
@@ -1082,9 +1054,6 @@ wp jat-search-intel multisite report --format=table  # Network-wide score report
 wp jat-search-intel queue status                     # Show queue status
 wp jat-search-intel queue process --batch=10         # Manually process queued jobs
 
-# White-Label (v3.0+)
-wp jat-search-intel white-label export > brand.json  # Export reseller config
-wp jat-search-intel white-label import < brand.json  # Import reseller config
 ```
 
 ---
@@ -1241,7 +1210,7 @@ jat-search-intel/
 │   ├── class-admin.php           # Settings, metaboxes, user fields, Bulk Tools page
 │   ├── class-rest-api.php        # REST API controller (jat-search-intel/v1 namespace)
 │   ├── class-bulk-tools.php      # Bulk rescore, regenerate, export/import (AJAX)
-│   ├── class-cli.php             # WP-CLI commands (analyze, rescore, scores, rbac, multisite, queue, white-label)
+│   ├── class-cli.php             # WP-CLI commands (analyze, rescore, scores, rbac, multisite, queue)
 │   ├── class-blocks.php          # Block editor: sidebar, custom blocks, meta registration
 │   ├── class-privacy.php         # GDPR: data exporter, eraser, privacy policy (v1.5+)
 │   ├── class-redirect-manager.php # 301/302/307/410 redirects, 404 log, CSV (v2.0+)
@@ -1252,8 +1221,6 @@ jat-search-intel/
 │   ├── class-audit-log.php       # Settings change tracking with diffs (v2.0+)
 │   ├── class-link-checker.php    # Broken link scanner via WP-Cron (v2.0.1+)
 │   ├── class-internal-linker.php # Internal linking suggestions (v2.0.1+)
-│   ├── class-csp-headers.php     # Content Security Policy headers (v2.0.1+)
-│   ├── class-sri.php             # Subresource Integrity hashes (v2.0.1+)
 │   ├── class-schema-types.php    # Video, Recipe, Event, Review, etc. (v2.1+)
 │   ├── class-qa-detector.php     # Q&A pattern detection engine (v2.1+)
 │   ├── class-faq-generator.php   # AI-assisted FAQ generation (v2.1+)
@@ -1264,9 +1231,7 @@ jat-search-intel/
 │   ├── class-migration.php       # SEO plugin migration engine (v3.0+)
 │   ├── class-rbac.php            # Role-based access control (v3.0+)
 │   ├── class-multilang.php       # WPML/Polylang integration (v3.0+)
-│   ├── class-white-label.php     # Reseller branding & config (v3.0+)
 │   ├── class-scale.php           # Object cache, queue, bulk editor (v3.0+)
-│   ├── class-mainwp-reporter.php # MainWP child-side reporter (v3.1+)
 │   ├── class-notifications.php   # Email digest, score alerts, Slack, widget (v3.1+)
 │   ├── class-ai-engine.php       # LLM abstraction: OpenAI, Anthropic, Ollama (v3.2+)
 │   ├── class-content-decay.php   # Score history, decay detection, refresh suggestions (v3.2+)

@@ -47,6 +47,9 @@ class Abilities {
 	 * Register the ability category.
 	 */
 	public function register_category(): void {
+		if ( ! function_exists( 'wp_register_ability_category' ) ) {
+			return;
+		}
 		wp_register_ability_category(
 			self::CATEGORY,
 			[
@@ -129,7 +132,7 @@ class Abilities {
 			],
 			'jat-search-intel/analyze-post'    => [
 				'label'               => __( 'Analyse a post for SEO, AEO and GEO', 'jat-search-intel' ),
-				'description'         => __( 'Scores a post for search (SEO), answer engines (AEO) and AI citations (GEO), saves the scores and returns every check with pass or fail.', 'jat-search-intel' ),
+				'description'         => __( 'Scores a post for search (SEO), answer engines (AEO) and AI citations (GEO), saves the scores, and returns every check plus passage-level edits (slow intros, unanswered question headings, unsourced figures, long paragraphs, missing comparison tables).', 'jat-search-intel' ),
 				'input_schema'        => [
 					'type'       => 'object',
 					'properties' => [ 'post_id' => $post_id_schema ],
@@ -393,11 +396,23 @@ class Abilities {
 			}
 		}
 
+		$post = get_post( $post_id );
+
 		return [
 			'post_id'    => $post_id,
 			'scores'     => Content_Analyzer::scores_from_results( $results ),
 			'word_count' => (int) ( $results['word_count'] ?? 0 ),
 			'checks'     => $checks,
+			// Passage-level edits, pointing at top-level block positions.
+			'passages'   => $post ? Passage_Coach::analyze(
+				(string) $post->post_content,
+				[
+					'title'      => (string) $post->post_title,
+					'keyword'    => (string) get_post_meta( $post_id, '_jat_search_intel_focus_keyword', true ),
+					'ai_summary' => (string) get_post_meta( $post_id, '_jat_search_intel_ai_summary', true ),
+					'site_host'  => (string) wp_parse_url( home_url(), PHP_URL_HOST ),
+				]
+			) : [],
 		];
 	}
 

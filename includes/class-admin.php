@@ -175,7 +175,7 @@ class Admin {
                 'enable_sitemap', 'enable_analyzer',
                 'enable_redirects', 'enable_indexnow', 'enable_robots_editor',
                 'enable_link_checker', 'enable_internal_linker', 'enable_local_business',
-                'enable_audit_log', 'enable_csp_headers', 'enable_sri',
+                'enable_audit_log',
                 'delete_data_on_uninstall',
                 'enable_schema_types', 'enable_qa_detector', 'enable_faq_generator',
                 'enable_visibility_dashboard', 'enable_citation_graph', 'enable_authority_map',
@@ -183,7 +183,7 @@ class Admin {
                 'enable_advanced_linking',
                 'enable_historical_analytics', 'enable_ga4', 'enable_cwv',
                 'enable_custom_reports', 'enable_notifications',
-                'enable_rbac', 'enable_multilang', 'enable_white_label', 'enable_scale',
+                'enable_rbac', 'enable_multilang', 'enable_scale',
             ],
             'seo' => [
                 'enable_og', 'enable_twitter', 'enable_canonical', 'enable_robots_meta',
@@ -229,14 +229,13 @@ class Admin {
             'enable_redirects', 'enable_indexnow', 'enable_robots_editor',
             'enable_link_checker', 'enable_internal_linker', 'enable_local_business',
             'enable_audit_log',
-            'enable_csp_headers', 'enable_sri',
             // Advanced AEO (v2.1)
             'enable_schema_types', 'enable_qa_detector', 'enable_faq_generator',
             // Advanced GEO (v2.5)
             'enable_visibility_dashboard', 'enable_citation_graph', 'enable_authority_map',
             // Enterprise (v3.0)
             'enable_rbac', 'enable_settings_lock', 'enable_multilang',
-            'enable_white_label', 'wl_hide_branding', 'enable_scale',
+            'enable_scale',
             // AI & Content Intelligence (v3.2)
             'enable_ai_engine', 'enable_content_decay', 'decay_auto_queue',
             'enable_cannibalization', 'enable_advanced_linking',
@@ -270,8 +269,6 @@ class Admin {
             // v2.0+
             'indexnow_api_key', 'faq_ai_api_key',
             'gsc_access_token', 'gsc_site_url', 'bing_api_key', 'bing_site_url',
-            'wl_plugin_name', 'wl_plugin_uri', 'wl_author_name', 'wl_author_uri',
-            'wl_description', 'wl_logo_url', 'wl_brand_color',
             'notification_email', 'slack_webhook_url',
             'ga4_property_id', 'psi_api_key',
             // v3.5

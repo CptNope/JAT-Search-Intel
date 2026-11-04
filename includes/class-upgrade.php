@@ -68,6 +68,7 @@ class Upgrade {
 		if ( get_option( self::VERSION_OPTION ) !== JAT_SEARCH_INTEL_VERSION ) {
 			Redirect_Manager::create_tables();
 			Rank_Tracker::create_table();
+			Meta_Sync::backfill();
 			// Autoloaded defaults read on every page view.
 			add_option( 'jat_search_intel_ai_permissions', 'allow', '', true );
 			add_option( self::FLUSH_FLAG, 0, '', true );

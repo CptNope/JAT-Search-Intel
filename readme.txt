@@ -16,13 +16,22 @@ JAT Search Intel covers the three pillars of modern search visibility in one plu
 
 Everything runs on your own site. No account, no tracking and no outside requests unless you switch on an optional integration (see External services below).
 
+**Set up in three steps**
+A short wizard after activation covers who you are (organisation or person, logo, official profiles), search engines (indexing, sitemap, IndexNow) and AI assistants (allow AI search but block training, allow everything, or block AI crawlers). It finishes on your Readiness score. Everything lives under six menu entries: Readiness, Settings, Redirects, AI Search, Reports and Tools.
+
 **AI Search Readiness**
 One screen that answers "can Google, Bing and AI assistants find, read, trust and cite this site?" It checks indexing settings, robots.txt (including whether you are accidentally blocking Googlebot, Bingbot or the AI search crawlers), conflicting SEO plugins, HTTPS, permalinks, sitemaps, IndexNow, llms.txt, Markdown copies, structured data, brand profiles, author bios, meta descriptions and content freshness, then gives a 0–100 score. Anything the plugin controls gets a one-click Fix button.
 
 The Refresh Queue beside it lists the pages that have gone longest without an update, weighted by real Search Console clicks when connected, so you know what to refresh first.
 
+**Passage Coach in the editor**
+Search results and AI answers quote single passages, not whole pages. Passage Coach checks each block of the post you are writing and points to the exact passage to improve: an intro that warms up instead of answering, a question heading with no direct answer under it, a statistic with no source, a paragraph too long to quote, a comparison with no table, or a reference to an out-of-date year. "Show passage" jumps to the block; for a missing answer or comparison table it inserts a starter block for you. It runs instantly on your own server, with no AI service needed.
+
+**Page Performance**
+One report puts Search Console clicks and impressions, visits from AI assistants, AI crawler activity, GEO score and freshness side by side for every page, with the next step for each: refresh it, rewrite its title, or make it easier for AI to cite.
+
 **AI agents and MCP**
-On WordPress 6.9 and later the plugin registers abilities with the WordPress Abilities API, so AI agents connected through the REST API or the MCP Adapter can search your content and read a page's SEO data (both limited to published, indexable pages), and logged-in editors can have an agent analyse posts, update titles and descriptions, run the readiness audit and fetch the refresh queue. Every ability that reads scores or changes data checks WordPress capabilities.
+On WordPress 6.9 and later the plugin registers abilities with the WordPress Abilities API, so AI agents connected through the REST API or the MCP Adapter can search your content and read a page's SEO data (both limited to published, indexable pages), and logged-in editors can have an agent analyse posts (including Passage Coach findings), update titles and descriptions, run the readiness audit and fetch the refresh queue. Every ability that reads scores or changes data checks WordPress capabilities.
 
 **SEO — Search Engine Optimization**
 Traditional search optimization with a modern implementation.
@@ -120,16 +129,18 @@ Native Block Editor integration with a tabbed sidebar panel:
 * Citation — inline source citation with CreativeWork schema
 
 **Optional modules**
-Turn on only what you need under Settings > General > Module Toggles: redirect manager with 404 log, IndexNow, robots.txt editor, broken link checker, internal linking suggestions, Local Business and WooCommerce schema, multilingual hreflang (WPML/Polylang), role-based access, white-label branding, AI writing assistance, content decay and keyword cannibalization reports, Core Web Vitals, GA4 insights and scheduled reports. Disabled modules are not loaded at all.
+Turn on only what you need under Settings > General > Module Toggles: redirect manager with 404 log, IndexNow, robots.txt editor, broken link checker, internal linking suggestions, Local Business and WooCommerce schema, multilingual hreflang (WPML/Polylang), role-based access, AI writing assistance, content decay and keyword cannibalization reports, Core Web Vitals, GA4 insights and scheduled reports. Disabled modules are not loaded at all.
 
 == Installation ==
 
 1. In WordPress, go to Plugins > Add New, search for "JAT Search Intel", then install and activate it. (Or upload the `jat-search-intel` folder to `/wp-content/plugins/`.)
-2. Open **JAT Search Intel > General** to set your site identity and choose which modules to enable.
-3. Review the SEO, AEO and GEO tabs, and add your social profiles under **JAT Search Intel > Social**.
-4. Edit any post or page: the JAT Search Intel sidebar panel shows live scores and fields.
+2. Click **Run setup** in the notice that appears (or go to **JAT Search Intel > Tools > Setup Wizard**) and answer the three steps.
+3. Check **JAT Search Intel > Readiness** and use the Fix buttons for anything it flags.
+4. Edit any post or page: the JAT Search Intel sidebar shows live scores and fields, and Passage Coach (in the Post tab) lists the passages to improve.
 
-If you are switching from another SEO plugin, use **JAT Search Intel > Migration** to import titles, descriptions and focus keywords from Yoast SEO, Rank Math, All in One SEO, SEOPress or The SEO Framework, then deactivate the old plugin to avoid duplicate meta tags.
+Optional modules are switched on under **Settings > General**.
+
+If you are switching from another SEO plugin, use **JAT Search Intel > Tools > Migration** to import titles, descriptions and focus keywords from Yoast SEO, Rank Math, All in One SEO, SEOPress or The SEO Framework, then deactivate the old plugin to avoid duplicate meta tags.
 
 == Frequently Asked Questions ==
 
@@ -215,6 +226,12 @@ Sends an HTTP HEAD request to each external URL linked from your content to chec
 * Added: Content Signals (search / ai-input / ai-train) in robots.txt, and crawler presets (allow all, block training only, block AI).
 * Changed: IndexNow generates its key automatically and pings on publish, update and unpublish.
 * Fixed: the REST analyse endpoint and the background rescore job never saved scores.
+* Added: three-step setup wizard, offered through a dismissible notice after activation.
+* Added: Passage Coach panel in the block editor, with one-click answer-paragraph and comparison-table inserts.
+* Added: Page Performance report combining Search Console, AI referrals, AI crawler visits, GEO score and freshness per page.
+* Changed: the admin menu is now six entries (Readiness, Settings, Redirects, AI Search, Reports, Tools) with tabs; every page keeps its address.
+* Fixed: canonical URL, social title/description/image, audience, key topics and fact-check date set in the block-editor sidebar were saved under keys the front end never read. They are now kept in sync both ways and existing values are copied over on update. X (Twitter) title, description and image overrides are now used.
+* Removed: CSP headers, Subresource Integrity, white-label branding and the MainWP reporter (outside the scope of an SEO plugin).
 * Fixed: settings pages no longer round-trip every option through hidden fields, which could flatten nested settings and stop some checkboxes from being turned off.
 * Fixed: title templates using %category%, %search_query% or %sep% were mangled when saved.
 * Fixed: saving the SEO page switched off breadcrumb and site-search schema (they now have their own controls).

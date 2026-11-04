@@ -244,29 +244,17 @@ $settings = wp_parse_args( $settings, \JAT_Search_Intel\Core::get_default_settin
                             <strong><?php esc_html_e( 'Multi-Language', 'jat-search-intel' ); ?></strong> — <?php esc_html_e( 'WPML/Polylang integration, hreflang, per-language sitemaps', 'jat-search-intel' ); ?>
                         </label>
                         <label style="display:block; margin-bottom:8px;">
-                            <input type="checkbox" name="jat_search_intel_settings[enable_white_label]" value="1" <?php checked( $settings['enable_white_label'] ); ?> />
-                            <strong><?php esc_html_e( 'White-Label', 'jat-search-intel' ); ?></strong> — <?php esc_html_e( 'Custom branding, plugin name, logo, reseller support', 'jat-search-intel' ); ?>
-                        </label>
-                        <label style="display:block; margin-bottom:8px;">
                             <input type="checkbox" name="jat_search_intel_settings[enable_scale]" value="1" <?php checked( $settings['enable_scale'] ); ?> />
                             <strong><?php esc_html_e( 'Scale & Performance', 'jat-search-intel' ); ?></strong> — <?php esc_html_e( 'Object cache, background queue, bulk editor, headless REST', 'jat-search-intel' ); ?>
                         </label>
                     </td>
                 </tr>
                 <tr>
-                    <th><?php esc_html_e( 'Security', 'jat-search-intel' ); ?></th>
+                    <th><?php esc_html_e( 'Change tracking', 'jat-search-intel' ); ?></th>
                     <td>
                         <label style="display:block; margin-bottom:8px;">
                             <input type="checkbox" name="jat_search_intel_settings[enable_audit_log]" value="1" <?php checked( $settings['enable_audit_log'] ); ?> />
                             <strong><?php esc_html_e( 'Audit Log', 'jat-search-intel' ); ?></strong> — <?php esc_html_e( 'Track settings changes with timestamps and user info', 'jat-search-intel' ); ?>
-                        </label>
-                        <label style="display:block; margin-bottom:8px;">
-                            <input type="checkbox" name="jat_search_intel_settings[enable_csp_headers]" value="1" <?php checked( $settings['enable_csp_headers'] ); ?> />
-                            <strong><?php esc_html_e( 'CSP Headers', 'jat-search-intel' ); ?></strong> — <?php esc_html_e( 'Content Security Policy on plugin endpoints', 'jat-search-intel' ); ?>
-                        </label>
-                        <label style="display:block; margin-bottom:8px;">
-                            <input type="checkbox" name="jat_search_intel_settings[enable_sri]" value="1" <?php checked( $settings['enable_sri'] ); ?> />
-                            <strong><?php esc_html_e( 'Subresource Integrity', 'jat-search-intel' ); ?></strong> — <?php esc_html_e( 'SRI hashes on admin JS/CSS assets', 'jat-search-intel' ); ?>
                         </label>
                     </td>
                 </tr>

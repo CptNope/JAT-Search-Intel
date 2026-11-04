@@ -1576,3 +1576,48 @@ if ( ! function_exists( '__return_true' ) ) {
 		return true;
 	}
 }
+
+if ( ! function_exists( 'parse_blocks' ) ) {
+	/**
+	 * Minimal parse_blocks() for tests: top-level, non-nested blocks plus freeform runs.
+	 */
+	function parse_blocks( string $content ): array {
+		$out    = [];
+		$offset = 0;
+		preg_match_all( '#<!-- wp:([a-z0-9/-]+)(\s+(\{.*?\}))?\s*(/)?-->(.*?)(?:<!-- /wp:\1 -->|(?=<!-- wp:)|$)#s', $content, $m, PREG_SET_ORDER | PREG_OFFSET_CAPTURE );
+		foreach ( $m as $match ) {
+			$start = $match[0][1];
+			if ( $start > $offset ) {
+				$out[] = [ 'blockName' => null, 'attrs' => [], 'innerBlocks' => [], 'innerHTML' => substr( $content, $offset, $start - $offset ) ];
+			}
+			$name  = $match[1][0];
+			$name  = false === strpos( $name, '/' ) ? 'core/' . $name : $name;
+			$out[] = [
+				'blockName'   => $name,
+				'attrs'       => isset( $match[3][0] ) && '' !== $match[3][0] ? (array) json_decode( $match[3][0], true ) : [],
+				'innerBlocks' => [],
+				'innerHTML'   => $match[5][0] ?? '',
+			];
+			$offset = $start + strlen( $match[0][0] );
+		}
+		if ( $offset < strlen( $content ) ) {
+			$out[] = [ 'blockName' => null, 'attrs' => [], 'innerBlocks' => [], 'innerHTML' => substr( $content, $offset ) ];
+		}
+		return $out;
+	}
+}
+
+if ( ! function_exists( 'maybe_unserialize' ) ) {
+	function maybe_unserialize( $data ) {
+		return is_string( $data ) && preg_match( '/^[aOs]:\d+:/', $data ) ? unserialize( $data ) : $data; // phpcs:ignore
+	}
+}
+
+if ( ! function_exists( 'trailingslashit' ) ) {
+	function trailingslashit( $value ): string {
+		return rtrim( (string) $value, '/\\' ) . '/';
+	}
+	function untrailingslashit( $value ): string {
+		return rtrim( (string) $value, '/\\' );
+	}
+}

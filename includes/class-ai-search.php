@@ -124,6 +124,56 @@ class AI_Search {
 	}
 
 	/**
+	 * Apply a crawler preset to settings: crawler rules plus matching Content Signals.
+	 * Mirrors the preset buttons in admin/js/settings.js.
+	 *
+	 * @param array  $settings Settings.
+	 * @param string $preset   allow | training | block.
+	 * @return array
+	 */
+	public static function apply_preset( array $settings, string $preset ): array {
+		if ( ! in_array( $preset, [ 'allow', 'training', 'block' ], true ) ) {
+			return $settings;
+		}
+		$rules = [];
+		foreach ( self::BOTS as $bot => $info ) {
+			$block         = 'block' === $preset || ( 'training' === $preset && in_array( $info[1], [ 'training', 'signal' ], true ) );
+			$rules[ $bot ] = $block ? 'block' : 'allow';
+		}
+		$settings['ai_crawler_rules'] = $rules;
+		$settings['content_signals']  = [
+			'allow'    => [ 'search' => 'yes', 'ai-input' => 'yes', 'ai-train' => 'yes' ],
+			'training' => [ 'search' => 'yes', 'ai-input' => 'yes', 'ai-train' => 'no' ],
+			'block'    => [ 'search' => 'yes', 'ai-input' => 'no', 'ai-train' => 'no' ],
+		][ $preset ];
+		return $settings;
+	}
+
+	/**
+	 * Which preset the current rules match ('' for a custom mix). Unset rules count as allow.
+	 *
+	 * @param array $settings Settings.
+	 * @return string
+	 */
+	public static function detect_preset( array $settings ): string {
+		$rules = (array) ( $settings['ai_crawler_rules'] ?? [] );
+		foreach ( [ 'training', 'allow', 'block' ] as $preset ) {
+			$expected = self::apply_preset( [], $preset )['ai_crawler_rules'];
+			$match    = true;
+			foreach ( $expected as $bot => $rule ) {
+				if ( ( $rules[ $bot ] ?? 'allow' ) !== $rule ) {
+					$match = false;
+					break;
+				}
+			}
+			if ( $match ) {
+				return $preset;
+			}
+		}
+		return '';
+	}
+
+	/**
 	 * Content Signals from a settings array, without booting the module.
 	 *
 	 * @param array $settings Plugin settings.

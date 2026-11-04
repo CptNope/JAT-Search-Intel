@@ -468,12 +468,6 @@ class Notifications {
 	public function register_dashboard_widget(): void {
 		$name = 'JAT Search Intel';
 
-		// Use white-label name if available.
-		$custom_name = $this->settings['wl_plugin_name'] ?? '';
-		if ( ! empty( $custom_name ) ) {
-			$name = $custom_name;
-		}
-
 		wp_add_dashboard_widget(
 			'jat_search_intel_health',
 			$name . ' — Site Health',
