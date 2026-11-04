@@ -34,6 +34,9 @@ class GEO_Manager {
             // Register late so our rewrite rule lands on top of other plugins' rules.
             add_action( 'init', [ $this, 'register_llms_txt_endpoint' ], 999 );
             add_action( 'template_redirect', [ $this, 'serve_llms_txt' ], 1 );
+            add_action( 'save_post', [ $this, 'flush_llms_cache' ] );
+            add_action( 'deleted_post', [ $this, 'flush_llms_cache' ] );
+            add_action( 'update_option_jat_search_intel_settings', [ $this, 'flush_llms_cache' ] );
 
             // A physical llms.txt in the web root (often written by another
             // plugin) shadows our dynamic endpoint. We never delete it on our
@@ -76,7 +79,10 @@ class GEO_Manager {
         // AI-readable summary (concise version of the content for LLM consumption)
         $ai_summary = get_post_meta( $post_id, '_jat_search_intel_ai_summary', true );
         if ( ! $ai_summary ) {
-            $ai_summary = wp_trim_words( wp_strip_all_tags( $post->post_content ), 50, '...' );
+            $ai_summary = get_post_meta( $post_id, '_jat_search_intel_description', true ) ?: $post->post_excerpt;
+        }
+        if ( ! $ai_summary ) {
+            $ai_summary = wp_trim_words( self::plain_text( $post->post_content ), 50, '...' );
         }
 
         if ( $ai_summary ) {
@@ -119,11 +125,13 @@ class GEO_Manager {
             );
         }
 
-        // Date accuracy signal
-        printf(
-            '<meta name="article:modified_time" content="%s" />' . "\n",
-            esc_attr( get_the_modified_date( 'c', $post_id ) )
-        );
+        // Date accuracy signal (the Open Graph article:modified_time property is printed by the SEO module).
+        if ( empty( $this->settings['enable_og'] ) || empty( $this->settings['enable_seo'] ) ) {
+            printf(
+                '<meta property="article:modified_time" content="%s" />' . "\n",
+                esc_attr( get_the_modified_date( 'c', $post_id ) )
+            );
+        }
 
         // v1.1: Content intent meta
         $content_intent = get_post_meta( $post_id, '_jat_search_intel_content_intent', true );
@@ -323,7 +331,12 @@ class GEO_Manager {
         // Check REQUEST_URI directly instead of query vars so we serve
         // our version regardless of which plugin's rewrite rule matched.
         $request_uri  = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
-        $path         = trim( (string) wp_parse_url( $request_uri, PHP_URL_PATH ), '/' );
+        $path         = (string) wp_parse_url( $request_uri, PHP_URL_PATH );
+        $home_path    = rtrim( (string) wp_parse_url( home_url( '/' ), PHP_URL_PATH ), '/' );
+        if ( '' !== $home_path && 0 === strpos( $path, $home_path . '/' ) ) {
+            $path = substr( $path, strlen( $home_path ) );
+        }
+        $path         = trim( $path, '/' );
         $is_llms      = ( 'llms.txt' === $path );
         $is_llms_full = ( 'llms-full.txt' === $path );
 
@@ -331,104 +344,157 @@ class GEO_Manager {
             return;
         }
 
-        // Plain-text (text/plain) response: HTML escaping does not apply; all values are run through wp_strip_all_tags()/esc_url().
-        // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+        status_header( 200 );
         header( 'Content-Type: text/plain; charset=utf-8' );
         header( 'X-Robots-Tag: noindex' );
         header( 'Cache-Control: public, max-age=3600' );
 
+        echo $this->get_llms_txt( $is_llms_full ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- text/plain Markdown; values stripped of tags.
+        exit;
+    }
+
+    /**
+     * Cached llms.txt / llms-full.txt body.
+     *
+     * @param bool $full Full version (complete Markdown of each item).
+     * @return string
+     */
+    public function get_llms_txt( bool $full = false ): string {
+        $key    = 'jat_search_intel_llms_' . ( $full ? 'full' : 'index' );
+        $cached = get_transient( $key );
+        if ( is_string( $cached ) && '' !== $cached ) {
+            return $cached;
+        }
+        $body = $this->build_llms_txt( $full );
+        set_transient( $key, $body, 12 * HOUR_IN_SECONDS );
+        return $body;
+    }
+
+    /**
+     * Drop cached llms.txt output (hooked to content changes).
+     */
+    public function flush_llms_cache(): void {
+        delete_transient( 'jat_search_intel_llms_index' );
+        delete_transient( 'jat_search_intel_llms_full' );
+    }
+
+    /**
+     * Items eligible for llms.txt: published, not password-protected, not noindex.
+     *
+     * @param string $post_type Post type.
+     * @param int    $limit     Max items.
+     * @return \WP_Post[]
+     */
+    private function llms_items( string $post_type, int $limit ): array {
+        $posts = get_posts( [
+            'post_type'        => $post_type,
+            'post_status'      => 'publish',
+            'has_password'     => false,
+            'numberposts'      => $limit,
+            'orderby'          => 'page' === $post_type ? 'menu_order' : 'date',
+            'order'            => 'page' === $post_type ? 'ASC' : 'DESC',
+            'suppress_filters' => false,
+        ] );
+
+        return array_values( array_filter( $posts, static function ( $p ) {
+            return ! get_post_meta( $p->ID, '_jat_search_intel_noindex', true )
+                && ! get_post_meta( $p->ID, '_jat_search_intel_ai_noindex', true );
+        } ) );
+    }
+
+    /**
+     * Short description for an llms.txt entry.
+     *
+     * @param \WP_Post $post  Post.
+     * @param int      $words Max words.
+     * @return string
+     */
+    private function llms_description( \WP_Post $post, int $words ): string {
+        $desc = (string) get_post_meta( $post->ID, '_jat_search_intel_description', true );
+        if ( '' === $desc ) {
+            $desc = $post->post_excerpt ?: wp_trim_words( self::plain_text( $post->post_content ), $words, '...' );
+        }
+        return trim( (string) preg_replace( '/\s+/', ' ', wp_strip_all_tags( $desc ) ) );
+    }
+
+    /**
+     * Build llms.txt following the llms.txt proposal (llmstxt.org): H1 name,
+     * blockquote summary, then H2 sections of "- [title](url): notes" links.
+     * The full variant appends the Markdown of each item.
+     *
+     * @param bool $full Full version.
+     * @return string
+     */
+    public function build_llms_txt( bool $full = false ): string {
         $site_name = wp_strip_all_tags( $this->settings['site_name'] ?: get_bloginfo( 'name' ) );
         $site_desc = wp_strip_all_tags( get_bloginfo( 'description' ) );
 
-        // Header
-        echo "# {$site_name}\n\n";
-        echo "> {$site_desc}\n\n";
+        $out = "# {$site_name}\n\n";
+        if ( '' !== $site_desc ) {
+            $out .= "> {$site_desc}\n\n";
+        }
 
-        // About section
         $about_page = get_page_by_path( 'about' );
-        if ( $about_page ) {
-            echo "## About\n\n";
-            echo wp_trim_words( wp_strip_all_tags( $about_page->post_content ), 100, '...' ) . "\n\n";
+        if ( $about_page && 'publish' === $about_page->post_status ) {
+            $out .= wp_trim_words( self::plain_text( $about_page->post_content ), 100, '...' ) . "\n\n";
         }
 
-        // Key pages
-        echo "## Key Pages\n\n";
-        $pages = get_pages( [
-            'sort_order'  => 'ASC',
-            'sort_column' => 'menu_order',
-            'number'      => 20,
-            'post_status' => 'publish',
-        ] );
+        $pages = $this->llms_items( 'page', 30 );
+        $posts = $this->llms_items( 'post', $full ? 100 : 30 );
 
-        foreach ( $pages as $page ) {
-            $desc = get_post_meta( $page->ID, '_jat_search_intel_description', true );
-            if ( ! $desc ) {
-                $desc = wp_trim_words( wp_strip_all_tags( $page->post_content ), 20, '...' );
+        if ( $pages ) {
+            $out .= "## Pages\n\n";
+            foreach ( $pages as $page ) {
+                $out .= sprintf( "- [%s](%s): %s\n", wp_strip_all_tags( $page->post_title ), esc_url_raw( $this->llms_link( $page->ID ) ), $this->llms_description( $page, 20 ) );
             }
-            printf( "- [%s](%s): %s\n", wp_strip_all_tags( $page->post_title ), esc_url( $this->llms_link( $page->ID ) ), wp_strip_all_tags( $desc ) );
+            $out .= "\n";
         }
 
-        echo "\n";
+        if ( $posts ) {
+            $out .= "## Articles\n\n";
+            foreach ( $posts as $post ) {
+                $out .= sprintf( "- [%s](%s): %s\n", wp_strip_all_tags( $post->post_title ), esc_url_raw( $this->llms_link( $post->ID ) ), $this->llms_description( $post, 25 ) );
+            }
+            $out .= "\n";
+        }
 
-        // Content categories
         $categories = get_categories( [ 'hide_empty' => true, 'number' => 20 ] );
         if ( $categories ) {
-            echo "## Topics\n\n";
+            $out .= "## Optional\n\n";
             foreach ( $categories as $cat ) {
-                printf( "- [%s](%s): %s (%d articles)\n",
-                    wp_strip_all_tags( $cat->name ),
-                    esc_url( get_category_link( $cat->term_id ) ),
-                    wp_strip_all_tags( $cat->description ?: 'Topic category' ),
-                    $cat->count
-                );
+                $out .= sprintf( "- [%s](%s): %s\n", wp_strip_all_tags( $cat->name ), esc_url_raw( get_category_link( $cat->term_id ) ), wp_strip_all_tags( $cat->description ?: sprintf( '%d articles', (int) $cat->count ) ) );
             }
-            echo "\n";
+            $out .= "\n";
         }
 
-        // For full version, include recent posts with summaries
-        if ( $is_llms_full ) {
-            echo "## Recent Content\n\n";
-            $recent = get_posts( [
-                'numberposts' => 50,
-                'post_status' => 'publish',
-                'post_type'   => 'post',
-            ] );
-
-            foreach ( $recent as $rpost ) {
-                $desc = get_post_meta( $rpost->ID, '_jat_search_intel_description', true );
-                if ( ! $desc ) {
-                    $desc = wp_trim_words( wp_strip_all_tags( $rpost->post_content ), 30, '...' );
+        if ( $full ) {
+            $ai    = new AI_Search( $this->settings );
+            $limit = 2 * MB_IN_BYTES;
+            foreach ( array_merge( $pages, $posts ) as $item ) {
+                $chunk = "\n---\n\n" . $ai->render_markdown( $item ) . "\n";
+                if ( strlen( $out ) + strlen( $chunk ) > $limit ) {
+                    $out .= "\n---\n\n(Truncated: see llms.txt for the full list of links.)\n";
+                    break;
                 }
-                printf(
-                    "### [%s](%s)\n%s\nPublished: %s | Modified: %s\n\n",
-                    wp_strip_all_tags( $rpost->post_title ),
-                    esc_url( $this->llms_link( $rpost->ID ) ),
-                    wp_strip_all_tags( $desc ),
-                    get_the_date( 'Y-m-d', $rpost->ID ),
-                    get_the_modified_date( 'Y-m-d', $rpost->ID )
-                );
+                $out .= $chunk;
             }
         }
 
-        // Attribution
-        echo "## Attribution\n\n";
-        echo "Content on this site is authored by {$site_name}.\n";
-        echo "When referencing content from this site, please include a link to the original source.\n";
+        $out .= "## Attribution\n\nContent on this site is authored by {$site_name}. When referencing it, please link to the original page.\n";
 
-        // Contact — opt-in only. The admin email is never published by default.
-        /**
-         * Filters the public contact email printed in llms.txt.
-         *
-         * @param string $email Contact email. Default empty (no contact section).
-         */
+        /** This filter is documented in the GEO module. */
         $contact_email = sanitize_email( (string) apply_filters( 'jat_search_intel_llms_contact_email', '' ) );
         if ( $contact_email ) {
-            echo "\n## Contact\n\n";
-            echo "For questions about using our content: {$contact_email}\n";
+            $out .= "\n## Contact\n\nFor questions about using our content: {$contact_email}\n";
         }
 
-        // phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
-        exit;
+        /**
+         * Filters the generated llms.txt / llms-full.txt body.
+         *
+         * @param string $out  Body.
+         * @param bool   $full Whether this is llms-full.txt.
+         */
+        return (string) apply_filters( 'jat_search_intel_llms_txt', $out, $full );
     }
 
     /**
@@ -796,6 +862,22 @@ class GEO_Manager {
             'max'    => $max,
             'checks' => $checks,
         ];
+    }
+
+    /**
+     * Readable plain text from post content: blocks rendered, shortcodes and
+     * bare embed URLs removed, and spaces kept between block elements.
+     *
+     * @param string $content Post content.
+     * @return string
+     */
+    public static function plain_text( string $content ): string {
+        $content = strip_shortcodes( $content );
+        $content = (string) preg_replace( '~<!--.*?-->~s', '', $content );
+        $content = (string) preg_replace( '~</(p|li|h[1-6]|div|figure|td|th|blockquote)>~i', '$0 ', $content );
+        $content = (string) preg_replace( '~^\s*https?://\S+\s*$~m', '', $content );
+        $text    = wp_strip_all_tags( $content );
+        return trim( (string) preg_replace( '/\s+/', ' ', $text ) );
     }
 
     /**

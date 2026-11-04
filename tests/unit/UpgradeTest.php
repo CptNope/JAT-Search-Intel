@@ -42,6 +42,9 @@ class UpgradeTest extends TestCase {
 			public function esc_like( string $text ): string {
 				return addcslashes( $text, '_%\\' );
 			}
+			public function suppress_errors( $suppress = true ) {
+				return false;
+			}
 			public function get_blog_prefix(): string {
 				return 'wp_';
 			}
@@ -54,7 +57,7 @@ class UpgradeTest extends TestCase {
 			}
 			public function query( string $q ) {
 				$this->queries[] = $q;
-				if ( preg_match( '/RENAME TABLE `([^`]+)` TO `([^`]+)`/', $q, $m ) ) {
+				if ( preg_match( '/(?:RENAME TABLE|ALTER TABLE) `([^`]+)` (?:TO|RENAME TO) `([^`]+)`/', $q, $m ) ) {
 					$this->tables = array_values( array_diff( $this->tables, [ $m[1] ] ) );
 					$this->tables[] = $m[2];
 				}

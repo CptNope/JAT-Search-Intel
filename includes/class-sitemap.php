@@ -27,7 +27,12 @@ class Sitemap {
         }
 
         add_action( 'init', [ $this, 'register_endpoints' ] );
-        add_action( 'template_redirect', [ $this, 'serve_sitemap' ] );
+        // Advertise the sitemaps in robots.txt (core only does this for its own sitemaps).
+        add_filter( 'robots_txt', [ $this, 'add_sitemap_to_robots' ], 900, 2 );
+
+        // Before redirect_canonical (priority 10), which would add a trailing slash to /sitemap.xml.
+        add_action( 'template_redirect', [ $this, 'serve_sitemap' ], 1 );
+        add_filter( 'redirect_canonical', [ $this, 'no_canonical_redirect' ] );
 
         // Disable WP core sitemaps to avoid conflicts
         add_filter( 'wp_sitemaps_enabled', '__return_false' );
@@ -73,6 +78,43 @@ class Sitemap {
     }
 
     /**
+     * Append Sitemap: lines to robots.txt.
+     *
+     * @param string $output robots.txt content.
+     * @param mixed  $public Whether the site is public.
+     * @return string
+     */
+    public function add_sitemap_to_robots( $output, $public ): string {
+        $output = (string) $output;
+        if ( ! $public ) {
+            return $output;
+        }
+        $lines = [ home_url( '/sitemap.xml' ) ];
+        if ( ! empty( $this->settings['enable_news_sitemap'] ) ) {
+            $lines[] = home_url( '/news-sitemap.xml' );
+        }
+        if ( ! empty( $this->settings['enable_video_sitemap'] ) ) {
+            $lines[] = home_url( '/video-sitemap.xml' );
+        }
+        foreach ( $lines as $url ) {
+            if ( false === stripos( $output, 'Sitemap: ' . $url ) ) {
+                $output = rtrim( $output ) . "\nSitemap: " . esc_url_raw( $url );
+            }
+        }
+        return $output . "\n";
+    }
+
+    /**
+     * Never canonical-redirect sitemap URLs.
+     *
+     * @param string|false $redirect_url Redirect target.
+     * @return string|false
+     */
+    public function no_canonical_redirect( $redirect_url ) {
+        return get_query_var( 'jat_search_intel_sitemap' ) ? false : $redirect_url;
+    }
+
+    /**
      * Serve the requested sitemap.
      */
     public function serve_sitemap(): void {
@@ -86,6 +128,10 @@ class Sitemap {
         // News / video sitemaps only exist when switched on.
         if ( ( '_news' === $type && empty( $this->settings['enable_news_sitemap'] ) )
             || ( '_video' === $type && empty( $this->settings['enable_video_sitemap'] ) ) ) {
+            global $wp_query;
+            $wp_query->set_404();
+            status_header( 404 );
+            nocache_headers();
             return;
         }
 

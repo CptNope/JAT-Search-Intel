@@ -167,13 +167,7 @@ class Upgrade {
 
 		// 3. Custom tables.
 		foreach ( self::OLD_TABLES as $old_table ) {
-			$old = $wpdb->prefix . $old_table;
-			$new = $wpdb->prefix . 'jat_' . $old_table;
-			$has_old = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $old ) ) );
-			$has_new = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $new ) ) );
-			if ( $has_old && ! $has_new ) {
-				$wpdb->query( $wpdb->prepare( 'RENAME TABLE %i TO %i', $old, $new ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.SchemaChange
-			}
+			self::migrate_table( $wpdb->prefix . $old_table, $wpdb->prefix . 'jat_' . $old_table );
 		}
 
 		// 4. Block markup saved in post content (comment delimiters and generated class names).
@@ -213,6 +207,56 @@ class Upgrade {
 		wp_cache_delete( 'notoptions', 'options' );
 		update_option( self::LEGACY_FLAG, JAT_SEARCH_INTEL_VERSION );
 		self::request_rewrite_flush();
+	}
+
+	/**
+	 * Move a legacy table to its new name.
+	 *
+	 * Uses ALTER TABLE … RENAME TO (supported by MySQL, MariaDB and SQLite-based
+	 * hosts such as WordPress Playground). If that is not possible, the new
+	 * table is created and the rows are copied across.
+	 *
+	 * @param string $old Old table name.
+	 * @param string $new New table name.
+	 */
+	private static function migrate_table( string $old, string $new ): void {
+		global $wpdb;
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery -- One-time schema migration.
+
+		$table_exists = static function ( string $name ) use ( $wpdb ): bool {
+			return (bool) $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $name ) ) );
+		};
+
+		if ( ! $table_exists( $old ) ) {
+			return;
+		}
+
+		if ( ! $table_exists( $new ) ) {
+			$suppress = $wpdb->suppress_errors( true );
+			$wpdb->query( $wpdb->prepare( 'ALTER TABLE %i RENAME TO %i', $old, $new ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.SchemaChange
+			$wpdb->suppress_errors( $suppress );
+			if ( $table_exists( $new ) && ! $table_exists( $old ) ) {
+				return;
+			}
+		}
+
+		// Fallback: make sure the new table exists, copy shared columns, drop the old one.
+		Redirect_Manager::create_tables();
+		$old_cols = (array) $wpdb->get_col( $wpdb->prepare( 'SHOW COLUMNS FROM %i', $old ) );
+		$new_cols = (array) $wpdb->get_col( $wpdb->prepare( 'SHOW COLUMNS FROM %i', $new ) );
+		$cols     = array_values( array_intersect( $old_cols, $new_cols ) );
+
+		if ( $cols ) {
+			$list = implode( ', ', array_map( static function ( $c ) {
+				return '`' . str_replace( '`', '', $c ) . '`';
+			}, $cols ) );
+			$copied = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i', $new ) );
+			if ( 0 === $copied ) {
+				$wpdb->query( $wpdb->prepare( "INSERT INTO %i ({$list}) SELECT {$list} FROM %i", $new, $old ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Column names read from the schema and backtick-quoted.
+			}
+		}
+		$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $old ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.SchemaChange
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery
 	}
 
 	/**
