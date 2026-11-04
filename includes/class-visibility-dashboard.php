@@ -332,7 +332,7 @@ class Visibility_Dashboard {
 		$end   = gmdate( 'Y-m-d', strtotime( '-2 days' ) );
 
 		$response = wp_remote_post(
-			"https://www.googleapis.com/webmasters/v3/sites/{$site_url}/searchAnalytics/query",
+			'https://searchconsole.googleapis.com/webmasters/v3/sites/' . rawurlencode( $site_url ) . '/searchAnalytics/query',
 			[
 				'headers' => [
 					'Authorization' => 'Bearer ' . $access_token,

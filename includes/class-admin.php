@@ -184,7 +184,6 @@ class Admin {
                 'enable_historical_analytics', 'enable_ga4', 'enable_cwv',
                 'enable_custom_reports', 'enable_notifications',
                 'enable_rbac', 'enable_multilang', 'enable_white_label', 'enable_scale',
-                'enable_rank_tracking',
             ],
             'seo' => [
                 'enable_og', 'enable_twitter', 'enable_canonical', 'enable_robots_meta',
@@ -205,6 +204,9 @@ class Admin {
             ],
             'ai' => [
                 'enable_ai_engine',
+            ],
+            'rank' => [
+                'enable_rank_tracking',
             ],
         ];
 

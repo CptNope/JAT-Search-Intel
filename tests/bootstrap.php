@@ -1523,3 +1523,20 @@ spl_autoload_register( function ( string $class ) {
         require_once $file;
     }
 } );
+
+if ( ! class_exists( 'WP_Error' ) ) {
+	class WP_Error {
+		private $code;
+		private $message;
+		public function __construct( $code = '', $message = '', $data = '' ) {
+			$this->code    = $code;
+			$this->message = $message;
+		}
+		public function get_error_message() {
+			return $this->message;
+		}
+		public function get_error_code() {
+			return $this->code;
+		}
+	}
+}

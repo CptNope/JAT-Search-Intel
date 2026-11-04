@@ -58,6 +58,7 @@ function jat_search_intel_cron_hooks() {
         'jat_search_intel_decay_check',
         'jat_search_intel_ga4_fetch',
         'jat_search_intel_process_queue',
+        'jat_search_intel_rank_tracking',
         'jat_search_intel_score_drop_check',
         'jat_search_intel_send_scheduled_report',
         'jat_search_intel_visibility_sync',

@@ -42,6 +42,7 @@ function jat_search_intel_uninstall_site() {
 		'jat_search_intel_decay_check',
 		'jat_search_intel_ga4_fetch',
 		'jat_search_intel_process_queue',
+		'jat_search_intel_rank_tracking',
 		'jat_search_intel_score_drop_check',
 		'jat_search_intel_send_scheduled_report',
 		'jat_search_intel_visibility_sync',
@@ -79,6 +80,7 @@ function jat_search_intel_uninstall_site() {
 	// Custom tables.
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}jat_search_intel_redirects" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.SchemaChange
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}jat_search_intel_404_log" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.SchemaChange
+	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}jat_search_intel_rankings" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.SchemaChange
 	// phpcs:enable WordPress.DB.DirectDatabaseQuery
 
 	// Role and capabilities.

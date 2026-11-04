@@ -67,6 +67,7 @@ class Upgrade {
 
 		if ( get_option( self::VERSION_OPTION ) !== JAT_SEARCH_INTEL_VERSION ) {
 			Redirect_Manager::create_tables();
+			Rank_Tracker::create_table();
 			update_option( self::VERSION_OPTION, JAT_SEARCH_INTEL_VERSION );
 			self::request_rewrite_flush();
 		}

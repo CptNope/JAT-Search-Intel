@@ -145,6 +145,9 @@ class Core {
     /** @var Custom_Reports */
     public $custom_reports;
 
+    /** @var Rank_Tracker */
+    public $rank_tracker;
+
     /** @var AI_Search */
     public $ai_search;
 
@@ -264,6 +267,7 @@ class Core {
             'feed_seo'                => [ $on( 'enable_rss_footer' ), Feed_SEO::class ],
             'custom_schema'           => [ $on( 'enable_schema' ), Custom_Schema::class ],
             'ai_search'               => [ true, AI_Search::class ],
+            'rank_tracker'            => [ $is_admin || $on( 'enable_rank_tracking' ), Rank_Tracker::class ],
         ];
 
         foreach ( $modules as $prop => list( $boot, $class ) ) {
