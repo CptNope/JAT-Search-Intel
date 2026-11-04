@@ -145,6 +145,9 @@ class Core {
     /** @var Custom_Reports */
     public $custom_reports;
 
+    /** @var AI_Search */
+    public $ai_search;
+
     /** @var Media_SEO */
     public $media_seo;
 
@@ -260,6 +263,7 @@ class Core {
             'media_seo'               => [ $on( 'enable_image_alt' ) || $on( 'redirect_attachments' ), Media_SEO::class ],
             'feed_seo'                => [ $on( 'enable_rss_footer' ), Feed_SEO::class ],
             'custom_schema'           => [ $on( 'enable_schema' ), Custom_Schema::class ],
+            'ai_search'               => [ true, AI_Search::class ],
         ];
 
         foreach ( $modules as $prop => list( $boot, $class ) ) {

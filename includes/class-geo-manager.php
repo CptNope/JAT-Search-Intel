@@ -365,7 +365,7 @@ class GEO_Manager {
             if ( ! $desc ) {
                 $desc = wp_trim_words( wp_strip_all_tags( $page->post_content ), 20, '...' );
             }
-            printf( "- [%s](%s): %s\n", wp_strip_all_tags( $page->post_title ), esc_url( get_permalink( $page->ID ) ), wp_strip_all_tags( $desc ) );
+            printf( "- [%s](%s): %s\n", wp_strip_all_tags( $page->post_title ), esc_url( $this->llms_link( $page->ID ) ), wp_strip_all_tags( $desc ) );
         }
 
         echo "\n";
@@ -402,7 +402,7 @@ class GEO_Manager {
                 printf(
                     "### [%s](%s)\n%s\nPublished: %s | Modified: %s\n\n",
                     wp_strip_all_tags( $rpost->post_title ),
-                    esc_url( get_permalink( $rpost->ID ) ),
+                    esc_url( $this->llms_link( $rpost->ID ) ),
                     wp_strip_all_tags( $desc ),
                     get_the_date( 'Y-m-d', $rpost->ID ),
                     get_the_modified_date( 'Y-m-d', $rpost->ID )
@@ -796,6 +796,19 @@ class GEO_Manager {
             'max'    => $max,
             'checks' => $checks,
         ];
+    }
+
+    /**
+     * Link used in llms.txt: the Markdown copy when available (per the llms.txt spec).
+     *
+     * @param int $post_id Post ID.
+     * @return string
+     */
+    private function llms_link( int $post_id ): string {
+        if ( ! empty( $this->settings['enable_markdown_endpoints'] ) ) {
+            return AI_Search::markdown_url( $post_id );
+        }
+        return (string) get_permalink( $post_id );
     }
 
     /**

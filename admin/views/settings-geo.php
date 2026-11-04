@@ -149,6 +149,70 @@ $settings = wp_parse_args( $settings, \JAT_Search_Intel\Core::get_default_settin
             </table>
         </div>
 
+        <div class="si-settings-card">
+            <h2><?php esc_html_e( 'AI Agents & Crawlers', 'jat-search-intel' ); ?></h2>
+            <table class="form-table">
+                <tr>
+                    <th><?php esc_html_e( 'Markdown for AI Agents', 'jat-search-intel' ); ?></th>
+                    <td>
+                        <label>
+                            <input type="checkbox" name="jat_search_intel_settings[enable_markdown_endpoints]" value="1" <?php checked( ! empty( $settings['enable_markdown_endpoints'] ) ); ?> />
+                            <?php esc_html_e( 'Serve a clean Markdown copy of each public post at its URL + .md (or ?format=md)', 'jat-search-intel' ); ?>
+                        </label>
+                        <p class="description"><?php esc_html_e( 'Pages advertise it with <link rel="alternate" type="text/markdown"> and llms.txt links to it. Markdown copies are marked noindex so they never compete with the HTML page.', 'jat-search-intel' ); ?></p>
+                    </td>
+                </tr>
+                <tr>
+                    <th><?php esc_html_e( 'AI Traffic Analytics', 'jat-search-intel' ); ?></th>
+                    <td>
+                        <label>
+                            <input type="checkbox" name="jat_search_intel_settings[enable_ai_crawler_log]" value="1" <?php checked( ! empty( $settings['enable_ai_crawler_log'] ) ); ?> />
+                            <?php esc_html_e( 'Record AI crawler visits and visitors arriving from ChatGPT, Perplexity, Claude, Gemini, Copilot and other assistants', 'jat-search-intel' ); ?>
+                        </label>
+                        <p class="description"><?php esc_html_e( 'Stores daily counts and page paths only. No IP addresses or cookies. See JAT Search Intel > AI Search.', 'jat-search-intel' ); ?></p>
+                    </td>
+                </tr>
+                <tr>
+                    <th><?php esc_html_e( 'Crawler Access', 'jat-search-intel' ); ?></th>
+                    <td>
+                        <p>
+                            <button type="button" class="button" data-jsi-ai-preset="allow"><?php esc_html_e( 'Allow all', 'jat-search-intel' ); ?></button>
+                            <button type="button" class="button" data-jsi-ai-preset="training"><?php esc_html_e( 'Block training, keep AI search', 'jat-search-intel' ); ?></button>
+                            <button type="button" class="button" data-jsi-ai-preset="block"><?php esc_html_e( 'Block all AI', 'jat-search-intel' ); ?></button>
+                        </p>
+                        <table class="widefat striped" style="max-width:720px">
+                            <thead><tr>
+                                <th><?php esc_html_e( 'Crawler', 'jat-search-intel' ); ?></th>
+                                <th><?php esc_html_e( 'Operator', 'jat-search-intel' ); ?></th>
+                                <th><?php esc_html_e( 'Purpose', 'jat-search-intel' ); ?></th>
+                                <th><?php esc_html_e( 'robots.txt', 'jat-search-intel' ); ?></th>
+                            </tr></thead>
+                            <tbody>
+                            <?php
+                            $ai_rules = (array) ( $settings['ai_crawler_rules'] ?? [] );
+                            foreach ( \JAT_Search_Intel\AI_Search::BOTS as $bot_token => $bot_info ) :
+                                $bot_rule = $ai_rules[ $bot_token ] ?? 'allow';
+                                ?>
+                                <tr>
+                                    <td><code><?php echo esc_html( $bot_token ); ?></code></td>
+                                    <td><?php echo esc_html( $bot_info[0] ); ?></td>
+                                    <td><?php echo esc_html( \JAT_Search_Intel\AI_Search::purpose_label( $bot_info[1] ) ); ?></td>
+                                    <td>
+                                        <select name="jat_search_intel_settings[ai_crawler_rules][<?php echo esc_attr( $bot_token ); ?>]" data-jsi-purpose="<?php echo esc_attr( $bot_info[1] ); ?>">
+                                            <option value="allow" <?php selected( $bot_rule, 'allow' ); ?>><?php esc_html_e( 'Allow', 'jat-search-intel' ); ?></option>
+                                            <option value="block" <?php selected( $bot_rule, 'block' ); ?>><?php esc_html_e( 'Block', 'jat-search-intel' ); ?></option>
+                                        </select>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                        <p class="description"><?php esc_html_e( 'Blocked crawlers get a "Disallow: /" group in your robots.txt. Blocking "AI search" crawlers removes you from that assistant\'s answers; most sites block training only. "Live fetch" agents act for a person and may not obey robots.txt.', 'jat-search-intel' ); ?></p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
         <div class="si-settings-card si-info-card">
             <h2><?php esc_html_e( 'GEO Tips', 'jat-search-intel' ); ?></h2>
             <ul>

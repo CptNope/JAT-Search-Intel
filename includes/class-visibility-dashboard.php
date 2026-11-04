@@ -536,6 +536,16 @@ class Visibility_Dashboard {
 			$by_day[ $day ]    = ( $by_day[ $day ] ?? 0 ) + 1;
 		}
 
+		// Visits recorded by the AI Search analytics module.
+		$recorded = AI_Search::summary( 'referrals', $days );
+		$total   += $recorded['total'];
+		foreach ( $recorded['by_label'] as $src => $count ) {
+			$by_source[ $src ] = ( $by_source[ $src ] ?? 0 ) + $count;
+		}
+		foreach ( $recorded['by_day'] as $day => $count ) {
+			$by_day[ $day ] = ( $by_day[ $day ] ?? 0 ) + $count;
+		}
+
 		arsort( $by_source );
 		ksort( $by_day );
 

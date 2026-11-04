@@ -406,6 +406,13 @@ class Admin {
                 [],
                 JAT_SEARCH_INTEL_VERSION
             );
+            wp_enqueue_script(
+                'jat-search-intel-settings',
+                JAT_SEARCH_INTEL_URL . 'admin/js/settings.js',
+                [],
+                JAT_SEARCH_INTEL_VERSION,
+                true
+            );
         }
 
         // Bulk Tools page — enqueue batch processing JS.
