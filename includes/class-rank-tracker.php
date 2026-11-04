@@ -459,9 +459,12 @@ class Rank_Tracker {
 		check_admin_referer( 'jat_search_intel_rank_fetch' );
 
 		$result = $this->run();
-		$args   = is_wp_error( $result )
-			? [ 'jsi_status' => 'fetch-error', 'jsi_message' => rawurlencode( $result->get_error_message() ) ]
-			: [ 'jsi_status' => 'fetched', 'jsi_count' => (int) $result ];
+		if ( is_wp_error( $result ) ) {
+			set_transient( 'jat_search_intel_rank_error_' . get_current_user_id(), $result->get_error_message(), 120 );
+			$args = [ 'jsi_status' => 'fetch-error' ];
+		} else {
+			$args = [ 'jsi_status' => 'fetched', 'jsi_count' => (int) $result ];
+		}
 
 		wp_safe_redirect( add_query_arg( $args, admin_url( 'admin.php?page=jat-search-intel-rank-tracker' ) ) );
 		exit;
@@ -477,9 +480,13 @@ class Rank_Tracker {
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Read-only status flags after a redirect.
 		$status  = isset( $_GET['jsi_status'] ) ? sanitize_key( wp_unslash( $_GET['jsi_status'] ) ) : '';
-		$message = isset( $_GET['jsi_message'] ) ? sanitize_text_field( rawurldecode( wp_unslash( $_GET['jsi_message'] ) ) ) : '';
 		$count   = isset( $_GET['jsi_count'] ) ? absint( $_GET['jsi_count'] ) : 0;
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+		$message = (string) get_transient( 'jat_search_intel_rank_error_' . get_current_user_id() );
+		if ( '' !== $message ) {
+			delete_transient( 'jat_search_intel_rank_error_' . get_current_user_id() );
+		}
 
 		$email    = Google_Auth::client_email();
 		$keywords = implode( "\n", (array) ( $this->settings['tracked_keywords'] ?? [] ) );

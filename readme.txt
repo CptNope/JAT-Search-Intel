@@ -25,10 +25,15 @@ Traditional search optimization with a modern implementation.
 * Canonical URL management
 * Robots meta directives (noindex, nofollow) per post
 * XML Sitemaps with image support and automatic pagination
+* Google News sitemap and video sitemap (YouTube, Vimeo, self-hosted)
+* HTML sitemap shortcode for visitors
+* Keyword rank tracker built on your own Search Console data (daily positions, 7/28-day movement)
+* Automatic image alt text from file names, attachment-page redirects and RSS feed backlinks
 * Focus keyword analysis with density and placement checks
 * Readability scoring (Flesch-Kincaid)
-* BreadcrumbList, WebSite, and Organization/Person JSON-LD schema
+* One connected JSON-LD graph: Organization/Person, WebSite, WebPage, Article, author, breadcrumbs and image, linked by @id
 * Article schema with full author, date, and category support
+* Custom JSON-LD per post (paste any Schema.org markup; validated and merged into the graph)
 
 **AEO — Answer Engine Optimization**
 Optimize your content for featured snippets, voice assistants, and People Also Ask boxes.
@@ -49,7 +54,10 @@ Optimize for AI-powered answer engines such as ChatGPT, Perplexity and Google AI
 * E-E-A-T author signals — credentials, expertise areas, years of experience
 * Content freshness meta tags — signal recency to AI crawlers
 * Content type detection — article, how-to, FAQ, comparison, review, guide
-* AI crawl directives — control which AI bots can index your content
+* Markdown copy of every public post for AI agents (`/post-slug.md`), linked from the page and from llms.txt
+* AI crawler access: allow or block 21 AI bots individually in robots.txt, grouped by purpose (training, AI search, live user fetch)
+* AI traffic analytics: AI crawler visits and visitors arriving from ChatGPT, Perplexity, Claude, Gemini, Copilot and more
+* Per-post AI crawl directives
 * Fact-check date tracking
 * Key topics extraction and semantic keyword signals
 
@@ -160,8 +168,8 @@ Same purpose and data as above when Anthropic is the selected provider. [Commerc
 = Ollama (AI Engine, optional) =
 If you choose Ollama, requests go to the endpoint you configure (by default a server on your own machine at localhost). No third party is involved unless you point it at one.
 
-= Google Search Console API (AI Visibility Dashboard, optional) =
-Fetches search query statistics for your site once a day or when you click Refresh. Sends your site URL and the access token you provide. [Google APIs Terms](https://developers.google.com/terms), [Google Privacy Policy](https://policies.google.com/privacy).
+= Google OAuth and Search Console API (Rank Tracker, optional) =
+After you paste a Google service account key, the plugin requests an access token from Google's OAuth endpoint (oauth2.googleapis.com) once an hour at most, then fetches search performance for your tracked keywords from the Search Console API once a day or when you click Fetch now. Sends a token request signed with your key, your Search Console property and the keywords to look up. [Google APIs Terms](https://developers.google.com/terms), [Google Privacy Policy](https://policies.google.com/privacy).
 
 = Bing Webmaster Tools API (AI Visibility Dashboard, optional) =
 Fetches query statistics for your site. Sends your site URL and Bing API key. [Microsoft Services Agreement](https://www.microsoft.com/servicesagreement), [Microsoft Privacy Statement](https://privacy.microsoft.com/privacystatement).
@@ -184,7 +192,15 @@ Sends an HTTP HEAD request to each external URL linked from your content to chec
 == Changelog ==
 
 = 3.5.0 =
-* First WordPress.org release, renamed JAT Search Intel (text domain `jat-search-intel`).
+* First WordPress.org release, renamed JAT Search Intel. Every identifier now uses `jat-search-intel` / `jat_search_intel` (main file, text domain, options, post meta, tables, REST namespace `jat-search-intel/v1`, blocks, WP-CLI `wp jat-search-intel`).
+* Added: automatic one-time migration from the earlier GitHub edition (settings, post meta, redirects, 404 log, roles, block markup); old FAQ/HowTo shortcodes keep working.
+* Added: connected JSON-LD @graph (single script, nodes linked by @id).
+* Added: custom JSON-LD per post.
+* Added: Google News sitemap, video sitemap and HTML sitemap shortcode.
+* Added: automatic image alt text, attachment-page redirects and RSS feed backlinks.
+* Added: Markdown copies of posts for AI agents, per-bot AI crawler rules in robots.txt, and AI crawler / AI referral analytics.
+* Added: Rank Tracker using your Search Console data via a Google service account.
+* Fixed: settings pages no longer round-trip every option through hidden fields, which could flatten nested settings and stop some checkboxes from being turned off.
 * Removed the GitHub self-updater; updates now come from WordPress.org.
 * Performance: disabled modules are no longer loaded on each request.
 * Performance: redirect matching uses a cached index, so pages without a redirect run no redirect queries.
@@ -214,4 +230,4 @@ Earlier releases are listed in CHANGELOG.md in the development repository.
 == Upgrade Notice ==
 
 = 3.5.0 =
-First WordPress.org release. Removes the GitHub updater, speeds up front-end requests and adds an opt-in data-removal setting.
+First WordPress.org release. Existing data from the GitHub edition (Search Intel) is migrated automatically. Adds rank tracking, news/video sitemaps, Markdown for AI agents and AI crawler controls.

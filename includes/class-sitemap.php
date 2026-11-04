@@ -435,7 +435,7 @@ class Sitemap {
         }
 
         $placeholders = implode( ',', array_fill( 0, count( $types ), '%s' ) );
-        // phpcs:disable WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $placeholders is a list of %s built above.
+        // phpcs:disable WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $placeholders is a list of %s built above; values passed as an array.
         $ids = $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- Content scan; result is cached with the sitemap.
             $wpdb->prepare(
                 "SELECT ID FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_password = '' AND post_type IN ({$placeholders})
@@ -444,7 +444,7 @@ class Sitemap {
                 array_merge( $types, [ '%youtube.com/%', '%youtu.be/%', '%vimeo.com/%', '%<video%' ] )
             )
         );
-        // phpcs:enable WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        // phpcs:enable WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
         foreach ( (array) $ids as $post_id ) {
             $post_id = (int) $post_id;
@@ -530,8 +530,8 @@ class Sitemap {
                 }
                 $videos[] = [
                     'player_loc'  => '',
-                    'content_loc' => html_entity_decode( $match[1] ),
-                    'thumbnail'   => $poster ? html_entity_decode( $poster ) : '',
+                    'content_loc' => html_entity_decode( $match[1], ENT_QUOTES | ENT_HTML5, 'UTF-8' ),
+                    'thumbnail'   => $poster ? html_entity_decode( $poster, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) : '',
                 ];
             }
         }
