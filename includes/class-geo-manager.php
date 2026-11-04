@@ -59,6 +59,7 @@ class GEO_Manager {
 
         // Add author E-E-A-T structured data
         add_action( 'wp_head', [ $this, 'render_author_eeat' ], 13 );
+        add_filter( 'jat_search_intel_schema_graph', [ $this, 'add_graph_nodes' ], 10, 2 );
     }
 
     /**
@@ -492,8 +493,43 @@ class GEO_Manager {
      * Render author E-E-A-T (Experience, Expertise, Authoritativeness, Trustworthiness) schema.
      */
     public function render_author_eeat(): void {
+        if ( $this->in_graph() ) {
+            return; // Merged into the author Person node of the shared graph.
+        }
+
+        $author_schema = $this->get_author_eeat_node();
+        if ( $author_schema ) {
+            printf(
+                '<script type="application/ld+json">%s</script>' . "\n",
+                wp_json_encode( $author_schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT )
+            );
+        }
+    }
+
+    /**
+     * Add the author's E-E-A-T details to the shared graph (merged by @id).
+     *
+     * @param array $nodes   Graph nodes.
+     * @param array $context Graph context.
+     * @return array
+     */
+    public function add_graph_nodes( array $nodes, array $context = [] ): array {
+        $author = $this->get_author_eeat_node();
+        if ( $author ) {
+            unset( $author['@context'] );
+            $nodes[] = $author;
+        }
+        return $nodes;
+    }
+
+    /**
+     * Person node with consented E-E-A-T signals for the current post's author.
+     *
+     * @return array<string,mixed>|null
+     */
+    public function get_author_eeat_node(): ?array {
         if ( ! is_singular() ) {
-            return;
+            return null;
         }
 
         $post_id   = get_queried_object_id();
@@ -502,7 +538,7 @@ class GEO_Manager {
         // Respect E-E-A-T consent — skip if author has not opted in.
         $consent = get_user_meta( $author_id, 'jat_search_intel_eeat_consent', true );
         if ( '1' !== $consent ) {
-            return;
+            return null;
         }
 
         // Author credentials
@@ -514,7 +550,7 @@ class GEO_Manager {
         if ( ! $credentials && ! $expertise ) {
             // Fall back to global setting
             if ( empty( $this->settings['author_expertise'] ) ) {
-                return;
+                return null;
             }
         }
 
@@ -558,10 +594,7 @@ class GEO_Manager {
             $author_schema['image'] = $avatar_url;
         }
 
-        printf(
-            '<script type="application/ld+json">%s</script>' . "\n",
-            wp_json_encode( $author_schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT )
-        );
+        return $author_schema;
     }
 
     /**
@@ -763,5 +796,14 @@ class GEO_Manager {
             'max'    => $max,
             'checks' => $checks,
         ];
+    }
+
+    /**
+     * Whether JSON-LD goes into the shared @graph printed by Schema_Manager.
+     *
+     * @return bool
+     */
+    private function in_graph(): bool {
+        return ! empty( $this->settings['enable_schema'] );
     }
 }

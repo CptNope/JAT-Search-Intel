@@ -47,6 +47,7 @@ class Local_Business {
 
 		if ( ! empty( $settings['enable_local_business'] ) ) {
 			add_action( 'wp_head', [ $this, 'render_schema' ], 12 );
+			add_filter( 'jat_search_intel_schema_graph', [ $this, 'add_graph_nodes' ], 10, 2 );
 		}
 	}
 
@@ -54,6 +55,10 @@ class Local_Business {
 	 * Render Local Business JSON-LD schema in wp_head.
 	 */
 	public function render_schema(): void {
+		if ( $this->in_graph() ) {
+			return; // Added to the shared graph via add_graph_nodes().
+		}
+
 		$locations = $this->get_locations();
 
 		if ( empty( $locations ) ) {
@@ -66,6 +71,31 @@ class Local_Business {
 				echo '<script type="application/ld+json">' . wp_json_encode( $schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) . '</script>' . "\n";
 			}
 		}
+	}
+
+	/**
+	 * Add LocalBusiness nodes to the shared graph, linked to the publisher.
+	 *
+	 * @param array $nodes   Graph nodes.
+	 * @param array $context Graph context.
+	 * @return array
+	 */
+	public function add_graph_nodes( array $nodes, array $context = [] ): array {
+		foreach ( $this->get_locations() as $i => $location ) {
+			$node = $this->build_location_schema( $location );
+			if ( ! $node ) {
+				continue;
+			}
+			unset( $node['@context'] );
+			if ( empty( $node['@id'] ) ) {
+				$node['@id'] = home_url( '/#localbusiness-' . ( (int) $i + 1 ) );
+			}
+			if ( ! empty( $context['publisher_id'] ) ) {
+				$node['parentOrganization'] = [ '@id' => $context['publisher_id'] ];
+			}
+			$nodes[] = $node;
+		}
+		return $nodes;
 	}
 
 	/**
@@ -271,5 +301,14 @@ class Local_Business {
 	public function get_location( int $index ): ?array {
 		$locations = $this->get_locations();
 		return $locations[ $index ] ?? null;
+	}
+
+	/**
+	 * Whether JSON-LD goes into the shared @graph printed by Schema_Manager.
+	 *
+	 * @return bool
+	 */
+	private function in_graph(): bool {
+		return ! empty( $this->settings['enable_schema'] );
 	}
 }

@@ -335,6 +335,17 @@ function is_front_page(): bool {
     return false;
 }
 
+function wp_get_document_title(): string {
+    global $si_test_state;
+    return $si_test_state['document_title'] ?? 'Test Page';
+}
+
+if ( ! function_exists( 'strip_shortcodes' ) ) {
+    function strip_shortcodes( string $content ): string {
+        return preg_replace( '/\[[^\]]+\]/', '', $content );
+    }
+}
+
 function is_home(): bool {
     return false;
 }

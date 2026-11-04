@@ -41,6 +41,7 @@ class Schema_Types {
 
 		if ( ! empty( $settings['enable_schema_types'] ) ) {
 			add_action( 'wp_head', [ $this, 'render_schemas' ], 15 );
+			add_filter( 'jat_search_intel_schema_graph', [ $this, 'add_graph_nodes' ], 10, 2 );
 			add_filter( 'jat_search_intel_singular_schema', [ $this, 'inject_schema_type' ], 10, 2 );
 		}
 	}
@@ -49,8 +50,49 @@ class Schema_Types {
 	 * Render additional schema types as standalone JSON-LD blocks.
 	 */
 	public function render_schemas(): void {
+		if ( $this->in_graph() ) {
+			return; // Added to the shared graph via add_graph_nodes().
+		}
+
+		foreach ( $this->get_type_nodes() as $schema ) {
+			$output = array_merge( [ '@context' => 'https://schema.org' ], $schema );
+			printf(
+				"\n" . '<script type="application/ld+json">%s</script>' . "\n",
+				wp_json_encode( $output, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT )
+			);
+		}
+	}
+
+	/**
+	 * Add the extra schema type nodes to the shared graph.
+	 *
+	 * @param array $nodes   Graph nodes.
+	 * @param array $context Graph context.
+	 * @return array
+	 */
+	public function add_graph_nodes( array $nodes, array $context = [] ): array {
+		foreach ( $this->get_type_nodes() as $i => $node ) {
+			unset( $node['@context'] );
+			if ( empty( $node['@id'] ) && ! empty( $context['page_id'] ) ) {
+				$type        = is_array( $node['@type'] ) ? reset( $node['@type'] ) : (string) $node['@type'];
+				$node['@id'] = $context['page_id'] . '#' . strtolower( $type ) . ( $i ? '-' . $i : '' );
+			}
+			if ( ! empty( $context['page_id'] ) ) {
+				$node['mainEntityOfPage'] = [ '@id' => $context['page_id'] ];
+			}
+			$nodes[] = $node;
+		}
+		return $nodes;
+	}
+
+	/**
+	 * Extra schema type nodes for the current singular request.
+	 *
+	 * @return array<int,array<string,mixed>>
+	 */
+	public function get_type_nodes(): array {
 		if ( ! is_singular() ) {
-			return;
+			return [];
 		}
 
 		$post_id = get_queried_object_id();
@@ -74,13 +116,7 @@ class Schema_Types {
 			}
 		}
 
-		foreach ( $schemas as $schema ) {
-			$output = array_merge( [ '@context' => 'https://schema.org' ], $schema );
-			printf(
-				"\n" . '<script type="application/ld+json">%s</script>' . "\n",
-				wp_json_encode( $output, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT )
-			);
-		}
+		return $schemas;
 	}
 
 	/**
@@ -561,5 +597,14 @@ class Schema_Types {
 	 */
 	public static function get_types(): array {
 		return self::TYPES;
+	}
+
+	/**
+	 * Whether JSON-LD goes into the shared @graph printed by Schema_Manager.
+	 *
+	 * @return bool
+	 */
+	private function in_graph(): bool {
+		return ! empty( $this->settings['enable_schema'] );
 	}
 }

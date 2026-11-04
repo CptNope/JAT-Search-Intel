@@ -24,6 +24,7 @@ class AEO_Manager {
         }
 
         add_action( 'wp_head', [ $this, 'render_aeo_schema' ], 11 );
+        add_filter( 'jat_search_intel_schema_graph', [ $this, 'add_graph_nodes' ], 10, 2 );
         add_action( 'wp_head', [ $this, 'render_speakable' ], 12 );
         add_action( 'wp_head', [ $this, 'render_direct_answer_meta' ], 13 );
 
@@ -181,8 +182,27 @@ class AEO_Manager {
      * Render AEO-specific schema (FAQ, HowTo) from post meta.
      */
     public function render_aeo_schema(): void {
+        if ( $this->in_graph() ) {
+            return; // Added to the shared graph via add_graph_nodes().
+        }
+
+        foreach ( $this->get_aeo_nodes() as $schema ) {
+            $output = array_merge( [ '@context' => 'https://schema.org' ], $schema );
+            printf(
+                '<script type="application/ld+json">%s</script>' . "\n",
+                wp_json_encode( $output, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT )
+            );
+        }
+    }
+
+    /**
+     * FAQPage / HowTo nodes for the current singular request.
+     *
+     * @return array<int,array<string,mixed>>
+     */
+    public function get_aeo_nodes(): array {
         if ( ! is_singular() ) {
-            return;
+            return [];
         }
 
         $post_id = get_queried_object_id();
@@ -204,13 +224,40 @@ class AEO_Manager {
             }
         }
 
-        foreach ( $schemas as $schema ) {
-            $output = array_merge( [ '@context' => 'https://schema.org' ], $schema );
-            printf(
-                '<script type="application/ld+json">%s</script>' . "\n",
-                wp_json_encode( $output, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT )
-            );
+        return $schemas;
+    }
+
+    /**
+     * Add FAQ, HowTo and Speakable data to the shared JSON-LD graph.
+     *
+     * @param array $nodes   Graph nodes.
+     * @param array $context Graph context (page_id, ...).
+     * @return array
+     */
+    public function add_graph_nodes( array $nodes, array $context = [] ): array {
+        $page_id = $context['page_id'] ?? '';
+
+        foreach ( $this->get_aeo_nodes() as $node ) {
+            unset( $node['@context'] );
+            $type        = is_array( $node['@type'] ) ? reset( $node['@type'] ) : $node['@type'];
+            $node['@id'] = $page_id . '#' . strtolower( (string) $type );
+            if ( $page_id ) {
+                $node['isPartOf'] = [ '@id' => $page_id ];
+            }
+            $nodes[] = $node;
         }
+
+        $speakable = $this->get_speakable_node();
+        if ( $speakable && $page_id ) {
+            // Same @id as the WebPage node, so it is merged into it.
+            $nodes[] = [
+                '@type'     => 'WebPage',
+                '@id'       => $page_id,
+                'speakable' => $speakable['speakable'],
+            ];
+        }
+
+        return $nodes;
     }
 
     /**
@@ -376,8 +423,29 @@ class AEO_Manager {
      * Render Speakable schema for voice assistant optimization.
      */
     public function render_speakable(): void {
-        if ( empty( $this->settings['enable_speakable'] ) || ! is_singular() ) {
+        if ( $this->in_graph() ) {
+            return; // Merged into the WebPage node of the shared graph.
+        }
+
+        $schema = $this->get_speakable_node();
+        if ( ! $schema ) {
             return;
+        }
+
+        printf(
+            '<script type="application/ld+json">%s</script>' . "\n",
+            wp_json_encode( $schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT )
+        );
+    }
+
+    /**
+     * Speakable WebPage node for the current singular request.
+     *
+     * @return array<string,mixed>|null
+     */
+    public function get_speakable_node(): ?array {
+        if ( empty( $this->settings['enable_speakable'] ) || ! is_singular() ) {
+            return null;
         }
 
         $post_id   = get_queried_object_id();
@@ -404,10 +472,7 @@ class AEO_Manager {
             ],
         ];
 
-        printf(
-            '<script type="application/ld+json">%s</script>' . "\n",
-            wp_json_encode( $schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT )
-        );
+        return $schema;
     }
 
     /**
@@ -579,5 +644,14 @@ class AEO_Manager {
             'max'    => $max,
             'checks' => $checks,
         ];
+    }
+
+    /**
+     * Whether JSON-LD goes into the shared @graph printed by Schema_Manager.
+     *
+     * @return bool
+     */
+    private function in_graph(): bool {
+        return ! empty( $this->settings['enable_schema'] );
     }
 }
