@@ -199,7 +199,8 @@ class Redirect_Manager {
 		// Upsert — increment hit_count if URL already logged.
 		$existing = $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT id FROM {$table} WHERE url = %s LIMIT 1",
+				'SELECT id FROM %i WHERE url = %s LIMIT 1',
+				$table,
 				$url
 			)
 		);
@@ -207,7 +208,8 @@ class Redirect_Manager {
 		if ( $existing ) {
 			$wpdb->query(
 				$wpdb->prepare(
-					"UPDATE {$table} SET hit_count = hit_count + 1, last_hit = NOW(), referrer = %s, user_agent = %s, ip_hash = %s WHERE id = %d",
+					'UPDATE %i SET hit_count = hit_count + 1, last_hit = NOW(), referrer = %s, user_agent = %s, ip_hash = %s WHERE id = %d',
+					$table,
 					$referrer,
 					$user_agent,
 					$ip_hash,
@@ -307,7 +309,8 @@ class Redirect_Manager {
 
 		return (int) $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT id FROM {$table} WHERE match_type = 'exact' AND source_url = %s AND enabled = 1 ORDER BY id ASC LIMIT 1",
+				"SELECT id FROM %i WHERE match_type = 'exact' AND source_url = %s AND enabled = 1 ORDER BY id ASC LIMIT 1",
+				$table,
 				$request_path
 			)
 		);
@@ -342,11 +345,14 @@ class Redirect_Manager {
 			'regex'       => [],
 		];
 
-		$exact_count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE match_type = 'exact' AND enabled = 1" );
+		$exact_count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE match_type = 'exact' AND enabled = 1", $table ) );
 		$index['exact_in_db'] = $exact_count > self::INDEX_EXACT_LIMIT;
 
-		$types = $index['exact_in_db'] ? "'prefix','regex'" : "'exact','prefix','regex'";
-		$rows  = $wpdb->get_results( "SELECT id, source_url, match_type FROM {$table} WHERE enabled = 1 AND match_type IN ({$types}) ORDER BY id ASC" );
+		if ( $index['exact_in_db'] ) {
+			$rows = $wpdb->get_results( $wpdb->prepare( "SELECT id, source_url, match_type FROM %i WHERE enabled = 1 AND match_type IN ('prefix','regex') ORDER BY id ASC", $table ) );
+		} else {
+			$rows = $wpdb->get_results( $wpdb->prepare( 'SELECT id, source_url, match_type FROM %i WHERE enabled = 1 ORDER BY id ASC', $table ) );
+		}
 
 		foreach ( (array) $rows as $row ) {
 			$source = (string) $row->source_url;
@@ -397,7 +403,7 @@ class Redirect_Manager {
 	public function get_redirect( int $id ) {
 		global $wpdb;
 		$table = $wpdb->prefix . self::TABLE_REDIRECTS;
-		return $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $id ) );
+		return $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM %i WHERE id = %d', $table, $id ) );
 	}
 
 	/**
@@ -420,18 +426,29 @@ class Redirect_Manager {
 		}
 		$order = strtoupper( $order ) === 'ASC' ? 'ASC' : 'DESC';
 
-		$where = '';
+		$offset = ( max( 1, $page ) - 1 ) * $per_page;
+
 		if ( $search ) {
 			$like  = '%' . $wpdb->esc_like( $search ) . '%';
-			$where = $wpdb->prepare( ' WHERE source_url LIKE %s OR target_url LIKE %s OR note LIKE %s', $like, $like, $like );
+			$total = (int) $wpdb->get_var(
+				$wpdb->prepare( 'SELECT COUNT(*) FROM %i WHERE source_url LIKE %s OR target_url LIKE %s OR note LIKE %s', $table, $like, $like, $like )
+			);
+			// $order is whitelisted to ASC/DESC above; $orderby is passed as an identifier.
+			$items = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT * FROM %i WHERE source_url LIKE %s OR target_url LIKE %s OR note LIKE %s ORDER BY %i {$order} LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					$table, $like, $like, $like, $orderby, $per_page, $offset
+				)
+			);
+		} else {
+			$total = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i', $table ) );
+			$items = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT * FROM %i ORDER BY %i {$order} LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					$table, $orderby, $per_page, $offset
+				)
+			);
 		}
-
-		$total = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}{$where}" );
-
-		$offset = ( $page - 1 ) * $per_page;
-		$items  = $wpdb->get_results(
-			"SELECT * FROM {$table}{$where} ORDER BY {$orderby} {$order} LIMIT {$per_page} OFFSET {$offset}"
-		);
 
 		return [
 			'items' => $items ?: [],
@@ -525,10 +542,10 @@ class Redirect_Manager {
 		global $wpdb;
 		$table = $wpdb->prefix . self::TABLE_404_LOG;
 
-		$total  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
-		$offset = ( $page - 1 ) * $per_page;
+		$total  = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i', $table ) );
+		$offset = ( max( 1, $page ) - 1 ) * $per_page;
 		$items  = $wpdb->get_results(
-			"SELECT * FROM {$table} ORDER BY hit_count DESC, last_hit DESC LIMIT {$per_page} OFFSET {$offset}"
+			$wpdb->prepare( 'SELECT * FROM %i ORDER BY hit_count DESC, last_hit DESC LIMIT %d OFFSET %d', $table, $per_page, $offset )
 		);
 
 		return [
@@ -543,7 +560,7 @@ class Redirect_Manager {
 	public function clear_404_log(): void {
 		global $wpdb;
 		$table = $wpdb->prefix . self::TABLE_404_LOG;
-		$wpdb->query( "TRUNCATE TABLE {$table}" );
+		$wpdb->query( $wpdb->prepare( 'TRUNCATE TABLE %i', $table ) );
 	}
 
 	/**
@@ -554,9 +571,9 @@ class Redirect_Manager {
 	public function export_csv(): string {
 		global $wpdb;
 		$table = $wpdb->prefix . self::TABLE_REDIRECTS;
-		$rows  = $wpdb->get_results( "SELECT source_url, target_url, status_code, match_type, enabled, note FROM {$table} ORDER BY id ASC", ARRAY_A );
+		$rows  = $wpdb->get_results( $wpdb->prepare( 'SELECT source_url, target_url, status_code, match_type, enabled, note FROM %i ORDER BY id ASC', $table ), ARRAY_A );
 
-		$output = fopen( 'php://temp', 'r+' );
+		$output = fopen( 'php://temp', 'r+' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- In-memory stream for fputcsv().
 		fputcsv( $output, [ 'source_url', 'target_url', 'status_code', 'match_type', 'enabled', 'note' ] );
 
 		foreach ( $rows as $row ) {
@@ -565,7 +582,7 @@ class Redirect_Manager {
 
 		rewind( $output );
 		$csv = stream_get_contents( $output );
-		fclose( $output );
+		fclose( $output ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
 
 		return $csv !== false ? $csv : '';
 	}
@@ -707,7 +724,7 @@ class Redirect_Manager {
 	 * Render the Redirect Rules tab.
 	 */
 	private function render_redirects_tab(): void {
-		$page     = max( 1, (int) ( $_GET['paged'] ?? 1 ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only view/pagination parameter.
+		$page     = max( 1, absint( $_GET['paged'] ?? 1 ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only view/pagination parameter.
 		$search   = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only view/pagination parameter.
 		$orderby  = sanitize_key( $_GET['orderby'] ?? 'id' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only view/pagination parameter.
 		$order    = sanitize_key( $_GET['order'] ?? 'DESC' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only view/pagination parameter.
@@ -842,7 +859,7 @@ class Redirect_Manager {
 	 * Render the 404 Log tab.
 	 */
 	private function render_404_log_tab(): void {
-		$page   = max( 1, (int) ( $_GET['paged'] ?? 1 ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only view/pagination parameter.
+		$page   = max( 1, absint( $_GET['paged'] ?? 1 ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only view/pagination parameter.
 		$result = $this->get_404_log( $page, 50 );
 		$items  = $result['items'];
 		$total  = $result['total'];
@@ -850,7 +867,7 @@ class Redirect_Manager {
 		?>
 		<div style="margin-top: 20px;">
 			<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-				<p><?php printf( esc_html__( '%s unique 404 URLs logged.', 'jat-search-intel' ), '<strong>' . esc_html( number_format_i18n( $total ) ) . '</strong>' ); ?></p>
+				<p><?php /* translators: %s: number of logged 404 URLs. */ printf( esc_html__( '%s unique 404 URLs logged.', 'jat-search-intel' ), '<strong>' . esc_html( number_format_i18n( $total ) ) . '</strong>' ); ?></p>
 				<button type="button" class="button" id="si-clear-404-log"><?php esc_html_e( 'Clear Log', 'jat-search-intel' ); ?></button>
 			</div>
 			<table class="wp-list-table widefat fixed striped">
@@ -912,10 +929,10 @@ class Redirect_Manager {
 		}
 
 		$data = [
-			'id'          => (int) ( $_POST['id'] ?? 0 ),
+			'id'          => absint( $_POST['id'] ?? 0 ),
 			'source_url'  => sanitize_text_field( wp_unslash( $_POST['source_url'] ?? '' ) ),
 			'target_url'  => sanitize_text_field( wp_unslash( $_POST['target_url'] ?? '' ) ),
-			'status_code' => (int) ( $_POST['status_code'] ?? 301 ),
+			'status_code' => absint( $_POST['status_code'] ?? 301 ),
 			'match_type'  => sanitize_key( $_POST['match_type'] ?? 'exact' ),
 			'enabled'     => ! empty( $_POST['enabled'] ),
 			'note'        => sanitize_text_field( wp_unslash( $_POST['note'] ?? '' ) ),
@@ -938,7 +955,7 @@ class Redirect_Manager {
 			wp_send_json_error( 'Unauthorized' );
 		}
 
-		$id = (int) ( $_POST['id'] ?? 0 );
+		$id = absint( $_POST['id'] ?? 0 );
 		if ( $this->delete_redirect( $id ) ) {
 			wp_send_json_success();
 		} else {
@@ -976,8 +993,12 @@ class Redirect_Manager {
 			wp_send_json_error( 'No file uploaded.' );
 		}
 
-		$file = $_FILES['csv_file'];
-		$csv  = file_get_contents( $file['tmp_name'] );
+		// tmp_name is a server-generated path; it must not be unslashed (Windows paths).
+		$tmp = isset( $_FILES['csv_file']['tmp_name'] ) ? (string) $_FILES['csv_file']['tmp_name'] : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+		if ( '' === $tmp || ! is_uploaded_file( $tmp ) ) {
+			wp_send_json_error( 'Invalid upload.' );
+		}
+		$csv = file_get_contents( $tmp ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reading PHP's temp upload file.
 
 		if ( false === $csv ) {
 			wp_send_json_error( 'Failed to read file.' );
@@ -1010,7 +1031,8 @@ class Redirect_Manager {
 		$table = $wpdb->prefix . self::TABLE_REDIRECTS;
 		$wpdb->query(
 			$wpdb->prepare(
-				"UPDATE {$table} SET hit_count = hit_count + 1, last_hit = NOW() WHERE id = %d",
+				'UPDATE %i SET hit_count = hit_count + 1, last_hit = NOW() WHERE id = %d',
+				$table,
 				$id
 			)
 		);

@@ -590,7 +590,7 @@ class AI_Optimizer {
 		check_ajax_referer( 'search_intel_nonce', 'nonce' );
 
 		$post_id       = absint( $_POST['post_id'] ?? 0 );
-		$suggestion_id = sanitize_text_field( $_POST['suggestion_id'] ?? '' );
+		$suggestion_id = isset( $_POST['suggestion_id'] ) ? sanitize_text_field( wp_unslash( $_POST['suggestion_id'] ) ) : '';
 
 		if ( ! $post_id || ! current_user_can( 'edit_post', $post_id ) ) {
 			wp_send_json_error( [ 'message' => 'Unauthorized.' ], 403 );
@@ -701,7 +701,7 @@ class AI_Optimizer {
 	public function ajax_auto_optimize(): void {
 		check_ajax_referer( 'search_intel_nonce', 'nonce' );
 
-		$post_id = (int) ( $_POST['post_id'] ?? 0 );
+		$post_id = absint( $_POST['post_id'] ?? 0 );
 		if ( ! $post_id || ! current_user_can( 'edit_post', $post_id ) ) {
 			wp_send_json_error( [ 'message' => 'Unauthorized.' ], 403 );
 		}
@@ -885,7 +885,7 @@ class AI_Optimizer {
 	public function ajax_rollback(): void {
 		check_ajax_referer( 'search_intel_nonce', 'nonce' );
 
-		$post_id = (int) ( $_POST['post_id'] ?? 0 );
+		$post_id = absint( $_POST['post_id'] ?? 0 );
 		if ( ! $post_id || ! current_user_can( 'edit_post', $post_id ) ) {
 			wp_send_json_error( [ 'message' => 'Unauthorized.' ], 403 );
 		}

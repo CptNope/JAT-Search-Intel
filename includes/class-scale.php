@@ -332,7 +332,7 @@ class Scale {
 			wp_send_json_error( 'Insufficient permissions.' );
 		}
 
-		$updates = $_POST['updates'] ?? [];
+		$updates = isset( $_POST['updates'] ) ? wp_unslash( $_POST['updates'] ) : []; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Each field is sanitized individually below.
 		if ( ! is_array( $updates ) ) {
 			wp_send_json_error( 'Invalid data.' );
 		}

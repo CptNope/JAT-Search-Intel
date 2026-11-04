@@ -331,5 +331,4 @@ class Sitemap {
 
         return gmdate( 'c' );
     }
-
 }

@@ -404,8 +404,8 @@ class Visibility_Dashboard {
 			return;
 		}
 
-		$user_agent = sanitize_text_field( $_SERVER['HTTP_USER_AGENT'] ?? '' );
-		$ip         = sanitize_text_field( $_SERVER['REMOTE_ADDR'] ?? '' );
+		$user_agent = isset( $_SERVER['HTTP_USER_AGENT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : '';
+		$ip         = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
 		$bot        = $this->identify_ai_bot( $user_agent );
 
 		$log = get_option( 'search_intel_llms_access_log', [] );

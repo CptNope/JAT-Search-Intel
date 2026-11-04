@@ -259,7 +259,8 @@ class Link_Checker {
 				<?php
 				if ( $last_scan ) {
 					printf(
-						esc_html__( 'Last full scan: %s. Found %d broken links.', 'jat-search-intel' ),
+						/* translators: %1$s: value, %2$d: number. */
+						esc_html__( 'Last full scan: %1$s. Found %2$d broken links.', 'jat-search-intel' ),
 						'<strong>' . esc_html( $last_scan ) . '</strong>',
 						count( $links )
 					);

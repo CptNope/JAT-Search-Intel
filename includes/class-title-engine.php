@@ -206,6 +206,7 @@ class Title_Engine {
     private function get_var_page(): string {
         $paged = get_query_var( 'paged', 0 );
         if ( $paged > 1 ) {
+            /* translators: %d: number. */
             return sprintf( __( 'Page %d', 'jat-search-intel' ), $paged );
         }
 

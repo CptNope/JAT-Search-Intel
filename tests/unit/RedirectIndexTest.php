@@ -36,7 +36,11 @@ class RedirectIndexTest extends TestCase {
 			public $rows = [];
 
 			public function prepare( string $query, ...$args ): string {
-				return vsprintf( str_replace( [ '%s', '%d' ], [ "'%s'", '%d' ], $query ), $args );
+				$i = 0;
+				return preg_replace_callback( '/%[sdi]/', static function ( $m ) use ( $args, &$i ) {
+					$value = $args[ $i++ ] ?? '';
+					return '%s' === $m[0] ? "'" . $value . "'" : (string) $value;
+				}, $query );
 			}
 			public function get_var( string $query ) {
 				$this->queries++;

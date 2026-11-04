@@ -166,7 +166,7 @@ class Custom_Reports {
             return '';
         }
 
-        $output = fopen( 'php://temp', 'r+' );
+        $output = fopen( 'php://temp', 'r+' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- In-memory stream for fputcsv().
         if ( $output === false ) {
             return '';
         }
@@ -195,7 +195,7 @@ class Custom_Reports {
 
         rewind( $output );
         $csv = stream_get_contents( $output );
-        fclose( $output );
+        fclose( $output ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
 
         return $csv !== false ? $csv : '';
     }

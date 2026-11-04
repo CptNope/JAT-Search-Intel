@@ -321,7 +321,8 @@ class GEO_Manager {
     public function serve_llms_txt(): void {
         // Check REQUEST_URI directly instead of query vars so we serve
         // our version regardless of which plugin's rewrite rule matched.
-        $path         = trim( wp_parse_url( $_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH ) ?: '', '/' );
+        $request_uri  = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+        $path         = trim( (string) wp_parse_url( $request_uri, PHP_URL_PATH ), '/' );
         $is_llms      = ( 'llms.txt' === $path );
         $is_llms_full = ( 'llms-full.txt' === $path );
 
@@ -750,8 +751,10 @@ class GEO_Manager {
         $word_count = str_word_count( $content );
         if ( $word_count >= 800 ) {
             $score += 10;
+            /* translators: %d: number. */
             $checks[] = [ 'pass' => true, 'label' => sprintf( __( 'Good content depth (%d words)', 'jat-search-intel' ), $word_count ) ];
         } else {
+            /* translators: %d: number. */
             $checks[] = [ 'pass' => false, 'label' => sprintf( __( 'Increase content depth (currently %d words, aim for 800+)', 'jat-search-intel' ), $word_count ) ];
         }
 

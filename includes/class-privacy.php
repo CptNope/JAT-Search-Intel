@@ -63,6 +63,21 @@ class Privacy {
 	}
 
 	/**
+	 * Translated labels for the exported user meta keys.
+	 *
+	 * @return array<string,string>
+	 */
+	private function get_meta_labels(): array {
+		return [
+			'search_intel_credentials'     => __( 'Credentials / Qualifications', 'jat-search-intel' ),
+			'search_intel_expertise_areas' => __( 'Areas of Expertise', 'jat-search-intel' ),
+			'search_intel_years_experience' => __( 'Years of Experience', 'jat-search-intel' ),
+			'search_intel_social_profiles' => __( 'Social / Professional Profiles', 'jat-search-intel' ),
+			'search_intel_eeat_consent'    => __( 'E-E-A-T Data Consent', 'jat-search-intel' ),
+		];
+	}
+
+	/**
 	 * Export personal data for a user by email.
 	 *
 	 * @param string $email_address User email.
@@ -81,6 +96,8 @@ class Privacy {
 
 		$data = [];
 
+		$labels = $this->get_meta_labels();
+
 		foreach ( self::USER_META_KEYS as $meta_key => $label ) {
 			$value = get_user_meta( $user->ID, $meta_key, true );
 
@@ -93,7 +110,7 @@ class Privacy {
 			}
 
 			$data[] = [
-				'name'  => __( $label, 'jat-search-intel' ),
+				'name'  => $labels[ $meta_key ] ?? $label,
 				'value' => (string) $value,
 			];
 		}

@@ -139,12 +139,12 @@ class AI_Engine {
             return '';
         }
         if ( ! function_exists( 'openssl_encrypt' ) ) {
-            return base64_encode( $plaintext ); // Fallback — not truly secure.
+            return $plaintext; // No OpenSSL: stored as-is rather than pretending to encrypt.
         }
         $key    = $this->get_encryption_key();
         $iv     = openssl_random_pseudo_bytes( 16 );
         $cipher = openssl_encrypt( $plaintext, 'aes-256-cbc', $key, OPENSSL_RAW_DATA, $iv );
-        return base64_encode( $iv . $cipher );
+        return base64_encode( $iv . $cipher ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- Encoding binary ciphertext for storage, not obfuscation.
     }
 
     /**
@@ -158,10 +158,10 @@ class AI_Engine {
             return '';
         }
         if ( ! function_exists( 'openssl_decrypt' ) ) {
-            return base64_decode( $ciphertext ); // Fallback.
+            return $ciphertext;
         }
         $key  = $this->get_encryption_key();
-        $data = base64_decode( $ciphertext );
+        $data = base64_decode( $ciphertext ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- Encoding binary ciphertext for storage, not obfuscation.
         if ( strlen( $data ) < 17 ) {
             return '';
         }

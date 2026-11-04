@@ -213,8 +213,10 @@ class Content_Analyzer {
             $desc_len = strlen( $description );
             if ( $desc_len >= 50 && $desc_len <= 160 ) {
                 $score += 10;
+                /* translators: %d: number. */
                 $checks[] = [ 'pass' => true, 'label' => sprintf( __( 'Meta description length is good (%d chars)', 'jat-search-intel' ), $desc_len ) ];
             } else {
+                /* translators: %d: number. */
                 $checks[] = [ 'pass' => false, 'label' => sprintf( __( 'Meta description should be 50-160 chars (currently %d)', 'jat-search-intel' ), $desc_len ) ];
             }
         } else {
@@ -225,9 +227,11 @@ class Content_Analyzer {
         $title_len = strlen( $title );
         if ( $title_len >= 30 && $title_len <= 60 ) {
             $score += 10;
+            /* translators: %d: number. */
             $checks[] = [ 'pass' => true, 'label' => sprintf( __( 'Title length is optimal (%d chars)', 'jat-search-intel' ), $title_len ) ];
         } elseif ( $title_len > 0 ) {
             $score += 3;
+            /* translators: %d: number. */
             $checks[] = [ 'pass' => false, 'label' => sprintf( __( 'Title should be 30-60 chars (currently %d)', 'jat-search-intel' ), $title_len ) ];
         } else {
             $checks[] = [ 'pass' => false, 'label' => __( 'Add a title', 'jat-search-intel' ) ];
@@ -236,8 +240,10 @@ class Content_Analyzer {
         // 5. Content length (10 pts)
         if ( $word_count >= 300 ) {
             $score += 10;
+            /* translators: %d: number. */
             $checks[] = [ 'pass' => true, 'label' => sprintf( __( 'Content length is sufficient (%d words)', 'jat-search-intel' ), $word_count ) ];
         } else {
+            /* translators: %d: number. */
             $checks[] = [ 'pass' => false, 'label' => sprintf( __( 'Content should be 300+ words (currently %d)', 'jat-search-intel' ), $word_count ) ];
         }
 
@@ -261,9 +267,11 @@ class Content_Analyzer {
             $density  = ( $kw_count / $word_count ) * 100;
             if ( $density >= 0.5 && $density <= 2.5 ) {
                 $score += 10;
+                /* translators: placeholder value. */
                 $checks[] = [ 'pass' => true, 'label' => sprintf( __( 'Keyword density is good (%.1f%%)', 'jat-search-intel' ), $density ) ];
             } elseif ( $density > 0 ) {
                 $score += 3;
+                /* translators: placeholder value. */
                 $checks[] = [ 'pass' => false, 'label' => sprintf( __( 'Keyword density is %.1f%% (aim for 0.5-2.5%%)', 'jat-search-intel' ), $density ) ];
             } else {
                 $checks[] = [ 'pass' => false, 'label' => __( 'Focus keyword not found in content', 'jat-search-intel' ) ];
@@ -290,7 +298,8 @@ class Content_Analyzer {
                 $checks[] = [ 'pass' => true, 'label' => __( 'All images have alt text', 'jat-search-intel' ) ];
             } else {
                 $score += 3;
-                $checks[] = [ 'pass' => false, 'label' => sprintf( __( '%d of %d images missing alt text', 'jat-search-intel' ), $total_imgs - $with_alt, $total_imgs ) ];
+                /* translators: %1$d: number, %2$d: number. */
+                $checks[] = [ 'pass' => false, 'label' => sprintf( __( '%1$d of %2$d images missing alt text', 'jat-search-intel' ), $total_imgs - $with_alt, $total_imgs ) ];
             }
         } elseif ( $word_count > 300 ) {
             $checks[] = [ 'pass' => false, 'label' => __( 'Add images to make content more engaging', 'jat-search-intel' ) ];
@@ -308,6 +317,7 @@ class Content_Analyzer {
         }
         if ( $internal_links >= 2 ) {
             $score += 7;
+            /* translators: %d: number. */
             $checks[] = [ 'pass' => true, 'label' => sprintf( __( '%d internal links found', 'jat-search-intel' ), $internal_links ) ];
         } else {
             $checks[] = [ 'pass' => false, 'label' => __( 'Add at least 2 internal links', 'jat-search-intel' ) ];
@@ -344,6 +354,7 @@ class Content_Analyzer {
         $q_headings = preg_match_all( '/<h[2-3][^>]*>.*?\?.*?<\/h[2-3]>/i', $content );
         if ( $q_headings >= 2 ) {
             $score += 20;
+            /* translators: %d: number. */
             $checks[] = [ 'pass' => true, 'label' => sprintf( __( '%d question-style headings found', 'jat-search-intel' ), $q_headings ) ];
         } elseif ( $q_headings === 1 ) {
             $score += 10;
@@ -448,8 +459,10 @@ class Content_Analyzer {
         // 5. Content depth (15 pts)
         if ( $word_count >= 800 ) {
             $score += 15;
+            /* translators: %d: number. */
             $checks[] = [ 'pass' => true, 'label' => sprintf( __( 'Good content depth (%d words)', 'jat-search-intel' ), $word_count ) ];
         } else {
+            /* translators: %d: number. */
             $checks[] = [ 'pass' => false, 'label' => sprintf( __( 'Aim for 800+ words for topical depth (%d)', 'jat-search-intel' ), $word_count ) ];
         }
 
@@ -607,6 +620,7 @@ class Content_Analyzer {
         } elseif ( $h1_count === 1 ) {
             $checks[] = [ 'pass' => true, 'label' => __( 'Exactly one H1 heading found', 'jat-search-intel' ), 'group' => 'structure' ];
         } else {
+            /* translators: %d: number. */
             $checks[] = [ 'pass' => false, 'label' => sprintf( __( 'Multiple H1 tags found (%d) — use only one', 'jat-search-intel' ), $h1_count ), 'group' => 'structure' ];
         }
 
@@ -645,13 +659,16 @@ class Content_Analyzer {
         }
         $recommended_internal = max( 2, intval( $word_count / 500 ) );
         if ( $internal_links >= $recommended_internal ) {
-            $checks[] = [ 'pass' => true, 'label' => sprintf( __( '%d internal links (recommended: %d+)', 'jat-search-intel' ), $internal_links, $recommended_internal ), 'group' => 'links' ];
+            /* translators: %1$d: number, %2$d: number. */
+            $checks[] = [ 'pass' => true, 'label' => sprintf( __( '%1$d internal links (recommended: %2$d+)', 'jat-search-intel' ), $internal_links, $recommended_internal ), 'group' => 'links' ];
         } else {
-            $checks[] = [ 'pass' => false, 'label' => sprintf( __( 'Add more internal links (%d found, recommend %d+)', 'jat-search-intel' ), $internal_links, $recommended_internal ), 'group' => 'links' ];
+            /* translators: %1$d: number, %2$d: number. */
+            $checks[] = [ 'pass' => false, 'label' => sprintf( __( 'Add more internal links (%1$d found, recommend %2$d+)', 'jat-search-intel' ), $internal_links, $recommended_internal ), 'group' => 'links' ];
         }
 
         // 4. External citation presence scoring
         if ( $external_links >= 1 ) {
+            /* translators: %d: number. */
             $checks[] = [ 'pass' => true, 'label' => sprintf( __( '%d external citations/links found', 'jat-search-intel' ), $external_links ), 'group' => 'credibility' ];
         } else {
             $checks[] = [ 'pass' => false, 'label' => __( 'Add external links to authoritative sources', 'jat-search-intel' ), 'group' => 'credibility' ];
@@ -681,8 +698,10 @@ class Content_Analyzer {
         $entities = get_post_meta( $post_id, '_search_intel_entities', true );
         $entity_count = is_array( $entities ) ? count( $entities ) : 0;
         if ( $entity_count >= 3 ) {
+            /* translators: %d: number. */
             $checks[] = [ 'pass' => true, 'label' => sprintf( __( '%d entities defined for semantic clarity', 'jat-search-intel' ), $entity_count ), 'group' => 'geo' ];
         } elseif ( $entity_count > 0 ) {
+            /* translators: %d: number. */
             $checks[] = [ 'pass' => false, 'label' => sprintf( __( 'Only %d entity defined — aim for 3+ key entities', 'jat-search-intel' ), $entity_count ), 'group' => 'geo' ];
         } else {
             $checks[] = [ 'pass' => false, 'label' => __( 'Define key entities (people, organizations, concepts) in the GEO tab', 'jat-search-intel' ), 'group' => 'geo' ];
@@ -721,9 +740,11 @@ class Content_Analyzer {
             }
             $total_kw = count( $keywords_arr );
             if ( $found === $total_kw ) {
+                /* translators: %d: number. */
                 $checks[] = [ 'pass' => true, 'label' => sprintf( __( 'All %d secondary keywords found in content', 'jat-search-intel' ), $total_kw ), 'group' => 'seo' ];
             } else {
-                $checks[] = [ 'pass' => false, 'label' => sprintf( __( '%d of %d secondary keywords found — add missing ones', 'jat-search-intel' ), $found, $total_kw ), 'group' => 'seo' ];
+                /* translators: %1$d: number, %2$d: number. */
+                $checks[] = [ 'pass' => false, 'label' => sprintf( __( '%1$d of %2$d secondary keywords found — add missing ones', 'jat-search-intel' ), $found, $total_kw ), 'group' => 'seo' ];
             }
         }
 
@@ -735,6 +756,7 @@ class Content_Analyzer {
         if ( $social_count === 3 ) {
             $checks[] = [ 'pass' => true, 'label' => __( 'Social sharing metadata is complete', 'jat-search-intel' ), 'group' => 'social' ];
         } elseif ( $social_count > 0 ) {
+            /* translators: %d: number. */
             $checks[] = [ 'pass' => false, 'label' => sprintf( __( 'Social metadata partially set (%d/3) — add title, description, and image', 'jat-search-intel' ), $social_count ), 'group' => 'social' ];
         } else {
             $checks[] = [ 'pass' => false, 'label' => __( 'Set custom social sharing title, description, and image in the SEO tab', 'jat-search-intel' ), 'group' => 'social' ];
@@ -753,9 +775,11 @@ class Content_Analyzer {
         }
         if ( $total_imgs > 0 ) {
             if ( $missing_alt === 0 ) {
+                /* translators: %d: number. */
                 $checks[] = [ 'pass' => true, 'label' => sprintf( __( 'All %d images have alt text', 'jat-search-intel' ), $total_imgs ), 'group' => 'accessibility' ];
             } else {
-                $checks[] = [ 'pass' => false, 'label' => sprintf( __( '%d of %d images missing alt text', 'jat-search-intel' ), $missing_alt, $total_imgs ), 'group' => 'accessibility' ];
+                /* translators: %1$d: number, %2$d: number. */
+                $checks[] = [ 'pass' => false, 'label' => sprintf( __( '%1$d of %2$d images missing alt text', 'jat-search-intel' ), $missing_alt, $total_imgs ), 'group' => 'accessibility' ];
             }
         }
 

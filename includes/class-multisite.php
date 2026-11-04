@@ -299,7 +299,7 @@ class Multisite {
 		}
 
 		$defaults = Core::get_default_settings();
-		$input    = $_POST['search_intel_network'] ?? [];
+		$input    = isset( $_POST['search_intel_network'] ) ? wp_unslash( $_POST['search_intel_network'] ) : []; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Each field is sanitized individually below.
 		$input    = is_array( $input ) ? $input : [];
 
 		$sanitized = [];

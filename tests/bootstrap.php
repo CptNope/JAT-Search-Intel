@@ -821,8 +821,15 @@ $wpdb = new class {
 
     public function prepare( string $query, ...$args ): string {
         $i = 0;
-        return preg_replace_callback( '/%[sd]/', function () use ( $args, &$i ) {
-            return "'" . ( $args[ $i++ ] ?? '' ) . "'";
+        return preg_replace_callback( '/%[sdi]/', function ( $m ) use ( $args, &$i ) {
+            $value = $args[ $i++ ] ?? '';
+            if ( '%i' === $m[0] ) {
+                return '`' . $value . '`';
+            }
+            if ( '%d' === $m[0] ) {
+                return (string) (int) $value;
+            }
+            return "'" . $value . "'";
         }, $query );
     }
 

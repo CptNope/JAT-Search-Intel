@@ -58,13 +58,13 @@ class SRI {
 			return '';
 		}
 
-		$content = file_get_contents( $file_path );
+		$content = file_get_contents( $file_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Hashing a local plugin asset file.
 		if ( false === $content ) {
 			return '';
 		}
 
 		$hash = hash( self::ALGO, $content, true );
-		return self::ALGO . '-' . base64_encode( $hash );
+		return self::ALGO . '-' . base64_encode( $hash ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- SRI hashes are base64 by specification.
 	}
 
 	/**

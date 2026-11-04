@@ -498,7 +498,7 @@ class Admin {
 
         // FAQs (JSON from repeater)
         if ( isset( $_POST['si_faqs'] ) ) {
-            $faqs = json_decode( wp_unslash( $_POST['si_faqs'] ), true );
+            $faqs = json_decode( wp_unslash( $_POST['si_faqs'] ), true ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Decoded/split, then every element is sanitized.
             if ( is_array( $faqs ) ) {
                 $sanitized_faqs = array_map( function ( $faq ) {
                     return [
@@ -512,13 +512,13 @@ class Admin {
 
         // Topics (comma-separated)
         if ( isset( $_POST['si_topics'] ) ) {
-            $topics = array_filter( array_map( 'sanitize_text_field', explode( ',', wp_unslash( $_POST['si_topics'] ) ) ) );
+            $topics = array_filter( array_map( 'sanitize_text_field', explode( ',', wp_unslash( $_POST['si_topics'] ) ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Decoded/split, then every element is sanitized.
             update_post_meta( $post_id, '_search_intel_topics', $topics );
         }
 
         // Entities (JSON)
         if ( isset( $_POST['si_entities'] ) ) {
-            $entities = json_decode( wp_unslash( $_POST['si_entities'] ), true );
+            $entities = json_decode( wp_unslash( $_POST['si_entities'] ), true ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Decoded/split, then every element is sanitized.
             if ( is_array( $entities ) ) {
                 $sanitized = array_map( function ( $entity ) {
                     return [
@@ -533,7 +533,7 @@ class Admin {
 
         // Citations (JSON from repeater)
         if ( isset( $_POST['si_citations'] ) ) {
-            $citations = json_decode( wp_unslash( $_POST['si_citations'] ), true );
+            $citations = json_decode( wp_unslash( $_POST['si_citations'] ), true ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Decoded/split, then every element is sanitized.
             if ( is_array( $citations ) ) {
                 $sanitized_citations = array_map( function ( $cite ) {
                     return [
@@ -671,13 +671,13 @@ class Admin {
 
         // Credentials
         if ( isset( $_POST['si_credentials'] ) ) {
-            $creds = array_filter( array_map( 'sanitize_text_field', explode( "\n", wp_unslash( $_POST['si_credentials'] ) ) ) );
+            $creds = array_filter( array_map( 'sanitize_text_field', explode( "\n", wp_unslash( $_POST['si_credentials'] ) ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Decoded/split, then every element is sanitized.
             update_user_meta( $user_id, 'search_intel_credentials', $creds );
         }
 
         // Expertise areas
         if ( isset( $_POST['si_expertise_areas'] ) ) {
-            $areas = array_filter( array_map( 'sanitize_text_field', explode( "\n", wp_unslash( $_POST['si_expertise_areas'] ) ) ) );
+            $areas = array_filter( array_map( 'sanitize_text_field', explode( "\n", wp_unslash( $_POST['si_expertise_areas'] ) ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Decoded/split, then every element is sanitized.
             update_user_meta( $user_id, 'search_intel_expertise_areas', $areas );
         }
 
@@ -688,7 +688,7 @@ class Admin {
 
         // Social profiles
         if ( isset( $_POST['si_social_profiles'] ) ) {
-            $profiles = array_filter( array_map( 'esc_url_raw', explode( "\n", wp_unslash( $_POST['si_social_profiles'] ) ) ) );
+            $profiles = array_filter( array_map( 'esc_url_raw', explode( "\n", wp_unslash( $_POST['si_social_profiles'] ) ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Decoded/split, then every element is sanitized.
             update_user_meta( $user_id, 'search_intel_social_profiles', $profiles );
         }
     }

@@ -164,8 +164,8 @@ class Core {
     /** @var array<string,mixed> Settings snapshot used to build lazy modules. */
     private $boot_settings = [];
 
-    /** @var array<string,callable> Factories for modules not built at boot. */
-    private $lazy_factories = [];
+    /** @var array<string,string> Deferred modules: property => class name. */
+    private $lazy_modules = [];
 
     /**
      * Constructor — boot modules.
@@ -214,48 +214,48 @@ class Core {
         $this->ai_optimizer = new AI_Optimizer( $settings, $this );
 
         /*
-         * Conditionally-booted modules: property => [ boot now?, factory ].
+         * Conditionally-booted modules: property => [ boot now?, class ].
          * "Boot now" mirrors exactly when the module's constructor would add hooks.
          */
         $modules = [
-            'privacy'                 => [ $is_admin, function () { return new Privacy(); } ],
-            'migration'               => [ $is_admin, function () use ( $settings ) { return new Migration( $settings ); } ],
-            'robots_txt'              => [ $is_admin || $on( 'enable_robots_editor' ), function () use ( $settings ) { return new Robots_Txt( $settings ); } ],
-            'faq_generator'           => [ $is_admin, function () use ( $settings ) { return new FAQ_Generator( $settings, $this->qa_detector ); } ],
-            'multisite'               => [ is_multisite(), function () use ( $settings ) { return new Multisite( $settings ); } ],
-            'indexnow'                => [ $on( 'enable_indexnow' ) || $on( 'indexnow_api_key' ), function () use ( $settings ) { return new IndexNow( $settings ); } ],
-            'local_business'          => [ $on( 'enable_local_business' ), function () use ( $settings ) { return new Local_Business( $settings ); } ],
-            'audit_log'               => [ $on( 'enable_audit_log' ), function () use ( $settings ) { return new Audit_Log( $settings ); } ],
-            'link_checker'            => [ $on( 'enable_link_checker' ), function () use ( $settings ) { return new Link_Checker( $settings ); } ],
-            'internal_linker'         => [ $on( 'enable_internal_linker' ), function () use ( $settings ) { return new Internal_Linker( $settings ); } ],
-            'csp_headers'             => [ $on( 'enable_csp_headers' ), function () use ( $settings ) { return new CSP_Headers( $settings ); } ],
-            'sri'                     => [ $on( 'enable_sri' ), function () use ( $settings ) { return new SRI( $settings ); } ],
-            'schema_types'            => [ $on( 'enable_schema_types' ), function () use ( $settings ) { return new Schema_Types( $settings ); } ],
-            'qa_detector'             => [ $on( 'enable_qa_detector' ), function () use ( $settings ) { return new QA_Detector( $settings ); } ],
-            'visibility_dashboard'    => [ $on( 'enable_visibility_dashboard' ), function () use ( $settings ) { return new Visibility_Dashboard( $settings ); } ],
-            'citation_graph'          => [ $on( 'enable_citation_graph' ), function () use ( $settings ) { return new Citation_Graph( $settings ); } ],
-            'authority_map'           => [ $on( 'enable_authority_map' ), function () use ( $settings ) { return new Authority_Map( $settings ); } ],
-            'rbac'                    => [ $on( 'enable_rbac' ), function () use ( $settings ) { return new RBAC( $settings ); } ],
-            'multilang'               => [ $on( 'enable_multilang' ), function () use ( $settings ) { return new Multilang( $settings ); } ],
-            'white_label'             => [ $on( 'enable_white_label' ), function () use ( $settings ) { return new White_Label( $settings ); } ],
-            'scale'                   => [ $on( 'enable_scale' ), function () use ( $settings ) { return new Scale( $settings ); } ],
-            'notifications'           => [ $on( 'enable_notifications' ), function () use ( $settings ) { return new Notifications( $settings ); } ],
-            'ai_engine'               => [ false, function () use ( $settings ) { return new AI_Engine( $settings ); } ],
-            'content_decay'           => [ $on( 'enable_content_decay' ), function () use ( $settings ) { return new Content_Decay( $settings ); } ],
-            'keyword_cannibalization' => [ $on( 'enable_cannibalization' ), function () use ( $settings ) { return new Keyword_Cannibalization( $settings ); } ],
-            'advanced_linking'        => [ $on( 'enable_advanced_linking' ), function () use ( $settings ) { return new Advanced_Linking( $settings ); } ],
-            'historical_analytics'    => [ $on( 'enable_historical_analytics' ), function () use ( $settings ) { return new Historical_Analytics( $settings ); } ],
-            'ga4_integration'         => [ $on( 'enable_ga4' ), function () use ( $settings ) { return new GA4_Integration( $settings ); } ],
-            'core_web_vitals'         => [ $on( 'enable_cwv' ), function () use ( $settings ) { return new Core_Web_Vitals( $settings ); } ],
-            'custom_reports'          => [ $on( 'enable_custom_reports' ), function () use ( $settings ) { return new Custom_Reports( $settings ); } ],
+            'privacy'                 => [ $is_admin, Privacy::class ],
+            'migration'               => [ $is_admin, Migration::class ],
+            'robots_txt'              => [ $is_admin || $on( 'enable_robots_editor' ), Robots_Txt::class ],
+            'faq_generator'           => [ $is_admin, FAQ_Generator::class ],
+            'multisite'               => [ is_multisite(), Multisite::class ],
+            'indexnow'                => [ $on( 'enable_indexnow' ) || $on( 'indexnow_api_key' ), IndexNow::class ],
+            'local_business'          => [ $on( 'enable_local_business' ), Local_Business::class ],
+            'audit_log'               => [ $on( 'enable_audit_log' ), Audit_Log::class ],
+            'link_checker'            => [ $on( 'enable_link_checker' ), Link_Checker::class ],
+            'internal_linker'         => [ $on( 'enable_internal_linker' ), Internal_Linker::class ],
+            'csp_headers'             => [ $on( 'enable_csp_headers' ), CSP_Headers::class ],
+            'sri'                     => [ $on( 'enable_sri' ), SRI::class ],
+            'schema_types'            => [ $on( 'enable_schema_types' ), Schema_Types::class ],
+            'qa_detector'             => [ $on( 'enable_qa_detector' ), QA_Detector::class ],
+            'visibility_dashboard'    => [ $on( 'enable_visibility_dashboard' ), Visibility_Dashboard::class ],
+            'citation_graph'          => [ $on( 'enable_citation_graph' ), Citation_Graph::class ],
+            'authority_map'           => [ $on( 'enable_authority_map' ), Authority_Map::class ],
+            'rbac'                    => [ $on( 'enable_rbac' ), RBAC::class ],
+            'multilang'               => [ $on( 'enable_multilang' ), Multilang::class ],
+            'white_label'             => [ $on( 'enable_white_label' ), White_Label::class ],
+            'scale'                   => [ $on( 'enable_scale' ), Scale::class ],
+            'notifications'           => [ $on( 'enable_notifications' ), Notifications::class ],
+            'ai_engine'               => [ false, AI_Engine::class ],
+            'content_decay'           => [ $on( 'enable_content_decay' ), Content_Decay::class ],
+            'keyword_cannibalization' => [ $on( 'enable_cannibalization' ), Keyword_Cannibalization::class ],
+            'advanced_linking'        => [ $on( 'enable_advanced_linking' ), Advanced_Linking::class ],
+            'historical_analytics'    => [ $on( 'enable_historical_analytics' ), Historical_Analytics::class ],
+            'ga4_integration'         => [ $on( 'enable_ga4' ), GA4_Integration::class ],
+            'core_web_vitals'         => [ $on( 'enable_cwv' ), Core_Web_Vitals::class ],
+            'custom_reports'          => [ $on( 'enable_custom_reports' ), Custom_Reports::class ],
         ];
 
-        foreach ( $modules as $prop => list( $boot, $factory ) ) {
+        foreach ( $modules as $prop => list( $boot, $class ) ) {
             if ( $boot ) {
-                $this->{$prop} = $factory();
+                $this->{$prop} = $this->build_module( $class );
             } else {
                 unset( $this->{$prop} );
-                $this->lazy_factories[ $prop ] = $factory;
+                $this->lazy_modules[ $prop ] = $class;
             }
         }
 
@@ -270,16 +270,33 @@ class Core {
     }
 
     /**
+     * Instantiate a module class with the arguments it expects.
+     *
+     * @param string $class Fully-qualified class name.
+     * @return object
+     */
+    private function build_module( string $class ) {
+        switch ( $class ) {
+            case Privacy::class:
+                return new Privacy();
+            case FAQ_Generator::class:
+                return new FAQ_Generator( $this->boot_settings, $this->qa_detector );
+            default:
+                return new $class( $this->boot_settings );
+        }
+    }
+
+    /**
      * Build a deferred module on first access.
      *
      * @param string $name Property name.
      * @return mixed|null Module instance, or null for unknown properties.
      */
     public function __get( string $name ) {
-        if ( isset( $this->lazy_factories[ $name ] ) ) {
-            $factory = $this->lazy_factories[ $name ];
-            unset( $this->lazy_factories[ $name ] );
-            $this->{$name} = $factory();
+        if ( isset( $this->lazy_modules[ $name ] ) ) {
+            $class = $this->lazy_modules[ $name ];
+            unset( $this->lazy_modules[ $name ] );
+            $this->{$name} = $this->build_module( $class );
             return $this->{$name};
         }
         return null;
@@ -292,7 +309,7 @@ class Core {
      * @return bool
      */
     public function __isset( string $name ): bool {
-        return isset( $this->lazy_factories[ $name ] );
+        return isset( $this->lazy_modules[ $name ] );
     }
 
     /**

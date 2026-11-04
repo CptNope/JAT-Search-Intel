@@ -314,6 +314,7 @@ class AEO_Manager {
             }
             $step_schema = [
                 '@type' => 'HowToStep',
+                /* translators: %d: number. */
                 'name'  => ! empty( $step['name'] ) ? sanitize_text_field( $step['name'] ) : sprintf( __( 'Step %d', 'jat-search-intel' ), $i + 1 ),
                 'text'  => wp_kses_post( $step['text'] ),
                 'url'   => get_permalink( $post_id ) . '#step-' . ( $i + 1 ),

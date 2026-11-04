@@ -325,7 +325,7 @@ class FAQ_Generator {
 			wp_send_json_error( [ 'message' => 'Invalid post.' ] );
 		}
 
-		$faqs = $_POST['faqs'] ?? [];
+		$faqs = isset( $_POST['faqs'] ) ? wp_unslash( $_POST['faqs'] ) : []; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Each field is sanitized individually below.
 		if ( ! is_array( $faqs ) ) {
 			wp_send_json_error( [ 'message' => 'Invalid FAQ data.' ] );
 		}

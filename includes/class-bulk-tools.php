@@ -112,7 +112,7 @@ class Bulk_Tools {
 
         $batch_size  = 20;
         $offset      = absint( $_POST['offset'] ?? 0 );
-        $post_type   = sanitize_text_field( $_POST['post_type'] ?? 'post' );
+        $post_type   = isset( $_POST['post_type'] ) ? sanitize_text_field( wp_unslash( $_POST['post_type'] ) ) : 'post';
         $query_types = $this->resolve_post_types( $post_type );
 
         $posts = get_posts( [
@@ -188,7 +188,7 @@ class Bulk_Tools {
 
         $batch_size  = 20;
         $offset      = absint( $_POST['offset'] ?? 0 );
-        $post_type   = sanitize_text_field( $_POST['post_type'] ?? 'post' );
+        $post_type   = isset( $_POST['post_type'] ) ? sanitize_text_field( wp_unslash( $_POST['post_type'] ) ) : 'post';
         $query_types = $this->resolve_post_types( $post_type );
 
         $posts = get_posts( [
@@ -280,7 +280,7 @@ class Bulk_Tools {
         $post_type   = sanitize_text_field( wp_unslash( $_POST['post_type'] ?? 'post' ) );
         $query_types = $this->resolve_post_types( $post_type );
         $mode        = sanitize_text_field( wp_unslash( $_POST['mode'] ?? 'empty_only' ) );
-        $fields      = array_map( 'sanitize_text_field', (array) ( $_POST['fields'] ?? [] ) );
+        $fields      = isset( $_POST['fields'] ) ? array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['fields'] ) ) : [];
 
         $valid_fields = [
             'seo_title', 'meta_description', 'focus_keyword', 'secondary_keywords',
@@ -742,14 +742,14 @@ class Bulk_Tools {
             wp_send_json_error( [ 'message' => 'Unauthorized.' ], 403 );
         }
 
-        $json = wp_unslash( $_POST['import_data'] ?? '' );
+        $json = isset( $_POST['import_data'] ) ? wp_unslash( $_POST['import_data'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- JSON is decoded and every setting is re-sanitized by Admin::sanitize_settings().
         $data = json_decode( $json, true );
 
         if ( ! is_array( $data ) || empty( $data['plugin'] ) || 'search-intel' !== $data['plugin'] ) {
             wp_send_json_error( [ 'message' => __( 'Invalid Search Intel settings file.', 'jat-search-intel' ) ] );
         }
 
-        $mode = sanitize_text_field( $_POST['import_mode'] ?? 'merge' );
+        $mode = isset( $_POST['import_mode'] ) ? sanitize_key( wp_unslash( $_POST['import_mode'] ) ) : 'merge';
 
         // Validate settings keys against defaults.
         $defaults = Core::get_default_settings();

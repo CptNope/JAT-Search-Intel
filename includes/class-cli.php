@@ -383,7 +383,7 @@ class CLI extends \WP_CLI_Command {
             \WP_CLI::error( "File not found: {$file}" );
         }
 
-        $json = file_get_contents( $file );
+        $json = file_get_contents( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reading a local file passed on the command line.
         $data = json_decode( $json, true );
 
         if ( ! is_array( $data ) || empty( $data['plugin'] ) || 'search-intel' !== $data['plugin'] ) {
@@ -928,7 +928,7 @@ class CLI extends \WP_CLI_Command {
                 \WP_CLI::error( 'Please provide a valid path to a brand.json file.' );
             }
 
-            $json = file_get_contents( $file );
+            $json = file_get_contents( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reading a local file passed on the command line.
             $data = json_decode( $json, true );
 
             if ( ! is_array( $data ) ) {

@@ -469,7 +469,7 @@ class Migration {
 			wp_send_json_error( 'Insufficient permissions.' );
 		}
 
-		$source    = sanitize_text_field( $_POST['source'] ?? '' );
+		$source    = ( isset( $_POST['source'] ) ? sanitize_key( wp_unslash( $_POST['source'] ) ) : '' );
 		$overwrite = ! empty( $_POST['overwrite'] );
 
 		$result = $this->migrate( $source, $overwrite );
@@ -485,7 +485,7 @@ class Migration {
 			wp_send_json_error( 'Insufficient permissions.' );
 		}
 
-		$source = sanitize_text_field( $_POST['source'] ?? '' );
+		$source = ( isset( $_POST['source'] ) ? sanitize_key( wp_unslash( $_POST['source'] ) ) : '' );
 		$result = $this->dry_run( $source );
 		wp_send_json_success( $result );
 	}
