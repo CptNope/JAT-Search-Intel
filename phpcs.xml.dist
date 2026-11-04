@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
-<ruleset name="Search Intel">
-	<description>Custom PHPCS ruleset for the Search Intel WordPress plugin.</description>
+<ruleset name="JAT Search Intel">
+	<description>Custom PHPCS ruleset for the JAT Search Intel WordPress plugin.</description>
 
 	<!-- Scan these paths -->
 	<file>includes/</file>
 	<file>admin/</file>
-	<file>search-intel.php</file>
+	<file>jat-search-intel.php</file>
 	<file>uninstall.php</file>
 
 	<!-- Exclude third-party / generated directories -->

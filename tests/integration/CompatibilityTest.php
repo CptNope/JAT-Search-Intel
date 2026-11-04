@@ -1,19 +1,19 @@
 <?php
 /**
- * Compatibility QA tests for Search Intel.
+ * Compatibility QA tests for JAT Search Intel.
  *
  * Verifies defensive behaviour with conflicting plugins, various
  * editors, WooCommerce-style post types, and edge-case content.
  */
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\Core;
-use Search_Intel\SEO_Manager;
-use Search_Intel\Schema_Manager;
-use Search_Intel\AEO_Manager;
-use Search_Intel\GEO_Manager;
-use Search_Intel\Content_Analyzer;
-use Search_Intel\Sitemap;
+use JAT_Search_Intel\Core;
+use JAT_Search_Intel\SEO_Manager;
+use JAT_Search_Intel\Schema_Manager;
+use JAT_Search_Intel\AEO_Manager;
+use JAT_Search_Intel\GEO_Manager;
+use JAT_Search_Intel\Content_Analyzer;
+use JAT_Search_Intel\Sitemap;
 
 class CompatibilityTest extends TestCase {
 
@@ -246,7 +246,7 @@ class CompatibilityTest extends TestCase {
 
     public function test_seo_handles_unicode_description(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_description'] = '这是一个中文描述，用于测试多字节字符处理。';
+        $si_test_state['post_meta'][1]['_jat_search_intel_description'] = '这是一个中文描述，用于测试多字节字符处理。';
 
         $seo = new SEO_Manager( Core::get_default_settings() );
         ob_start();
@@ -258,7 +258,7 @@ class CompatibilityTest extends TestCase {
 
     public function test_seo_handles_unicode_title(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_title'] = '日本語のタイトル — ユニコード対応';
+        $si_test_state['post_meta'][1]['_jat_search_intel_title'] = '日本語のタイトル — ユニコード対応';
 
         $seo   = new SEO_Manager( Core::get_default_settings() );
         $title = $seo->get_title( 1 );
@@ -292,7 +292,7 @@ class CompatibilityTest extends TestCase {
 
     public function test_custom_schema_type_overrides_default(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_schema_type'] = 'TechArticle';
+        $si_test_state['post_meta'][1]['_jat_search_intel_schema_type'] = 'TechArticle';
 
         $schema = new Schema_Manager( Core::get_default_settings() );
         $result = $schema->get_singular_schema( 1 );

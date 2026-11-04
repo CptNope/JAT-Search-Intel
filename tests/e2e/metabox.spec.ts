@@ -1,14 +1,14 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * E2E tests for the Search Intel post editor metabox.
+ * E2E tests for the JAT Search Intel post editor metabox.
  * Requires an active WordPress instance with the plugin enabled.
  */
 
 test.describe('Metabox', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/wp-admin/post-new.php');
-    await expect(page.locator('#search-intel-seo')).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator('#jat-search-intel-seo')).toBeVisible({ timeout: 10_000 });
   });
 
   // ── Tab navigation ──────────────────────────────────────────────────
@@ -78,7 +78,7 @@ test.describe('Metabox', () => {
   // ── Nonce field present ───────────────────────────────────────────
 
   test('nonce field is present in metabox', async ({ page }) => {
-    const nonce = page.locator('#search_intel_metabox_nonce');
+    const nonce = page.locator('#jat_search_intel_metabox_nonce');
     await expect(nonce).toBeAttached();
   });
 });

@@ -1,5 +1,5 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -19,13 +19,13 @@ class Notifications {
 	private $settings;
 
 	/** Cron hook for weekly digest. */
-	private const DIGEST_HOOK = 'search_intel_weekly_digest';
+	private const DIGEST_HOOK = 'jat_search_intel_weekly_digest';
 
 	/** Cron hook for score drop checks. */
-	private const SCORE_DROP_HOOK = 'search_intel_score_drop_check';
+	private const SCORE_DROP_HOOK = 'jat_search_intel_score_drop_check';
 
 	/** Option key for storing previous score snapshots. */
-	private const SNAPSHOT_OPTION = 'search_intel_score_snapshots';
+	private const SNAPSHOT_OPTION = 'jat_search_intel_score_snapshots';
 
 	/**
 	 * @param array $settings Plugin settings.
@@ -48,7 +48,7 @@ class Notifications {
 		add_action( 'wp_dashboard_setup', [ $this, 'register_dashboard_widget' ] );
 
 		// Snapshot scores after each analysis run.
-		add_action( 'search_intel_analysis_complete', [ $this, 'snapshot_post_scores' ], 10, 2 );
+		add_action( 'jat_search_intel_analysis_complete', [ $this, 'snapshot_post_scores' ], 10, 2 );
 	}
 
 	// ── Scheduling ───────────────────────────────────────────────────────────
@@ -150,9 +150,9 @@ class Notifications {
 		] );
 
 		foreach ( $posts as $post_id ) {
-			$current_seo = (int) get_post_meta( $post_id, '_search_intel_seo_score', true );
-			$current_aeo = (int) get_post_meta( $post_id, '_search_intel_aeo_score', true );
-			$current_geo = (int) get_post_meta( $post_id, '_search_intel_geo_score', true );
+			$current_seo = (int) get_post_meta( $post_id, '_jat_search_intel_seo_score', true );
+			$current_aeo = (int) get_post_meta( $post_id, '_jat_search_intel_aeo_score', true );
+			$current_geo = (int) get_post_meta( $post_id, '_jat_search_intel_geo_score', true );
 
 			$prev = $snapshots[ $post_id ] ?? null;
 
@@ -276,10 +276,10 @@ class Notifications {
 		$scored = [];
 
 		foreach ( $posts as $post_id ) {
-			$s = (int) get_post_meta( $post_id, '_search_intel_seo_score', true );
-			$a = (int) get_post_meta( $post_id, '_search_intel_aeo_score', true );
-			$g = (int) get_post_meta( $post_id, '_search_intel_geo_score', true );
-			$r = (int) get_post_meta( $post_id, '_search_intel_readability_score', true );
+			$s = (int) get_post_meta( $post_id, '_jat_search_intel_seo_score', true );
+			$a = (int) get_post_meta( $post_id, '_jat_search_intel_aeo_score', true );
+			$g = (int) get_post_meta( $post_id, '_jat_search_intel_geo_score', true );
+			$r = (int) get_post_meta( $post_id, '_jat_search_intel_readability_score', true );
 
 			$seo  += $s;
 			$aeo  += $a;
@@ -367,7 +367,7 @@ class Notifications {
 			$body .= "\n";
 		}
 
-		$body .= sprintf( "Review at: %s\n", admin_url( 'admin.php?page=search-intel-bulk-editor' ) );
+		$body .= sprintf( "Review at: %s\n", admin_url( 'admin.php?page=jat-search-intel-bulk-editor' ) );
 
 		wp_mail( $recipient, $subject, $body );
 	}
@@ -466,7 +466,7 @@ class Notifications {
 	 * Register the admin dashboard widget.
 	 */
 	public function register_dashboard_widget(): void {
-		$name = 'Search Intel';
+		$name = 'JAT Search Intel';
 
 		// Use white-label name if available.
 		$custom_name = $this->settings['wl_plugin_name'] ?? '';
@@ -475,7 +475,7 @@ class Notifications {
 		}
 
 		wp_add_dashboard_widget(
-			'search_intel_health',
+			'jat_search_intel_health',
 			$name . ' — Site Health',
 			[ $this, 'render_dashboard_widget' ]
 		);
@@ -542,7 +542,7 @@ class Notifications {
 		// Links.
 		printf(
 			'<p style="margin-top:12px"><a href="%s">View all scores →</a></p>',
-			esc_url( admin_url( 'admin.php?page=search-intel-bulk-editor' ) )
+			esc_url( admin_url( 'admin.php?page=jat-search-intel-bulk-editor' ) )
 		);
 
 		echo '</div>';

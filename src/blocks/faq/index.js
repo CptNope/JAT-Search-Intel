@@ -1,5 +1,5 @@
 /**
- * Search Intel — FAQ Block
+ * JAT Search Intel — FAQ Block
  *
  * Visual FAQ editor with live schema preview.
  * Outputs FAQPage JSON-LD structured data.
@@ -13,7 +13,7 @@ import { plus, trash } from '@wordpress/icons';
 
 import './editor.css';
 
-registerBlockType( 'search-intel/faq', {
+registerBlockType( 'jat-search-intel/faq', {
 	title: __( 'FAQ', 'jat-search-intel' ),
 	description: __( 'Add frequently asked questions with automatic FAQPage schema markup.', 'jat-search-intel' ),
 	category: 'widgets',

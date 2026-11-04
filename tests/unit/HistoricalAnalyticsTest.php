@@ -2,10 +2,10 @@
 
 declare( strict_types=1 );
 
-namespace Search_Intel\Tests\Unit;
+namespace JAT_Search_Intel\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\Historical_Analytics;
+use JAT_Search_Intel\Historical_Analytics;
 
 class HistoricalAnalyticsTest extends TestCase {
 
@@ -112,7 +112,7 @@ class HistoricalAnalyticsTest extends TestCase {
             'geo'  => 60.0,
         ];
 
-        update_post_meta( 10, '_search_intel_analytics_history', [ $old_entry, $new_entry ] );
+        update_post_meta( 10, '_jat_search_intel_analytics_history', [ $old_entry, $new_entry ] );
 
         $chart = $ha->get_chart_data( 10, 'all', 30 );
 
@@ -146,10 +146,10 @@ class HistoricalAnalyticsTest extends TestCase {
         $si_test_state['posts']     = [];
 
         // Simulate 2 posts with score history.
-        update_post_meta( 1, '_search_intel_analytics_history', [
+        update_post_meta( 1, '_jat_search_intel_analytics_history', [
             [ 'date' => gmdate( 'Y-m-d' ), 'seo' => 80.0, 'aeo' => 60.0, 'geo' => 40.0, 'readability' => 70.0 ],
         ] );
-        update_post_meta( 2, '_search_intel_analytics_history', [
+        update_post_meta( 2, '_jat_search_intel_analytics_history', [
             [ 'date' => gmdate( 'Y-m-d' ), 'seo' => 60.0, 'aeo' => 40.0, 'geo' => 20.0, 'readability' => 50.0 ],
         ] );
 
@@ -159,7 +159,7 @@ class HistoricalAnalyticsTest extends TestCase {
         $ha = $this->make();
         $ha->compute_site_aggregate();
 
-        $aggregates = get_option( 'search_intel_site_score_aggregates', [] );
+        $aggregates = get_option( 'jat_search_intel_site_score_aggregates', [] );
         $this->assertIsArray( $aggregates );
         // Since our get_posts stub may not return the right IDs, just verify structure.
     }
@@ -179,7 +179,7 @@ class HistoricalAnalyticsTest extends TestCase {
             [ 'date' => '2026-01-15', 'seo' => 70.0, 'aeo' => 60.0, 'geo' => 50.0, 'readability' => 65.0 ],
             [ 'date' => '2026-02-01', 'seo' => 80.0, 'aeo' => 70.0, 'geo' => 60.0, 'readability' => 75.0 ],
         ];
-        update_post_meta( 10, '_search_intel_analytics_history', $history );
+        update_post_meta( 10, '_jat_search_intel_analytics_history', $history );
 
         $result = $ha->get_before_after( 10, '2026-01-15' );
 

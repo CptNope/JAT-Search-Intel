@@ -4,8 +4,8 @@
  */
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\Sitemap;
-use Search_Intel\Core;
+use JAT_Search_Intel\Sitemap;
+use JAT_Search_Intel\Core;
 
 class SitemapOutputTest extends TestCase {
 

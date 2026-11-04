@@ -29,7 +29,7 @@ test.describe('White-Label Branding', () => {
         path: '/wp/v2/settings',
         method: 'POST',
         data: {
-          search_intel_settings: {
+          jat_search_intel_settings: {
             enable_white_label: true,
             wl_plugin_name: name,
           },
@@ -45,31 +45,31 @@ test.describe('White-Label Branding', () => {
   test('custom name appears in admin sidebar menu', async ({ page }) => {
     await page.goto('/wp-admin/');
     const menuText = await page.locator('#adminmenu').textContent();
-    // The menu should show either the custom name or the default "Search Intel".
+    // The menu should show either the custom name or the default "JAT Search Intel".
     const hasCustom = menuText?.includes(CUSTOM_NAME);
-    const hasDefault = menuText?.includes('Search Intel');
+    const hasDefault = menuText?.includes('JAT Search Intel');
     // At least one must be present — the menu item renders.
     expect(hasCustom || hasDefault).toBe(true);
   });
 
   test('custom name appears on plugins list page', async ({ page }) => {
     await page.goto('/wp-admin/plugins.php');
-    const pluginRows = page.locator('tr[data-slug="search-intel"], tr[data-plugin*="search-intel"]');
+    const pluginRows = page.locator('tr[data-slug="jat-search-intel"], tr[data-plugin*="jat-search-intel"]');
     const count = await pluginRows.count();
 
     if (count > 0) {
       const pluginText = await pluginRows.first().textContent();
-      // If white-label is active, custom name replaces "Search Intel".
+      // If white-label is active, custom name replaces "JAT Search Intel".
       const hasCustom = pluginText?.includes(CUSTOM_NAME);
-      const hasDefault = pluginText?.includes('Search Intel');
+      const hasDefault = pluginText?.includes('JAT Search Intel');
       expect(hasCustom || hasDefault).toBe(true);
     }
   });
 
   test('settings page header shows branding', async ({ page }) => {
-    await page.goto('/wp-admin/admin.php?page=search-intel');
+    await page.goto('/wp-admin/admin.php?page=jat-search-intel');
     const heading = await page.locator('h1').first().textContent();
     // Should contain either the white-label name or the default.
-    expect(heading?.includes(CUSTOM_NAME) || heading?.includes('Search Intel')).toBe(true);
+    expect(heading?.includes(CUSTOM_NAME) || heading?.includes('JAT Search Intel')).toBe(true);
   });
 });

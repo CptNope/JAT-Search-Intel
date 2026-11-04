@@ -117,7 +117,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
         <div id="si-faq-repeater">
             <?php
-            $faqs = get_post_meta( $post->ID, '_search_intel_faqs', true );
+            $faqs = get_post_meta( $post->ID, '_jat_search_intel_faqs', true );
             if ( ! empty( $faqs ) && is_array( $faqs ) ) :
                 foreach ( $faqs as $i => $faq ) :
                     ?>
@@ -135,7 +135,7 @@ if ( ! defined( 'ABSPATH' ) ) {
             <button type="button" class="button" id="si-add-faq"><?php esc_html_e( '+ Add FAQ Item', 'jat-search-intel' ); ?></button>
             <button type="button" class="button button-primary" id="si-generate-faqs"><?php esc_html_e( 'Generate FAQs', 'jat-search-intel' ); ?></button>
             <?php
-            $ai_available = \Search_Intel\Core::get_instance()->ai_engine->is_configured();
+            $ai_available = \JAT_Search_Intel\Core::get_instance()->ai_engine->is_configured();
             if ( $ai_available ) : ?>
                 <label style="margin-left:4px;">
                     <input type="checkbox" id="si-faq-use-ai" value="1" checked />
@@ -180,7 +180,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
         <div id="si-citation-repeater">
             <?php
-            $citations = get_post_meta( $post->ID, '_search_intel_citations', true );
+            $citations = get_post_meta( $post->ID, '_jat_search_intel_citations', true );
             if ( ! empty( $citations ) && is_array( $citations ) ) :
                 foreach ( $citations as $i => $cite ) :
                     ?>
@@ -210,7 +210,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
         <div class="si-field">
             <label for="si_topics"><?php esc_html_e( 'Key Topics / Entities', 'jat-search-intel' ); ?></label>
-            <?php $topics = get_post_meta( $post->ID, '_search_intel_topics', true ); ?>
+            <?php $topics = get_post_meta( $post->ID, '_jat_search_intel_topics', true ); ?>
             <input type="text" id="si_topics" name="si_topics" value="<?php echo esc_attr( is_array( $topics ) ? implode( ', ', $topics ) : '' ); ?>" class="widefat" placeholder="<?php esc_attr_e( 'SEO, Content Marketing, Google Algorithm...', 'jat-search-intel' ); ?>" />
             <p class="description"><?php esc_html_e( 'Comma-separated list of key topics and entities in this content.', 'jat-search-intel' ); ?></p>
         </div>
@@ -284,7 +284,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
         <div id="si-entity-repeater">
             <?php
-            $entities = get_post_meta( $post->ID, '_search_intel_entities', true );
+            $entities = get_post_meta( $post->ID, '_jat_search_intel_entities', true );
             if ( ! empty( $entities ) && is_array( $entities ) ) :
                 foreach ( $entities as $i => $entity ) :
                     ?>
@@ -341,26 +341,26 @@ if ( ! defined( 'ABSPATH' ) ) {
     <div class="si-tab-content" data-tab="analysis">
         <div class="si-analysis-scores" id="si-analysis-scores">
             <div class="si-score-ring" id="si-seo-ring">
-                <div class="si-score-value"><?php echo esc_html( get_post_meta( $post->ID, '_search_intel_seo_score', true ) ?: '—' ); ?></div>
+                <div class="si-score-value"><?php echo esc_html( get_post_meta( $post->ID, '_jat_search_intel_seo_score', true ) ?: '—' ); ?></div>
                 <div class="si-score-label"><?php esc_html_e( 'SEO', 'jat-search-intel' ); ?></div>
             </div>
             <div class="si-score-ring" id="si-aeo-ring">
-                <div class="si-score-value"><?php echo esc_html( get_post_meta( $post->ID, '_search_intel_aeo_score', true ) ?: '—' ); ?></div>
+                <div class="si-score-value"><?php echo esc_html( get_post_meta( $post->ID, '_jat_search_intel_aeo_score', true ) ?: '—' ); ?></div>
                 <div class="si-score-label"><?php esc_html_e( 'AEO', 'jat-search-intel' ); ?></div>
             </div>
             <div class="si-score-ring" id="si-geo-ring">
-                <div class="si-score-value"><?php echo esc_html( get_post_meta( $post->ID, '_search_intel_geo_score', true ) ?: '—' ); ?></div>
+                <div class="si-score-value"><?php echo esc_html( get_post_meta( $post->ID, '_jat_search_intel_geo_score', true ) ?: '—' ); ?></div>
                 <div class="si-score-label"><?php esc_html_e( 'GEO', 'jat-search-intel' ); ?></div>
             </div>
             <div class="si-score-ring" id="si-readability-ring">
-                <div class="si-score-value"><?php echo esc_html( get_post_meta( $post->ID, '_search_intel_readability_score', true ) ?: '—' ); ?></div>
+                <div class="si-score-value"><?php echo esc_html( get_post_meta( $post->ID, '_jat_search_intel_readability_score', true ) ?: '—' ); ?></div>
                 <div class="si-score-label"><?php esc_html_e( 'Readability', 'jat-search-intel' ); ?></div>
             </div>
         </div>
 
         <div style="display:flex; gap:8px; align-items:center; margin:12px 0;">
             <button type="button" class="button button-primary" id="si-run-analysis"><?php esc_html_e( 'Run Analysis', 'jat-search-intel' ); ?></button>
-            <?php if ( \Search_Intel\Core::get_instance()->ai_engine->is_configured() ) : ?>
+            <?php if ( \JAT_Search_Intel\Core::get_instance()->ai_engine->is_configured() ) : ?>
                 <button type="button" class="button" id="si-ai-suggestions"><?php esc_html_e( 'AI Suggest Edits', 'jat-search-intel' ); ?></button>
             <?php endif; ?>
         </div>
@@ -379,7 +379,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
         <!-- Score History -->
         <?php
-        $history = get_post_meta( $post->ID, '_search_intel_analytics_history', true );
+        $history = get_post_meta( $post->ID, '_jat_search_intel_analytics_history', true );
         if ( ! empty( $history ) && is_array( $history ) ) :
             $recent = array_slice( $history, -10 );
         ?>

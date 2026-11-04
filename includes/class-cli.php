@@ -1,31 +1,31 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
 /**
- * WP-CLI commands for Search Intel.
+ * WP-CLI commands for JAT Search Intel.
  *
  * ## EXAMPLES
  *
- *     wp search-intel analyze 42
- *     wp search-intel rescore --all
- *     wp search-intel regenerate --all --post_type=page
- *     wp search-intel sitemap cache
- *     wp search-intel export > settings.json
- *     wp search-intel import < settings.json
- *     wp search-intel scores --format=table
- *     wp search-intel migrate --from=yoast --dry-run
- *     wp search-intel rbac grant 5 seo
- *     wp search-intel rbac list
- *     wp search-intel multisite push-defaults
- *     wp search-intel multisite report --format=table
- *     wp search-intel queue status
- *     wp search-intel queue process --batch=10
- *     wp search-intel white-label export > brand.json
- *     wp search-intel white-label import brand.json
+ *     wp jat-search-intel analyze 42
+ *     wp jat-search-intel rescore --all
+ *     wp jat-search-intel regenerate --all --post_type=page
+ *     wp jat-search-intel sitemap cache
+ *     wp jat-search-intel export > settings.json
+ *     wp jat-search-intel import < settings.json
+ *     wp jat-search-intel scores --format=table
+ *     wp jat-search-intel migrate --from=yoast --dry-run
+ *     wp jat-search-intel rbac grant 5 seo
+ *     wp jat-search-intel rbac list
+ *     wp jat-search-intel multisite push-defaults
+ *     wp jat-search-intel multisite report --format=table
+ *     wp jat-search-intel queue status
+ *     wp jat-search-intel queue process --batch=10
+ *     wp jat-search-intel white-label export > brand.json
+ *     wp jat-search-intel white-label import brand.json
  *
  * @since 1.3.0
  */
@@ -44,8 +44,8 @@ class CLI extends \WP_CLI_Command {
      *
      * ## EXAMPLES
      *
-     *     wp search-intel analyze 42
-     *     wp search-intel analyze 42 --save
+     *     wp jat-search-intel analyze 42
+     *     wp jat-search-intel analyze 42 --save
      *
      * @param array $args       Positional arguments.
      * @param array $assoc_args Associative arguments.
@@ -61,8 +61,8 @@ class CLI extends \WP_CLI_Command {
         $core        = Core::get_instance();
         $content     = wp_strip_all_tags( $post->post_content );
         $title       = $post->post_title;
-        $keyword     = get_post_meta( $post_id, '_search_intel_focus_keyword', true ) ?: '';
-        $description = get_post_meta( $post_id, '_search_intel_description', true ) ?: '';
+        $keyword     = get_post_meta( $post_id, '_jat_search_intel_focus_keyword', true ) ?: '';
+        $description = get_post_meta( $post_id, '_jat_search_intel_description', true ) ?: '';
 
         \WP_CLI::log( "Analyzing: \"{$title}\" (ID: {$post_id})..." );
 
@@ -76,10 +76,10 @@ class CLI extends \WP_CLI_Command {
         ];
 
         if ( \WP_CLI\Utils\get_flag_value( $assoc_args, 'save', false ) ) {
-            update_post_meta( $post_id, '_search_intel_seo_score', (int) $scores['SEO'] );
-            update_post_meta( $post_id, '_search_intel_aeo_score', (int) $scores['AEO'] );
-            update_post_meta( $post_id, '_search_intel_geo_score', (int) $scores['GEO'] );
-            update_post_meta( $post_id, '_search_intel_readability_score', (int) $scores['Readability'] );
+            update_post_meta( $post_id, '_jat_search_intel_seo_score', (int) $scores['SEO'] );
+            update_post_meta( $post_id, '_jat_search_intel_aeo_score', (int) $scores['AEO'] );
+            update_post_meta( $post_id, '_jat_search_intel_geo_score', (int) $scores['GEO'] );
+            update_post_meta( $post_id, '_jat_search_intel_readability_score', (int) $scores['Readability'] );
             \WP_CLI::log( 'Scores saved to post meta.' );
         }
 
@@ -117,8 +117,8 @@ class CLI extends \WP_CLI_Command {
      *
      * ## EXAMPLES
      *
-     *     wp search-intel rescore --all
-     *     wp search-intel rescore --all --post_type=page
+     *     wp jat-search-intel rescore --all
+     *     wp jat-search-intel rescore --all --post_type=page
      *
      * @param array $args       Positional arguments.
      * @param array $assoc_args Associative arguments.
@@ -159,22 +159,22 @@ class CLI extends \WP_CLI_Command {
             foreach ( $posts as $post ) {
                 $content     = wp_strip_all_tags( $post->post_content );
                 $title       = $post->post_title;
-                $keyword     = get_post_meta( $post->ID, '_search_intel_focus_keyword', true ) ?: '';
-                $description = get_post_meta( $post->ID, '_search_intel_description', true ) ?: '';
+                $keyword     = get_post_meta( $post->ID, '_jat_search_intel_focus_keyword', true ) ?: '';
+                $description = get_post_meta( $post->ID, '_jat_search_intel_description', true ) ?: '';
 
                 $results = $core->analyzer->analyze( $post->ID, $content, $title, $keyword, $description );
 
                 if ( isset( $results['seo']['score'] ) ) {
-                    update_post_meta( $post->ID, '_search_intel_seo_score', (int) $results['seo']['score'] );
+                    update_post_meta( $post->ID, '_jat_search_intel_seo_score', (int) $results['seo']['score'] );
                 }
                 if ( isset( $results['aeo']['score'] ) ) {
-                    update_post_meta( $post->ID, '_search_intel_aeo_score', (int) $results['aeo']['score'] );
+                    update_post_meta( $post->ID, '_jat_search_intel_aeo_score', (int) $results['aeo']['score'] );
                 }
                 if ( isset( $results['geo']['score'] ) ) {
-                    update_post_meta( $post->ID, '_search_intel_geo_score', (int) $results['geo']['score'] );
+                    update_post_meta( $post->ID, '_jat_search_intel_geo_score', (int) $results['geo']['score'] );
                 }
                 if ( isset( $results['readability']['score'] ) ) {
-                    update_post_meta( $post->ID, '_search_intel_readability_score', (int) $results['readability']['score'] );
+                    update_post_meta( $post->ID, '_jat_search_intel_readability_score', (int) $results['readability']['score'] );
                 }
 
                 $scored++;
@@ -207,8 +207,8 @@ class CLI extends \WP_CLI_Command {
      *
      * ## EXAMPLES
      *
-     *     wp search-intel regenerate --all
-     *     wp search-intel regenerate --all --post_type=page
+     *     wp jat-search-intel regenerate --all
+     *     wp jat-search-intel regenerate --all --post_type=page
      *
      * @param array $args       Positional arguments.
      * @param array $assoc_args Associative arguments.
@@ -248,25 +248,25 @@ class CLI extends \WP_CLI_Command {
 
             foreach ( $posts as $post ) {
                 // Auto-fill description.
-                $desc = get_post_meta( $post->ID, '_search_intel_description', true );
+                $desc = get_post_meta( $post->ID, '_jat_search_intel_description', true );
                 if ( empty( $desc ) ) {
                     $auto = $core->seo->get_description( $post->ID );
                     if ( $auto ) {
-                        update_post_meta( $post->ID, '_search_intel_description', sanitize_text_field( $auto ) );
+                        update_post_meta( $post->ID, '_jat_search_intel_description', sanitize_text_field( $auto ) );
                     }
                 }
 
                 // Auto-fill AI summary.
-                $summary = get_post_meta( $post->ID, '_search_intel_ai_summary', true );
+                $summary = get_post_meta( $post->ID, '_jat_search_intel_ai_summary', true );
                 if ( empty( $summary ) ) {
                     $auto = wp_trim_words( wp_strip_all_tags( $post->post_content ), 50, '...' );
                     if ( $auto ) {
-                        update_post_meta( $post->ID, '_search_intel_ai_summary', sanitize_text_field( $auto ) );
+                        update_post_meta( $post->ID, '_jat_search_intel_ai_summary', sanitize_text_field( $auto ) );
                     }
                 }
 
                 // Auto-detect content type.
-                $type = get_post_meta( $post->ID, '_search_intel_content_type', true );
+                $type = get_post_meta( $post->ID, '_jat_search_intel_content_type', true );
                 if ( empty( $type ) ) {
                     $lower = strtolower( $post->post_content );
                     if ( str_contains( $lower, 'how to' ) || str_contains( $lower, 'step' ) ) {
@@ -278,7 +278,7 @@ class CLI extends \WP_CLI_Command {
                     } else {
                         $detected = 'article';
                     }
-                    update_post_meta( $post->ID, '_search_intel_content_type', $detected );
+                    update_post_meta( $post->ID, '_jat_search_intel_content_type', $detected );
                 }
 
                 $processed++;
@@ -302,8 +302,8 @@ class CLI extends \WP_CLI_Command {
      *
      * ## EXAMPLES
      *
-     *     wp search-intel sitemap cache
-     *     wp search-intel sitemap clear
+     *     wp jat-search-intel sitemap cache
+     *     wp jat-search-intel sitemap clear
      *
      * @param array $args Positional arguments.
      */
@@ -331,8 +331,8 @@ class CLI extends \WP_CLI_Command {
      *
      * ## EXAMPLES
      *
-     *     wp search-intel export
-     *     wp search-intel export > settings.json
+     *     wp jat-search-intel export
+     *     wp jat-search-intel export > settings.json
      *
      * @subcommand export
      */
@@ -340,11 +340,11 @@ class CLI extends \WP_CLI_Command {
         $core = Core::get_instance();
 
         $data = [
-            'plugin'   => 'search-intel',
-            'version'  => SEARCH_INTEL_VERSION,
+            'plugin'   => 'jat-search-intel',
+            'version'  => JAT_SEARCH_INTEL_VERSION,
             'exported' => gmdate( 'Y-m-d\TH:i:s\Z' ),
             'settings' => $core->get_settings(),
-            'social'   => get_option( 'search_intel_social_profiles', [] ),
+            'social'   => get_option( 'jat_search_intel_social_profiles', [] ),
         ];
 
         echo wp_json_encode( $data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) . "\n";
@@ -369,8 +369,8 @@ class CLI extends \WP_CLI_Command {
      *
      * ## EXAMPLES
      *
-     *     wp search-intel import settings.json
-     *     wp search-intel import settings.json --mode=overwrite
+     *     wp jat-search-intel import settings.json
+     *     wp jat-search-intel import settings.json --mode=overwrite
      *
      * @subcommand import
      * @param array $args       Positional arguments.
@@ -386,8 +386,8 @@ class CLI extends \WP_CLI_Command {
         $json = file_get_contents( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reading a local file passed on the command line.
         $data = json_decode( $json, true );
 
-        if ( ! is_array( $data ) || empty( $data['plugin'] ) || 'search-intel' !== $data['plugin'] ) {
-            \WP_CLI::error( 'Invalid Search Intel settings file.' );
+        if ( ! is_array( $data ) || empty( $data['plugin'] ) || 'jat-search-intel' !== $data['plugin'] ) {
+            \WP_CLI::error( 'Invalid JAT Search Intel settings file.' );
         }
 
         $mode     = $assoc_args['mode'] ?? 'merge';
@@ -420,12 +420,12 @@ class CLI extends \WP_CLI_Command {
                 }
             }
 
-            update_option( 'search_intel_settings', $new );
+            update_option( 'jat_search_intel_settings', $new );
         }
 
         if ( ! empty( $data['social'] ) && is_array( $data['social'] ) ) {
             $social = array_map( 'esc_url_raw', $data['social'] );
-            update_option( 'search_intel_social_profiles', $social );
+            update_option( 'jat_search_intel_social_profiles', $social );
         }
 
         \WP_CLI::success( "Settings imported ({$mode} mode) from {$file}." );
@@ -467,9 +467,9 @@ class CLI extends \WP_CLI_Command {
      *
      * ## EXAMPLES
      *
-     *     wp search-intel scores
-     *     wp search-intel scores --format=csv --limit=100
-     *     wp search-intel scores --orderby=seo
+     *     wp jat-search-intel scores
+     *     wp jat-search-intel scores --format=csv --limit=100
+     *     wp jat-search-intel scores --orderby=seo
      *
      * @param array $args       Positional arguments.
      * @param array $assoc_args Associative arguments.
@@ -490,10 +490,10 @@ class CLI extends \WP_CLI_Command {
 
         // Sort by meta value if a score field is specified.
         $score_fields = [
-            'seo'         => '_search_intel_seo_score',
-            'aeo'         => '_search_intel_aeo_score',
-            'geo'         => '_search_intel_geo_score',
-            'readability' => '_search_intel_readability_score',
+            'seo'         => '_jat_search_intel_seo_score',
+            'aeo'         => '_jat_search_intel_aeo_score',
+            'geo'         => '_jat_search_intel_geo_score',
+            'readability' => '_jat_search_intel_readability_score',
         ];
 
         if ( isset( $score_fields[ $orderby ] ) ) {
@@ -514,11 +514,11 @@ class CLI extends \WP_CLI_Command {
             $rows[] = [
                 'ID'          => $post->ID,
                 'Title'       => mb_strimwidth( $post->post_title, 0, 50, '...' ),
-                'SEO'         => (int) get_post_meta( $post->ID, '_search_intel_seo_score', true ),
-                'AEO'         => (int) get_post_meta( $post->ID, '_search_intel_aeo_score', true ),
-                'GEO'         => (int) get_post_meta( $post->ID, '_search_intel_geo_score', true ),
-                'Readability' => (int) get_post_meta( $post->ID, '_search_intel_readability_score', true ),
-                'Keyword'     => get_post_meta( $post->ID, '_search_intel_focus_keyword', true ) ?: '—',
+                'SEO'         => (int) get_post_meta( $post->ID, '_jat_search_intel_seo_score', true ),
+                'AEO'         => (int) get_post_meta( $post->ID, '_jat_search_intel_aeo_score', true ),
+                'GEO'         => (int) get_post_meta( $post->ID, '_jat_search_intel_geo_score', true ),
+                'Readability' => (int) get_post_meta( $post->ID, '_jat_search_intel_readability_score', true ),
+                'Keyword'     => get_post_meta( $post->ID, '_jat_search_intel_focus_keyword', true ) ?: '—',
             ];
         }
 
@@ -545,7 +545,7 @@ class CLI extends \WP_CLI_Command {
      * : Preview what will be migrated without making changes.
      *
      * [--overwrite]
-     * : Overwrite existing Search Intel data (default is merge).
+     * : Overwrite existing JAT Search Intel data (default is merge).
      *
      * [--post_type=<type>]
      * : Comma-separated post types to migrate.
@@ -555,9 +555,9 @@ class CLI extends \WP_CLI_Command {
      *
      * ## EXAMPLES
      *
-     *     wp search-intel migrate --from=yoast
-     *     wp search-intel migrate --from=yoast --dry-run
-     *     wp search-intel migrate --from=rankmath --overwrite
+     *     wp jat-search-intel migrate --from=yoast
+     *     wp jat-search-intel migrate --from=yoast --dry-run
+     *     wp jat-search-intel migrate --from=rankmath --overwrite
      *
      * @param array $args       Positional arguments.
      * @param array $assoc_args Associative arguments.
@@ -655,9 +655,9 @@ class CLI extends \WP_CLI_Command {
      *
      * ## EXAMPLES
      *
-     *     wp search-intel rbac list
-     *     wp search-intel rbac grant 5 seo
-     *     wp search-intel rbac revoke 5 aeo
+     *     wp jat-search-intel rbac list
+     *     wp jat-search-intel rbac grant 5 seo
+     *     wp jat-search-intel rbac revoke 5 aeo
      *
      * @param array $args       Positional arguments.
      * @param array $assoc_args Associative arguments.
@@ -672,7 +672,7 @@ class CLI extends \WP_CLI_Command {
             $summary = $rbac->get_permissions_summary();
 
             if ( empty( $summary ) ) {
-                \WP_CLI::log( 'No users with custom Search Intel permissions found.' );
+                \WP_CLI::log( 'No users with custom JAT Search Intel permissions found.' );
                 return;
             }
 
@@ -744,9 +744,9 @@ class CLI extends \WP_CLI_Command {
      *
      * ## EXAMPLES
      *
-     *     wp search-intel multisite push-defaults
-     *     wp search-intel multisite report
-     *     wp search-intel multisite report --format=json
+     *     wp jat-search-intel multisite push-defaults
+     *     wp jat-search-intel multisite report
+     *     wp jat-search-intel multisite report --format=json
      *
      * @param array $args       Positional arguments.
      * @param array $assoc_args Associative arguments.
@@ -764,7 +764,7 @@ class CLI extends \WP_CLI_Command {
             $defaults = $ms->get_network_defaults();
 
             if ( empty( $defaults ) ) {
-                \WP_CLI::error( 'No network defaults configured. Set them in Network Admin > Search Intel first.' );
+                \WP_CLI::error( 'No network defaults configured. Set them in Network Admin > JAT Search Intel first.' );
             }
 
             $sites = get_sites( [ 'number' => 0 ] );
@@ -772,7 +772,7 @@ class CLI extends \WP_CLI_Command {
 
             foreach ( $sites as $site ) {
                 switch_to_blog( (int) $site->blog_id );
-                update_option( 'search_intel_settings', $defaults );
+                update_option( 'jat_search_intel_settings', $defaults );
                 restore_current_blog();
                 $count++;
             }
@@ -826,9 +826,9 @@ class CLI extends \WP_CLI_Command {
      *
      * ## EXAMPLES
      *
-     *     wp search-intel queue status
-     *     wp search-intel queue process
-     *     wp search-intel queue process --batch=25
+     *     wp jat-search-intel queue status
+     *     wp jat-search-intel queue process
+     *     wp jat-search-intel queue process --batch=25
      *
      * @param array $args       Positional arguments.
      * @param array $assoc_args Associative arguments.
@@ -902,9 +902,9 @@ class CLI extends \WP_CLI_Command {
      *
      * ## EXAMPLES
      *
-     *     wp search-intel white-label export
-     *     wp search-intel white-label export > brand.json
-     *     wp search-intel white-label import brand.json
+     *     wp jat-search-intel white-label export
+     *     wp jat-search-intel white-label export > brand.json
+     *     wp jat-search-intel white-label import brand.json
      *
      * @subcommand white-label
      * @param array $args       Positional arguments.

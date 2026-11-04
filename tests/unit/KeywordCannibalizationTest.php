@@ -1,7 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\Keyword_Cannibalization;
+use JAT_Search_Intel\Keyword_Cannibalization;
 
 class KeywordCannibalizationTest extends TestCase {
 
@@ -142,7 +142,7 @@ class KeywordCannibalizationTest extends TestCase {
     public function test_invalidate_cache_deletes_transient(): void {
         global $si_test_state;
         $si_test_state['transients'] = [
-            'search_intel_cannibalization_report' => [ 'cached' => true ],
+            'jat_search_intel_cannibalization_report' => [ 'cached' => true ],
         ];
 
         $kc = $this->make();
@@ -150,7 +150,7 @@ class KeywordCannibalizationTest extends TestCase {
 
         // Transient should be removed.
         $this->assertArrayNotHasKey(
-            'search_intel_cannibalization_report',
+            'jat_search_intel_cannibalization_report',
             $si_test_state['transients'] ?? []
         );
     }

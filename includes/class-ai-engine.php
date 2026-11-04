@@ -6,11 +6,11 @@
  * Ollama (local). Handles encrypted API key storage, per-provider request
  * formatting, rate limiting, and token budget controls.
  *
- * @package Search_Intel
+ * @package JAT_Search_Intel
  * @since   3.2.0
  */
 
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
@@ -22,13 +22,13 @@ class AI_Engine {
     private $settings;
 
     /** @var string Transient key for rate-limit tracking. */
-    private const RATE_LIMIT_KEY = 'search_intel_ai_rate_limit';
+    private const RATE_LIMIT_KEY = 'jat_search_intel_ai_rate_limit';
 
     /** @var string Option key for lifetime token usage. */
-    private const TOKEN_USAGE_KEY = 'search_intel_ai_token_usage';
+    private const TOKEN_USAGE_KEY = 'jat_search_intel_ai_token_usage';
 
     /** @var string Option key for encrypted API keys. */
-    private const API_KEYS_OPTION = 'search_intel_ai_api_keys';
+    private const API_KEYS_OPTION = 'jat_search_intel_ai_api_keys';
 
     /** @var array Supported providers and their default endpoints. */
     private const PROVIDERS = [
@@ -124,8 +124,8 @@ class AI_Engine {
      * @return string 32-byte key.
      */
     private function get_encryption_key(): string {
-        $salt = defined( 'LOGGED_IN_SALT' ) ? LOGGED_IN_SALT : 'search-intel-fallback-salt';
-        return substr( hash( 'sha256', $salt . 'search_intel_ai', true ), 0, 32 );
+        $salt = defined( 'LOGGED_IN_SALT' ) ? LOGGED_IN_SALT : 'jat-search-intel-fallback-salt';
+        return substr( hash( 'sha256', $salt . 'jat_search_intel_ai', true ), 0, 32 );
     }
 
     /**

@@ -1,5 +1,5 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
@@ -28,8 +28,8 @@ class AEO_Manager {
         add_action( 'wp_head', [ $this, 'render_direct_answer_meta' ], 13 );
 
         // Register FAQ / HowTo shortcodes for easy content creation
-        add_shortcode( 'search_intel_faq', [ $this, 'faq_shortcode' ] );
-        add_shortcode( 'search_intel_howto', [ $this, 'howto_shortcode' ] );
+        add_shortcode( 'jat_search_intel_faq', [ $this, 'faq_shortcode' ] );
+        add_shortcode( 'jat_search_intel_howto', [ $this, 'howto_shortcode' ] );
 
         // Auto-generate lead summary when no excerpt exists
         add_filter( 'get_the_excerpt', [ $this, 'auto_lead_summary' ], 10, 2 );
@@ -44,7 +44,7 @@ class AEO_Manager {
         }
 
         $post_id       = get_queried_object_id();
-        $direct_answer = get_post_meta( $post_id, '_search_intel_direct_answer', true );
+        $direct_answer = get_post_meta( $post_id, '_jat_search_intel_direct_answer', true );
 
         if ( $direct_answer ) {
             printf(
@@ -215,7 +215,7 @@ class AEO_Manager {
      * Meta format: array of [ 'question' => '...', 'answer' => '...' ]
      */
     public function get_faq_schema( int $post_id ): ?array {
-        $faqs = get_post_meta( $post_id, '_search_intel_faqs', true );
+        $faqs = get_post_meta( $post_id, '_jat_search_intel_faqs', true );
 
         if ( empty( $faqs ) || ! is_array( $faqs ) ) {
             // Auto-detect FAQ from content headings
@@ -267,7 +267,7 @@ class AEO_Manager {
      * ]
      */
     public function get_howto_schema( int $post_id ): ?array {
-        $howto = get_post_meta( $post_id, '_search_intel_howto', true );
+        $howto = get_post_meta( $post_id, '_jat_search_intel_howto', true );
 
         if ( empty( $howto ) || empty( $howto['steps'] ) ) {
             return null;
@@ -384,7 +384,7 @@ class AEO_Manager {
         }
 
         // Custom per-post selectors
-        $custom = get_post_meta( $post_id, '_search_intel_speakable_selectors', true );
+        $custom = get_post_meta( $post_id, '_jat_search_intel_speakable_selectors', true );
         if ( ! empty( $custom ) && is_array( $custom ) ) {
             $selectors = $custom;
         }
@@ -407,25 +407,25 @@ class AEO_Manager {
     }
 
     /**
-     * [search_intel_faq] shortcode — renders an accessible FAQ block with schema.
+     * [jat_search_intel_faq] shortcode — renders an accessible FAQ block with schema.
      *
-     * Usage: [search_intel_faq question="What is SEO?" answer="SEO stands for..."]
-     * Or nested: [search_intel_faq]Q: What is SEO?\nA: SEO stands for...[/search_intel_faq]
+     * Usage: [jat_search_intel_faq question="What is SEO?" answer="SEO stands for..."]
+     * Or nested: [jat_search_intel_faq]Q: What is SEO?\nA: SEO stands for...[/jat_search_intel_faq]
      */
     public function faq_shortcode( $atts, $content = null ): string {
         // Deprecation notice when shortcode is used in block editor content.
         if ( function_exists( 'has_blocks' ) && has_blocks( get_the_ID() ) ) {
             _deprecated_function(
-                '[search_intel_faq] shortcode',
+                '[jat_search_intel_faq] shortcode',
                 '1.4.0',
-                'the search-intel/faq Gutenberg block'
+                'the jat-search-intel/faq Gutenberg block'
             );
         }
 
         $atts = shortcode_atts( [
             'question' => '',
             'answer'   => '',
-        ], $atts, 'search_intel_faq' );
+        ], $atts, 'jat_search_intel_faq' );
 
         $question = $atts['question'];
         $answer   = $atts['answer'];
@@ -454,26 +454,26 @@ class AEO_Manager {
     }
 
     /**
-     * [search_intel_howto] shortcode — renders a HowTo block.
+     * [jat_search_intel_howto] shortcode — renders a HowTo block.
      *
-     * Usage: [search_intel_howto name="How to do X" time="PT30M"]
+     * Usage: [jat_search_intel_howto name="How to do X" time="PT30M"]
      *          Step content parsed from nested shortcodes or structured content.
-     *        [/search_intel_howto]
+     *        [/jat_search_intel_howto]
      */
     public function howto_shortcode( $atts, $content = null ): string {
         // Deprecation notice when shortcode is used in block editor content.
         if ( function_exists( 'has_blocks' ) && has_blocks( get_the_ID() ) ) {
             _deprecated_function(
-                '[search_intel_howto] shortcode',
+                '[jat_search_intel_howto] shortcode',
                 '1.4.0',
-                'the search-intel/howto Gutenberg block'
+                'the jat-search-intel/howto Gutenberg block'
             );
         }
 
         $atts = shortcode_atts( [
             'name' => '',
             'time' => '',
-        ], $atts, 'search_intel_howto' );
+        ], $atts, 'jat_search_intel_howto' );
 
         $html  = '<div class="si-howto" itemscope itemtype="https://schema.org/HowTo">';
 
@@ -506,7 +506,7 @@ class AEO_Manager {
         $content = $post->post_content;
 
         // Check 1: Has FAQ content (20 points)
-        $faqs = get_post_meta( $post_id, '_search_intel_faqs', true );
+        $faqs = get_post_meta( $post_id, '_jat_search_intel_faqs', true );
         $auto_faqs = $this->auto_detect_faqs( $post_id );
         $has_faqs = ( ! empty( $faqs ) && is_array( $faqs ) ) || ! empty( $auto_faqs );
         if ( $has_faqs ) {
@@ -553,7 +553,7 @@ class AEO_Manager {
         }
 
         // Check 5: Concise meta description set (15 points)
-        $desc = get_post_meta( $post_id, '_search_intel_description', true );
+        $desc = get_post_meta( $post_id, '_jat_search_intel_description', true );
         if ( $desc && strlen( $desc ) >= 50 && strlen( $desc ) <= 160 ) {
             $score += 15;
             $checks[] = [ 'pass' => true, 'label' => __( 'Meta description is optimal length', 'jat-search-intel' ) ];

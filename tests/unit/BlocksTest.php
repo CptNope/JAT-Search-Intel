@@ -1,8 +1,8 @@
 <?php
-namespace Search_Intel\Tests\Unit;
+namespace JAT_Search_Intel\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\Blocks;
+use JAT_Search_Intel\Blocks;
 
 class BlocksTest extends TestCase {
 
@@ -90,7 +90,7 @@ class BlocksTest extends TestCase {
 		$this->blocks->register_meta();
 
 		foreach ( array_keys( $si_registered_meta['post'] ) as $key ) {
-			$this->assertStringStartsWith( '_search_intel_', $key, "Meta key {$key} missing prefix" );
+			$this->assertStringStartsWith( '_jat_search_intel_', $key, "Meta key {$key} missing prefix" );
 		}
 	}
 
@@ -131,10 +131,10 @@ class BlocksTest extends TestCase {
 		$this->blocks->register_meta();
 
 		$score_keys = [
-			'_search_intel_seo_score',
-			'_search_intel_aeo_score',
-			'_search_intel_geo_score',
-			'_search_intel_readability_score',
+			'_jat_search_intel_seo_score',
+			'_jat_search_intel_aeo_score',
+			'_jat_search_intel_geo_score',
+			'_jat_search_intel_readability_score',
 		];
 
 		foreach ( $score_keys as $key ) {
@@ -148,10 +148,10 @@ class BlocksTest extends TestCase {
 		$this->blocks->register_meta();
 
 		$text_keys = [
-			'_search_intel_title',
-			'_search_intel_description',
-			'_search_intel_focus_keyword',
-			'_search_intel_ai_summary',
+			'_jat_search_intel_title',
+			'_jat_search_intel_description',
+			'_jat_search_intel_focus_keyword',
+			'_jat_search_intel_ai_summary',
 		];
 
 		foreach ( $text_keys as $key ) {
@@ -167,12 +167,12 @@ class BlocksTest extends TestCase {
 		$this->blocks->register_blocks();
 
 		$expected = [
-			'search-intel/faq',
-			'search-intel/howto',
-			'search-intel/answer-box',
-			'search-intel/citation',
-			'search-intel/toc',
-			'search-intel/breadcrumbs',
+			'jat-search-intel/faq',
+			'jat-search-intel/howto',
+			'jat-search-intel/answer-box',
+			'jat-search-intel/citation',
+			'jat-search-intel/toc',
+			'jat-search-intel/breadcrumbs',
 		];
 
 		foreach ( $expected as $block_name ) {
@@ -197,8 +197,8 @@ class BlocksTest extends TestCase {
 
 		$this->blocks->register_blocks();
 
-		$this->assertArrayHasKey( 'render_callback', $si_registered_blocks['search-intel/toc'] );
-		$this->assertIsCallable( $si_registered_blocks['search-intel/toc']['render_callback'] );
+		$this->assertArrayHasKey( 'render_callback', $si_registered_blocks['jat-search-intel/toc'] );
+		$this->assertIsCallable( $si_registered_blocks['jat-search-intel/toc']['render_callback'] );
 	}
 
 	public function test_register_blocks_breadcrumbs_has_render_callback(): void {
@@ -206,8 +206,8 @@ class BlocksTest extends TestCase {
 
 		$this->blocks->register_blocks();
 
-		$this->assertArrayHasKey( 'render_callback', $si_registered_blocks['search-intel/breadcrumbs'] );
-		$this->assertIsCallable( $si_registered_blocks['search-intel/breadcrumbs']['render_callback'] );
+		$this->assertArrayHasKey( 'render_callback', $si_registered_blocks['jat-search-intel/breadcrumbs'] );
+		$this->assertIsCallable( $si_registered_blocks['jat-search-intel/breadcrumbs']['render_callback'] );
 	}
 
 	public function test_register_blocks_static_blocks_have_no_render_callback(): void {
@@ -215,7 +215,7 @@ class BlocksTest extends TestCase {
 
 		$this->blocks->register_blocks();
 
-		$static = [ 'search-intel/faq', 'search-intel/howto', 'search-intel/answer-box', 'search-intel/citation' ];
+		$static = [ 'jat-search-intel/faq', 'jat-search-intel/howto', 'jat-search-intel/answer-box', 'jat-search-intel/citation' ];
 
 		foreach ( $static as $block_name ) {
 			$this->assertArrayNotHasKey( 'render_callback', $si_registered_blocks[ $block_name ], "{$block_name} should not have render_callback" );
@@ -228,12 +228,12 @@ class BlocksTest extends TestCase {
 		$this->blocks->register_blocks();
 
 		$expected_handles = [
-			'search-intel-faq',
-			'search-intel-howto',
-			'search-intel-answer-box',
-			'search-intel-citation',
-			'search-intel-toc',
-			'search-intel-breadcrumbs',
+			'jat-search-intel-faq',
+			'jat-search-intel-howto',
+			'jat-search-intel-answer-box',
+			'jat-search-intel-citation',
+			'jat-search-intel-toc',
+			'jat-search-intel-breadcrumbs',
 		];
 
 		foreach ( $expected_handles as $handle ) {
@@ -248,10 +248,10 @@ class BlocksTest extends TestCase {
 
 		// FAQ, HowTo, Answer Box, Citation have editor CSS; TOC and Breadcrumbs don't.
 		$expected_style_handles = [
-			'search-intel-faq-editor',
-			'search-intel-howto-editor',
-			'search-intel-answer-box-editor',
-			'search-intel-citation-editor',
+			'jat-search-intel-faq-editor',
+			'jat-search-intel-howto-editor',
+			'jat-search-intel-answer-box-editor',
+			'jat-search-intel-citation-editor',
 		];
 
 		foreach ( $expected_style_handles as $handle ) {

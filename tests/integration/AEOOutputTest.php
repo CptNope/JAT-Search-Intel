@@ -5,8 +5,8 @@
  */
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\AEO_Manager;
-use Search_Intel\Core;
+use JAT_Search_Intel\AEO_Manager;
+use JAT_Search_Intel\Core;
 
 class AEOOutputTest extends TestCase {
 
@@ -42,7 +42,7 @@ class AEOOutputTest extends TestCase {
 
     public function test_direct_answer_meta_renders_when_set(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_direct_answer'] = 'SEO means Search Engine Optimization.';
+        $si_test_state['post_meta'][1]['_jat_search_intel_direct_answer'] = 'SEO means Search Engine Optimization.';
 
         $mgr = $this->make_aeo();
         ob_start();
@@ -64,7 +64,7 @@ class AEOOutputTest extends TestCase {
 
     public function test_direct_answer_meta_escapes_content(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_direct_answer'] = 'Use <strong>bold</strong> & "quotes"';
+        $si_test_state['post_meta'][1]['_jat_search_intel_direct_answer'] = 'Use <strong>bold</strong> & "quotes"';
 
         $mgr = $this->make_aeo();
         ob_start();
@@ -78,7 +78,7 @@ class AEOOutputTest extends TestCase {
 
     public function test_faq_schema_renders_when_faqs_exist(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_faqs'] = [
+        $si_test_state['post_meta'][1]['_jat_search_intel_faqs'] = [
             [ 'question' => 'What is SEO?', 'answer' => 'SEO stands for Search Engine Optimization.' ],
             [ 'question' => 'Why use AEO?', 'answer' => 'AEO targets AI answer engines.' ],
         ];
@@ -103,7 +103,7 @@ class AEOOutputTest extends TestCase {
 
     public function test_faq_schema_disabled_when_setting_off(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_faqs'] = [
+        $si_test_state['post_meta'][1]['_jat_search_intel_faqs'] = [
             [ 'question' => 'Q?', 'answer' => 'A.' ],
         ];
 
@@ -117,7 +117,7 @@ class AEOOutputTest extends TestCase {
 
     public function test_faq_schema_is_valid_json_ld(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_faqs'] = [
+        $si_test_state['post_meta'][1]['_jat_search_intel_faqs'] = [
             [ 'question' => 'What is SEO?', 'answer' => 'It is optimization.' ],
         ];
 

@@ -1,5 +1,5 @@
 /**
- * Search Intel — Citation Block
+ * JAT Search Intel — Citation Block
  *
  * Inline source citation block for referencing external sources.
  * Adds structured citation metadata for AI and search engines.
@@ -21,7 +21,7 @@ const SOURCE_TYPE_OPTIONS = [
 	{ label: __( 'Government', 'jat-search-intel' ), value: 'government' },
 ];
 
-registerBlockType( 'search-intel/citation', {
+registerBlockType( 'jat-search-intel/citation', {
 	title: __( 'Citation', 'jat-search-intel' ),
 	description: __( 'Inline source citation with structured metadata for AI and search engines.', 'jat-search-intel' ),
 	category: 'widgets',

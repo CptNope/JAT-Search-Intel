@@ -1,5 +1,5 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;

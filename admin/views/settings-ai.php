@@ -3,19 +3,19 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 // phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- View template included inside a class method; variables are method-scoped.
-$settings  = get_option( 'search_intel_settings', [] );
-$settings  = wp_parse_args( $settings, \Search_Intel\Core::get_default_settings() );
-$ai_engine = \Search_Intel\Core::get_instance()->ai_engine;
+$settings  = get_option( 'jat_search_intel_settings', [] );
+$settings  = wp_parse_args( $settings, \JAT_Search_Intel\Core::get_default_settings() );
+$ai_engine = \JAT_Search_Intel\Core::get_instance()->ai_engine;
 $providers = $ai_engine->get_providers();
 $usage     = $ai_engine->get_token_usage();
 ?>
 <div class="wrap si-settings">
-    <h1><span class="dashicons dashicons-admin-generic"></span> <?php esc_html_e( 'Search Intel — AI Engine', 'jat-search-intel' ); ?></h1>
+    <h1><span class="dashicons dashicons-admin-generic"></span> <?php esc_html_e( 'JAT Search Intel — AI Engine', 'jat-search-intel' ); ?></h1>
     <p class="si-settings-intro"><?php esc_html_e( 'Configure your AI provider for content generation, meta descriptions, title suggestions, and bulk AI tools.', 'jat-search-intel' ); ?></p>
 
     <form method="post" action="options.php" id="si-ai-settings-form">
-        <?php settings_fields( 'search_intel_settings_group' ); ?>
-        <input type="hidden" name="search_intel_settings[_si_page]" value="ai" />
+        <?php settings_fields( 'jat_search_intel_settings_group' ); ?>
+        <input type="hidden" name="jat_search_intel_settings[_si_page]" value="ai" />
 
         <?php
         // Preserve all non-AI settings as hidden fields.
@@ -26,14 +26,14 @@ $usage     = $ai_engine->get_token_usage();
             }
             if ( is_array( $val ) ) :
                 foreach ( $val as $v ) : ?>
-                    <input type="hidden" name="search_intel_settings[<?php echo esc_attr( $key ); ?>][]" value="<?php echo esc_attr( $v ); ?>" />
+                    <input type="hidden" name="jat_search_intel_settings[<?php echo esc_attr( $key ); ?>][]" value="<?php echo esc_attr( $v ); ?>" />
                 <?php endforeach;
             elseif ( is_bool( $val ) || $val === true ) :
                 if ( $val ) : ?>
-                    <input type="hidden" name="search_intel_settings[<?php echo esc_attr( $key ); ?>]" value="1" />
+                    <input type="hidden" name="jat_search_intel_settings[<?php echo esc_attr( $key ); ?>]" value="1" />
                 <?php endif;
             else : ?>
-                <input type="hidden" name="search_intel_settings[<?php echo esc_attr( $key ); ?>]" value="<?php echo esc_attr( $val ); ?>" />
+                <input type="hidden" name="jat_search_intel_settings[<?php echo esc_attr( $key ); ?>]" value="<?php echo esc_attr( $val ); ?>" />
             <?php endif;
         endforeach;
         ?>
@@ -46,7 +46,7 @@ $usage     = $ai_engine->get_token_usage();
                     <th><?php esc_html_e( 'AI Engine', 'jat-search-intel' ); ?></th>
                     <td>
                         <label>
-                            <input type="checkbox" name="search_intel_settings[enable_ai_engine]" value="1" <?php checked( $settings['enable_ai_engine'] ); ?> />
+                            <input type="checkbox" name="jat_search_intel_settings[enable_ai_engine]" value="1" <?php checked( $settings['enable_ai_engine'] ); ?> />
                             <?php esc_html_e( 'Enable AI-powered content generation (meta descriptions, title suggestions, AI summaries, bulk generation)', 'jat-search-intel' ); ?>
                         </label>
                     </td>
@@ -61,7 +61,7 @@ $usage     = $ai_engine->get_token_usage();
                 <tr>
                     <th><label for="si_ai_provider"><?php esc_html_e( 'Active Provider', 'jat-search-intel' ); ?></label></th>
                     <td>
-                        <select id="si_ai_provider" name="search_intel_settings[ai_provider]">
+                        <select id="si_ai_provider" name="jat_search_intel_settings[ai_provider]">
                             <?php foreach ( $providers as $provider_id => $label ) : ?>
                                 <option value="<?php echo esc_attr( $provider_id ); ?>" <?php selected( $settings['ai_provider'], $provider_id ); ?>>
                                     <?php echo esc_html( $label ); ?>
@@ -74,7 +74,7 @@ $usage     = $ai_engine->get_token_usage();
                 <tr>
                     <th><label for="si_ai_model"><?php esc_html_e( 'Model Override', 'jat-search-intel' ); ?></label></th>
                     <td>
-                        <input type="text" id="si_ai_model" name="search_intel_settings[ai_model]" value="<?php echo esc_attr( $settings['ai_model'] ); ?>" class="regular-text" placeholder="<?php esc_attr_e( 'Leave blank for default', 'jat-search-intel' ); ?>" />
+                        <input type="text" id="si_ai_model" name="jat_search_intel_settings[ai_model]" value="<?php echo esc_attr( $settings['ai_model'] ); ?>" class="regular-text" placeholder="<?php esc_attr_e( 'Leave blank for default', 'jat-search-intel' ); ?>" />
                         <p class="description">
                             <?php esc_html_e( 'Defaults:', 'jat-search-intel' ); ?>
                             <strong>OpenAI:</strong> gpt-4o-mini &nbsp;|&nbsp;
@@ -86,7 +86,7 @@ $usage     = $ai_engine->get_token_usage();
                 <tr id="si-ai-endpoint-row">
                     <th><label for="si_ai_endpoint"><?php esc_html_e( 'Custom Endpoint', 'jat-search-intel' ); ?></label></th>
                     <td>
-                        <input type="url" id="si_ai_endpoint" name="search_intel_settings[ai_endpoint]" value="<?php echo esc_url( $settings['ai_endpoint'] ); ?>" class="regular-text" placeholder="<?php esc_attr_e( 'Leave blank for default', 'jat-search-intel' ); ?>" />
+                        <input type="url" id="si_ai_endpoint" name="jat_search_intel_settings[ai_endpoint]" value="<?php echo esc_url( $settings['ai_endpoint'] ); ?>" class="regular-text" placeholder="<?php esc_attr_e( 'Leave blank for default', 'jat-search-intel' ); ?>" />
                         <p class="description"><?php esc_html_e( 'For Ollama: your local server URL (e.g. http://localhost:11434). For OpenAI/Anthropic: use a proxy or compatible endpoint.', 'jat-search-intel' ); ?></p>
                     </td>
                 </tr>
@@ -148,14 +148,14 @@ $usage     = $ai_engine->get_token_usage();
                 <tr>
                     <th><label for="si_ai_rate_limit"><?php esc_html_e( 'Max Requests / Minute', 'jat-search-intel' ); ?></label></th>
                     <td>
-                        <input type="number" id="si_ai_rate_limit" name="search_intel_settings[ai_rate_limit]" value="<?php echo esc_attr( $settings['ai_rate_limit'] ); ?>" min="1" max="200" step="1" class="small-text" />
+                        <input type="number" id="si_ai_rate_limit" name="jat_search_intel_settings[ai_rate_limit]" value="<?php echo esc_attr( $settings['ai_rate_limit'] ); ?>" min="1" max="200" step="1" class="small-text" />
                         <p class="description"><?php esc_html_e( 'Limits how many AI requests can be made per minute to avoid hitting provider rate limits.', 'jat-search-intel' ); ?></p>
                     </td>
                 </tr>
                 <tr>
                     <th><label for="si_ai_token_budget"><?php esc_html_e( 'Monthly Token Budget', 'jat-search-intel' ); ?></label></th>
                     <td>
-                        <input type="number" id="si_ai_token_budget" name="search_intel_settings[ai_token_budget]" value="<?php echo esc_attr( $settings['ai_token_budget'] ); ?>" min="0" step="1000" class="regular-text" />
+                        <input type="number" id="si_ai_token_budget" name="jat_search_intel_settings[ai_token_budget]" value="<?php echo esc_attr( $settings['ai_token_budget'] ); ?>" min="0" step="1000" class="regular-text" />
                         <p class="description"><?php esc_html_e( 'Set to 0 for unlimited. Prevents runaway costs by capping total tokens per month.', 'jat-search-intel' ); ?></p>
                     </td>
                 </tr>
@@ -217,7 +217,7 @@ jQuery(function ($) {
         status.html('<span class="si-status-testing">Saving...</span>');
 
         $.post(ajaxUrl, {
-            action: 'search_intel_save_ai_api_key',
+            action: 'jat_search_intel_save_ai_api_key',
             nonce: nonce,
             provider: provider,
             api_key: apiKey
@@ -245,7 +245,7 @@ jQuery(function ($) {
         status.html('<span class="si-status-testing">Testing...</span>');
 
         $.post(ajaxUrl, {
-            action: 'search_intel_test_ai_connection',
+            action: 'jat_search_intel_test_ai_connection',
             nonce: nonce,
             provider: provider
         }, function (response) {

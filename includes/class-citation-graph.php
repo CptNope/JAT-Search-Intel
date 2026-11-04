@@ -1,5 +1,5 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -26,7 +26,7 @@ class Citation_Graph {
 
 		add_action( 'save_post', [ $this, 'update_post_graph' ], 20, 2 );
 		add_action( 'admin_menu', [ $this, 'register_admin_page' ] );
-		add_action( 'wp_ajax_search_intel_rebuild_graph', [ $this, 'ajax_rebuild' ] );
+		add_action( 'wp_ajax_jat_search_intel_rebuild_graph', [ $this, 'ajax_rebuild' ] );
 	}
 
 	// ── Internal Link Graph ──────────────────────────────────────────────────
@@ -446,8 +446,8 @@ class Citation_Graph {
 		$links    = $this->extract_internal_links( $post_id );
 		$external = $this->extract_external_links( $post_id );
 
-		update_post_meta( $post_id, '_search_intel_internal_links', $links['outbound'] );
-		update_post_meta( $post_id, '_search_intel_external_links', $external );
+		update_post_meta( $post_id, '_jat_search_intel_internal_links', $links['outbound'] );
+		update_post_meta( $post_id, '_jat_search_intel_external_links', $external );
 	}
 
 	// ── Admin ────────────────────────────────────────────────────────────────
@@ -457,11 +457,11 @@ class Citation_Graph {
 	 */
 	public function register_admin_page(): void {
 		add_submenu_page(
-			'search-intel',
+			'jat-search-intel',
 			'Citation Graph',
 			'Citation Graph',
 			'manage_options',
-			'search-intel-citation-graph',
+			'jat-search-intel-citation-graph',
 			[ $this, 'render_admin_page' ]
 		);
 	}

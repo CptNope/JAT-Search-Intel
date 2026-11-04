@@ -1,5 +1,5 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -24,7 +24,7 @@ class Authority_Map {
 		}
 
 		add_action( 'admin_menu', [ $this, 'register_admin_page' ] );
-		add_action( 'wp_ajax_search_intel_refresh_authority', [ $this, 'ajax_refresh' ] );
+		add_action( 'wp_ajax_jat_search_intel_refresh_authority', [ $this, 'ajax_refresh' ] );
 	}
 
 	// ── Authority Score ──────────────────────────────────────────────────────
@@ -162,13 +162,13 @@ class Authority_Map {
 		foreach ( $post_ids as $pid ) {
 			$has_signal = false;
 
-			if ( get_post_meta( $pid, '_search_intel_author_expertise_notes', true ) ) {
+			if ( get_post_meta( $pid, '_jat_search_intel_author_expertise_notes', true ) ) {
 				$has_signal = true;
 			}
-			if ( get_post_meta( $pid, '_search_intel_ai_summary', true ) ) {
+			if ( get_post_meta( $pid, '_jat_search_intel_ai_summary', true ) ) {
 				$has_signal = true;
 			}
-			if ( get_post_meta( $pid, '_search_intel_fact_checked', true ) ) {
+			if ( get_post_meta( $pid, '_jat_search_intel_fact_checked', true ) ) {
 				$has_signal = true;
 			}
 
@@ -195,7 +195,7 @@ class Authority_Map {
 		$linked = 0;
 
 		foreach ( $post_ids as $pid ) {
-			$links = get_post_meta( $pid, '_search_intel_internal_links', true );
+			$links = get_post_meta( $pid, '_jat_search_intel_internal_links', true );
 			if ( $links && is_array( $links ) ) {
 				foreach ( $links as $target ) {
 					if ( in_array( (int) $target, $post_ids, true ) ) {
@@ -224,7 +224,7 @@ class Authority_Map {
 		$with_schema = 0;
 
 		foreach ( $post_ids as $pid ) {
-			if ( get_post_meta( $pid, '_search_intel_schema_type_extra', true ) ) {
+			if ( get_post_meta( $pid, '_jat_search_intel_schema_type_extra', true ) ) {
 				$with_schema++;
 			}
 		}
@@ -392,8 +392,8 @@ class Authority_Map {
 					'id'        => $pid,
 					'title'     => $post ? $post->post_title : '',
 					'modified'  => get_the_modified_date( 'Y-m-d', $pid ),
-					'has_meta'  => (bool) get_post_meta( $pid, '_search_intel_ai_summary', true ),
-					'has_schema' => (bool) get_post_meta( $pid, '_search_intel_schema_type_extra', true ),
+					'has_meta'  => (bool) get_post_meta( $pid, '_jat_search_intel_ai_summary', true ),
+					'has_schema' => (bool) get_post_meta( $pid, '_jat_search_intel_schema_type_extra', true ),
 				];
 			}
 
@@ -471,14 +471,14 @@ class Authority_Map {
 			$has_video = (bool) preg_match( '/<iframe[^>]*(?:youtube|vimeo|video)[^>]*>/i', $content );
 			if ( $has_video ) {
 				$with_video++;
-				$video_schema = get_post_meta( $pid, '_search_intel_video_url', true );
+				$video_schema = get_post_meta( $pid, '_jat_search_intel_video_url', true );
 				if ( ! $video_schema ) {
 					$issues[] = 'Video detected but no VideoObject schema configured';
 				}
 			}
 
 			// Check structured data.
-			$has_schema = (bool) get_post_meta( $pid, '_search_intel_schema_type_extra', true );
+			$has_schema = (bool) get_post_meta( $pid, '_jat_search_intel_schema_type_extra', true );
 			if ( $has_schema ) {
 				$with_schema++;
 			}
@@ -513,11 +513,11 @@ class Authority_Map {
 	 */
 	public function register_admin_page(): void {
 		add_submenu_page(
-			'search-intel',
+			'jat-search-intel',
 			'Topical Authority',
 			'Authority Map',
 			'manage_options',
-			'search-intel-authority',
+			'jat-search-intel-authority',
 			[ $this, 'render_admin_page' ]
 		);
 	}

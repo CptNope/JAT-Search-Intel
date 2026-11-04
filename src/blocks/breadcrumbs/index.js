@@ -1,5 +1,5 @@
 /**
- * Search Intel — Breadcrumbs Block
+ * JAT Search Intel — Breadcrumbs Block
  *
  * Theme-aware breadcrumb navigation.
  * Dynamic block — rendered via PHP on frontend.
@@ -10,7 +10,7 @@ import { __ } from '@wordpress/i18n';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import { PanelBody, SelectControl, TextControl } from '@wordpress/components';
 
-registerBlockType( 'search-intel/breadcrumbs', {
+registerBlockType( 'jat-search-intel/breadcrumbs', {
 	title: __( 'Breadcrumbs', 'jat-search-intel' ),
 	description: __( 'Theme-aware breadcrumb navigation with BreadcrumbList schema.', 'jat-search-intel' ),
 	category: 'widgets',

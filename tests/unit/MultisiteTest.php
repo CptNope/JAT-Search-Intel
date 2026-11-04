@@ -1,8 +1,8 @@
 <?php
-namespace Search_Intel\Tests\Unit;
+namespace JAT_Search_Intel\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\Multisite;
+use JAT_Search_Intel\Multisite;
 
 class MultisiteTest extends TestCase {
 
@@ -56,7 +56,7 @@ class MultisiteTest extends TestCase {
 
 	public function test_get_effective_settings_merges_network_defaults(): void {
 		global $si_test_state;
-		$si_test_state['site_options']['search_intel_network_defaults'] = [
+		$si_test_state['site_options']['jat_search_intel_network_defaults'] = [
 			'enable_schema' => true,
 		];
 
@@ -67,13 +67,13 @@ class MultisiteTest extends TestCase {
 
 	public function test_get_effective_settings_site_override_wins(): void {
 		global $si_test_state;
-		$si_test_state['site_options']['search_intel_network_defaults'] = [
+		$si_test_state['site_options']['jat_search_intel_network_defaults'] = [
 			'enable_schema' => true,
 		];
-		$si_test_state['options']['search_intel_settings'] = [
+		$si_test_state['options']['jat_search_intel_settings'] = [
 			'enable_schema' => false,
 		];
-		$si_test_state['options']['search_intel_site_overrides'] = [ 'enable_schema' ];
+		$si_test_state['options']['jat_search_intel_site_overrides'] = [ 'enable_schema' ];
 
 		$ms = $this->make();
 		$effective = $ms->get_effective_settings();
@@ -87,18 +87,18 @@ class MultisiteTest extends TestCase {
 		$ms = $this->make();
 		$ms->set_site_override( 'enable_geo', true );
 
-		$overrides = $si_test_state['options']['search_intel_site_overrides'];
+		$overrides = $si_test_state['options']['jat_search_intel_site_overrides'];
 		$this->assertContains( 'enable_geo', $overrides );
 	}
 
 	public function test_remove_site_override(): void {
 		global $si_test_state;
-		$si_test_state['options']['search_intel_site_overrides'] = [ 'enable_geo', 'enable_schema' ];
+		$si_test_state['options']['jat_search_intel_site_overrides'] = [ 'enable_geo', 'enable_schema' ];
 
 		$ms = $this->make();
 		$ms->remove_site_override( 'enable_geo' );
 
-		$overrides = $si_test_state['options']['search_intel_site_overrides'];
+		$overrides = $si_test_state['options']['jat_search_intel_site_overrides'];
 		$this->assertNotContains( 'enable_geo', $overrides );
 		$this->assertContains( 'enable_schema', $overrides );
 	}
@@ -122,7 +122,7 @@ class MultisiteTest extends TestCase {
 
 	public function test_apply_defaults_to_new_site(): void {
 		global $si_test_state;
-		$si_test_state['site_options']['search_intel_network_defaults'] = [
+		$si_test_state['site_options']['jat_search_intel_network_defaults'] = [
 			'enable_schema' => true,
 		];
 
@@ -130,7 +130,7 @@ class MultisiteTest extends TestCase {
 		$site = (object) [ 'blog_id' => 2 ];
 		$ms->apply_defaults_to_new_site( $site, [] );
 
-		$settings = $si_test_state['options']['search_intel_settings'] ?? [];
+		$settings = $si_test_state['options']['jat_search_intel_settings'] ?? [];
 		$this->assertTrue( $settings['enable_schema'] );
 	}
 
@@ -140,7 +140,7 @@ class MultisiteTest extends TestCase {
 		$site = (object) [ 'blog_id' => 2 ];
 		$ms->apply_defaults_to_new_site( $site, [] );
 
-		$this->assertArrayNotHasKey( 'search_intel_settings', $si_test_state['options'] );
+		$this->assertArrayNotHasKey( 'jat_search_intel_settings', $si_test_state['options'] );
 	}
 
 	// ── Not Multisite ────────────────────────────────────────────────────────

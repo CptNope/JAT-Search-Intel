@@ -1,5 +1,5 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -106,8 +106,8 @@ class Migration {
 		$this->settings = $settings;
 
 		add_action( 'admin_menu', [ $this, 'register_admin_menu' ] );
-		add_action( 'wp_ajax_search_intel_migration_run', [ $this, 'ajax_run_migration' ] );
-		add_action( 'wp_ajax_search_intel_migration_dryrun', [ $this, 'ajax_dry_run' ] );
+		add_action( 'wp_ajax_jat_search_intel_migration_run', [ $this, 'ajax_run_migration' ] );
+		add_action( 'wp_ajax_jat_search_intel_migration_dryrun', [ $this, 'ajax_dry_run' ] );
 	}
 
 	// ── Detection ────────────────────────────────────────────────────────────
@@ -240,7 +240,7 @@ class Migration {
 	 * Run a full migration from a source plugin.
 	 *
 	 * @param string $source    Source plugin key.
-	 * @param bool   $overwrite Whether to overwrite existing Search Intel values.
+	 * @param bool   $overwrite Whether to overwrite existing JAT Search Intel values.
 	 * @return array Migration result.
 	 */
 	public function migrate( string $source, bool $overwrite = false ): array {
@@ -305,23 +305,23 @@ class Migration {
 	}
 
 	/**
-	 * Map field names to Search Intel meta keys.
+	 * Map field names to JAT Search Intel meta keys.
 	 *
 	 * @param string $field Field name.
 	 * @return string Target meta key.
 	 */
 	private function get_target_meta_key( string $field ): string {
 		$map = [
-			'title'       => '_search_intel_title',
-			'description' => '_search_intel_description',
-			'keyword'     => '_search_intel_focus_keyword',
-			'robots'      => '_search_intel_robots',
-			'canonical'   => '_search_intel_canonical',
-			'og_title'    => '_search_intel_og_title',
-			'og_desc'     => '_search_intel_og_description',
-			'og_image'    => '_search_intel_og_image',
-			'twitter'     => '_search_intel_twitter_title',
-			'schema'      => '_search_intel_schema',
+			'title'       => '_jat_search_intel_title',
+			'description' => '_jat_search_intel_description',
+			'keyword'     => '_jat_search_intel_focus_keyword',
+			'robots'      => '_jat_search_intel_robots',
+			'canonical'   => '_jat_search_intel_canonical',
+			'og_title'    => '_jat_search_intel_og_title',
+			'og_desc'     => '_jat_search_intel_og_description',
+			'og_image'    => '_jat_search_intel_og_image',
+			'twitter'     => '_jat_search_intel_twitter_title',
+			'schema'      => '_jat_search_intel_schema',
 		];
 
 		return $map[ $field ] ?? '';
@@ -364,7 +364,7 @@ class Migration {
 			return 0;
 		}
 
-		$existing = get_option( 'search_intel_redirects', [] );
+		$existing = get_option( 'jat_search_intel_redirects', [] );
 		$existing = is_array( $existing ) ? $existing : [];
 		$count    = 0;
 
@@ -399,7 +399,7 @@ class Migration {
 		}
 
 		if ( $count > 0 ) {
-			update_option( 'search_intel_redirects', $existing, false );
+			update_option( 'jat_search_intel_redirects', $existing, false );
 		}
 
 		return $count;
@@ -464,7 +464,7 @@ class Migration {
 	 * AJAX handler for running migration.
 	 */
 	public function ajax_run_migration(): void {
-		check_ajax_referer( 'search_intel_migration', 'nonce' );
+		check_ajax_referer( 'jat_search_intel_migration', 'nonce' );
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( 'Insufficient permissions.' );
 		}
@@ -480,7 +480,7 @@ class Migration {
 	 * AJAX handler for dry run preview.
 	 */
 	public function ajax_dry_run(): void {
-		check_ajax_referer( 'search_intel_migration', 'nonce' );
+		check_ajax_referer( 'jat_search_intel_migration', 'nonce' );
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( 'Insufficient permissions.' );
 		}
@@ -497,11 +497,11 @@ class Migration {
 	 */
 	public function register_admin_menu(): void {
 		add_submenu_page(
-			'search-intel',
+			'jat-search-intel',
 			'Plugin Migration',
 			'Migration',
 			'manage_options',
-			'search-intel-migration',
+			'jat-search-intel-migration',
 			[ $this, 'render_admin_page' ]
 		);
 	}
@@ -520,7 +520,7 @@ class Migration {
 			return;
 		}
 
-		echo '<p>The following SEO plugins have data that can be migrated to Search Intel:</p>';
+		echo '<p>The following SEO plugins have data that can be migrated to JAT Search Intel:</p>';
 
 		foreach ( $detected as $key => $info ) {
 			printf(

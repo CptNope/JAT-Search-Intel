@@ -66,7 +66,7 @@ export default function AeoPanel() {
 				value={ schemaType }
 				options={ SCHEMA_TYPE_OPTIONS }
 				onChange={ setSchemaType }
-				help={ __( 'Leave on Auto-detect to let Search Intel choose the best schema type.', 'jat-search-intel' ) }
+				help={ __( 'Leave on Auto-detect to let JAT Search Intel choose the best schema type.', 'jat-search-intel' ) }
 			/>
 
 			<PanelBody
@@ -74,7 +74,7 @@ export default function AeoPanel() {
 				initialOpen={ false }
 			>
 				<p className="si-panel__help">
-					{ __( 'Use the Search Intel FAQ or HowTo blocks in the editor content area to add structured FAQ/HowTo data. These blocks automatically generate the correct schema markup.', 'jat-search-intel' ) }
+					{ __( 'Use the JAT Search Intel FAQ or HowTo blocks in the editor content area to add structured FAQ/HowTo data. These blocks automatically generate the correct schema markup.', 'jat-search-intel' ) }
 				</p>
 			</PanelBody>
 		</div>

@@ -5,8 +5,8 @@
  */
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\SEO_Manager;
-use Search_Intel\Core;
+use JAT_Search_Intel\SEO_Manager;
+use JAT_Search_Intel\Core;
 
 class MetaOutputTest extends TestCase {
 
@@ -55,12 +55,12 @@ class MetaOutputTest extends TestCase {
         $seo->render_meta_tags();
         $output = ob_get_clean();
 
-        $this->assertStringContainsString( '<!-- Search Intel v', $output );
+        $this->assertStringContainsString( '<!-- JAT Search Intel v', $output );
     }
 
     public function test_meta_description_uses_custom_when_set(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_description'] = 'My custom SEO description.';
+        $si_test_state['post_meta'][1]['_jat_search_intel_description'] = 'My custom SEO description.';
 
         $seo = $this->make_seo();
         ob_start();
@@ -81,7 +81,7 @@ class MetaOutputTest extends TestCase {
 
     public function test_meta_description_escapes_html(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_description'] = '<b>Bold</b> & "quoted"';
+        $si_test_state['post_meta'][1]['_jat_search_intel_description'] = '<b>Bold</b> & "quoted"';
 
         $seo = $this->make_seo();
         ob_start();
@@ -122,7 +122,7 @@ class MetaOutputTest extends TestCase {
 
     public function test_canonical_uses_custom_when_set(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_canonical'] = 'https://example.com/my-seo-url';
+        $si_test_state['post_meta'][1]['_jat_search_intel_canonical'] = 'https://example.com/my-seo-url';
 
         $seo = $this->make_seo();
         ob_start();
@@ -156,7 +156,7 @@ class MetaOutputTest extends TestCase {
 
     public function test_robots_meta_includes_noindex_when_set(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_noindex'] = '1';
+        $si_test_state['post_meta'][1]['_jat_search_intel_noindex'] = '1';
 
         $seo = $this->make_seo();
         ob_start();
@@ -168,7 +168,7 @@ class MetaOutputTest extends TestCase {
 
     public function test_robots_meta_includes_nofollow_when_set(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_nofollow'] = '1';
+        $si_test_state['post_meta'][1]['_jat_search_intel_nofollow'] = '1';
 
         $seo = $this->make_seo();
         ob_start();
@@ -230,7 +230,7 @@ class MetaOutputTest extends TestCase {
 
     public function test_open_graph_uses_social_title_override(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_social_title'] = 'Social Override Title';
+        $si_test_state['post_meta'][1]['_jat_search_intel_social_title'] = 'Social Override Title';
 
         $seo = $this->make_seo();
         ob_start();
@@ -242,7 +242,7 @@ class MetaOutputTest extends TestCase {
 
     public function test_open_graph_uses_social_description_override(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_social_description'] = 'Social desc override.';
+        $si_test_state['post_meta'][1]['_jat_search_intel_social_description'] = 'Social desc override.';
 
         $seo = $this->make_seo();
         ob_start();
@@ -333,7 +333,7 @@ class MetaOutputTest extends TestCase {
 
     public function test_twitter_card_uses_social_override(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_social_title'] = 'Twitter Override';
+        $si_test_state['post_meta'][1]['_jat_search_intel_social_title'] = 'Twitter Override';
 
         $seo = $this->make_seo();
         ob_start();
@@ -356,7 +356,7 @@ class MetaOutputTest extends TestCase {
 
     public function test_filter_title_returns_custom_seo_title(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_title'] = 'Custom SEO Title';
+        $si_test_state['post_meta'][1]['_jat_search_intel_title'] = 'Custom SEO Title';
 
         $seo   = $this->make_seo();
         $title = $seo->filter_title( 'Original Title' );
@@ -383,7 +383,7 @@ class MetaOutputTest extends TestCase {
     public function test_description_truncated_to_max_length(): void {
         global $si_test_state;
         $long_desc = str_repeat( 'word ', 100 );
-        $si_test_state['post_meta'][1]['_search_intel_description'] = $long_desc;
+        $si_test_state['post_meta'][1]['_jat_search_intel_description'] = $long_desc;
 
         $seo  = $this->make_seo( [ 'description_max_length' => 50 ] );
         $desc = $seo->get_description( 1 );
@@ -393,7 +393,7 @@ class MetaOutputTest extends TestCase {
 
     public function test_description_not_truncated_when_short(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_description'] = 'Short description.';
+        $si_test_state['post_meta'][1]['_jat_search_intel_description'] = 'Short description.';
 
         $seo  = $this->make_seo();
         $desc = $seo->get_description( 1 );

@@ -1,5 +1,5 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -38,8 +38,8 @@ class FAQ_Generator {
 		}
 
 		// AJAX handlers always active — the main metabox AEO tab uses these.
-		add_action( 'wp_ajax_search_intel_generate_faqs', [ $this, 'ajax_generate' ] );
-		add_action( 'wp_ajax_search_intel_save_faqs', [ $this, 'ajax_save' ] );
+		add_action( 'wp_ajax_jat_search_intel_generate_faqs', [ $this, 'ajax_generate' ] );
+		add_action( 'wp_ajax_jat_search_intel_save_faqs', [ $this, 'ajax_save' ] );
 	}
 
 	/**
@@ -340,7 +340,7 @@ class FAQ_Generator {
 			}
 		}
 
-		update_post_meta( $post_id, '_search_intel_faqs', $sanitized );
+		update_post_meta( $post_id, '_jat_search_intel_faqs', $sanitized );
 
 		wp_send_json_success( [ 'message' => 'FAQs saved.', 'count' => count( $sanitized ) ] );
 	}
@@ -368,7 +368,7 @@ class FAQ_Generator {
 	 * @param object $post Current post object.
 	 */
 	public function render_metabox( object $post ): void {
-		$saved_faqs = get_post_meta( $post->ID, '_search_intel_faqs', true );
+		$saved_faqs = get_post_meta( $post->ID, '_jat_search_intel_faqs', true );
 		$has_ai_key = ! empty( $this->settings['faq_ai_api_key'] );
 
 		wp_nonce_field( 'si_faq_nonce', 'si_faq_nonce' );

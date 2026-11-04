@@ -1,5 +1,5 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -15,17 +15,17 @@ class Redirect_Manager {
 	/**
 	 * Custom DB table name (without prefix).
 	 */
-	private const TABLE_REDIRECTS = 'search_intel_redirects';
+	private const TABLE_REDIRECTS = 'jat_search_intel_redirects';
 
 	/**
 	 * Custom DB table name for 404 log (without prefix).
 	 */
-	private const TABLE_404_LOG = 'search_intel_404_log';
+	private const TABLE_404_LOG = 'jat_search_intel_404_log';
 
 	/**
 	 * Option holding the compiled lookup index of enabled rules.
 	 */
-	private const INDEX_OPTION = 'search_intel_redirect_index';
+	private const INDEX_OPTION = 'jat_search_intel_redirect_index';
 
 	/**
 	 * Above this many exact rules the index stops holding them and exact
@@ -79,11 +79,11 @@ class Redirect_Manager {
 
 		if ( is_admin() ) {
 			add_action( 'admin_menu', [ $this, 'register_admin_page' ] );
-			add_action( 'wp_ajax_search_intel_save_redirect', [ $this, 'ajax_save_redirect' ] );
-			add_action( 'wp_ajax_search_intel_delete_redirect', [ $this, 'ajax_delete_redirect' ] );
-			add_action( 'wp_ajax_search_intel_export_redirects', [ $this, 'ajax_export_csv' ] );
-			add_action( 'wp_ajax_search_intel_import_redirects', [ $this, 'ajax_import_csv' ] );
-			add_action( 'wp_ajax_search_intel_clear_404_log', [ $this, 'ajax_clear_404_log' ] );
+			add_action( 'wp_ajax_jat_search_intel_save_redirect', [ $this, 'ajax_save_redirect' ] );
+			add_action( 'wp_ajax_jat_search_intel_delete_redirect', [ $this, 'ajax_delete_redirect' ] );
+			add_action( 'wp_ajax_jat_search_intel_export_redirects', [ $this, 'ajax_export_csv' ] );
+			add_action( 'wp_ajax_jat_search_intel_import_redirects', [ $this, 'ajax_import_csv' ] );
+			add_action( 'wp_ajax_jat_search_intel_clear_404_log', [ $this, 'ajax_clear_404_log' ] );
 		}
 	}
 
@@ -676,11 +676,11 @@ class Redirect_Manager {
 	 */
 	public function register_admin_page(): void {
 		add_submenu_page(
-			'search-intel',
+			'jat-search-intel',
 			__( 'Redirects', 'jat-search-intel' ),
 			__( 'Redirects', 'jat-search-intel' ),
 			'manage_options',
-			'search-intel-redirects',
+			'jat-search-intel-redirects',
 			[ $this, 'render_admin_page' ]
 		);
 	}
@@ -696,14 +696,14 @@ class Redirect_Manager {
 		$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'redirects'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only view/pagination parameter.
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'Search Intel — Redirects', 'jat-search-intel' ); ?></h1>
+			<h1><?php esc_html_e( 'JAT Search Intel — Redirects', 'jat-search-intel' ); ?></h1>
 
 			<nav class="nav-tab-wrapper">
-				<a href="?page=search-intel-redirects&tab=redirects"
+				<a href="?page=jat-search-intel-redirects&tab=redirects"
 				   class="nav-tab <?php echo 'redirects' === $tab ? 'nav-tab-active' : ''; ?>">
 					<?php esc_html_e( 'Redirect Rules', 'jat-search-intel' ); ?>
 				</a>
-				<a href="?page=search-intel-redirects&tab=404log"
+				<a href="?page=jat-search-intel-redirects&tab=404log"
 				   class="nav-tab <?php echo '404log' === $tab ? 'nav-tab-active' : ''; ?>">
 					<?php esc_html_e( '404 Log', 'jat-search-intel' ); ?>
 				</a>
@@ -737,7 +737,7 @@ class Redirect_Manager {
 		<div class="si-redirects-wrap" style="margin-top: 20px;">
 			<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
 				<form method="get" style="display:flex; gap:8px; align-items:center;">
-					<input type="hidden" name="page" value="search-intel-redirects" />
+					<input type="hidden" name="page" value="jat-search-intel-redirects" />
 					<input type="search" name="s" value="<?php echo esc_attr( $search ); ?>"
 						   placeholder="<?php esc_attr_e( 'Search redirects…', 'jat-search-intel' ); ?>" class="regular-text" />
 					<button type="submit" class="button"><?php esc_html_e( 'Search', 'jat-search-intel' ); ?></button>
@@ -975,7 +975,7 @@ class Redirect_Manager {
 		$csv = $this->export_csv();
 
 		header( 'Content-Type: text/csv; charset=utf-8' );
-		header( 'Content-Disposition: attachment; filename=search-intel-redirects-' . gmdate( 'Y-m-d' ) . '.csv' );
+		header( 'Content-Disposition: attachment; filename=jat-search-intel-redirects-' . gmdate( 'Y-m-d' ) . '.csv' );
 		echo $csv; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Raw CSV file download, not HTML.
 		exit;
 	}

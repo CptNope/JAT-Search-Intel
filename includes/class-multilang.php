@@ -1,12 +1,12 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 /**
- * Multi-language support for Search Intel.
+ * Multi-language support for JAT Search Intel.
  *
  * Integrates with WPML and Polylang for per-language SEO metadata,
  * hreflang tag generation, per-language sitemaps, and per-language llms.txt.
@@ -29,7 +29,7 @@ class Multilang {
 		}
 
 		add_action( 'wp_head', [ $this, 'render_hreflang' ], 1 );
-		add_filter( 'search_intel_meta_fields', [ $this, 'add_language_fields' ], 10, 2 );
+		add_filter( 'jat_search_intel_meta_fields', [ $this, 'add_language_fields' ], 10, 2 );
 	}
 
 	// ── Plugin Detection ─────────────────────────────────────────────────────
@@ -158,7 +158,7 @@ class Multilang {
 			return;
 		}
 
-		echo "\n<!-- Search Intel hreflang -->\n";
+		echo "\n<!-- JAT Search Intel hreflang -->\n";
 		foreach ( $translations as $lang => $tid ) {
 			$url    = get_permalink( $tid );
 			$locale = $this->lang_to_locale( $lang );
@@ -200,7 +200,7 @@ class Multilang {
 	 * Get per-language meta value.
 	 *
 	 * @param int    $post_id  Post ID.
-	 * @param string $meta_key Base meta key (e.g., '_search_intel_title').
+	 * @param string $meta_key Base meta key (e.g., '_jat_search_intel_title').
 	 * @param string $lang     Language code (empty = current post language).
 	 * @return string
 	 */
@@ -318,7 +318,7 @@ class Multilang {
 			}
 
 			$url  = get_permalink( $post->ID );
-			$desc = get_post_meta( $post->ID, '_search_intel_description', true );
+			$desc = get_post_meta( $post->ID, '_jat_search_intel_description', true );
 			if ( empty( $desc ) ) {
 				$desc = wp_trim_words( wp_strip_all_tags( $post->post_content ), 30, '...' );
 			}

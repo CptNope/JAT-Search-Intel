@@ -4,7 +4,7 @@
  */
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\GEO_Manager;
+use JAT_Search_Intel\GEO_Manager;
 
 class GEOManagerTest extends TestCase {
 
@@ -61,7 +61,7 @@ class GEOManagerTest extends TestCase {
 
     public function test_render_ai_meta_outputs_ai_summary(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_ai_summary'] = 'AI-friendly summary.';
+        $si_test_state['post_meta'][1]['_jat_search_intel_ai_summary'] = 'AI-friendly summary.';
 
         $mgr = $this->make_manager();
         ob_start();
@@ -74,7 +74,7 @@ class GEOManagerTest extends TestCase {
 
     public function test_render_ai_meta_outputs_content_type(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_content_type'] = 'guide';
+        $si_test_state['post_meta'][1]['_jat_search_intel_content_type'] = 'guide';
 
         $mgr = $this->make_manager();
         ob_start();
@@ -86,7 +86,7 @@ class GEOManagerTest extends TestCase {
 
     public function test_render_ai_meta_outputs_content_intent(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_content_intent'] = 'informational';
+        $si_test_state['post_meta'][1]['_jat_search_intel_content_intent'] = 'informational';
 
         $mgr = $this->make_manager();
         ob_start();
@@ -99,7 +99,7 @@ class GEOManagerTest extends TestCase {
 
     public function test_render_ai_meta_outputs_audience(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_audience'] = 'developers';
+        $si_test_state['post_meta'][1]['_jat_search_intel_audience'] = 'developers';
 
         $mgr = $this->make_manager();
         ob_start();
@@ -112,7 +112,7 @@ class GEOManagerTest extends TestCase {
 
     public function test_render_ai_meta_outputs_author_expertise(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_author_expertise_notes'] = '10 years in SEO';
+        $si_test_state['post_meta'][1]['_jat_search_intel_author_expertise_notes'] = '10 years in SEO';
 
         $mgr = $this->make_manager();
         ob_start();
@@ -125,8 +125,8 @@ class GEOManagerTest extends TestCase {
 
     public function test_render_ai_meta_outputs_local_relevance(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_local_relevance'] = '1';
-        $si_test_state['post_meta'][1]['_search_intel_local_location']  = 'New York, NY';
+        $si_test_state['post_meta'][1]['_jat_search_intel_local_relevance'] = '1';
+        $si_test_state['post_meta'][1]['_jat_search_intel_local_location']  = 'New York, NY';
 
         $mgr = $this->make_manager();
         ob_start();
@@ -139,8 +139,8 @@ class GEOManagerTest extends TestCase {
 
     public function test_render_ai_meta_no_local_without_toggle(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_local_relevance'] = '';
-        $si_test_state['post_meta'][1]['_search_intel_local_location']  = 'New York, NY';
+        $si_test_state['post_meta'][1]['_jat_search_intel_local_relevance'] = '';
+        $si_test_state['post_meta'][1]['_jat_search_intel_local_location']  = 'New York, NY';
 
         $mgr = $this->make_manager();
         ob_start();
@@ -154,7 +154,7 @@ class GEOManagerTest extends TestCase {
 
     public function test_enhance_content_entities_wraps_entity(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_entities'] = [
+        $si_test_state['post_meta'][1]['_jat_search_intel_entities'] = [
             [ 'name' => 'Google', 'type' => 'Organization', 'url' => '' ],
         ];
 
@@ -167,7 +167,7 @@ class GEOManagerTest extends TestCase {
 
     public function test_enhance_content_entities_uses_link_for_url(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_entities'] = [
+        $si_test_state['post_meta'][1]['_jat_search_intel_entities'] = [
             [ 'name' => 'Google', 'type' => 'Organization', 'url' => 'https://google.com' ],
         ];
 
@@ -180,7 +180,7 @@ class GEOManagerTest extends TestCase {
 
     public function test_enhance_content_entities_fallback_type(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_entities'] = [
+        $si_test_state['post_meta'][1]['_jat_search_intel_entities'] = [
             [ 'name' => 'Widget', 'type' => 'InvalidType', 'url' => '' ],
         ];
 
@@ -213,7 +213,7 @@ class GEOManagerTest extends TestCase {
 
     public function test_render_ai_crawl_outputs_noindex_when_set(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_ai_noindex'] = '1';
+        $si_test_state['post_meta'][1]['_jat_search_intel_ai_noindex'] = '1';
 
         $mgr = $this->make_manager();
         ob_start();

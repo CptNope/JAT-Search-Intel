@@ -1,5 +1,5 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
@@ -22,7 +22,7 @@ class Content_Analyzer {
         }
 
         // AJAX endpoint for live analysis
-        add_action( 'wp_ajax_search_intel_analyze', [ $this, 'ajax_analyze' ] );
+        add_action( 'wp_ajax_jat_search_intel_analyze', [ $this, 'ajax_analyze' ] );
 
         // Analysis-on-Save
         add_action( 'wp_after_insert_post', [ $this, 'analyze_on_save' ], 20, 2 );
@@ -51,18 +51,18 @@ class Content_Analyzer {
         }
 
         $content     = $post->post_content;
-        $title       = get_post_meta( $post_id, '_search_intel_title', true ) ?: $post->post_title;
-        $keyword     = get_post_meta( $post_id, '_search_intel_focus_keyword', true );
-        $description = get_post_meta( $post_id, '_search_intel_description', true );
+        $title       = get_post_meta( $post_id, '_jat_search_intel_title', true ) ?: $post->post_title;
+        $keyword     = get_post_meta( $post_id, '_jat_search_intel_focus_keyword', true );
+        $description = get_post_meta( $post_id, '_jat_search_intel_description', true );
 
         $results = $this->analyze( $post_id, $content, $title, $keyword, $description );
 
         // Capture old scores before overwriting — used by change log.
         $old_scores = [
-            'seo'         => (float) get_post_meta( $post_id, '_search_intel_seo_score', true ),
-            'aeo'         => (float) get_post_meta( $post_id, '_search_intel_aeo_score', true ),
-            'geo'         => (float) get_post_meta( $post_id, '_search_intel_geo_score', true ),
-            'readability' => (float) get_post_meta( $post_id, '_search_intel_readability_score', true ),
+            'seo'         => (float) get_post_meta( $post_id, '_jat_search_intel_seo_score', true ),
+            'aeo'         => (float) get_post_meta( $post_id, '_jat_search_intel_aeo_score', true ),
+            'geo'         => (float) get_post_meta( $post_id, '_jat_search_intel_geo_score', true ),
+            'readability' => (float) get_post_meta( $post_id, '_jat_search_intel_readability_score', true ),
         ];
 
         $new_scores = [
@@ -72,10 +72,10 @@ class Content_Analyzer {
             'readability' => (float) ( $results['readability']['score'] ?? 0 ),
         ];
 
-        update_post_meta( $post_id, '_search_intel_seo_score', $new_scores['seo'] );
-        update_post_meta( $post_id, '_search_intel_aeo_score', $new_scores['aeo'] );
-        update_post_meta( $post_id, '_search_intel_geo_score', $new_scores['geo'] );
-        update_post_meta( $post_id, '_search_intel_readability_score', $new_scores['readability'] );
+        update_post_meta( $post_id, '_jat_search_intel_seo_score', $new_scores['seo'] );
+        update_post_meta( $post_id, '_jat_search_intel_aeo_score', $new_scores['aeo'] );
+        update_post_meta( $post_id, '_jat_search_intel_geo_score', $new_scores['geo'] );
+        update_post_meta( $post_id, '_jat_search_intel_readability_score', $new_scores['readability'] );
 
         /**
          * Fires after a post has been analyzed and scores saved.
@@ -85,7 +85,7 @@ class Content_Analyzer {
          * @param array $old_scores Previous scores (seo, aeo, geo, readability).
          * @param array $results    Full analysis results including checks.
          */
-        do_action( 'search_intel_post_analyzed', $post_id, $new_scores, $old_scores, $results );
+        do_action( 'jat_search_intel_post_analyzed', $post_id, $new_scores, $old_scores, $results );
 
         // Flag critical issues for admin notice
         $critical = [];
@@ -100,7 +100,7 @@ class Content_Analyzer {
         }
 
         if ( ! empty( $critical ) ) {
-            set_transient( "search_intel_notice_{$post_id}_{$post->post_author}", $critical, 60 );
+            set_transient( "jat_search_intel_notice_{$post_id}_{$post->post_author}", $critical, 60 );
         }
     }
 
@@ -119,15 +119,15 @@ class Content_Analyzer {
             return;
         }
 
-        $issues = get_transient( "search_intel_notice_{$post_id}_{$user_id}" );
+        $issues = get_transient( "jat_search_intel_notice_{$post_id}_{$user_id}" );
         if ( empty( $issues ) ) {
             return;
         }
 
-        delete_transient( "search_intel_notice_{$post_id}_{$user_id}" );
+        delete_transient( "jat_search_intel_notice_{$post_id}_{$user_id}" );
 
         echo '<div class="notice notice-warning is-dismissible"><p>';
-        echo '<strong>' . esc_html__( 'Search Intel:', 'jat-search-intel' ) . '</strong> ';
+        echo '<strong>' . esc_html__( 'JAT Search Intel:', 'jat-search-intel' ) . '</strong> ';
         echo esc_html( implode( ' · ', $issues ) );
         echo '</p></div>';
     }
@@ -136,7 +136,7 @@ class Content_Analyzer {
      * AJAX handler for live content analysis.
      */
     public function ajax_analyze(): void {
-        check_ajax_referer( 'search_intel_nonce', 'nonce' );
+        check_ajax_referer( 'jat_search_intel_nonce', 'nonce' );
 
         $post_id = absint( $_POST['post_id'] ?? 0 );
 
@@ -380,7 +380,7 @@ class Content_Analyzer {
         }
 
         // 5. FAQ data (15 pts)
-        $faqs = get_post_meta( $post_id, '_search_intel_faqs', true );
+        $faqs = get_post_meta( $post_id, '_jat_search_intel_faqs', true );
         if ( ! empty( $faqs ) ) {
             $score += 15;
             $checks[] = [ 'pass' => true, 'label' => __( 'FAQ schema data configured', 'jat-search-intel' ) ];
@@ -420,7 +420,7 @@ class Content_Analyzer {
         $checks = [];
 
         // 1. AI Summary (15 pts)
-        $ai_summary = get_post_meta( $post_id, '_search_intel_ai_summary', true );
+        $ai_summary = get_post_meta( $post_id, '_jat_search_intel_ai_summary', true );
         if ( $ai_summary ) {
             $score += 15;
             $checks[] = [ 'pass' => true, 'label' => __( 'AI summary provided', 'jat-search-intel' ) ];
@@ -467,7 +467,7 @@ class Content_Analyzer {
         }
 
         // 6. Entities defined (15 pts)
-        $entities = get_post_meta( $post_id, '_search_intel_entities', true );
+        $entities = get_post_meta( $post_id, '_jat_search_intel_entities', true );
         if ( ! empty( $entities ) ) {
             $score += 15;
             $checks[] = [ 'pass' => true, 'label' => __( 'Entities marked up for AI understanding', 'jat-search-intel' ) ];
@@ -695,7 +695,7 @@ class Content_Analyzer {
         }
 
         // 6. Entity clarity scoring (key entities in repeater)
-        $entities = get_post_meta( $post_id, '_search_intel_entities', true );
+        $entities = get_post_meta( $post_id, '_jat_search_intel_entities', true );
         $entity_count = is_array( $entities ) ? count( $entities ) : 0;
         if ( $entity_count >= 3 ) {
             /* translators: %d: number. */
@@ -708,7 +708,7 @@ class Content_Analyzer {
         }
 
         // 7. AI summary presence check
-        $ai_summary = get_post_meta( $post_id, '_search_intel_ai_summary', true );
+        $ai_summary = get_post_meta( $post_id, '_jat_search_intel_ai_summary', true );
         if ( $ai_summary && str_word_count( $ai_summary ) >= 10 ) {
             $checks[] = [ 'pass' => true, 'label' => __( 'AI summary is set and substantive', 'jat-search-intel' ), 'group' => 'geo' ];
         } else {
@@ -716,8 +716,8 @@ class Content_Analyzer {
         }
 
         // 8. Schema completeness check
-        $schema_type = get_post_meta( $post_id, '_search_intel_schema_type', true );
-        $faqs        = get_post_meta( $post_id, '_search_intel_faqs', true );
+        $schema_type = get_post_meta( $post_id, '_jat_search_intel_schema_type', true );
+        $faqs        = get_post_meta( $post_id, '_jat_search_intel_faqs', true );
         $schema_score = 0;
         if ( $schema_type ) { $schema_score++; }
         if ( ! empty( $faqs ) ) { $schema_score++; }
@@ -729,7 +729,7 @@ class Content_Analyzer {
         }
 
         // 9. Secondary keyword usage in content
-        $secondary_kw = get_post_meta( $post_id, '_search_intel_secondary_keywords', true );
+        $secondary_kw = get_post_meta( $post_id, '_jat_search_intel_secondary_keywords', true );
         if ( $secondary_kw ) {
             $keywords_arr = array_filter( array_map( 'trim', explode( ',', $secondary_kw ) ) );
             $found = 0;
@@ -749,9 +749,9 @@ class Content_Analyzer {
         }
 
         // 10. Social metadata completeness check
-        $social_title = get_post_meta( $post_id, '_search_intel_social_title', true );
-        $social_desc  = get_post_meta( $post_id, '_search_intel_social_description', true );
-        $social_image = get_post_meta( $post_id, '_search_intel_social_image', true );
+        $social_title = get_post_meta( $post_id, '_jat_search_intel_social_title', true );
+        $social_desc  = get_post_meta( $post_id, '_jat_search_intel_social_description', true );
+        $social_image = get_post_meta( $post_id, '_jat_search_intel_social_image', true );
         $social_count = ( $social_title ? 1 : 0 ) + ( $social_desc ? 1 : 0 ) + ( $social_image ? 1 : 0 );
         if ( $social_count === 3 ) {
             $checks[] = [ 'pass' => true, 'label' => __( 'Social sharing metadata is complete', 'jat-search-intel' ), 'group' => 'social' ];

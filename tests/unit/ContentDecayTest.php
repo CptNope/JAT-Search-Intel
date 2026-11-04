@@ -1,7 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\Content_Decay;
+use JAT_Search_Intel\Content_Decay;
 
 class ContentDecayTest extends TestCase {
 
@@ -50,7 +50,7 @@ class ContentDecayTest extends TestCase {
 
     public function test_get_latest_snapshot(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_score_history'] = [
+        $si_test_state['post_meta'][1]['_jat_search_intel_score_history'] = [
             [ 'date' => '2026-01-01', 'seo' => 80, 'aeo' => 70, 'geo' => 60, 'readability' => 75 ],
             [ 'date' => '2026-02-01', 'seo' => 70, 'aeo' => 65, 'geo' => 55, 'readability' => 72 ],
         ];
@@ -73,7 +73,7 @@ class ContentDecayTest extends TestCase {
         $thirty_days_ago = gmdate( 'Y-m-d', strtotime( '-30 days' ) );
         $today           = gmdate( 'Y-m-d' );
 
-        $si_test_state['post_meta'][1]['_search_intel_score_history'] = [
+        $si_test_state['post_meta'][1]['_jat_search_intel_score_history'] = [
             [ 'date' => $thirty_days_ago, 'seo' => 90, 'aeo' => 85, 'geo' => 80, 'readability' => 88 ],
             [ 'date' => $today, 'seo' => 70, 'aeo' => 65, 'geo' => 55, 'readability' => 72 ],
         ];
@@ -93,7 +93,7 @@ class ContentDecayTest extends TestCase {
         $thirty_days_ago = gmdate( 'Y-m-d', strtotime( '-31 days' ) );
         $today           = gmdate( 'Y-m-d' );
 
-        $si_test_state['post_meta'][1]['_search_intel_score_history'] = [
+        $si_test_state['post_meta'][1]['_jat_search_intel_score_history'] = [
             [ 'date' => $thirty_days_ago, 'seo' => 80, 'aeo' => 70, 'geo' => 60, 'readability' => 75 ],
             [ 'date' => $today, 'seo' => 60, 'aeo' => 70, 'geo' => 60, 'readability' => 75 ],
         ];
@@ -114,7 +114,7 @@ class ContentDecayTest extends TestCase {
         $thirty_days_ago = gmdate( 'Y-m-d', strtotime( '-31 days' ) );
         $today           = gmdate( 'Y-m-d' );
 
-        $si_test_state['post_meta'][1]['_search_intel_score_history'] = [
+        $si_test_state['post_meta'][1]['_jat_search_intel_score_history'] = [
             [ 'date' => $thirty_days_ago, 'seo' => 80, 'aeo' => 70, 'geo' => 60, 'readability' => 75 ],
             [ 'date' => $today, 'seo' => 78, 'aeo' => 70, 'geo' => 58, 'readability' => 75 ],
         ];
@@ -138,7 +138,7 @@ class ContentDecayTest extends TestCase {
         $thirty_days_ago = gmdate( 'Y-m-d', strtotime( '-31 days' ) );
         $today           = gmdate( 'Y-m-d' );
 
-        $si_test_state['post_meta'][1]['_search_intel_score_history'] = [
+        $si_test_state['post_meta'][1]['_jat_search_intel_score_history'] = [
             [ 'date' => $thirty_days_ago, 'seo' => 90, 'aeo' => 80, 'geo' => 70, 'readability' => 75 ],
             [ 'date' => $today, 'seo' => 60, 'aeo' => 50, 'geo' => 40, 'readability' => 75 ],
         ];
@@ -180,7 +180,7 @@ class ContentDecayTest extends TestCase {
         $mid   = gmdate( 'Y-m-d', strtotime( '-15 days' ) );
         $today = gmdate( 'Y-m-d' );
 
-        $si_test_state['post_meta'][1]['_search_intel_score_history'] = [
+        $si_test_state['post_meta'][1]['_jat_search_intel_score_history'] = [
             [ 'date' => $old, 'seo' => 90, 'aeo' => 85, 'geo' => 80, 'readability' => 88 ],
             [ 'date' => $mid, 'seo' => 75, 'aeo' => 70, 'geo' => 65, 'readability' => 75 ],
             [ 'date' => $today, 'seo' => 70, 'aeo' => 65, 'geo' => 55, 'readability' => 72 ],
@@ -199,7 +199,7 @@ class ContentDecayTest extends TestCase {
         $thirty_days_ago = gmdate( 'Y-m-d', strtotime( '-31 days' ) );
         $today           = gmdate( 'Y-m-d' );
 
-        $si_test_state['post_meta'][1]['_search_intel_score_history'] = [
+        $si_test_state['post_meta'][1]['_jat_search_intel_score_history'] = [
             [ 'date' => $thirty_days_ago, 'seo' => 80, 'aeo' => 70, 'geo' => 60, 'readability' => 75 ],
             [ 'date' => $today, 'seo' => 70, 'aeo' => 65, 'geo' => 55, 'readability' => 72 ],
         ];
@@ -220,7 +220,7 @@ class ContentDecayTest extends TestCase {
         $thirty_days_ago = gmdate( 'Y-m-d', strtotime( '-31 days' ) );
         $today           = gmdate( 'Y-m-d' );
 
-        $si_test_state['post_meta'][1]['_search_intel_score_history'] = [
+        $si_test_state['post_meta'][1]['_jat_search_intel_score_history'] = [
             [ 'date' => $thirty_days_ago, 'seo' => 80, 'aeo' => 80, 'geo' => 80, 'readability' => 75 ],
             [ 'date' => $today, 'seo' => 40, 'aeo' => 40, 'geo' => 40, 'readability' => 75 ],
         ];

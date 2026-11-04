@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\MainWP_Reporter;
+use JAT_Search_Intel\MainWP_Reporter;
 
 /**
  * Unit tests for the MainWP Child Reporter class.
@@ -87,16 +87,16 @@ class MainWPReporterTest extends TestCase {
 		];
 
 		$si_test_state['post_meta'][1] = [
-			'_search_intel_seo_score'         => '80',
-			'_search_intel_aeo_score'         => '60',
-			'_search_intel_geo_score'         => '70',
-			'_search_intel_readability_score'  => '90',
+			'_jat_search_intel_seo_score'         => '80',
+			'_jat_search_intel_aeo_score'         => '60',
+			'_jat_search_intel_geo_score'         => '70',
+			'_jat_search_intel_readability_score'  => '90',
 		];
 		$si_test_state['post_meta'][2] = [
-			'_search_intel_seo_score'         => '40',
-			'_search_intel_aeo_score'         => '20',
-			'_search_intel_geo_score'         => '30',
-			'_search_intel_readability_score'  => '50',
+			'_jat_search_intel_seo_score'         => '40',
+			'_jat_search_intel_aeo_score'         => '20',
+			'_jat_search_intel_geo_score'         => '30',
+			'_jat_search_intel_readability_score'  => '50',
 		];
 
 		$scores = $this->reporter->get_aggregate_scores();
@@ -128,7 +128,7 @@ class MainWPReporterTest extends TestCase {
 
 	public function test_get_pending_queue_count_counts_pending_only(): void {
 		global $si_test_state;
-		$si_test_state['options']['search_intel_bg_queue'] = [
+		$si_test_state['options']['jat_search_intel_bg_queue'] = [
 			[ 'id' => 'a', 'status' => 'pending' ],
 			[ 'id' => 'b', 'status' => 'completed' ],
 			[ 'id' => 'c', 'status' => 'pending' ],
@@ -140,7 +140,7 @@ class MainWPReporterTest extends TestCase {
 
 	// ── Callback Handler ─────────────────────────────────────────────────────
 
-	public function test_handle_callback_ignores_non_search_intel_actions(): void {
+	public function test_handle_callback_ignores_non_jat_search_intel_actions(): void {
 		$result  = [ 'data' => null ];
 		$message = [ 'action' => 'other_plugin_action' ];
 
@@ -151,7 +151,7 @@ class MainWPReporterTest extends TestCase {
 
 	public function test_handle_callback_returns_summary(): void {
 		$result  = [];
-		$message = [ 'action' => 'search_intel_get_summary' ];
+		$message = [ 'action' => 'jat_search_intel_get_summary' ];
 
 		$out = $this->reporter->handle_callback( $result, $message );
 
@@ -162,12 +162,12 @@ class MainWPReporterTest extends TestCase {
 
 	// ── Sync Data ────────────────────────────────────────────────────────────
 
-	public function test_inject_sync_data_adds_search_intel_key(): void {
+	public function test_inject_sync_data_adds_jat_search_intel_key(): void {
 		$data = [ 'existing_key' => 'value' ];
 		$out  = $this->reporter->inject_sync_data( $data );
 
 		$this->assertArrayHasKey( 'existing_key', $out );
-		$this->assertArrayHasKey( 'search_intel', $out );
-		$this->assertArrayHasKey( 'version', $out['search_intel'] );
+		$this->assertArrayHasKey( 'jat_search_intel', $out );
+		$this->assertArrayHasKey( 'version', $out['jat_search_intel'] );
 	}
 }

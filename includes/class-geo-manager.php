@@ -1,5 +1,5 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
@@ -40,7 +40,7 @@ class GEO_Manager {
             // own: admins get a notice and can remove it with one click.
             if ( is_admin() ) {
                 add_action( 'admin_notices', [ $this, 'static_llms_txt_notice' ] );
-                add_action( 'admin_post_search_intel_remove_static_llms', [ $this, 'handle_remove_static_llms_txt' ] );
+                add_action( 'admin_post_jat_search_intel_remove_static_llms', [ $this, 'handle_remove_static_llms_txt' ] );
             }
         }
 
@@ -73,7 +73,7 @@ class GEO_Manager {
         $post    = get_post( $post_id );
 
         // AI-readable summary (concise version of the content for LLM consumption)
-        $ai_summary = get_post_meta( $post_id, '_search_intel_ai_summary', true );
+        $ai_summary = get_post_meta( $post_id, '_jat_search_intel_ai_summary', true );
         if ( ! $ai_summary ) {
             $ai_summary = wp_trim_words( wp_strip_all_tags( $post->post_content ), 50, '...' );
         }
@@ -86,7 +86,7 @@ class GEO_Manager {
         }
 
         // Key topics / entities for the content
-        $topics = get_post_meta( $post_id, '_search_intel_topics', true );
+        $topics = get_post_meta( $post_id, '_jat_search_intel_topics', true );
         if ( empty( $topics ) ) {
             $topics = $this->auto_extract_topics( $post_id );
         }
@@ -99,7 +99,7 @@ class GEO_Manager {
         }
 
         // Content type hint for AI engines
-        $content_type = get_post_meta( $post_id, '_search_intel_content_type', true );
+        $content_type = get_post_meta( $post_id, '_jat_search_intel_content_type', true );
         if ( ! $content_type ) {
             $content_type = $this->detect_content_type( $post_id );
         }
@@ -110,7 +110,7 @@ class GEO_Manager {
         );
 
         // Expertise level
-        $expertise = get_post_meta( $post_id, '_search_intel_expertise_level', true );
+        $expertise = get_post_meta( $post_id, '_jat_search_intel_expertise_level', true );
         if ( $expertise ) {
             printf(
                 '<meta name="expertise-level" content="%s" />' . "\n",
@@ -125,7 +125,7 @@ class GEO_Manager {
         );
 
         // v1.1: Content intent meta
-        $content_intent = get_post_meta( $post_id, '_search_intel_content_intent', true );
+        $content_intent = get_post_meta( $post_id, '_jat_search_intel_content_intent', true );
         if ( $content_intent ) {
             printf(
                 '<meta name="content-intent" content="%s" />' . "\n",
@@ -134,7 +134,7 @@ class GEO_Manager {
         }
 
         // v1.1: Target audience meta
-        $audience = get_post_meta( $post_id, '_search_intel_audience', true );
+        $audience = get_post_meta( $post_id, '_jat_search_intel_audience', true );
         if ( $audience ) {
             printf(
                 '<meta name="target-audience" content="%s" />' . "\n",
@@ -143,7 +143,7 @@ class GEO_Manager {
         }
 
         // v1.1: Author expertise notes
-        $expertise_notes = get_post_meta( $post_id, '_search_intel_author_expertise_notes', true );
+        $expertise_notes = get_post_meta( $post_id, '_jat_search_intel_author_expertise_notes', true );
         if ( $expertise_notes ) {
             printf(
                 '<meta name="author-expertise" content="%s" />' . "\n",
@@ -152,8 +152,8 @@ class GEO_Manager {
         }
 
         // v1.1: Local relevance signal
-        $local_relevance = get_post_meta( $post_id, '_search_intel_local_relevance', true );
-        $local_location  = get_post_meta( $post_id, '_search_intel_local_location', true );
+        $local_relevance = get_post_meta( $post_id, '_jat_search_intel_local_relevance', true );
+        $local_location  = get_post_meta( $post_id, '_jat_search_intel_local_location', true );
         if ( $local_relevance && $local_location ) {
             printf(
                 '<meta name="geo.placename" content="%s" />' . "\n",
@@ -195,7 +195,7 @@ class GEO_Manager {
         );
 
         // Fact-check date if set
-        $fact_checked = get_post_meta( $post_id, '_search_intel_fact_checked', true );
+        $fact_checked = get_post_meta( $post_id, '_jat_search_intel_fact_checked', true );
         if ( $fact_checked ) {
             printf(
                 '<meta name="fact-check-date" content="%s" />' . "\n",
@@ -209,7 +209,7 @@ class GEO_Manager {
      */
     public function render_ai_crawl_directives(): void {
         $post_id    = is_singular() ? get_queried_object_id() : 0;
-        $ai_noindex = $post_id ? get_post_meta( $post_id, '_search_intel_ai_noindex', true ) : false;
+        $ai_noindex = $post_id ? get_post_meta( $post_id, '_jat_search_intel_ai_noindex', true ) : false;
 
         if ( $ai_noindex ) {
             // Block specific AI crawlers
@@ -220,7 +220,7 @@ class GEO_Manager {
         }
 
         // Opt-in signals for AI crawlers (site-wide default)
-        $ai_permissions = get_option( 'search_intel_ai_permissions', 'allow' );
+        $ai_permissions = get_option( 'jat_search_intel_ai_permissions', 'allow' );
         if ( 'restrict' === $ai_permissions ) {
             echo '<meta name="robots" content="noai, noimageai" />' . "\n";
         }
@@ -253,7 +253,7 @@ class GEO_Manager {
         }
 
         $screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
-        if ( ! $screen || ( 'plugins' !== $screen->id && false === strpos( $screen->id, 'search-intel' ) ) ) {
+        if ( ! $screen || ( 'plugins' !== $screen->id && false === strpos( $screen->id, 'jat-search-intel' ) ) ) {
             return;
         }
 
@@ -262,7 +262,7 @@ class GEO_Manager {
             return;
         }
 
-        $url = wp_nonce_url( admin_url( 'admin-post.php?action=search_intel_remove_static_llms' ), 'search_intel_remove_static_llms' );
+        $url = wp_nonce_url( admin_url( 'admin-post.php?action=jat_search_intel_remove_static_llms' ), 'jat_search_intel_remove_static_llms' );
 
         echo '<div class="notice notice-warning"><p>';
         echo esc_html__( 'A static llms.txt file in your site root is overriding the one generated by JAT Search Intel. It may have been created by another plugin.', 'jat-search-intel' );
@@ -277,7 +277,7 @@ class GEO_Manager {
         if ( ! current_user_can( 'manage_options' ) ) {
             wp_die( esc_html__( 'You do not have permission to do this.', 'jat-search-intel' ), 403 );
         }
-        check_admin_referer( 'search_intel_remove_static_llms' );
+        check_admin_referer( 'jat_search_intel_remove_static_llms' );
 
         $this->cleanup_static_llms_txt();
 
@@ -300,11 +300,11 @@ class GEO_Manager {
      * Register the llms.txt rewrite endpoint.
      */
     public function register_llms_txt_endpoint(): void {
-        add_rewrite_rule( '^llms\.txt$', 'index.php?search_intel_llms_txt=1', 'top' );
-        add_rewrite_rule( '^llms-full\.txt$', 'index.php?search_intel_llms_full_txt=1', 'top' );
+        add_rewrite_rule( '^llms\.txt$', 'index.php?jat_search_intel_llms_txt=1', 'top' );
+        add_rewrite_rule( '^llms-full\.txt$', 'index.php?jat_search_intel_llms_full_txt=1', 'top' );
         add_filter( 'query_vars', function ( $vars ) {
-            $vars[] = 'search_intel_llms_txt';
-            $vars[] = 'search_intel_llms_full_txt';
+            $vars[] = 'jat_search_intel_llms_txt';
+            $vars[] = 'jat_search_intel_llms_full_txt';
             return $vars;
         });
     }
@@ -360,7 +360,7 @@ class GEO_Manager {
         ] );
 
         foreach ( $pages as $page ) {
-            $desc = get_post_meta( $page->ID, '_search_intel_description', true );
+            $desc = get_post_meta( $page->ID, '_jat_search_intel_description', true );
             if ( ! $desc ) {
                 $desc = wp_trim_words( wp_strip_all_tags( $page->post_content ), 20, '...' );
             }
@@ -394,7 +394,7 @@ class GEO_Manager {
             ] );
 
             foreach ( $recent as $rpost ) {
-                $desc = get_post_meta( $rpost->ID, '_search_intel_description', true );
+                $desc = get_post_meta( $rpost->ID, '_jat_search_intel_description', true );
                 if ( ! $desc ) {
                     $desc = wp_trim_words( wp_strip_all_tags( $rpost->post_content ), 30, '...' );
                 }
@@ -420,7 +420,7 @@ class GEO_Manager {
          *
          * @param string $email Contact email. Default empty (no contact section).
          */
-        $contact_email = sanitize_email( (string) apply_filters( 'search_intel_llms_contact_email', '' ) );
+        $contact_email = sanitize_email( (string) apply_filters( 'jat_search_intel_llms_contact_email', '' ) );
         if ( $contact_email ) {
             echo "\n## Contact\n\n";
             echo "For questions about using our content: {$contact_email}\n";
@@ -440,7 +440,7 @@ class GEO_Manager {
         }
 
         $post_id  = get_queried_object_id();
-        $entities = get_post_meta( $post_id, '_search_intel_entities', true );
+        $entities = get_post_meta( $post_id, '_jat_search_intel_entities', true );
 
         if ( empty( $entities ) || ! is_array( $entities ) ) {
             return $content;
@@ -500,16 +500,16 @@ class GEO_Manager {
         $author_id = get_post_field( 'post_author', $post_id );
 
         // Respect E-E-A-T consent — skip if author has not opted in.
-        $consent = get_user_meta( $author_id, 'search_intel_eeat_consent', true );
+        $consent = get_user_meta( $author_id, 'jat_search_intel_eeat_consent', true );
         if ( '1' !== $consent ) {
             return;
         }
 
         // Author credentials
-        $credentials  = get_user_meta( $author_id, 'search_intel_credentials', true );
-        $expertise    = get_user_meta( $author_id, 'search_intel_expertise_areas', true );
-        $experience   = get_user_meta( $author_id, 'search_intel_years_experience', true );
-        $social_proof = get_user_meta( $author_id, 'search_intel_social_profiles', true );
+        $credentials  = get_user_meta( $author_id, 'jat_search_intel_credentials', true );
+        $expertise    = get_user_meta( $author_id, 'jat_search_intel_expertise_areas', true );
+        $experience   = get_user_meta( $author_id, 'jat_search_intel_years_experience', true );
+        $social_proof = get_user_meta( $author_id, 'jat_search_intel_social_profiles', true );
 
         if ( ! $credentials && ! $expertise ) {
             // Fall back to global setting
@@ -676,7 +676,7 @@ class GEO_Manager {
         $content = wp_strip_all_tags( $post->post_content );
 
         // Check 1: AI Summary provided (15 points)
-        $ai_summary = get_post_meta( $post_id, '_search_intel_ai_summary', true );
+        $ai_summary = get_post_meta( $post_id, '_jat_search_intel_ai_summary', true );
         if ( $ai_summary ) {
             $score += 15;
             $checks[] = [ 'pass' => true, 'label' => __( 'AI summary provided', 'jat-search-intel' ) ];
@@ -685,8 +685,8 @@ class GEO_Manager {
         }
 
         // Check 2: Topics/entities defined (15 points)
-        $topics = get_post_meta( $post_id, '_search_intel_topics', true );
-        $entities = get_post_meta( $post_id, '_search_intel_entities', true );
+        $topics = get_post_meta( $post_id, '_jat_search_intel_topics', true );
+        $entities = get_post_meta( $post_id, '_jat_search_intel_entities', true );
         if ( ( $topics && is_array( $topics ) ) || ( $entities && is_array( $entities ) ) ) {
             $score += 15;
             $checks[] = [ 'pass' => true, 'label' => __( 'Key topics and entities defined', 'jat-search-intel' ) ];
@@ -707,7 +707,7 @@ class GEO_Manager {
         // Check 4: Author has E-E-A-T data (15 points)
         $author_id   = (int) $post->post_author;
         $author_bio  = get_the_author_meta( 'description', $author_id );
-        $credentials = get_user_meta( $author_id, 'search_intel_credentials', true );
+        $credentials = get_user_meta( $author_id, 'jat_search_intel_credentials', true );
         if ( $author_bio && strlen( $author_bio ) > 50 ) {
             $score += 10;
             $checks[] = [ 'pass' => true, 'label' => __( 'Author bio is detailed', 'jat-search-intel' ) ];

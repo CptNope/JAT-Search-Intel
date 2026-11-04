@@ -3,12 +3,12 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 // phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- View template included inside a class method; variables are method-scoped.
-$settings   = get_option( 'search_intel_settings', [] );
-$settings   = wp_parse_args( $settings, \Search_Intel\Core::get_default_settings() );
+$settings   = get_option( 'jat_search_intel_settings', [] );
+$settings   = wp_parse_args( $settings, \JAT_Search_Intel\Core::get_default_settings() );
 $post_types = get_post_types( [ 'public' => true ], 'objects' );
 ?>
 <div class="wrap si-settings si-bulk-tools">
-    <h1><span class="dashicons dashicons-chart-area"></span> <?php esc_html_e( 'Search Intel — Bulk Tools', 'jat-search-intel' ); ?></h1>
+    <h1><span class="dashicons dashicons-chart-area"></span> <?php esc_html_e( 'JAT Search Intel — Bulk Tools', 'jat-search-intel' ); ?></h1>
     <p class="si-settings-intro"><?php esc_html_e( 'Run batch operations across your content, manage sitemap caches, and export/import plugin settings.', 'jat-search-intel' ); ?></p>
 
     <!-- Post Type Selector -->
@@ -66,7 +66,7 @@ $post_types = get_post_types( [ 'public' => true ], 'objects' );
         <?php if ( empty( $settings['enable_ai_engine'] ) ) : ?>
             <div class="si-notice si-notice-warning">
                 <p><?php esc_html_e( 'AI Engine is disabled.', 'jat-search-intel' ); ?>
-                <a href="<?php echo esc_url( admin_url( 'admin.php?page=search-intel-ai' ) ); ?>"><?php esc_html_e( 'Enable it and add an API key →', 'jat-search-intel' ); ?></a></p>
+                <a href="<?php echo esc_url( admin_url( 'admin.php?page=jat-search-intel-ai' ) ); ?>"><?php esc_html_e( 'Enable it and add an API key →', 'jat-search-intel' ); ?></a></p>
             </div>
         <?php else : ?>
             <p><?php esc_html_e( 'Use AI to generate content for all published posts across SEO, AEO, and GEO fields. Select which fields to fill below.', 'jat-search-intel' ); ?></p>
@@ -194,7 +194,7 @@ $post_types = get_post_types( [ 'public' => true ], 'objects' );
     <!-- Export Settings -->
     <div class="si-settings-card">
         <h2><?php esc_html_e( 'Export Settings', 'jat-search-intel' ); ?></h2>
-        <p><?php esc_html_e( 'Download all Search Intel settings as a JSON file. Use this to back up your configuration or transfer it to another site.', 'jat-search-intel' ); ?></p>
+        <p><?php esc_html_e( 'Download all JAT Search Intel settings as a JSON file. Use this to back up your configuration or transfer it to another site.', 'jat-search-intel' ); ?></p>
         <div class="si-bulk-action">
             <button type="button" class="button" id="si-btn-export">
                 <span class="dashicons dashicons-download"></span> <?php esc_html_e( 'Export Settings', 'jat-search-intel' ); ?>

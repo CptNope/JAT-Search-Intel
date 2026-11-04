@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\Notifications;
+use JAT_Search_Intel\Notifications;
 
 /**
  * Unit tests for the Notifications & Scheduled Reports class.
@@ -119,16 +119,16 @@ class NotificationsTest extends TestCase {
 		];
 
 		$si_test_state['post_meta'][1] = [
-			'_search_intel_seo_score' => '80',
-			'_search_intel_aeo_score' => '70',
-			'_search_intel_geo_score' => '90',
-			'_search_intel_readability_score' => '85',
+			'_jat_search_intel_seo_score' => '80',
+			'_jat_search_intel_aeo_score' => '70',
+			'_jat_search_intel_geo_score' => '90',
+			'_jat_search_intel_readability_score' => '85',
 		];
 		$si_test_state['post_meta'][2] = [
-			'_search_intel_seo_score' => '30',
-			'_search_intel_aeo_score' => '20',
-			'_search_intel_geo_score' => '40',
-			'_search_intel_readability_score' => '50',
+			'_jat_search_intel_seo_score' => '30',
+			'_jat_search_intel_aeo_score' => '20',
+			'_jat_search_intel_geo_score' => '40',
+			'_jat_search_intel_readability_score' => '50',
 		];
 
 		$summary = $this->notifier->build_digest_summary();
@@ -151,10 +151,10 @@ class NotificationsTest extends TestCase {
 			'post_content' => 'c', 'post_status' => 'publish', 'post_type' => 'post',
 		];
 		$si_test_state['post_meta'][1] = [
-			'_search_intel_seo_score' => '30',
-			'_search_intel_aeo_score' => '20',
-			'_search_intel_geo_score' => '25',
-			'_search_intel_readability_score' => '40',
+			'_jat_search_intel_seo_score' => '30',
+			'_jat_search_intel_aeo_score' => '20',
+			'_jat_search_intel_geo_score' => '25',
+			'_jat_search_intel_readability_score' => '40',
 		];
 
 		$summary = $this->notifier->build_digest_summary();
@@ -172,10 +172,10 @@ class NotificationsTest extends TestCase {
 			'post_content' => 'c', 'post_status' => 'publish', 'post_type' => 'post',
 		];
 		$si_test_state['post_meta'][1] = [
-			'_search_intel_seo_score' => '75',
-			'_search_intel_aeo_score' => '65',
-			'_search_intel_geo_score' => '55',
-			'_search_intel_readability_score' => '80',
+			'_jat_search_intel_seo_score' => '75',
+			'_jat_search_intel_aeo_score' => '65',
+			'_jat_search_intel_geo_score' => '55',
+			'_jat_search_intel_readability_score' => '80',
 		];
 
 		$this->notifier->send_weekly_digest();
@@ -196,9 +196,9 @@ class NotificationsTest extends TestCase {
 			'post_content' => 'c', 'post_status' => 'publish', 'post_type' => 'post',
 		];
 		$si_test_state['post_meta'][1] = [
-			'_search_intel_seo_score' => '80',
-			'_search_intel_aeo_score' => '70',
-			'_search_intel_geo_score' => '90',
+			'_jat_search_intel_seo_score' => '80',
+			'_jat_search_intel_aeo_score' => '70',
+			'_jat_search_intel_geo_score' => '90',
 		];
 
 		$this->notifier->check_score_drops();
@@ -215,9 +215,9 @@ class NotificationsTest extends TestCase {
 			'post_content' => 'c', 'post_status' => 'publish', 'post_type' => 'post',
 		];
 		$si_test_state['post_meta'][1] = [
-			'_search_intel_seo_score' => '30',
-			'_search_intel_aeo_score' => '60',
-			'_search_intel_geo_score' => '25',
+			'_jat_search_intel_seo_score' => '30',
+			'_jat_search_intel_aeo_score' => '60',
+			'_jat_search_intel_geo_score' => '25',
 		];
 
 		$this->notifier->check_score_drops();

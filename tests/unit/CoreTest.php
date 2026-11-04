@@ -4,7 +4,7 @@
  */
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\Core;
+use JAT_Search_Intel\Core;
 
 class CoreTest extends TestCase {
 
@@ -148,13 +148,13 @@ class CoreTest extends TestCase {
      */
     public function lazy_module_provider(): array {
         return [
-            'ai_engine'      => [ 'ai_engine', \Search_Intel\AI_Engine::class ],
-            'citation_graph' => [ 'citation_graph', \Search_Intel\Citation_Graph::class ],
-            'scale'          => [ 'scale', \Search_Intel\Scale::class ],
-            'rbac'           => [ 'rbac', \Search_Intel\RBAC::class ],
-            'migration'      => [ 'migration', \Search_Intel\Migration::class ],
-            'qa_detector'    => [ 'qa_detector', \Search_Intel\QA_Detector::class ],
-            'custom_reports' => [ 'custom_reports', \Search_Intel\Custom_Reports::class ],
+            'ai_engine'      => [ 'ai_engine', \JAT_Search_Intel\AI_Engine::class ],
+            'citation_graph' => [ 'citation_graph', \JAT_Search_Intel\Citation_Graph::class ],
+            'scale'          => [ 'scale', \JAT_Search_Intel\Scale::class ],
+            'rbac'           => [ 'rbac', \JAT_Search_Intel\RBAC::class ],
+            'migration'      => [ 'migration', \JAT_Search_Intel\Migration::class ],
+            'qa_detector'    => [ 'qa_detector', \JAT_Search_Intel\QA_Detector::class ],
+            'custom_reports' => [ 'custom_reports', \JAT_Search_Intel\Custom_Reports::class ],
         ];
     }
 
@@ -180,44 +180,44 @@ class CoreTest extends TestCase {
 
     public function test_core_initializes_seo_manager(): void {
         $core = Core::get_instance();
-        $this->assertInstanceOf( \Search_Intel\SEO_Manager::class, $core->seo );
+        $this->assertInstanceOf( \JAT_Search_Intel\SEO_Manager::class, $core->seo );
     }
 
     public function test_core_initializes_schema_manager(): void {
         $core = Core::get_instance();
-        $this->assertInstanceOf( \Search_Intel\Schema_Manager::class, $core->schema );
+        $this->assertInstanceOf( \JAT_Search_Intel\Schema_Manager::class, $core->schema );
     }
 
     public function test_core_initializes_aeo_manager(): void {
         $core = Core::get_instance();
-        $this->assertInstanceOf( \Search_Intel\AEO_Manager::class, $core->aeo );
+        $this->assertInstanceOf( \JAT_Search_Intel\AEO_Manager::class, $core->aeo );
     }
 
     public function test_core_initializes_geo_manager(): void {
         $core = Core::get_instance();
-        $this->assertInstanceOf( \Search_Intel\GEO_Manager::class, $core->geo );
+        $this->assertInstanceOf( \JAT_Search_Intel\GEO_Manager::class, $core->geo );
     }
 
     public function test_core_initializes_content_analyzer(): void {
         $core = Core::get_instance();
-        $this->assertInstanceOf( \Search_Intel\Content_Analyzer::class, $core->analyzer );
+        $this->assertInstanceOf( \JAT_Search_Intel\Content_Analyzer::class, $core->analyzer );
     }
 
     public function test_core_initializes_sitemap(): void {
         $core = Core::get_instance();
-        $this->assertInstanceOf( \Search_Intel\Sitemap::class, $core->sitemap );
+        $this->assertInstanceOf( \JAT_Search_Intel\Sitemap::class, $core->sitemap );
     }
 
     public function test_core_initializes_title_engine(): void {
         $core = Core::get_instance();
-        $this->assertInstanceOf( \Search_Intel\Title_Engine::class, $core->title_engine );
+        $this->assertInstanceOf( \JAT_Search_Intel\Title_Engine::class, $core->title_engine );
     }
 
     // ── Settings merge ──────────────────────────────────────────────────
 
     public function test_get_settings_merges_saved_with_defaults(): void {
         global $si_test_state;
-        $si_test_state['options']['search_intel_settings'] = [
+        $si_test_state['options']['jat_search_intel_settings'] = [
             'separator' => '-',
         ];
 

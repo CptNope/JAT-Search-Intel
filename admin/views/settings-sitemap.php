@@ -3,15 +3,15 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 // phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- View template included inside a class method; variables are method-scoped.
-$settings = get_option( 'search_intel_settings', [] );
-$settings = wp_parse_args( $settings, \Search_Intel\Core::get_default_settings() );
+$settings = get_option( 'jat_search_intel_settings', [] );
+$settings = wp_parse_args( $settings, \JAT_Search_Intel\Core::get_default_settings() );
 ?>
 <div class="wrap si-settings">
-    <h1><span class="dashicons dashicons-networking"></span> <?php esc_html_e( 'Search Intel — Sitemap Settings', 'jat-search-intel' ); ?></h1>
+    <h1><span class="dashicons dashicons-networking"></span> <?php esc_html_e( 'JAT Search Intel — Sitemap Settings', 'jat-search-intel' ); ?></h1>
 
     <form method="post" action="options.php">
-        <?php settings_fields( 'search_intel_settings_group' ); ?>
-        <input type="hidden" name="search_intel_settings[_si_page]" value="sitemap" />
+        <?php settings_fields( 'jat_search_intel_settings_group' ); ?>
+        <input type="hidden" name="jat_search_intel_settings[_si_page]" value="sitemap" />
 
         <?php
         $sitemap_keys = [ 'sitemap_post_types', 'sitemap_taxonomies', 'sitemap_max_urls' ];
@@ -19,14 +19,14 @@ $settings = wp_parse_args( $settings, \Search_Intel\Core::get_default_settings()
             if ( in_array( $key, $sitemap_keys, true ) ) continue;
             if ( is_array( $val ) ) :
                 foreach ( $val as $v ) : ?>
-                    <input type="hidden" name="search_intel_settings[<?php echo esc_attr( $key ); ?>][]" value="<?php echo esc_attr( $v ); ?>" />
+                    <input type="hidden" name="jat_search_intel_settings[<?php echo esc_attr( $key ); ?>][]" value="<?php echo esc_attr( $v ); ?>" />
                 <?php endforeach;
             elseif ( is_bool( $val ) || $val === true ) :
                 if ( $val ) : ?>
-                    <input type="hidden" name="search_intel_settings[<?php echo esc_attr( $key ); ?>]" value="1" />
+                    <input type="hidden" name="jat_search_intel_settings[<?php echo esc_attr( $key ); ?>]" value="1" />
                 <?php endif;
             else : ?>
-                <input type="hidden" name="search_intel_settings[<?php echo esc_attr( $key ); ?>]" value="<?php echo esc_attr( $val ); ?>" />
+                <input type="hidden" name="jat_search_intel_settings[<?php echo esc_attr( $key ); ?>]" value="<?php echo esc_attr( $val ); ?>" />
             <?php endif;
         endforeach;
         ?>
@@ -53,7 +53,7 @@ $settings = wp_parse_args( $settings, \Search_Intel\Core::get_default_settings()
                             if ( 'attachment' === $pt->name ) continue;
                             ?>
                             <label style="display:block; margin-bottom:6px;">
-                                <input type="checkbox" name="search_intel_settings[sitemap_post_types][]" value="<?php echo esc_attr( $pt->name ); ?>" <?php checked( in_array( $pt->name, $settings['sitemap_post_types'] ?? [], true ) ); ?> />
+                                <input type="checkbox" name="jat_search_intel_settings[sitemap_post_types][]" value="<?php echo esc_attr( $pt->name ); ?>" <?php checked( in_array( $pt->name, $settings['sitemap_post_types'] ?? [], true ) ); ?> />
                                 <?php echo esc_html( $pt->label ); ?>
                                 <?php
                                 $count = wp_count_posts( $pt->name );
@@ -74,7 +74,7 @@ $settings = wp_parse_args( $settings, \Search_Intel\Core::get_default_settings()
                         foreach ( $public_taxonomies as $tax_obj ) :
                             ?>
                             <label style="display:block; margin-bottom:6px;">
-                                <input type="checkbox" name="search_intel_settings[sitemap_taxonomies][]" value="<?php echo esc_attr( $tax_obj->name ); ?>" <?php checked( in_array( $tax_obj->name, $active_taxonomies, true ) ); ?> />
+                                <input type="checkbox" name="jat_search_intel_settings[sitemap_taxonomies][]" value="<?php echo esc_attr( $tax_obj->name ); ?>" <?php checked( in_array( $tax_obj->name, $active_taxonomies, true ) ); ?> />
                                 <?php echo esc_html( $tax_obj->label ); ?>
                                 <?php
                                 $term_count = wp_count_terms( [ 'taxonomy' => $tax_obj->name, 'hide_empty' => true ] );
@@ -89,7 +89,7 @@ $settings = wp_parse_args( $settings, \Search_Intel\Core::get_default_settings()
                 <tr>
                     <th><label for="si_sitemap_max_urls"><?php esc_html_e( 'Max URLs per Sitemap', 'jat-search-intel' ); ?></label></th>
                     <td>
-                        <input type="number" id="si_sitemap_max_urls" name="search_intel_settings[sitemap_max_urls]" value="<?php echo esc_attr( $settings['sitemap_max_urls'] ); ?>" min="100" max="50000" step="100" class="small-text" />
+                        <input type="number" id="si_sitemap_max_urls" name="jat_search_intel_settings[sitemap_max_urls]" value="<?php echo esc_attr( $settings['sitemap_max_urls'] ); ?>" min="100" max="50000" step="100" class="small-text" />
                         <p class="description"><?php esc_html_e( 'Sitemaps will be paginated if the number of URLs exceeds this limit. Google recommends max 50,000.', 'jat-search-intel' ); ?></p>
                     </td>
                 </tr>

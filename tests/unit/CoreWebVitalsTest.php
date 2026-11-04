@@ -2,10 +2,10 @@
 
 declare( strict_types=1 );
 
-namespace Search_Intel\Tests\Unit;
+namespace JAT_Search_Intel\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\Core_Web_Vitals;
+use JAT_Search_Intel\Core_Web_Vitals;
 
 class CoreWebVitalsTest extends TestCase {
 

@@ -1,5 +1,5 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
@@ -60,7 +60,7 @@ class Title_Engine {
         // For single posts/pages, check for a manual SEO title override first
         if ( in_array( $context, [ 'single', 'page' ], true ) && is_singular() ) {
             $post_id   = get_queried_object_id();
-            $seo_title = get_post_meta( $post_id, '_search_intel_title', true );
+            $seo_title = get_post_meta( $post_id, '_jat_search_intel_title', true );
             if ( $seo_title ) {
                 return $seo_title;
             }

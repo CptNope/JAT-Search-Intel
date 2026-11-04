@@ -65,7 +65,7 @@ function ScoreRing( { label, score, color } ) {
  * falling back to WordPress admin defaults.
  */
 function getScoreColor( score ) {
-	const theme = window.searchIntelTheme?.colors || {};
+	const theme = window.jatSearchIntelTheme?.colors || {};
 	const good    = theme.primary   || '#00a32a';
 	const warning = theme.secondary || '#dba617';
 	const poor    = theme.tertiary  || '#cc1818';
@@ -82,8 +82,8 @@ function getScoreColor( score ) {
 export default function ScorePanel() {
 	const { isAnalyzing, analysisResults } = useSelect(
 		( select ) => ( {
-			isAnalyzing: select( 'search-intel/editor' ).isAnalyzing(),
-			analysisResults: select( 'search-intel/editor' ).getAnalysisResults(),
+			isAnalyzing: select( 'jat-search-intel/editor' ).isAnalyzing(),
+			analysisResults: select( 'jat-search-intel/editor' ).getAnalysisResults(),
 		} ),
 		[]
 	);
@@ -101,7 +101,7 @@ export default function ScorePanel() {
 		[]
 	);
 
-	const { runAnalysis } = useDispatch( 'search-intel/editor' );
+	const { runAnalysis } = useDispatch( 'jat-search-intel/editor' );
 
 	const checks = analysisResults?.checks || {};
 

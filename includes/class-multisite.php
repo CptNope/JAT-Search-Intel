@@ -1,12 +1,12 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 /**
- * Multisite support for Search Intel.
+ * Multisite support for JAT Search Intel.
  *
  * Provides network-level default settings, per-site overrides,
  * centralized reporting across the network, and a network admin page.
@@ -29,7 +29,7 @@ class Multisite {
 		}
 
 		add_action( 'network_admin_menu', [ $this, 'register_network_menu' ] );
-		add_action( 'network_admin_edit_search_intel_network', [ $this, 'save_network_settings' ] );
+		add_action( 'network_admin_edit_jat_search_intel_network', [ $this, 'save_network_settings' ] );
 
 		// Apply network defaults to new sites.
 		add_action( 'wp_initialize_site', [ $this, 'apply_defaults_to_new_site' ], 10, 2 );
@@ -46,7 +46,7 @@ class Multisite {
 		if ( ! is_multisite() ) {
 			return [];
 		}
-		$defaults = get_site_option( 'search_intel_network_defaults', [] );
+		$defaults = get_site_option( 'jat_search_intel_network_defaults', [] );
 		return is_array( $defaults ) ? $defaults : [];
 	}
 
@@ -60,7 +60,7 @@ class Multisite {
 		if ( ! is_multisite() ) {
 			return false;
 		}
-		return update_site_option( 'search_intel_network_defaults', $settings );
+		return update_site_option( 'jat_search_intel_network_defaults', $settings );
 	}
 
 	/**
@@ -77,11 +77,11 @@ class Multisite {
 			switch_to_blog( $site_id );
 		}
 
-		$site_settings = get_option( 'search_intel_settings', [] );
+		$site_settings = get_option( 'jat_search_intel_settings', [] );
 		$site_settings = is_array( $site_settings ) ? $site_settings : [];
 
 		// Check which keys this site has explicitly overridden.
-		$site_overrides = get_option( 'search_intel_site_overrides', [] );
+		$site_overrides = get_option( 'jat_search_intel_site_overrides', [] );
 		$site_overrides = is_array( $site_overrides ) ? $site_overrides : [];
 
 		if ( $site_id > 0 && is_multisite() ) {
@@ -120,18 +120,18 @@ class Multisite {
 		}
 
 		// Mark as overridden.
-		$overrides = get_option( 'search_intel_site_overrides', [] );
+		$overrides = get_option( 'jat_search_intel_site_overrides', [] );
 		$overrides = is_array( $overrides ) ? $overrides : [];
 		if ( ! in_array( $key, $overrides, true ) ) {
 			$overrides[] = $key;
-			update_option( 'search_intel_site_overrides', $overrides );
+			update_option( 'jat_search_intel_site_overrides', $overrides );
 		}
 
 		// Save the value.
-		$settings = get_option( 'search_intel_settings', [] );
+		$settings = get_option( 'jat_search_intel_settings', [] );
 		$settings = is_array( $settings ) ? $settings : [];
 		$settings[ $key ] = $value;
-		$result = update_option( 'search_intel_settings', $settings );
+		$result = update_option( 'jat_search_intel_settings', $settings );
 
 		if ( $site_id > 0 && is_multisite() ) {
 			restore_current_blog();
@@ -152,10 +152,10 @@ class Multisite {
 			switch_to_blog( $site_id );
 		}
 
-		$overrides = get_option( 'search_intel_site_overrides', [] );
+		$overrides = get_option( 'jat_search_intel_site_overrides', [] );
 		$overrides = is_array( $overrides ) ? $overrides : [];
 		$overrides = array_values( array_diff( $overrides, [ $key ] ) );
-		$result    = update_option( 'search_intel_site_overrides', $overrides );
+		$result    = update_option( 'jat_search_intel_site_overrides', $overrides );
 
 		if ( $site_id > 0 && is_multisite() ) {
 			restore_current_blog();
@@ -179,7 +179,7 @@ class Multisite {
 		switch_to_blog( (int) $new_site->blog_id );
 		$plugin_defaults = Core::get_default_settings();
 		$merged          = array_merge( $plugin_defaults, $defaults );
-		update_option( 'search_intel_settings', $merged );
+		update_option( 'jat_search_intel_settings', $merged );
 		restore_current_blog();
 	}
 
@@ -201,7 +201,7 @@ class Multisite {
 		foreach ( $sites as $site ) {
 			switch_to_blog( (int) $site->blog_id );
 
-			$settings = get_option( 'search_intel_settings', [] );
+			$settings = get_option( 'jat_search_intel_settings', [] );
 			$settings = is_array( $settings ) ? $settings : [];
 
 			$total_obj = wp_count_posts( 'post' );
@@ -225,7 +225,7 @@ class Multisite {
 					'geo'    => ! empty( $settings['enable_geo'] ),
 					'schema' => ! empty( $settings['enable_schema'] ),
 				],
-				'overrides'  => count( get_option( 'search_intel_site_overrides', [] ) ),
+				'overrides'  => count( get_option( 'jat_search_intel_site_overrides', [] ) ),
 			];
 
 			restore_current_blog();
@@ -259,9 +259,9 @@ class Multisite {
 		] );
 
 		foreach ( $posts as $post ) {
-			$seo_sum += (int) get_post_meta( $post->ID, '_search_intel_seo_score', true );
-			$aeo_sum += (int) get_post_meta( $post->ID, '_search_intel_aeo_score', true );
-			$geo_sum += (int) get_post_meta( $post->ID, '_search_intel_geo_score', true );
+			$seo_sum += (int) get_post_meta( $post->ID, '_jat_search_intel_seo_score', true );
+			$aeo_sum += (int) get_post_meta( $post->ID, '_jat_search_intel_aeo_score', true );
+			$geo_sum += (int) get_post_meta( $post->ID, '_jat_search_intel_geo_score', true );
 		}
 
 		$count = count( $posts );
@@ -280,10 +280,10 @@ class Multisite {
 	public function register_network_menu(): void {
 		add_submenu_page(
 			'settings.php',
-			'Search Intel Network',
-			'Search Intel',
+			'JAT Search Intel Network',
+			'JAT Search Intel',
 			'manage_network_options',
-			'search-intel-network',
+			'jat-search-intel-network',
 			[ $this, 'render_network_page' ]
 		);
 	}
@@ -292,14 +292,14 @@ class Multisite {
 	 * Handle saving network settings.
 	 */
 	public function save_network_settings(): void {
-		check_admin_referer( 'search_intel_network_settings' );
+		check_admin_referer( 'jat_search_intel_network_settings' );
 
 		if ( ! current_user_can( 'manage_network_options' ) ) {
 			wp_die( 'Unauthorized.' );
 		}
 
 		$defaults = Core::get_default_settings();
-		$input    = isset( $_POST['search_intel_network'] ) ? wp_unslash( $_POST['search_intel_network'] ) : []; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Each field is sanitized individually below.
+		$input    = isset( $_POST['jat_search_intel_network'] ) ? wp_unslash( $_POST['jat_search_intel_network'] ) : []; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Each field is sanitized individually below.
 		$input    = is_array( $input ) ? $input : [];
 
 		$sanitized = [];
@@ -321,7 +321,7 @@ class Multisite {
 
 		wp_safe_redirect(
 			add_query_arg( [
-				'page'    => 'search-intel-network',
+				'page'    => 'jat-search-intel-network',
 				'updated' => 'true',
 			], network_admin_url( 'settings.php' ) )
 		);
@@ -336,7 +336,7 @@ class Multisite {
 		$report   = $this->get_network_report();
 
 		echo '<div class="wrap">';
-		echo '<h1>Search Intel — Network Settings</h1>';
+		echo '<h1>JAT Search Intel — Network Settings</h1>';
 
 		if ( isset( $_GET['updated'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only view/pagination parameter.
 			echo '<div class="notice notice-success"><p>Network defaults saved.</p></div>';
@@ -344,8 +344,8 @@ class Multisite {
 
 		// Network defaults form.
 		echo '<h2>Network Default Settings</h2>';
-		echo '<form method="post" action="' . esc_url( network_admin_url( 'edit.php?action=search_intel_network' ) ) . '">';
-		wp_nonce_field( 'search_intel_network_settings' );
+		echo '<form method="post" action="' . esc_url( network_admin_url( 'edit.php?action=jat_search_intel_network' ) ) . '">';
+		wp_nonce_field( 'jat_search_intel_network_settings' );
 
 		$plugin_defaults = Core::get_default_settings();
 		echo '<table class="form-table">';
@@ -353,14 +353,14 @@ class Multisite {
 			if ( is_bool( $default_val ) ) {
 				$checked = ! empty( $defaults[ $key ] ) ? ' checked' : '';
 				printf(
-					'<tr><th><label for="%1$s">%1$s</label></th><td><input type="checkbox" name="search_intel_network[%1$s]" id="%1$s" value="1"%2$s></td></tr>',
+					'<tr><th><label for="%1$s">%1$s</label></th><td><input type="checkbox" name="jat_search_intel_network[%1$s]" id="%1$s" value="1"%2$s></td></tr>',
 					esc_attr( $key ),
 					esc_attr( $checked )
 				);
 			} elseif ( is_string( $default_val ) ) {
 				$value = $defaults[ $key ] ?? '';
 				printf(
-					'<tr><th><label for="%1$s">%1$s</label></th><td><input type="text" name="search_intel_network[%1$s]" id="%1$s" value="%2$s" class="regular-text"></td></tr>',
+					'<tr><th><label for="%1$s">%1$s</label></th><td><input type="text" name="jat_search_intel_network[%1$s]" id="%1$s" value="%2$s" class="regular-text"></td></tr>',
 					esc_attr( $key ),
 					esc_attr( $value )
 				);

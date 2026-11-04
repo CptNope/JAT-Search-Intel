@@ -1,7 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\Advanced_Linking;
+use JAT_Search_Intel\Advanced_Linking;
 
 class AdvancedLinkingTest extends TestCase {
 

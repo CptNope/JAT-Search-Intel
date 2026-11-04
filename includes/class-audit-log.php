@@ -1,5 +1,5 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -15,7 +15,7 @@ class Audit_Log {
 	/**
 	 * Option key for the audit log.
 	 */
-	private const OPTION_KEY = 'search_intel_audit_log';
+	private const OPTION_KEY = 'jat_search_intel_audit_log';
 
 	/**
 	 * Max log entries to keep.
@@ -34,7 +34,7 @@ class Audit_Log {
 		$this->settings = $settings;
 
 		if ( ! empty( $settings['enable_audit_log'] ) ) {
-			add_action( 'update_option_search_intel_settings', [ $this, 'log_settings_change' ], 10, 2 );
+			add_action( 'update_option_jat_search_intel_settings', [ $this, 'log_settings_change' ], 10, 2 );
 		}
 	}
 

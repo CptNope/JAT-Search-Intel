@@ -7,11 +7,11 @@
  * content updates, and a score change log tracking what changed, when, and
  * by whom.
  *
- * @package Search_Intel
+ * @package JAT_Search_Intel
  * @since   3.3.0
  */
 
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
@@ -23,13 +23,13 @@ class Historical_Analytics {
     private $settings;
 
     /** @var string Post meta key for score history. */
-    private const HISTORY_META_KEY = '_search_intel_analytics_history';
+    private const HISTORY_META_KEY = '_jat_search_intel_analytics_history';
 
     /** @var string Option key for site-wide daily aggregates. */
-    private const SITE_AGGREGATE_KEY = 'search_intel_site_score_aggregates';
+    private const SITE_AGGREGATE_KEY = 'jat_search_intel_site_score_aggregates';
 
     /** @var string Post meta key for score change log. */
-    private const CHANGE_LOG_META_KEY = '_search_intel_score_change_log';
+    private const CHANGE_LOG_META_KEY = '_jat_search_intel_score_change_log';
 
     /** @var int Maximum history entries per post. */
     private const MAX_HISTORY_ENTRIES = 365;
@@ -50,13 +50,13 @@ class Historical_Analytics {
         }
 
         // Record score and change log on every analysis.
-        add_action( 'search_intel_post_analyzed', [ $this, 'on_post_analyzed' ], 10, 4 );
+        add_action( 'jat_search_intel_post_analyzed', [ $this, 'on_post_analyzed' ], 10, 4 );
 
         // Daily site-wide aggregate cron.
-        add_action( 'search_intel_daily_aggregate', [ $this, 'compute_site_aggregate' ] );
+        add_action( 'jat_search_intel_daily_aggregate', [ $this, 'compute_site_aggregate' ] );
 
-        if ( ! wp_next_scheduled( 'search_intel_daily_aggregate' ) ) {
-            wp_schedule_event( time(), 'daily', 'search_intel_daily_aggregate' );
+        if ( ! wp_next_scheduled( 'jat_search_intel_daily_aggregate' ) ) {
+            wp_schedule_event( time(), 'daily', 'jat_search_intel_daily_aggregate' );
         }
 
         // Admin page.
@@ -70,7 +70,7 @@ class Historical_Analytics {
      *--------------------------------------------------------------------*/
 
     /**
-     * Handle the search_intel_post_analyzed action.
+     * Handle the jat_search_intel_post_analyzed action.
      *
      * Records score history and logs changes.
      *
@@ -460,11 +460,11 @@ class Historical_Analytics {
      */
     public function register_admin_page(): void {
         add_submenu_page(
-            'search-intel',
+            'jat-search-intel',
             'Score Analytics',
             'Analytics',
             'manage_options',
-            'search-intel-analytics',
+            'jat-search-intel-analytics',
             [ $this, 'render_admin_page' ]
         );
     }
@@ -483,9 +483,9 @@ class Historical_Analytics {
             <h2>Site-Wide Score Trends (<?php echo esc_html( (string) $period ); ?> days)</h2>
 
             <p>
-                <a href="<?php echo esc_url( admin_url( 'admin.php?page=search-intel-analytics&period=30' ) ); ?>" class="button <?php echo $period === 30 ? 'button-primary' : ''; ?>">30 Days</a>
-                <a href="<?php echo esc_url( admin_url( 'admin.php?page=search-intel-analytics&period=60' ) ); ?>" class="button <?php echo $period === 60 ? 'button-primary' : ''; ?>">60 Days</a>
-                <a href="<?php echo esc_url( admin_url( 'admin.php?page=search-intel-analytics&period=90' ) ); ?>" class="button <?php echo $period === 90 ? 'button-primary' : ''; ?>">90 Days</a>
+                <a href="<?php echo esc_url( admin_url( 'admin.php?page=jat-search-intel-analytics&period=30' ) ); ?>" class="button <?php echo $period === 30 ? 'button-primary' : ''; ?>">30 Days</a>
+                <a href="<?php echo esc_url( admin_url( 'admin.php?page=jat-search-intel-analytics&period=60' ) ); ?>" class="button <?php echo $period === 60 ? 'button-primary' : ''; ?>">60 Days</a>
+                <a href="<?php echo esc_url( admin_url( 'admin.php?page=jat-search-intel-analytics&period=90' ) ); ?>" class="button <?php echo $period === 90 ? 'button-primary' : ''; ?>">90 Days</a>
             </p>
 
             <?php if ( empty( $trends['labels'] ) ) : ?>

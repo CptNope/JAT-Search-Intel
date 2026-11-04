@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * Playwright configuration for Search Intel E2E tests.
+ * Playwright configuration for JAT Search Intel E2E tests.
  *
  * Requires a running WordPress instance with the plugin activated.
  * Set WP_BASE_URL environment variable or use the default below.

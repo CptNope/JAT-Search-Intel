@@ -1,5 +1,5 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -18,11 +18,11 @@ class Privacy {
 	 * @var array<string,string>
 	 */
 	private const USER_META_KEYS = [
-		'search_intel_credentials'      => 'Credentials / Qualifications',
-		'search_intel_expertise_areas'   => 'Areas of Expertise',
-		'search_intel_years_experience'  => 'Years of Experience',
-		'search_intel_social_profiles'   => 'Social / Professional Profiles',
-		'search_intel_eeat_consent'      => 'E-E-A-T Data Consent',
+		'jat_search_intel_credentials'      => 'Credentials / Qualifications',
+		'jat_search_intel_expertise_areas'   => 'Areas of Expertise',
+		'jat_search_intel_years_experience'  => 'Years of Experience',
+		'jat_search_intel_social_profiles'   => 'Social / Professional Profiles',
+		'jat_search_intel_eeat_consent'      => 'E-E-A-T Data Consent',
 	];
 
 	/**
@@ -41,8 +41,8 @@ class Privacy {
 	 * @return array
 	 */
 	public function register_exporter( array $exporters ): array {
-		$exporters['search-intel'] = [
-			'exporter_friendly_name' => __( 'Search Intel Author Data', 'jat-search-intel' ),
+		$exporters['jat-search-intel'] = [
+			'exporter_friendly_name' => __( 'JAT Search Intel Author Data', 'jat-search-intel' ),
 			'callback'               => [ $this, 'export_personal_data' ],
 		];
 		return $exporters;
@@ -55,8 +55,8 @@ class Privacy {
 	 * @return array
 	 */
 	public function register_eraser( array $erasers ): array {
-		$erasers['search-intel'] = [
-			'eraser_friendly_name' => __( 'Search Intel Author Data', 'jat-search-intel' ),
+		$erasers['jat-search-intel'] = [
+			'eraser_friendly_name' => __( 'JAT Search Intel Author Data', 'jat-search-intel' ),
 			'callback'             => [ $this, 'erase_personal_data' ],
 		];
 		return $erasers;
@@ -69,11 +69,11 @@ class Privacy {
 	 */
 	private function get_meta_labels(): array {
 		return [
-			'search_intel_credentials'     => __( 'Credentials / Qualifications', 'jat-search-intel' ),
-			'search_intel_expertise_areas' => __( 'Areas of Expertise', 'jat-search-intel' ),
-			'search_intel_years_experience' => __( 'Years of Experience', 'jat-search-intel' ),
-			'search_intel_social_profiles' => __( 'Social / Professional Profiles', 'jat-search-intel' ),
-			'search_intel_eeat_consent'    => __( 'E-E-A-T Data Consent', 'jat-search-intel' ),
+			'jat_search_intel_credentials'     => __( 'Credentials / Qualifications', 'jat-search-intel' ),
+			'jat_search_intel_expertise_areas' => __( 'Areas of Expertise', 'jat-search-intel' ),
+			'jat_search_intel_years_experience' => __( 'Years of Experience', 'jat-search-intel' ),
+			'jat_search_intel_social_profiles' => __( 'Social / Professional Profiles', 'jat-search-intel' ),
+			'jat_search_intel_eeat_consent'    => __( 'E-E-A-T Data Consent', 'jat-search-intel' ),
 		];
 	}
 
@@ -119,10 +119,10 @@ class Privacy {
 
 		if ( ! empty( $data ) ) {
 			$export_items[] = [
-				'group_id'          => 'search-intel-author',
-				'group_label'       => __( 'Search Intel Author Data', 'jat-search-intel' ),
-				'group_description' => __( 'Author E-E-A-T data stored by the Search Intel plugin.', 'jat-search-intel' ),
-				'item_id'           => 'search-intel-author-' . $user->ID,
+				'group_id'          => 'jat-search-intel-author',
+				'group_label'       => __( 'JAT Search Intel Author Data', 'jat-search-intel' ),
+				'group_description' => __( 'Author E-E-A-T data stored by the JAT Search Intel plugin.', 'jat-search-intel' ),
+				'item_id'           => 'jat-search-intel-author-' . $user->ID,
 				'data'              => $data,
 			];
 		}
@@ -169,7 +169,7 @@ class Privacy {
 				? [
 					sprintf(
 										/* translators: %d: number of meta fields removed */
-                        __( 'Removed %d Search Intel author data field(s).', 'jat-search-intel' ),
+                        __( 'Removed %d JAT Search Intel author data field(s).', 'jat-search-intel' ),
                         $items_removed
                     ),
 				]
@@ -186,10 +186,10 @@ class Privacy {
 			return;
 		}
 
-		$content = '<h2>' . __( 'Search Intel Plugin', 'jat-search-intel' ) . '</h2>';
+		$content = '<h2>' . __( 'JAT Search Intel Plugin', 'jat-search-intel' ) . '</h2>';
 
 		$content .= '<h3>' . __( 'What personal data we collect and why', 'jat-search-intel' ) . '</h3>';
-		$content .= '<p>' . __( 'The Search Intel plugin stores author E-E-A-T (Experience, Expertise, Authoritativeness, Trustworthiness) data on user profiles when explicitly provided by the author. This includes:', 'jat-search-intel' ) . '</p>';
+		$content .= '<p>' . __( 'The JAT Search Intel plugin stores author E-E-A-T (Experience, Expertise, Authoritativeness, Trustworthiness) data on user profiles when explicitly provided by the author. This includes:', 'jat-search-intel' ) . '</p>';
 		$content .= '<ul>';
 		$content .= '<li>' . __( 'Professional credentials and qualifications', 'jat-search-intel' ) . '</li>';
 		$content .= '<li>' . __( 'Areas of expertise', 'jat-search-intel' ) . '</li>';
@@ -208,10 +208,10 @@ class Privacy {
 		$content .= '<p>' . __( 'When enabled (opt-in), the plugin may send sitemap ping requests to Google and Bing when content is published. These requests contain only your sitemap URL and no personal data.', 'jat-search-intel' ) . '</p>';
 
 		$content .= '<h3>' . __( 'Data export and deletion', 'jat-search-intel' ) . '</h3>';
-		$content .= '<p>' . __( 'Search Intel fully supports the WordPress personal data export and erasure tools. When a data export or deletion request is processed, all author E-E-A-T data stored by this plugin will be included.', 'jat-search-intel' ) . '</p>';
+		$content .= '<p>' . __( 'JAT Search Intel fully supports the WordPress personal data export and erasure tools. When a data export or deletion request is processed, all author E-E-A-T data stored by this plugin will be included.', 'jat-search-intel' ) . '</p>';
 
 		wp_add_privacy_policy_content(
-			'Search Intel',
+			'JAT Search Intel',
 			wp_kses_post( $content )
 		);
 	}

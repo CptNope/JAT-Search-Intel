@@ -7,11 +7,11 @@
  * suggests actions (merge, redirect, differentiate, de-optimize), and
  * integrates with Citation Graph to show link relationships.
  *
- * @package Search_Intel
+ * @package JAT_Search_Intel
  * @since   3.2.0
  */
 
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
@@ -23,10 +23,10 @@ class Keyword_Cannibalization {
     private $settings;
 
     /** @var string Post meta key for focus keyword. */
-    private const KEYWORD_META_KEY = '_search_intel_focus_keyword';
+    private const KEYWORD_META_KEY = '_jat_search_intel_focus_keyword';
 
     /** @var string Transient key for cached report. */
-    private const REPORT_CACHE_KEY = 'search_intel_cannibalization_report';
+    private const REPORT_CACHE_KEY = 'jat_search_intel_cannibalization_report';
 
     /** @var int Cache TTL in seconds (6 hours). */
     private const CACHE_TTL = 21600;
@@ -133,9 +133,9 @@ class Keyword_Cannibalization {
                     'id'        => $post_id,
                     'title'     => get_the_title( $post_id ),
                     'url'       => get_permalink( $post_id ),
-                    'seo_score' => (int) get_post_meta( $post_id, '_search_intel_seo_score', true ),
-                    'aeo_score' => (int) get_post_meta( $post_id, '_search_intel_aeo_score', true ),
-                    'geo_score' => (int) get_post_meta( $post_id, '_search_intel_geo_score', true ),
+                    'seo_score' => (int) get_post_meta( $post_id, '_jat_search_intel_seo_score', true ),
+                    'aeo_score' => (int) get_post_meta( $post_id, '_jat_search_intel_aeo_score', true ),
+                    'geo_score' => (int) get_post_meta( $post_id, '_jat_search_intel_geo_score', true ),
                 ];
             }
 
@@ -306,11 +306,11 @@ class Keyword_Cannibalization {
      */
     public function register_admin_page(): void {
         add_submenu_page(
-            'search-intel',
+            'jat-search-intel',
             'Keyword Cannibalization',
             'Cannibalization',
             'manage_options',
-            'search-intel-cannibalization',
+            'jat-search-intel-cannibalization',
             [ $this, 'render_admin_page' ]
         );
     }

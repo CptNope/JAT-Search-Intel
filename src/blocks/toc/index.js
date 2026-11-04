@@ -1,5 +1,5 @@
 /**
- * Search Intel — Table of Contents Block
+ * JAT Search Intel — Table of Contents Block
  *
  * Auto-generated TOC from post headings.
  * Renders dynamically in the editor and uses PHP render_callback on frontend.
@@ -12,7 +12,7 @@ import { PanelBody, RangeControl, ToggleControl } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { useEffect, useState } from '@wordpress/element';
 
-registerBlockType( 'search-intel/toc', {
+registerBlockType( 'jat-search-intel/toc', {
 	title: __( 'Table of Contents', 'jat-search-intel' ),
 	description: __( 'Auto-generated table of contents from headings in the post.', 'jat-search-intel' ),
 	category: 'widgets',

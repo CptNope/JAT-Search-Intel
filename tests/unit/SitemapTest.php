@@ -4,7 +4,7 @@
  */
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\Sitemap;
+use JAT_Search_Intel\Sitemap;
 
 class SitemapTest extends TestCase {
 

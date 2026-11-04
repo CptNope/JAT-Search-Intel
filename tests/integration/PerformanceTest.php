@@ -1,6 +1,6 @@
 <?php
 /**
- * Performance benchmark tests for Search Intel.
+ * Performance benchmark tests for JAT Search Intel.
  *
  * These tests verify that key operations complete within acceptable
  * time budgets. All benchmarks use wall-clock time with generous
@@ -8,13 +8,13 @@
  */
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\Core;
-use Search_Intel\SEO_Manager;
-use Search_Intel\Schema_Manager;
-use Search_Intel\AEO_Manager;
-use Search_Intel\GEO_Manager;
-use Search_Intel\Content_Analyzer;
-use Search_Intel\Sitemap;
+use JAT_Search_Intel\Core;
+use JAT_Search_Intel\SEO_Manager;
+use JAT_Search_Intel\Schema_Manager;
+use JAT_Search_Intel\AEO_Manager;
+use JAT_Search_Intel\GEO_Manager;
+use JAT_Search_Intel\Content_Analyzer;
+use JAT_Search_Intel\Sitemap;
 
 class PerformanceTest extends TestCase {
 
@@ -41,26 +41,26 @@ class PerformanceTest extends TestCase {
         ];
         // Simulate real-world meta data
         $si_test_state['post_meta'][1] = [
-            '_search_intel_title'           => 'Custom SEO Title',
-            '_search_intel_description'     => 'Custom meta description for performance testing.',
-            '_search_intel_focus_keyword'   => 'performance',
-            '_search_intel_canonical'       => '',
-            '_search_intel_noindex'         => '',
-            '_search_intel_nofollow'        => '',
-            '_search_intel_schema_type'     => 'Article',
-            '_search_intel_direct_answer'   => 'This is a direct answer for performance testing.',
-            '_search_intel_ai_summary'      => 'AI summary for performance.',
-            '_search_intel_content_type'    => 'article',
-            '_search_intel_content_intent'  => 'informational',
-            '_search_intel_audience'        => 'developers',
-            '_search_intel_faqs'            => [
+            '_jat_search_intel_title'           => 'Custom SEO Title',
+            '_jat_search_intel_description'     => 'Custom meta description for performance testing.',
+            '_jat_search_intel_focus_keyword'   => 'performance',
+            '_jat_search_intel_canonical'       => '',
+            '_jat_search_intel_noindex'         => '',
+            '_jat_search_intel_nofollow'        => '',
+            '_jat_search_intel_schema_type'     => 'Article',
+            '_jat_search_intel_direct_answer'   => 'This is a direct answer for performance testing.',
+            '_jat_search_intel_ai_summary'      => 'AI summary for performance.',
+            '_jat_search_intel_content_type'    => 'article',
+            '_jat_search_intel_content_intent'  => 'informational',
+            '_jat_search_intel_audience'        => 'developers',
+            '_jat_search_intel_faqs'            => [
                 [ 'question' => 'What is SEO?', 'answer' => 'Search Engine Optimization.' ],
                 [ 'question' => 'What is AEO?', 'answer' => 'Answer Engine Optimization.' ],
             ],
-            '_search_intel_entities'        => [
+            '_jat_search_intel_entities'        => [
                 [ 'name' => 'WordPress', 'type' => 'SoftwareApplication', 'url' => 'https://wordpress.org' ],
             ],
-            '_search_intel_citations'       => [
+            '_jat_search_intel_citations'       => [
                 [ 'source' => 'Study', 'url' => 'https://example.com/study', 'date' => '2025-06-01', 'quote' => 'Key result.' ],
             ],
         ];
@@ -182,7 +182,7 @@ class PerformanceTest extends TestCase {
     public function test_sitemap_cached_under_5ms(): void {
         global $si_test_state;
         // Simulate cached sitemap
-        $si_test_state['transients']['search_intel_sitemap_index'] = '<?xml version="1.0" encoding="UTF-8"?><sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></sitemapindex>';
+        $si_test_state['transients']['jat_search_intel_sitemap_index'] = '<?xml version="1.0" encoding="UTF-8"?><sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></sitemapindex>';
 
         $sitemap = new Sitemap( Core::get_default_settings() );
 

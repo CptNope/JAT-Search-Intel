@@ -1,18 +1,18 @@
 <?php
 /**
- * PHPStan constant stubs for Search Intel.
+ * PHPStan constant stubs for JAT Search Intel.
  *
- * These constants are defined at runtime in search-intel.php.
+ * These constants are defined at runtime in jat-search-intel.php.
  * This file is only used by PHPStan for static analysis.
  *
  * @phpstan-ignore-next-line
  */
 
-define( 'SEARCH_INTEL_VERSION', '3.5.0' );
-define( 'SEARCH_INTEL_FILE', __FILE__ );
-define( 'SEARCH_INTEL_DIR', __DIR__ . '/' );
-define( 'SEARCH_INTEL_URL', 'https://example.com/wp-content/plugins/search-intel/' );
-define( 'SEARCH_INTEL_BASENAME', 'search-intel/search-intel.php' );
+define( 'JAT_SEARCH_INTEL_VERSION', '3.5.0' );
+define( 'JAT_SEARCH_INTEL_FILE', __FILE__ );
+define( 'JAT_SEARCH_INTEL_DIR', __DIR__ . '/' );
+define( 'JAT_SEARCH_INTEL_URL', 'https://example.com/wp-content/plugins/jat-search-intel/' );
+define( 'JAT_SEARCH_INTEL_BASENAME', 'jat-search-intel/jat-search-intel.php' );
 
 // WordPress database constants.
 define( 'ARRAY_A', 'ARRAY_A' );

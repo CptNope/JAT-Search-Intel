@@ -1,14 +1,14 @@
 <?php
 /**
- * PHPUnit bootstrap for Search Intel unit tests.
+ * PHPUnit bootstrap for JAT Search Intel unit tests.
  *
  * Provides WordPress function stubs so unit tests can run
  * without a full WordPress installation.
  */
 
 // Plugin constants
-define( 'SEARCH_INTEL_VERSION', '1.1.0' );
-define( 'SEARCH_INTEL_DIR', __DIR__ . '/../' );
+define( 'JAT_SEARCH_INTEL_VERSION', '1.1.0' );
+define( 'JAT_SEARCH_INTEL_DIR', __DIR__ . '/../' );
 
 if ( ! defined( 'ARRAY_A' ) ) {
 	define( 'ARRAY_A', 'ARRAY_A' );
@@ -16,14 +16,14 @@ if ( ! defined( 'ARRAY_A' ) ) {
 if ( ! defined( 'ARRAY_N' ) ) {
 	define( 'ARRAY_N', 'ARRAY_N' );
 }
-define( 'SEARCH_INTEL_URL', 'https://example.com/wp-content/plugins/search-intel/' );
+define( 'JAT_SEARCH_INTEL_URL', 'https://example.com/wp-content/plugins/jat-search-intel/' );
 define( 'ABSPATH', dirname( __DIR__, 3 ) . '/' );
 define( 'MINUTE_IN_SECONDS', 60 );
 define( 'HOUR_IN_SECONDS', 3600 );
 define( 'DAY_IN_SECONDS', 86400 );
 define( 'WEEK_IN_SECONDS', 604800 );
 
-define( 'SEARCH_INTEL_BASENAME', 'search-intel/search-intel.php' );
+define( 'JAT_SEARCH_INTEL_BASENAME', 'jat-search-intel/jat-search-intel.php' );
 
 // ── WordPress function stubs ────────────────────────────────────────────────
 
@@ -727,7 +727,7 @@ function plugin_dir_url( string $file ): string {
 }
 
 function plugin_basename( string $file ): string {
-    return 'search-intel/' . basename( $file );
+    return 'jat-search-intel/' . basename( $file );
 }
 
 // ── WP_REST stubs ────────────────────────────────────────────────────────
@@ -1408,13 +1408,13 @@ if ( ! defined( 'LOGGED_IN_SALT' ) ) {
 // ── Autoloader ───────────────────────────────────────────────────────────────
 
 spl_autoload_register( function ( string $class ) {
-    $prefix = 'Search_Intel\\';
+    $prefix = 'JAT_Search_Intel\\';
     if ( strpos( $class, $prefix ) !== 0 ) {
         return;
     }
 
     $relative = substr( $class, strlen( $prefix ) );
-    $file     = SEARCH_INTEL_DIR . 'includes/class-' . strtolower( str_replace( '_', '-', $relative ) ) . '.php';
+    $file     = JAT_SEARCH_INTEL_DIR . 'includes/class-' . strtolower( str_replace( '_', '-', $relative ) ) . '.php';
 
     if ( file_exists( $file ) ) {
         require_once $file;

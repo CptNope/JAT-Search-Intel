@@ -1,12 +1,12 @@
-# Search Intel
+# JAT Search Intel
 
 **The first WordPress plugin built for all three pillars of modern search visibility: SEO, AEO, and GEO.**
 
-[![CI](https://github.com/CptNope/Search-Intel/actions/workflows/ci.yml/badge.svg)](https://github.com/CptNope/Search-Intel/actions/workflows/ci.yml)
+[![CI](https://github.com/CptNope/JAT-Search-Intel/actions/workflows/ci.yml/badge.svg)](https://github.com/CptNope/JAT-Search-Intel/actions/workflows/ci.yml)
 [![License: GPL v2](https://img.shields.io/badge/License-GPLv2-blue.svg)](LICENSE.md)
 [![WordPress: 6.0+](https://img.shields.io/badge/WordPress-6.0%2B-21759b.svg)](https://wordpress.org/)
 [![PHP: 7.4+](https://img.shields.io/badge/PHP-7.4%2B-777bb4.svg)](https://php.net/)
-[![Release: v3.3.6](https://img.shields.io/badge/Release-v3.3.6-brightgreen)](https://github.com/CptNope/Search-Intel/releases/tag/v3.3.6)
+[![Release: v3.3.6](https://img.shields.io/badge/Release-v3.3.6-brightgreen)](https://github.com/CptNope/JAT-Search-Intel/releases/tag/v3.3.6)
 
 **[Roadmap](ROADMAP.md)** · **[Changelog](CHANGELOG.md)** · **[Contributing](CONTRIBUTING.md)** · **[License](LICENSE.md)**
 
@@ -41,7 +41,7 @@
 
 ## Overview
 
-Search Intel optimizes WordPress content across three dimensions:
+JAT Search Intel optimizes WordPress content across three dimensions:
 
 | Pillar | Target | What It Optimizes For |
 |--------|--------|----------------------|
@@ -51,7 +51,7 @@ Search Intel optimizes WordPress content across three dimensions:
 
 ```mermaid
 graph LR
-    subgraph "Search Intel Plugin"
+    subgraph "JAT Search Intel Plugin"
         SEO["SEO Module"]
         AEO["AEO Module"]
         GEO["GEO Module"]
@@ -96,7 +96,7 @@ graph LR
 
 ```mermaid
 graph TD
-    BOOT["search-intel.php<br/><i>Bootstrap & Autoloader</i>"]
+    BOOT["jat-search-intel.php<br/><i>Bootstrap & Autoloader</i>"]
     CORE["Core<br/><i>Singleton Orchestrator</i>"]
     
     BOOT --> CORE
@@ -691,7 +691,7 @@ flowchart LR
     BLOCK --> SB_GEO["GEO Panel<br/><i>AI summary, topics, intent,<br/>audience, local relevance</i>"]
     BLOCK --> SB_SCORE["Analysis Panel<br/><i>score rings, Run Analysis</i>"]
 
-    TAB_SEO --> |"save_post"| PM["Post Meta<br/><i>28 _search_intel_* keys</i>"]
+    TAB_SEO --> |"save_post"| PM["Post Meta<br/><i>28 _jat_search_intel_* keys</i>"]
     TAB_AEO --> |"save_post"| PM
     TAB_GEO --> |"save_post"| PM
 
@@ -716,7 +716,7 @@ sequenceDiagram
     participant SM as Sitemap Module
 
     Bot->>WP: GET /sitemap.xml
-    WP->>SM: query_var = search_intel_sitemap
+    WP->>SM: query_var = jat_search_intel_sitemap
     SM->>SM: Check transient cache
     alt Cache hit
         SM-->>Bot: Cached XML Sitemap Index
@@ -750,14 +750,14 @@ sequenceDiagram
     participant GEO as GEO Manager
 
     AI->>WP: GET /llms.txt
-    WP->>GEO: query_var = search_intel_llms_txt
+    WP->>GEO: query_var = jat_search_intel_llms_txt
     GEO->>GEO: Build site summary
     GEO->>WP: get_pages(), get_categories()
     WP-->>GEO: Pages + categories
     GEO-->>AI: text/plain llms.txt
 
     AI->>WP: GET /llms-full.txt
-    WP->>GEO: query_var = search_intel_llms_full_txt
+    WP->>GEO: query_var = jat_search_intel_llms_full_txt
     GEO->>WP: get_posts(50 recent)
     WP-->>GEO: Posts with content
     GEO-->>AI: Full llms.txt with article summaries
@@ -771,7 +771,7 @@ sequenceDiagram
 
 ```mermaid
 graph TD
-    MENU["Search Intel Menu<br/><i>dashicons-chart-area</i>"]
+    MENU["JAT Search Intel Menu<br/><i>dashicons-chart-area</i>"]
 
     MENU --> GEN["General Settings<br/><i>Site identity, post types, module toggles</i>"]
     MENU --> SEO_S["SEO Settings<br/><i>OG, Twitter, canonical, robots</i>"]
@@ -781,8 +781,8 @@ graph TD
     MENU --> SOC_S["Social Settings<br/><i>8 platform profile URLs</i>"]
     MENU --> BULK_S["Bulk Tools<br/><i>v1.3+ Rescore, Regenerate,<br/>Sitemap Warm, Export/Import</i>"]
 
-    GEN --> OPT_MAIN["wp_options:<br/>search_intel_settings"]
-    SOC_S --> OPT_SOC["wp_options:<br/>search_intel_social_profiles"]
+    GEN --> OPT_MAIN["wp_options:<br/>jat_search_intel_settings"]
+    SOC_S --> OPT_SOC["wp_options:<br/>jat_search_intel_social_profiles"]
 
     style MENU fill:#2563eb,color:#fff
     style BULK_S fill:#be185d,color:#fff
@@ -797,7 +797,7 @@ graph TD
 ```mermaid
 flowchart TD
     subgraph JS["JavaScript (Block Editor)"]
-        STORE["@wordpress/data Store<br/><i>search-intel/editor</i>"]
+        STORE["@wordpress/data Store<br/><i>jat-search-intel/editor</i>"]
         SIDEBAR["Sidebar Panel<br/><i>PluginDocumentSettingPanel</i>"]
         BLK_FAQ["FAQ Block<br/><i>FAQPage microdata</i>"]
         BLK_HOWTO["HowTo Block<br/><i>HowTo schema</i>"]
@@ -841,12 +841,12 @@ sequenceDiagram
     loop Each of 6 blocks
         B->>FS: file_exists(build/blocks/{slug}/index.asset.php)
         FS-->>B: asset{dependencies, version}
-        B->>WP: wp_register_script(search-intel-{slug})
+        B->>WP: wp_register_script(jat-search-intel-{slug})
         B->>FS: file_exists(build/blocks/{slug}/index.css)
         alt CSS exists
-            B->>WP: wp_register_style(search-intel-{slug}-editor)
+            B->>WP: wp_register_style(jat-search-intel-{slug}-editor)
         end
-        B->>WP: register_block_type(search-intel/{slug}, args)
+        B->>WP: register_block_type(jat-search-intel/{slug}, args)
     end
 
     WP->>B: register_meta()
@@ -962,14 +962,14 @@ pie title GEO Score Distribution
 ### Steps
 
 1. Download or clone this repository
-2. Copy the `search-intel` folder to `wp-content/plugins/`
+2. Copy the `jat-search-intel` folder to `wp-content/plugins/`
 3. Activate via **Plugins > Installed Plugins**
-4. Navigate to **Search Intel > General** to configure
+4. Navigate to **JAT Search Intel > General** to configure
 5. Flush permalinks: **Settings > Permalinks > Save** (required for sitemap and llms.txt)
 
 ### Important
 
-> **Deactivate other SEO plugins** (Yoast, Rank Math, All in One SEO, etc.) before activating Search Intel to avoid duplicate meta tags and schema conflicts.
+> **Deactivate other SEO plugins** (Yoast, Rank Math, All in One SEO, etc.) before activating JAT Search Intel to avoid duplicate meta tags and schema conflicts.
 
 ---
 
@@ -986,7 +986,7 @@ pie title GEO Score Distribution
 
 ### Per-Post Settings
 
-Every post and page gets a **Search Intel** metabox with five tabs:
+Every post and page gets a **JAT Search Intel** metabox with five tabs:
 
 | Tab | Fields |
 |-----|--------|
@@ -1000,7 +1000,7 @@ Every post and page gets a **Search Intel** metabox with five tabs:
 
 ## REST API
 
-Search Intel exposes a REST API under the `search-intel/v1` namespace. Enable it via **Search Intel > GEO > Enable REST API**.
+JAT Search Intel exposes a REST API under the `jat-search-intel/v1` namespace. Enable it via **JAT Search Intel > GEO > Enable REST API**.
 
 All endpoints use standard WordPress REST authentication (cookie, application passwords, or OAuth).
 
@@ -1008,90 +1008,90 @@ All endpoints use standard WordPress REST authentication (cookie, application pa
 
 | Method | Route | Permission | Description |
 |--------|-------|------------|-------------|
-| `GET` | `/search-intel/v1/scores/{id}` | `read` (published) | SEO, AEO, GEO, readability scores |
-| `GET` | `/search-intel/v1/geo/{id}` | `read` (published) | Full GEO metadata (AI summary, topics, entities, intent, audience) |
-| `GET` | `/search-intel/v1/meta/{id}` | `read` (published) | SEO meta fields (title, description, keyword, canonical, robots) |
-| `PUT` | `/search-intel/v1/meta/{id}` | `edit_post` | Update SEO meta fields |
-| `POST` | `/search-intel/v1/analyze/{id}` | `edit_post` | Run content analysis and save scores |
-| `POST` | `/search-intel/v1/bulk/rescore` | `manage_options` | Batch rescore with offset pagination |
-| `GET` | `/search-intel/v1/settings` | `manage_options` | Read all plugin settings |
-| `PUT` | `/search-intel/v1/settings` | `manage_options` | Update plugin settings |
-| `POST` | `/search-intel/v1/sitemap/invalidate` | `manage_options` | Clear sitemap transient caches |
+| `GET` | `/jat-search-intel/v1/scores/{id}` | `read` (published) | SEO, AEO, GEO, readability scores |
+| `GET` | `/jat-search-intel/v1/geo/{id}` | `read` (published) | Full GEO metadata (AI summary, topics, entities, intent, audience) |
+| `GET` | `/jat-search-intel/v1/meta/{id}` | `read` (published) | SEO meta fields (title, description, keyword, canonical, robots) |
+| `PUT` | `/jat-search-intel/v1/meta/{id}` | `edit_post` | Update SEO meta fields |
+| `POST` | `/jat-search-intel/v1/analyze/{id}` | `edit_post` | Run content analysis and save scores |
+| `POST` | `/jat-search-intel/v1/bulk/rescore` | `manage_options` | Batch rescore with offset pagination |
+| `GET` | `/jat-search-intel/v1/settings` | `manage_options` | Read all plugin settings |
+| `PUT` | `/jat-search-intel/v1/settings` | `manage_options` | Update plugin settings |
+| `POST` | `/jat-search-intel/v1/sitemap/invalidate` | `manage_options` | Clear sitemap transient caches |
 
 ### Example
 
 ```bash
 # Get scores for post 42
-curl -u admin:APP_PASSWORD https://example.com/wp-json/search-intel/v1/scores/42
+curl -u admin:APP_PASSWORD https://example.com/wp-json/jat-search-intel/v1/scores/42
 
 # Trigger analysis
-curl -X POST -u admin:APP_PASSWORD https://example.com/wp-json/search-intel/v1/analyze/42
+curl -X POST -u admin:APP_PASSWORD https://example.com/wp-json/jat-search-intel/v1/analyze/42
 
 # Export settings
-curl -u admin:APP_PASSWORD https://example.com/wp-json/search-intel/v1/settings
+curl -u admin:APP_PASSWORD https://example.com/wp-json/jat-search-intel/v1/settings
 ```
 
 ---
 
 ## WP-CLI Commands
 
-Search Intel registers a `search-intel` WP-CLI command group with the following subcommands:
+JAT Search Intel registers a `jat-search-intel` WP-CLI command group with the following subcommands:
 
 ```bash
 # Analyze a single post (displays score table)
-wp search-intel analyze 42
-wp search-intel analyze 42 --save        # Save scores to post meta
+wp jat-search-intel analyze 42
+wp jat-search-intel analyze 42 --save        # Save scores to post meta
 
 # Bulk rescore all published posts
-wp search-intel rescore --all
-wp search-intel rescore --all --post_type=page --batch_size=100
+wp jat-search-intel rescore --all
+wp jat-search-intel rescore --all --post_type=page --batch_size=100
 
 # Bulk regenerate empty metadata (descriptions, AI summaries, content types)
-wp search-intel regenerate --all
-wp search-intel regenerate --all --post_type=page
+wp jat-search-intel regenerate --all
+wp jat-search-intel regenerate --all --post_type=page
 
 # Sitemap cache management
-wp search-intel sitemap cache             # Clear + queue regeneration
-wp search-intel sitemap clear             # Clear caches only
+wp jat-search-intel sitemap cache             # Clear + queue regeneration
+wp jat-search-intel sitemap clear             # Clear caches only
 
 # Settings export/import
-wp search-intel export > settings.json
-wp search-intel import settings.json
-wp search-intel import settings.json --mode=overwrite
+wp jat-search-intel export > settings.json
+wp jat-search-intel import settings.json
+wp jat-search-intel import settings.json --mode=overwrite
 
 # Display score table
-wp search-intel scores
-wp search-intel scores --format=csv --limit=100
-wp search-intel scores --orderby=seo
+wp jat-search-intel scores
+wp jat-search-intel scores --format=csv --limit=100
+wp jat-search-intel scores --orderby=seo
 
 # Migration (v3.0+)
-wp search-intel migrate --from=yoast             # Migrate from Yoast SEO
-wp search-intel migrate --from=rankmath --dry-run # Preview migration
-wp search-intel migrate --from=aioseo --overwrite # Overwrite existing data
+wp jat-search-intel migrate --from=yoast             # Migrate from Yoast SEO
+wp jat-search-intel migrate --from=rankmath --dry-run # Preview migration
+wp jat-search-intel migrate --from=aioseo --overwrite # Overwrite existing data
 
 # RBAC (v3.0+)
-wp search-intel rbac grant 5 seo                 # Grant SEO module to user 5
-wp search-intel rbac revoke 5 geo                # Revoke GEO module from user 5
-wp search-intel rbac list                        # List all user permissions
+wp jat-search-intel rbac grant 5 seo                 # Grant SEO module to user 5
+wp jat-search-intel rbac revoke 5 geo                # Revoke GEO module from user 5
+wp jat-search-intel rbac list                        # List all user permissions
 
 # Multisite (v3.0+)
-wp search-intel multisite push-defaults          # Push network defaults to all sites
-wp search-intel multisite report --format=table  # Network-wide score report
+wp jat-search-intel multisite push-defaults          # Push network defaults to all sites
+wp jat-search-intel multisite report --format=table  # Network-wide score report
 
 # Background Queue (v3.0+)
-wp search-intel queue status                     # Show queue status
-wp search-intel queue process --batch=10         # Manually process queued jobs
+wp jat-search-intel queue status                     # Show queue status
+wp jat-search-intel queue process --batch=10         # Manually process queued jobs
 
 # White-Label (v3.0+)
-wp search-intel white-label export > brand.json  # Export reseller config
-wp search-intel white-label import < brand.json  # Import reseller config
+wp jat-search-intel white-label export > brand.json  # Export reseller config
+wp jat-search-intel white-label import < brand.json  # Import reseller config
 ```
 
 ---
 
 ## Bulk Tools
 
-Navigate to **Search Intel > Bulk Tools** in the WordPress admin to access:
+Navigate to **JAT Search Intel > Bulk Tools** in the WordPress admin to access:
 
 - **Bulk Rescore** — re-run SEO/AEO/GEO/readability analysis on all published posts with a live progress bar
 - **Bulk Regenerate Metadata** — auto-fill empty descriptions, AI summaries, and content types (existing values are never overwritten)
@@ -1105,7 +1105,7 @@ All bulk operations are batched via AJAX (20 posts per request) with a progress 
 
 ## Gutenberg Sidebar
 
-Search Intel adds a native **PluginDocumentSettingPanel** to the Block Editor with four tabs:
+JAT Search Intel adds a native **PluginDocumentSettingPanel** to the Block Editor with four tabs:
 
 ### SEO Tab
 - **SEO Title** — custom title tag with character count (60 max)
@@ -1143,24 +1143,24 @@ Search Intel adds a native **PluginDocumentSettingPanel** to the Block Editor wi
 
 ## Custom Blocks
 
-Search Intel provides 6 custom Gutenberg blocks under the `search-intel` namespace:
+JAT Search Intel provides 6 custom Gutenberg blocks under the `jat-search-intel` namespace:
 
-### `search-intel/faq`
+### `jat-search-intel/faq`
 Visual FAQ editor with numbered question/answer pairs. Add, remove, and reorder items directly in the editor. Outputs microdata with `itemScope`/`itemProp` attributes and a `data-schema="FAQPage"` data attribute for JSON-LD generation.
 
-### `search-intel/howto`
+### `jat-search-intel/howto`
 Step-by-step tutorial editor with a title, description, optional total time (ISO 8601), and per-step name, instructions, and image upload via `MediaUpload`. Outputs an ordered list with HowTo schema data attributes.
 
-### `search-intel/toc`
+### `jat-search-intel/toc`
 Auto-generated Table of Contents from headings in the post. Updates in real-time as you add or edit headings. Settings: max heading depth (1–6) and ordered/unordered list. **Dynamic block** — rendered server-side via `render_toc()` on the frontend.
 
-### `search-intel/breadcrumbs`
+### `jat-search-intel/breadcrumbs`
 Theme-aware breadcrumb navigation with configurable separator (`›`, `/`, `»`, `→`, `|`) and home label. Outputs a full `BreadcrumbList` schema with `itemListElement` microdata. **Dynamic block** — rendered server-side via `render_breadcrumbs()` with category hierarchy.
 
-### `search-intel/answer-box`
+### `jat-search-intel/answer-box`
 Highlighted answer container optimized for featured snippet extraction. Question + answer fields with `data-si-answer-box` and `data-si-direct-answer` attributes for AI and search engine parsing.
 
-### `search-intel/citation`
+### `jat-search-intel/citation`
 Inline source citation block wrapping quoted text with source metadata. Inspector panel for source name, URL, type (website, journal, book, report, news, government), author, and date. Outputs a `<figure>` with `CreativeWork` microdata.
 
 > **FSE Templates**: The TOC, Breadcrumbs, and FAQ blocks are all usable in Full Site Editing templates (`header.html`, `single.html`, etc.).
@@ -1172,15 +1172,15 @@ Inline source citation block wrapping quoted text with source metadata. Inspecto
 ### FAQ Block
 
 ```
-[search_intel_faq question="What is SEO?" answer="SEO stands for Search Engine Optimization."]
+[jat_search_intel_faq question="What is SEO?" answer="SEO stands for Search Engine Optimization."]
 ```
 
 ### HowTo Block
 
 ```
-[search_intel_howto name="How to Install a Plugin" time="PT5M"]
+[jat_search_intel_howto name="How to Install a Plugin" time="PT5M"]
   Step content here...
-[/search_intel_howto]
+[/jat_search_intel_howto]
 ```
 
 ---
@@ -1191,7 +1191,7 @@ Inline source citation block wrapping quoted text with source metadata. Inspecto
 
 | Filter | Description | Parameters |
 |--------|-------------|------------|
-| `search_intel_singular_schema` | Modify article/page schema before output | `$schema`, `$post_id` |
+| `jat_search_intel_singular_schema` | Modify article/page schema before output | `$schema`, `$post_id` |
 
 ### Actions
 
@@ -1219,8 +1219,8 @@ All output hooks fire on `wp_head` with the following priorities:
 ## File Structure
 
 ```
-search-intel/
-├── search-intel.php              # Main plugin bootstrap + autoloader + WP-CLI registration
+jat-search-intel/
+├── jat-search-intel.php              # Main plugin bootstrap + autoloader + WP-CLI registration
 ├── uninstall.php                 # Database cleanup on uninstall
 ├── readme.txt                    # WordPress.org readme
 ├── README.md                     # This file
@@ -1239,7 +1239,7 @@ search-intel/
 │   ├── class-content-analyzer.php# Scoring engine + analysis-on-save + 11 content checks
 │   ├── class-sitemap.php         # XML sitemap with images + transient caching
 │   ├── class-admin.php           # Settings, metaboxes, user fields, Bulk Tools page
-│   ├── class-rest-api.php        # REST API controller (search-intel/v1 namespace)
+│   ├── class-rest-api.php        # REST API controller (jat-search-intel/v1 namespace)
 │   ├── class-bulk-tools.php      # Bulk rescore, regenerate, export/import (AJAX)
 │   ├── class-cli.php             # WP-CLI commands (analyze, rescore, scores, rbac, multisite, queue, white-label)
 │   ├── class-blocks.php          # Block editor: sidebar, custom blocks, meta registration
@@ -1279,7 +1279,7 @@ search-intel/
 │
 ├── src/                           # Block editor source (compiled to build/)
 │   ├── store/
-│   │   └── index.js              # @wordpress/data store (search-intel/editor)
+│   │   └── index.js              # @wordpress/data store (jat-search-intel/editor)
 │   ├── sidebar/
 │   │   ├── index.js              # PluginDocumentSettingPanel registration
 │   │   ├── sidebar.css           # Sidebar styles (tabs, SERP preview, score rings)
@@ -1336,7 +1336,7 @@ search-intel/
 
 ## Testing & CI
 
-Search Intel has a comprehensive automated test suite and CI pipeline.
+JAT Search Intel has a comprehensive automated test suite and CI pipeline.
 
 ### Test Coverage
 
@@ -1418,4 +1418,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for full details on branching strategy, c
 
 ## License
 
-Search Intel is licensed under the [GNU General Public License v2.0 or later](LICENSE.md).
+JAT Search Intel is licensed under the [GNU General Public License v2.0 or later](LICENSE.md).

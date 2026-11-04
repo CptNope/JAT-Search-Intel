@@ -1,5 +1,5 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * MainWP Child-Side Reporter.
  *
  * Hooks into the MainWP Child plugin's callback API to expose
- * Search Intel site scores, feature status, post counts, and
+ * JAT Search Intel site scores, feature status, post counts, and
  * remote action triggers (rescore, regenerate, toggle features).
  *
  * Requires the MainWP Child plugin to be active on the child site.
@@ -22,7 +22,7 @@ class MainWP_Reporter {
 	private $settings;
 
 	/** Callback action prefix. */
-	private const PREFIX = 'search_intel';
+	private const PREFIX = 'jat_search_intel';
 
 	/**
 	 * @param array $settings Plugin settings.
@@ -52,7 +52,7 @@ class MainWP_Reporter {
 	// ── Sync Data ────────────────────────────────────────────────────────────
 
 	/**
-	 * Inject Search Intel data into the MainWP sync payload.
+	 * Inject JAT Search Intel data into the MainWP sync payload.
 	 *
 	 * This data is sent to the MainWP Dashboard on every sync, making it
 	 * available for the dashboard extension's scores grid.
@@ -67,7 +67,7 @@ class MainWP_Reporter {
 	}
 
 	/**
-	 * Get a summary of the site's Search Intel status and scores.
+	 * Get a summary of the site's JAT Search Intel status and scores.
 	 *
 	 * @return array
 	 */
@@ -75,7 +75,7 @@ class MainWP_Reporter {
 		$core = Core::get_instance();
 
 		return [
-			'version'        => defined( 'SEARCH_INTEL_VERSION' ) ? SEARCH_INTEL_VERSION : '0.0.0',
+			'version'        => defined( 'JAT_SEARCH_INTEL_VERSION' ) ? JAT_SEARCH_INTEL_VERSION : '0.0.0',
 			'features'       => $this->get_feature_status(),
 			'scores'         => $this->get_aggregate_scores(),
 			'post_count'     => $this->get_scored_post_count(),
@@ -132,10 +132,10 @@ class MainWP_Reporter {
 		$count = count( $posts );
 
 		foreach ( $posts as $post_id ) {
-			$seo  += (int) get_post_meta( $post_id, '_search_intel_seo_score', true );
-			$aeo  += (int) get_post_meta( $post_id, '_search_intel_aeo_score', true );
-			$geo  += (int) get_post_meta( $post_id, '_search_intel_geo_score', true );
-			$read += (int) get_post_meta( $post_id, '_search_intel_readability_score', true );
+			$seo  += (int) get_post_meta( $post_id, '_jat_search_intel_seo_score', true );
+			$aeo  += (int) get_post_meta( $post_id, '_jat_search_intel_aeo_score', true );
+			$geo  += (int) get_post_meta( $post_id, '_jat_search_intel_geo_score', true );
+			$read += (int) get_post_meta( $post_id, '_jat_search_intel_readability_score', true );
 		}
 
 		return [
@@ -147,7 +147,7 @@ class MainWP_Reporter {
 	}
 
 	/**
-	 * Count posts that have at least one Search Intel score.
+	 * Count posts that have at least one JAT Search Intel score.
 	 *
 	 * @return int
 	 */
@@ -159,7 +159,7 @@ class MainWP_Reporter {
 			'fields'         => 'ids',
 			'meta_query'     => [
 				[
-					'key'     => '_search_intel_seo_score',
+					'key'     => '_jat_search_intel_seo_score',
 					'value'   => '0',
 					'compare' => '>',
 					'type'    => 'NUMERIC',
@@ -182,7 +182,7 @@ class MainWP_Reporter {
 			'posts_per_page' => 1,
 			'orderby'        => 'modified',
 			'order'          => 'DESC',
-			'meta_key'       => '_search_intel_seo_score',
+			'meta_key'       => '_jat_search_intel_seo_score',
 		] );
 
 		if ( empty( $posts ) ) {
@@ -198,7 +198,7 @@ class MainWP_Reporter {
 	 * @return int
 	 */
 	public function get_pending_queue_count(): int {
-		$queue = get_option( 'search_intel_bg_queue', [] );
+		$queue = get_option( 'jat_search_intel_bg_queue', [] );
 		if ( ! is_array( $queue ) ) {
 			return 0;
 		}
@@ -319,7 +319,7 @@ class MainWP_Reporter {
 	 * @return array
 	 */
 	private function remote_toggle_feature( string $feature, bool $enabled ): array {
-		$settings = get_option( 'search_intel_settings', [] );
+		$settings = get_option( 'jat_search_intel_settings', [] );
 		$settings = is_array( $settings ) ? $settings : [];
 
 		// Validate feature key.
@@ -335,7 +335,7 @@ class MainWP_Reporter {
 		}
 
 		$settings[ $feature ] = $enabled;
-		update_option( 'search_intel_settings', $settings );
+		update_option( 'jat_search_intel_settings', $settings );
 
 		return [ 'feature' => $feature, 'enabled' => $enabled ];
 	}
@@ -352,7 +352,7 @@ class MainWP_Reporter {
 		}
 
 		$defaults = Core::get_default_settings();
-		$current  = get_option( 'search_intel_settings', [] );
+		$current  = get_option( 'jat_search_intel_settings', [] );
 		$current  = is_array( $current ) ? $current : [];
 
 		foreach ( $settings as $key => $value ) {
@@ -362,7 +362,7 @@ class MainWP_Reporter {
 			$current[ $key ] = $value;
 		}
 
-		update_option( 'search_intel_settings', $current );
+		update_option( 'jat_search_intel_settings', $current );
 
 		return [ 'imported' => count( $settings ) ];
 	}
@@ -378,16 +378,16 @@ class MainWP_Reporter {
 			'post_type'      => 'post',
 			'post_status'    => 'publish',
 			'posts_per_page' => 50,
-			'meta_key'       => '_search_intel_seo_score',
+			'meta_key'       => '_jat_search_intel_seo_score',
 			'orderby'        => 'meta_value_num',
 			'order'          => 'ASC',
 		] );
 
 		$low = [];
 		foreach ( $posts as $post ) {
-			$seo  = (int) get_post_meta( $post->ID, '_search_intel_seo_score', true );
-			$aeo  = (int) get_post_meta( $post->ID, '_search_intel_aeo_score', true );
-			$geo  = (int) get_post_meta( $post->ID, '_search_intel_geo_score', true );
+			$seo  = (int) get_post_meta( $post->ID, '_jat_search_intel_seo_score', true );
+			$aeo  = (int) get_post_meta( $post->ID, '_jat_search_intel_aeo_score', true );
+			$geo  = (int) get_post_meta( $post->ID, '_jat_search_intel_geo_score', true );
 
 			if ( $seo < $threshold || $aeo < $threshold || $geo < $threshold ) {
 				$low[] = [

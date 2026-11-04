@@ -1,8 +1,8 @@
 <?php
-namespace Search_Intel\Tests\Unit;
+namespace JAT_Search_Intel\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\Robots_Txt;
+use JAT_Search_Intel\Robots_Txt;
 
 class RobotsTxtTest extends TestCase {
 

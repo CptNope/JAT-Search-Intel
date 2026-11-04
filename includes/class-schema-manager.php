@@ -1,5 +1,5 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
@@ -72,7 +72,7 @@ class Schema_Manager {
     }
 
     /**
-     * Detect Search Intel blocks in the current post content that already output schema.
+     * Detect JAT Search Intel blocks in the current post content that already output schema.
      *
      * Returns an array of schema type names that blocks handle via microdata,
      * so wp_head JSON-LD can skip those types to prevent duplication.
@@ -95,15 +95,15 @@ class Schema_Manager {
 
         $schemas = [];
 
-        if ( has_block( 'search-intel/faq', $post ) ) {
+        if ( has_block( 'jat-search-intel/faq', $post ) ) {
             $schemas[] = 'FAQPage';
         }
 
-        if ( has_block( 'search-intel/howto', $post ) ) {
+        if ( has_block( 'jat-search-intel/howto', $post ) ) {
             $schemas[] = 'HowTo';
         }
 
-        if ( has_block( 'search-intel/breadcrumbs', $post ) ) {
+        if ( has_block( 'jat-search-intel/breadcrumbs', $post ) ) {
             $schemas[] = 'BreadcrumbList';
         }
 
@@ -266,7 +266,7 @@ class Schema_Manager {
         $post_type = $post->post_type;
 
         // Determine schema type
-        $custom_type = get_post_meta( $post_id, '_search_intel_schema_type', true );
+        $custom_type = get_post_meta( $post_id, '_jat_search_intel_schema_type', true );
         if ( $custom_type ) {
             $type = $custom_type;
         } elseif ( 'post' === $post_type ) {
@@ -347,13 +347,13 @@ class Schema_Manager {
         }
 
         // v1.1: Direct answer as abstract
-        $direct_answer = get_post_meta( $post_id, '_search_intel_direct_answer', true );
+        $direct_answer = get_post_meta( $post_id, '_jat_search_intel_direct_answer', true );
         if ( $direct_answer ) {
             $schema['abstract'] = sanitize_text_field( $direct_answer );
         }
 
         // v1.1: Citations as CreativeWork references
-        $citations = get_post_meta( $post_id, '_search_intel_citations', true );
+        $citations = get_post_meta( $post_id, '_jat_search_intel_citations', true );
         if ( ! empty( $citations ) && is_array( $citations ) ) {
             $cite_schemas = [];
             foreach ( $citations as $cite ) {
@@ -383,13 +383,13 @@ class Schema_Manager {
         }
 
         // v1.1: Content intent
-        $content_intent = get_post_meta( $post_id, '_search_intel_content_intent', true );
+        $content_intent = get_post_meta( $post_id, '_jat_search_intel_content_intent', true );
         if ( $content_intent ) {
             $schema['creativeWorkStatus'] = sanitize_text_field( $content_intent );
         }
 
         // v1.1: Audience
-        $audience = get_post_meta( $post_id, '_search_intel_audience', true );
+        $audience = get_post_meta( $post_id, '_jat_search_intel_audience', true );
         if ( $audience ) {
             $schema['audience'] = [
                 '@type'         => 'Audience',
@@ -398,14 +398,14 @@ class Schema_Manager {
         }
 
         // v1.1: Author expertise notes
-        $expertise_notes = get_post_meta( $post_id, '_search_intel_author_expertise_notes', true );
+        $expertise_notes = get_post_meta( $post_id, '_jat_search_intel_author_expertise_notes', true );
         if ( $expertise_notes && ! empty( $schema['author'] ) ) {
             $schema['author']['knowsAbout'] = sanitize_text_field( $expertise_notes );
         }
 
         // v1.1: Local relevance — contentLocation
-        $local_relevance = get_post_meta( $post_id, '_search_intel_local_relevance', true );
-        $local_location  = get_post_meta( $post_id, '_search_intel_local_location', true );
+        $local_relevance = get_post_meta( $post_id, '_jat_search_intel_local_relevance', true );
+        $local_location  = get_post_meta( $post_id, '_jat_search_intel_local_location', true );
         if ( $local_relevance && $local_location ) {
             $schema['contentLocation'] = [
                 '@type' => 'Place',
@@ -420,7 +420,7 @@ class Schema_Manager {
             ];
         }
 
-        return apply_filters( 'search_intel_singular_schema', $schema, $post_id );
+        return apply_filters( 'jat_search_intel_singular_schema', $schema, $post_id );
     }
 
     /**
@@ -428,7 +428,7 @@ class Schema_Manager {
      */
     private function get_social_urls(): array {
         $urls     = [];
-        $profiles = get_option( 'search_intel_social_profiles', [] );
+        $profiles = get_option( 'jat_search_intel_social_profiles', [] );
 
         $platforms = [
             'facebook', 'twitter', 'instagram', 'linkedin',

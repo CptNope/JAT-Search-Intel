@@ -1,6 +1,6 @@
 # GNU General Public License v2.0
 
-Copyright (C) 2024 Search Intel
+Copyright (C) 2024 JAT Search Intel
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

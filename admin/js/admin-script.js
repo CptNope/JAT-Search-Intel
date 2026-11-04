@@ -1,11 +1,11 @@
 /**
- * Search Intel — Admin Script
+ * JAT Search Intel — Admin Script
  * Handles metabox tabs, SERP preview, FAQ/Entity repeaters, and live analysis.
  */
 (function ($) {
     'use strict';
 
-    const SI = window.searchIntel || {};
+    const SI = window.jatSearchIntel || {};
 
     /* ========== Tab Navigation ========== */
 
@@ -298,7 +298,7 @@
             url: SI.ajaxUrl,
             type: 'POST',
             data: {
-                action: 'search_intel_analyze',
+                action: 'jat_search_intel_analyze',
                 nonce: SI.nonce,
                 post_id: SI.postId,
                 content: content,
@@ -347,7 +347,7 @@
             url: SI.ajaxUrl,
             type: 'POST',
             data: {
-                action: 'search_intel_generate_faqs',
+                action: 'jat_search_intel_generate_faqs',
                 nonce: SI.faqNonce,
                 post_id: SI.postId,
                 use_ai: useAi
@@ -397,7 +397,7 @@
             url: SI.ajaxUrl,
             type: 'POST',
             data: {
-                action: 'search_intel_ai_get_suggestions',
+                action: 'jat_search_intel_ai_get_suggestions',
                 nonce: SI.nonce,
                 post_id: SI.postId,
                 force: 1
@@ -442,7 +442,7 @@
             url: SI.ajaxUrl,
             type: 'POST',
             data: {
-                action: 'search_intel_ai_apply_suggestion',
+                action: 'jat_search_intel_ai_apply_suggestion',
                 nonce: SI.nonce,
                 post_id: SI.postId,
                 suggestion_id: suggestionId
@@ -454,15 +454,15 @@
                     // Update the corresponding field in the metabox if visible.
                     var metaKey = response.data.meta_key || '';
                     var value = response.data.value || '';
-                    if (metaKey === '_search_intel_description') {
+                    if (metaKey === '_jat_search_intel_description') {
                         $('#si_description').val(value);
                         updateSerpPreview();
                         updateCharCounts();
-                    } else if (metaKey === '_search_intel_title') {
+                    } else if (metaKey === '_jat_search_intel_title') {
                         $('#si_title').val(value);
                         updateSerpPreview();
                         updateCharCounts();
-                    } else if (metaKey === '_search_intel_focus_keyword') {
+                    } else if (metaKey === '_jat_search_intel_focus_keyword') {
                         $('#si_focus_keyword').val(value);
                     }
                 } else {

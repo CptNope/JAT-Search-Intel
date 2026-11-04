@@ -1,5 +1,5 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
@@ -42,8 +42,8 @@ class Sitemap {
      */
     public function invalidate_cache(): void {
         global $wpdb;
-        $like        = $wpdb->esc_like( '_transient_search_intel_sitemap_' ) . '%';
-        $like_timeout = $wpdb->esc_like( '_transient_timeout_search_intel_sitemap_' ) . '%';
+        $like        = $wpdb->esc_like( '_transient_jat_search_intel_sitemap_' ) . '%';
+        $like_timeout = $wpdb->esc_like( '_transient_timeout_jat_search_intel_sitemap_' ) . '%';
         $wpdb->query(
             $wpdb->prepare(
                 "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
@@ -57,12 +57,12 @@ class Sitemap {
      * Register sitemap rewrite rules.
      */
     public function register_endpoints(): void {
-        add_rewrite_rule( '^sitemap\.xml$', 'index.php?search_intel_sitemap=index', 'top' );
-        add_rewrite_rule( '^sitemap-([a-z]+)-?(\d*)\.xml$', 'index.php?search_intel_sitemap=$matches[1]&search_intel_sitemap_page=$matches[2]', 'top' );
+        add_rewrite_rule( '^sitemap\.xml$', 'index.php?jat_search_intel_sitemap=index', 'top' );
+        add_rewrite_rule( '^sitemap-([a-z]+)-?(\d*)\.xml$', 'index.php?jat_search_intel_sitemap=$matches[1]&jat_search_intel_sitemap_page=$matches[2]', 'top' );
 
         add_filter( 'query_vars', function ( $vars ) {
-            $vars[] = 'search_intel_sitemap';
-            $vars[] = 'search_intel_sitemap_page';
+            $vars[] = 'jat_search_intel_sitemap';
+            $vars[] = 'jat_search_intel_sitemap_page';
             return $vars;
         });
     }
@@ -71,18 +71,18 @@ class Sitemap {
      * Serve the requested sitemap.
      */
     public function serve_sitemap(): void {
-        $type = get_query_var( 'search_intel_sitemap' );
+        $type = get_query_var( 'jat_search_intel_sitemap' );
         if ( ! $type ) {
             return;
         }
 
-        $page = max( 1, absint( get_query_var( 'search_intel_sitemap_page' ) ) );
+        $page = max( 1, absint( get_query_var( 'jat_search_intel_sitemap_page' ) ) );
 
         header( 'Content-Type: application/xml; charset=utf-8' );
         header( 'X-Robots-Tag: noindex, follow' );
         header( 'Cache-Control: public, max-age=3600' );
 
-        $cache_key = 'search_intel_sitemap_' . $type . '_' . $page;
+        $cache_key = 'jat_search_intel_sitemap_' . $type . '_' . $page;
         $cached    = get_transient( $cache_key );
 
         if ( false !== $cached ) {
@@ -190,11 +190,11 @@ class Sitemap {
             'meta_query'     => [
                 'relation' => 'OR',
                 [
-                    'key'     => '_search_intel_noindex',
+                    'key'     => '_jat_search_intel_noindex',
                     'compare' => 'NOT EXISTS',
                 ],
                 [
-                    'key'     => '_search_intel_noindex',
+                    'key'     => '_jat_search_intel_noindex',
                     'value'   => '1',
                     'compare' => '!=',
                 ],

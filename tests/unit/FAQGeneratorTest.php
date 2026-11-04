@@ -1,9 +1,9 @@
 <?php
-namespace Search_Intel\Tests\Unit;
+namespace JAT_Search_Intel\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\FAQ_Generator;
-use Search_Intel\QA_Detector;
+use JAT_Search_Intel\FAQ_Generator;
+use JAT_Search_Intel\QA_Detector;
 
 class FAQGeneratorTest extends TestCase {
 
@@ -237,16 +237,16 @@ class FAQGeneratorTest extends TestCase {
 		];
 
 		// Set up AI Engine with properly encrypted key.
-		$si_test_state['options']['search_intel_settings'] = [ 'ai_provider' => 'openai' ];
+		$si_test_state['options']['jat_search_intel_settings'] = [ 'ai_provider' => 'openai' ];
 
 		// Reset Core singleton so it picks up the fresh state.
-		$ref = new \ReflectionClass( \Search_Intel\Core::class );
+		$ref = new \ReflectionClass( \JAT_Search_Intel\Core::class );
 		$prop = $ref->getProperty( 'instance' );
 		$prop->setAccessible( true );
 		$prop->setValue( null, null );
 
 		// Use AI Engine's own encryption to store the key.
-		\Search_Intel\Core::get_instance()->ai_engine->save_api_key( 'openai', 'sk-test-key' );
+		\JAT_Search_Intel\Core::get_instance()->ai_engine->save_api_key( 'openai', 'sk-test-key' );
 
 		$result = $this->generator->enhance_with_ai( 1 );
 
@@ -274,14 +274,14 @@ class FAQGeneratorTest extends TestCase {
 		];
 
 		// Set up AI Engine with properly encrypted key.
-		$si_test_state['options']['search_intel_settings'] = [ 'ai_provider' => 'openai' ];
+		$si_test_state['options']['jat_search_intel_settings'] = [ 'ai_provider' => 'openai' ];
 
-		$ref = new \ReflectionClass( \Search_Intel\Core::class );
+		$ref = new \ReflectionClass( \JAT_Search_Intel\Core::class );
 		$prop = $ref->getProperty( 'instance' );
 		$prop->setAccessible( true );
 		$prop->setValue( null, null );
 
-		\Search_Intel\Core::get_instance()->ai_engine->save_api_key( 'openai', 'sk-test-key' );
+		\JAT_Search_Intel\Core::get_instance()->ai_engine->save_api_key( 'openai', 'sk-test-key' );
 
 		$result = $this->generator->enhance_with_ai( 1 );
 		$this->assertEmpty( $result );
@@ -298,7 +298,7 @@ class FAQGeneratorTest extends TestCase {
 		$gen = new FAQ_Generator( [ 'enable_faq_generator' => false ] );
 
 		// AJAX handlers are always registered (used by the main metabox AEO tab).
-		$this->assertArrayHasKey( 'wp_ajax_search_intel_generate_faqs', $si_test_state['actions'] ?? [] );
+		$this->assertArrayHasKey( 'wp_ajax_jat_search_intel_generate_faqs', $si_test_state['actions'] ?? [] );
 
 		// But the separate metabox should NOT be registered when disabled.
 		$this->assertArrayNotHasKey( 'add_meta_boxes', $si_test_state['actions'] ?? [] );

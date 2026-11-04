@@ -57,7 +57,7 @@ Optimize for AI-powered answer engines such as ChatGPT, Perplexity and Google AI
 Real-time scoring dashboard in the post editor with separate SEO, AEO, and GEO scores plus actionable recommendations.
 
 **REST API**
-Full REST API under the `search-intel/v1` namespace with toggleable endpoints:
+Full REST API under the `jat-search-intel/v1` namespace with toggleable endpoints:
 
 * `GET /scores/{id}` — SEO, AEO, GEO, readability scores
 * `GET /geo/{id}` — full GEO metadata
@@ -77,12 +77,12 @@ Admin page with batch operations and live progress bars:
 
 **WP-CLI Commands**
 
-* `wp search-intel analyze <post_id>` — analyze a single post
-* `wp search-intel rescore --all` — bulk rescore with progress bar
-* `wp search-intel regenerate --all` — bulk regenerate metadata
-* `wp search-intel sitemap cache|clear` — manage sitemap caches
-* `wp search-intel export / import` — settings export/import
-* `wp search-intel scores` — display score table (table, CSV, JSON, YAML)
+* `wp jat-search-intel analyze <post_id>` — analyze a single post
+* `wp jat-search-intel rescore --all` — bulk rescore with progress bar
+* `wp jat-search-intel regenerate --all` — bulk regenerate metadata
+* `wp jat-search-intel sitemap cache|clear` — manage sitemap caches
+* `wp jat-search-intel export / import` — settings export/import
+* `wp jat-search-intel scores` — display score table (table, CSV, JSON, YAML)
 
 **Gutenberg Sidebar Panel**
 Native Block Editor integration with a tabbed sidebar panel:
@@ -107,11 +107,11 @@ Turn on only what you need under Settings > General > Module Toggles: redirect m
 == Installation ==
 
 1. In WordPress, go to Plugins > Add New, search for "JAT Search Intel", then install and activate it. (Or upload the `jat-search-intel` folder to `/wp-content/plugins/`.)
-2. Open **Search Intel > General** to set your site identity and choose which modules to enable.
-3. Review the SEO, AEO and GEO tabs, and add your social profiles under **Search Intel > Social**.
-4. Edit any post or page: the Search Intel sidebar panel shows live scores and fields.
+2. Open **JAT Search Intel > General** to set your site identity and choose which modules to enable.
+3. Review the SEO, AEO and GEO tabs, and add your social profiles under **JAT Search Intel > Social**.
+4. Edit any post or page: the JAT Search Intel sidebar panel shows live scores and fields.
 
-If you are switching from another SEO plugin, use **Search Intel > Migration** to import titles, descriptions and focus keywords from Yoast SEO, Rank Math, All in One SEO, SEOPress or The SEO Framework, then deactivate the old plugin to avoid duplicate meta tags.
+If you are switching from another SEO plugin, use **JAT Search Intel > Migration** to import titles, descriptions and focus keywords from Yoast SEO, Rank Math, All in One SEO, SEOPress or The SEO Framework, then deactivate the old plugin to avoid duplicate meta tags.
 
 == Frequently Asked Questions ==
 
@@ -192,7 +192,7 @@ Sends an HTTP HEAD request to each external URL linked from your content to chec
 * Added: opt-in "Delete all plugin data" setting; uninstall now also removes tables, cron events and roles.
 * Added: scheduled tasks are cleared on deactivation, and database tables are created on update as well as activation.
 * Changed: a static llms.txt left by another plugin is no longer deleted automatically; you get a notice with a one-click remove button.
-* Changed: llms.txt no longer publishes the admin email address (use the `search_intel_llms_contact_email` filter to add a contact).
+* Changed: llms.txt no longer publishes the admin email address (use the `jat_search_intel_llms_contact_email` filter to add a contact).
 * Changed: AI-crawler access log stores hashed IPs only.
 * Removed: Google/Bing sitemap ping (both endpoints were retired; use IndexNow).
 * Fixed: background queue cron interval was never registered.

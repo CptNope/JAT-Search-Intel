@@ -1,5 +1,5 @@
 /**
- * Search Intel — HowTo Block
+ * JAT Search Intel — HowTo Block
  *
  * Step-by-step editor with image support per step.
  * Outputs HowTo JSON-LD structured data.
@@ -13,7 +13,7 @@ import { plus, trash } from '@wordpress/icons';
 
 import './editor.css';
 
-registerBlockType( 'search-intel/howto', {
+registerBlockType( 'jat-search-intel/howto', {
 	title: __( 'How To', 'jat-search-intel' ),
 	description: __( 'Step-by-step instructions with automatic HowTo schema markup.', 'jat-search-intel' ),
 	category: 'widgets',

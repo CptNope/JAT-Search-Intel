@@ -7,11 +7,11 @@
  * content, auto-queues decaying posts for re-analysis, and suggests content
  * refresh actions based on score changes.
  *
- * @package Search_Intel
+ * @package JAT_Search_Intel
  * @since   3.2.0
  */
 
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
@@ -23,10 +23,10 @@ class Content_Decay {
     private $settings;
 
     /** @var string Option prefix for score snapshots. */
-    private const SNAPSHOT_META_KEY = '_search_intel_score_history';
+    private const SNAPSHOT_META_KEY = '_jat_search_intel_score_history';
 
     /** @var string Post meta key for decay flag. */
-    private const DECAY_FLAG_KEY = '_search_intel_decaying';
+    private const DECAY_FLAG_KEY = '_jat_search_intel_decaying';
 
     /** @var int Maximum snapshots to retain per post. */
     private const MAX_SNAPSHOTS = 90;
@@ -50,13 +50,13 @@ class Content_Decay {
         }
 
         // Store snapshot on every analysis.
-        add_action( 'search_intel_post_analyzed', [ $this, 'store_snapshot' ], 10, 2 );
+        add_action( 'jat_search_intel_post_analyzed', [ $this, 'store_snapshot' ], 10, 2 );
 
         // Daily cron for decay detection.
-        add_action( 'search_intel_decay_check', [ $this, 'run_decay_check' ] );
+        add_action( 'jat_search_intel_decay_check', [ $this, 'run_decay_check' ] );
 
-        if ( ! wp_next_scheduled( 'search_intel_decay_check' ) ) {
-            wp_schedule_event( time(), 'daily', 'search_intel_decay_check' );
+        if ( ! wp_next_scheduled( 'jat_search_intel_decay_check' ) ) {
+            wp_schedule_event( time(), 'daily', 'jat_search_intel_decay_check' );
         }
 
         // Admin page.
@@ -72,7 +72,7 @@ class Content_Decay {
     /**
      * Store a score snapshot for a post.
      *
-     * Called after every content analysis via the `search_intel_post_analyzed`
+     * Called after every content analysis via the `jat_search_intel_post_analyzed`
      * action. Stores date + SEO/AEO/GEO/readability scores.
      *
      * @param int   $post_id Post ID.
@@ -430,11 +430,11 @@ class Content_Decay {
      */
     public function register_admin_page(): void {
         add_submenu_page(
-            'search-intel',
+            'jat-search-intel',
             'Content Decay',
             'Content Decay',
             'manage_options',
-            'search-intel-content-decay',
+            'jat-search-intel-content-decay',
             [ $this, 'render_admin_page' ]
         );
     }

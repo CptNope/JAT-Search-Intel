@@ -1,5 +1,5 @@
 /**
- * Search Intel — Answer Box Block
+ * JAT Search Intel — Answer Box Block
  *
  * Direct-answer formatting block optimized for featured snippets.
  * Styled container with semantic markup for AI/search extraction.
@@ -11,7 +11,7 @@ import { RichText, useBlockProps } from '@wordpress/block-editor';
 
 import './editor.css';
 
-registerBlockType( 'search-intel/answer-box', {
+registerBlockType( 'jat-search-intel/answer-box', {
 	title: __( 'Answer Box', 'jat-search-intel' ),
 	description: __( 'A highlighted answer box optimized for featured snippets and AI extraction.', 'jat-search-intel' ),
 	category: 'widgets',

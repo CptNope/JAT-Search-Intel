@@ -13,24 +13,24 @@
       <code><![CDATA[array]]></code>
     </PossiblyUnusedReturnValue>
     <UndefinedConstant>
-      <code><![CDATA[SEARCH_INTEL_BASENAME]]></code>
-      <code><![CDATA[SEARCH_INTEL_DIR]]></code>
-      <code><![CDATA[SEARCH_INTEL_DIR]]></code>
-      <code><![CDATA[SEARCH_INTEL_DIR]]></code>
-      <code><![CDATA[SEARCH_INTEL_DIR]]></code>
-      <code><![CDATA[SEARCH_INTEL_DIR]]></code>
-      <code><![CDATA[SEARCH_INTEL_DIR]]></code>
-      <code><![CDATA[SEARCH_INTEL_DIR]]></code>
-      <code><![CDATA[SEARCH_INTEL_DIR]]></code>
-      <code><![CDATA[SEARCH_INTEL_DIR]]></code>
-      <code><![CDATA[SEARCH_INTEL_URL]]></code>
-      <code><![CDATA[SEARCH_INTEL_URL]]></code>
-      <code><![CDATA[SEARCH_INTEL_URL]]></code>
-      <code><![CDATA[SEARCH_INTEL_VERSION]]></code>
-      <code><![CDATA[SEARCH_INTEL_VERSION]]></code>
-      <code><![CDATA[SEARCH_INTEL_VERSION]]></code>
-      <code><![CDATA[SEARCH_INTEL_VERSION]]></code>
-      <code><![CDATA[SEARCH_INTEL_VERSION]]></code>
+      <code><![CDATA[JAT_SEARCH_INTEL_BASENAME]]></code>
+      <code><![CDATA[JAT_SEARCH_INTEL_DIR]]></code>
+      <code><![CDATA[JAT_SEARCH_INTEL_DIR]]></code>
+      <code><![CDATA[JAT_SEARCH_INTEL_DIR]]></code>
+      <code><![CDATA[JAT_SEARCH_INTEL_DIR]]></code>
+      <code><![CDATA[JAT_SEARCH_INTEL_DIR]]></code>
+      <code><![CDATA[JAT_SEARCH_INTEL_DIR]]></code>
+      <code><![CDATA[JAT_SEARCH_INTEL_DIR]]></code>
+      <code><![CDATA[JAT_SEARCH_INTEL_DIR]]></code>
+      <code><![CDATA[JAT_SEARCH_INTEL_DIR]]></code>
+      <code><![CDATA[JAT_SEARCH_INTEL_URL]]></code>
+      <code><![CDATA[JAT_SEARCH_INTEL_URL]]></code>
+      <code><![CDATA[JAT_SEARCH_INTEL_URL]]></code>
+      <code><![CDATA[JAT_SEARCH_INTEL_VERSION]]></code>
+      <code><![CDATA[JAT_SEARCH_INTEL_VERSION]]></code>
+      <code><![CDATA[JAT_SEARCH_INTEL_VERSION]]></code>
+      <code><![CDATA[JAT_SEARCH_INTEL_VERSION]]></code>
+      <code><![CDATA[JAT_SEARCH_INTEL_VERSION]]></code>
     </UndefinedConstant>
     <UnusedVariable>
       <code><![CDATA[$meta]]></code>
@@ -76,20 +76,20 @@
       <code><![CDATA[$content]]></code>
     </PossiblyUnusedParam>
     <UndefinedConstant>
-      <code><![CDATA[SEARCH_INTEL_DIR]]></code>
-      <code><![CDATA[SEARCH_INTEL_DIR]]></code>
-      <code><![CDATA[SEARCH_INTEL_DIR]]></code>
-      <code><![CDATA[SEARCH_INTEL_URL]]></code>
-      <code><![CDATA[SEARCH_INTEL_URL]]></code>
-      <code><![CDATA[SEARCH_INTEL_URL]]></code>
-      <code><![CDATA[SEARCH_INTEL_URL]]></code>
+      <code><![CDATA[JAT_SEARCH_INTEL_DIR]]></code>
+      <code><![CDATA[JAT_SEARCH_INTEL_DIR]]></code>
+      <code><![CDATA[JAT_SEARCH_INTEL_DIR]]></code>
+      <code><![CDATA[JAT_SEARCH_INTEL_URL]]></code>
+      <code><![CDATA[JAT_SEARCH_INTEL_URL]]></code>
+      <code><![CDATA[JAT_SEARCH_INTEL_URL]]></code>
+      <code><![CDATA[JAT_SEARCH_INTEL_URL]]></code>
     </UndefinedConstant>
   </file>
   <file src="includes/class-bulk-tools.php">
     <UndefinedConstant>
-      <code><![CDATA[SEARCH_INTEL_URL]]></code>
-      <code><![CDATA[SEARCH_INTEL_VERSION]]></code>
-      <code><![CDATA[SEARCH_INTEL_VERSION]]></code>
+      <code><![CDATA[JAT_SEARCH_INTEL_URL]]></code>
+      <code><![CDATA[JAT_SEARCH_INTEL_VERSION]]></code>
+      <code><![CDATA[JAT_SEARCH_INTEL_VERSION]]></code>
     </UndefinedConstant>
   </file>
   <file src="includes/class-citation-graph.php">
@@ -111,7 +111,7 @@
       <code><![CDATA[$args]]></code>
     </PossiblyUnusedParam>
     <UndefinedConstant>
-      <code><![CDATA[SEARCH_INTEL_VERSION]]></code>
+      <code><![CDATA[JAT_SEARCH_INTEL_VERSION]]></code>
     </UndefinedConstant>
     <UnusedClass>
       <code><![CDATA[CLI]]></code>
@@ -170,7 +170,7 @@
       <code><![CDATA[$plugin_updater]]></code>
     </PossiblyUnusedProperty>
     <UndefinedConstant>
-      <code><![CDATA[SEARCH_INTEL_BASENAME]]></code>
+      <code><![CDATA[JAT_SEARCH_INTEL_BASENAME]]></code>
     </UndefinedConstant>
   </file>
   <file src="includes/class-csp-headers.php">
@@ -443,7 +443,7 @@
       <code><![CDATA[string]]></code>
     </PossiblyUnusedReturnValue>
     <UndefinedConstant>
-      <code><![CDATA[SEARCH_INTEL_VERSION]]></code>
+      <code><![CDATA[JAT_SEARCH_INTEL_VERSION]]></code>
     </UndefinedConstant>
     <UnusedVariable>
       <code><![CDATA[$robots]]></code>
@@ -520,7 +520,7 @@
       <code><![CDATA[string]]></code>
     </PossiblyUnusedReturnValue>
     <UndefinedConstant>
-      <code><![CDATA[SEARCH_INTEL_VERSION]]></code>
+      <code><![CDATA[JAT_SEARCH_INTEL_VERSION]]></code>
     </UndefinedConstant>
   </file>
   <file src="includes/class-ai-engine.php">
@@ -539,8 +539,8 @@
       <code><![CDATA[$issues]]></code>
     </UnusedParam>
     <UndefinedConstant>
-      <code><![CDATA[SEARCH_INTEL_URL]]></code>
-      <code><![CDATA[SEARCH_INTEL_VERSION]]></code>
+      <code><![CDATA[JAT_SEARCH_INTEL_URL]]></code>
+      <code><![CDATA[JAT_SEARCH_INTEL_VERSION]]></code>
     </UndefinedConstant>
   </file>
   <file src="includes/class-plugin-updater.php">
@@ -566,8 +566,8 @@
     </PossiblyUnusedReturnValue>
     <UndefinedConstant>
       <code><![CDATA[HOUR_IN_SECONDS]]></code>
-      <code><![CDATA[SEARCH_INTEL_BASENAME]]></code>
-      <code><![CDATA[SEARCH_INTEL_VERSION]]></code>
+      <code><![CDATA[JAT_SEARCH_INTEL_BASENAME]]></code>
+      <code><![CDATA[JAT_SEARCH_INTEL_VERSION]]></code>
       <code><![CDATA[WP_PLUGIN_DIR]]></code>
       <code><![CDATA[MINUTE_IN_SECONDS]]></code>
     </UndefinedConstant>

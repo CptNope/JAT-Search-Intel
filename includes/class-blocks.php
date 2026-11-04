@@ -1,5 +1,5 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -18,34 +18,34 @@ class Blocks {
 	 * @var array<string,array>
 	 */
 	private const META_KEYS = [
-		'_search_intel_title'              => [ 'type' => 'string', 'default' => '' ],
-		'_search_intel_description'        => [ 'type' => 'string', 'default' => '' ],
-		'_search_intel_focus_keyword'      => [ 'type' => 'string', 'default' => '' ],
-		'_search_intel_canonical_url'      => [ 'type' => 'string', 'default' => '' ],
-		'_search_intel_noindex'            => [ 'type' => 'string', 'default' => '' ],
-		'_search_intel_nofollow'           => [ 'type' => 'string', 'default' => '' ],
-		'_search_intel_og_title'           => [ 'type' => 'string', 'default' => '' ],
-		'_search_intel_og_description'     => [ 'type' => 'string', 'default' => '' ],
-		'_search_intel_og_image'           => [ 'type' => 'string', 'default' => '' ],
-		'_search_intel_twitter_title'      => [ 'type' => 'string', 'default' => '' ],
-		'_search_intel_twitter_description'=> [ 'type' => 'string', 'default' => '' ],
-		'_search_intel_twitter_image'      => [ 'type' => 'string', 'default' => '' ],
-		'_search_intel_secondary_keywords' => [ 'type' => 'string', 'default' => '' ],
-		'_search_intel_direct_answer'      => [ 'type' => 'string', 'default' => '' ],
-		'_search_intel_schema_type'        => [ 'type' => 'string', 'default' => '' ],
-		'_search_intel_ai_summary'         => [ 'type' => 'string', 'default' => '' ],
-		'_search_intel_key_topics'         => [ 'type' => 'string', 'default' => '' ],
-		'_search_intel_content_type'       => [ 'type' => 'string', 'default' => '' ],
-		'_search_intel_content_intent'     => [ 'type' => 'string', 'default' => '' ],
-		'_search_intel_target_audience'    => [ 'type' => 'string', 'default' => '' ],
-		'_search_intel_expertise_level'    => [ 'type' => 'string', 'default' => '' ],
-		'_search_intel_fact_check_date'    => [ 'type' => 'string', 'default' => '' ],
-		'_search_intel_local_relevance'    => [ 'type' => 'string', 'default' => '' ],
-		'_search_intel_local_location'     => [ 'type' => 'string', 'default' => '' ],
-		'_search_intel_seo_score'          => [ 'type' => 'string', 'default' => '0' ],
-		'_search_intel_aeo_score'          => [ 'type' => 'string', 'default' => '0' ],
-		'_search_intel_geo_score'          => [ 'type' => 'string', 'default' => '0' ],
-		'_search_intel_readability_score'  => [ 'type' => 'string', 'default' => '0' ],
+		'_jat_search_intel_title'              => [ 'type' => 'string', 'default' => '' ],
+		'_jat_search_intel_description'        => [ 'type' => 'string', 'default' => '' ],
+		'_jat_search_intel_focus_keyword'      => [ 'type' => 'string', 'default' => '' ],
+		'_jat_search_intel_canonical_url'      => [ 'type' => 'string', 'default' => '' ],
+		'_jat_search_intel_noindex'            => [ 'type' => 'string', 'default' => '' ],
+		'_jat_search_intel_nofollow'           => [ 'type' => 'string', 'default' => '' ],
+		'_jat_search_intel_og_title'           => [ 'type' => 'string', 'default' => '' ],
+		'_jat_search_intel_og_description'     => [ 'type' => 'string', 'default' => '' ],
+		'_jat_search_intel_og_image'           => [ 'type' => 'string', 'default' => '' ],
+		'_jat_search_intel_twitter_title'      => [ 'type' => 'string', 'default' => '' ],
+		'_jat_search_intel_twitter_description'=> [ 'type' => 'string', 'default' => '' ],
+		'_jat_search_intel_twitter_image'      => [ 'type' => 'string', 'default' => '' ],
+		'_jat_search_intel_secondary_keywords' => [ 'type' => 'string', 'default' => '' ],
+		'_jat_search_intel_direct_answer'      => [ 'type' => 'string', 'default' => '' ],
+		'_jat_search_intel_schema_type'        => [ 'type' => 'string', 'default' => '' ],
+		'_jat_search_intel_ai_summary'         => [ 'type' => 'string', 'default' => '' ],
+		'_jat_search_intel_key_topics'         => [ 'type' => 'string', 'default' => '' ],
+		'_jat_search_intel_content_type'       => [ 'type' => 'string', 'default' => '' ],
+		'_jat_search_intel_content_intent'     => [ 'type' => 'string', 'default' => '' ],
+		'_jat_search_intel_target_audience'    => [ 'type' => 'string', 'default' => '' ],
+		'_jat_search_intel_expertise_level'    => [ 'type' => 'string', 'default' => '' ],
+		'_jat_search_intel_fact_check_date'    => [ 'type' => 'string', 'default' => '' ],
+		'_jat_search_intel_local_relevance'    => [ 'type' => 'string', 'default' => '' ],
+		'_jat_search_intel_local_location'     => [ 'type' => 'string', 'default' => '' ],
+		'_jat_search_intel_seo_score'          => [ 'type' => 'string', 'default' => '0' ],
+		'_jat_search_intel_aeo_score'          => [ 'type' => 'string', 'default' => '0' ],
+		'_jat_search_intel_geo_score'          => [ 'type' => 'string', 'default' => '0' ],
+		'_jat_search_intel_readability_score'  => [ 'type' => 'string', 'default' => '0' ],
 	];
 
 	/**
@@ -82,7 +82,7 @@ class Blocks {
 	 * Enqueue sidebar panel script in the block editor.
 	 */
 	public function enqueue_sidebar(): void {
-		$asset_file = SEARCH_INTEL_DIR . 'build/sidebar.asset.php';
+		$asset_file = JAT_SEARCH_INTEL_DIR . 'build/sidebar.asset.php';
 
 		if ( ! file_exists( $asset_file ) ) {
 			return;
@@ -91,24 +91,24 @@ class Blocks {
 		$asset = require $asset_file;
 
 		wp_enqueue_script(
-			'search-intel-sidebar',
-			SEARCH_INTEL_URL . 'build/sidebar.js',
+			'jat-search-intel-sidebar',
+			JAT_SEARCH_INTEL_URL . 'build/sidebar.js',
 			$asset['dependencies'],
 			$asset['version'],
 			true
 		);
 
 		wp_enqueue_style(
-			'search-intel-sidebar',
-			SEARCH_INTEL_URL . 'build/sidebar.css',
+			'jat-search-intel-sidebar',
+			JAT_SEARCH_INTEL_URL . 'build/sidebar.css',
 			[],
 			$asset['version']
 		);
 
-		wp_set_script_translations( 'search-intel-sidebar', 'jat-search-intel' );
+		wp_set_script_translations( 'jat-search-intel-sidebar', 'jat-search-intel' );
 
 		// Pass theme.json color palette to JS for score ring theming.
-		wp_localize_script( 'search-intel-sidebar', 'searchIntelTheme', [
+		wp_localize_script( 'jat-search-intel-sidebar', 'jatSearchIntelTheme', [
 			'colors' => $this->get_theme_json_colors(),
 		] );
 	}
@@ -162,7 +162,7 @@ class Blocks {
 		];
 
 		foreach ( $blocks as $slug => $args ) {
-			$script_asset = SEARCH_INTEL_DIR . "build/blocks/{$slug}/index.asset.php";
+			$script_asset = JAT_SEARCH_INTEL_DIR . "build/blocks/{$slug}/index.asset.php";
 
 			if ( ! file_exists( $script_asset ) ) {
 				continue;
@@ -170,25 +170,25 @@ class Blocks {
 
 			$asset = require $script_asset;
 
-			$script_handle = "search-intel-{$slug}";
+			$script_handle = "jat-search-intel-{$slug}";
 
 			wp_register_script(
 				$script_handle,
-				SEARCH_INTEL_URL . "build/blocks/{$slug}/index.js",
+				JAT_SEARCH_INTEL_URL . "build/blocks/{$slug}/index.js",
 				$asset['dependencies'],
 				$asset['version'],
 				true
 			);
 			wp_set_script_translations( $script_handle, 'jat-search-intel' );
 
-			$style_path = SEARCH_INTEL_DIR . "build/blocks/{$slug}/index.css";
+			$style_path = JAT_SEARCH_INTEL_DIR . "build/blocks/{$slug}/index.css";
 			$style_handle = null;
 
 			if ( file_exists( $style_path ) ) {
-				$style_handle = "search-intel-{$slug}-editor";
+				$style_handle = "jat-search-intel-{$slug}-editor";
 				wp_register_style(
 					$style_handle,
-					SEARCH_INTEL_URL . "build/blocks/{$slug}/index.css",
+					JAT_SEARCH_INTEL_URL . "build/blocks/{$slug}/index.css",
 					[],
 					$asset['version']
 				);
@@ -206,7 +206,7 @@ class Blocks {
 				$block_args['render_callback'] = $args['render_callback'];
 			}
 
-			register_block_type( "search-intel/{$slug}", $block_args );
+			register_block_type( "jat-search-intel/{$slug}", $block_args );
 		}
 	}
 

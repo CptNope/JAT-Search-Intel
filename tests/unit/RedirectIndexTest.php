@@ -1,8 +1,8 @@
 <?php
-namespace Search_Intel\Tests\Unit;
+namespace JAT_Search_Intel\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\Redirect_Manager;
+use JAT_Search_Intel\Redirect_Manager;
 
 /**
  * Tests for the compiled redirect lookup index.
@@ -108,7 +108,7 @@ class RedirectIndexTest extends TestCase {
 	public function test_small_index_is_autoloaded(): void {
 		global $si_test_state;
 		$this->manager->rebuild_index();
-		$this->assertTrue( $si_test_state['autoload']['search_intel_redirect_index'] );
+		$this->assertTrue( $si_test_state['autoload']['jat_search_intel_redirect_index'] );
 	}
 
 	public function test_stale_index_entry_is_dropped(): void {
@@ -117,6 +117,6 @@ class RedirectIndexTest extends TestCase {
 		unset( $this->db->rows[1] ); // Row deleted behind the plugin's back.
 
 		$this->assertNull( $this->manager->find_matching_redirect( '/old-page' ) );
-		$this->assertArrayNotHasKey( 'search_intel_redirect_index', $si_test_state['options'] );
+		$this->assertArrayNotHasKey( 'jat_search_intel_redirect_index', $si_test_state['options'] );
 	}
 }

@@ -6,11 +6,11 @@
  * per post, identify high-score/low-traffic distribution opportunities, and
  * flag low-score/high-traffic optimization priorities.
  *
- * @package Search_Intel
+ * @package JAT_Search_Intel
  * @since   3.3.0
  */
 
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
@@ -22,13 +22,13 @@ class GA4_Integration {
     private $settings;
 
     /** @var string Option key for cached GA4 data. */
-    private const CACHE_KEY = 'search_intel_ga4_cache';
+    private const CACHE_KEY = 'jat_search_intel_ga4_cache';
 
     /** @var string Option key for the GA4 access token. */
-    private const TOKEN_OPTION = 'search_intel_ga4_token';
+    private const TOKEN_OPTION = 'jat_search_intel_ga4_token';
 
     /** @var string Option key for the GA4 refresh token. */
-    private const REFRESH_TOKEN_OPTION = 'search_intel_ga4_refresh_token';
+    private const REFRESH_TOKEN_OPTION = 'jat_search_intel_ga4_refresh_token';
 
     /** @var int Cache TTL in seconds (6 hours). */
     private const CACHE_TTL = 21600;
@@ -49,15 +49,15 @@ class GA4_Integration {
         }
 
         // Daily fetch cron.
-        add_action( 'search_intel_ga4_fetch', [ $this, 'fetch_organic_data' ] );
+        add_action( 'jat_search_intel_ga4_fetch', [ $this, 'fetch_organic_data' ] );
 
-        if ( ! wp_next_scheduled( 'search_intel_ga4_fetch' ) ) {
-            wp_schedule_event( time(), 'daily', 'search_intel_ga4_fetch' );
+        if ( ! wp_next_scheduled( 'jat_search_intel_ga4_fetch' ) ) {
+            wp_schedule_event( time(), 'daily', 'jat_search_intel_ga4_fetch' );
         }
 
         if ( is_admin() ) {
             add_action( 'admin_menu', [ $this, 'register_admin_page' ] );
-            add_action( 'wp_ajax_search_intel_save_ga4_settings', [ $this, 'ajax_save_settings' ] );
+            add_action( 'wp_ajax_jat_search_intel_save_ga4_settings', [ $this, 'ajax_save_settings' ] );
         }
     }
 
@@ -70,9 +70,9 @@ class GA4_Integration {
             wp_send_json_error( [ 'message' => 'Unauthorized.' ] );
         }
         $property_id = sanitize_text_field( wp_unslash( $_POST['ga4_property_id'] ?? '' ) );
-        $settings    = get_option( 'search_intel_settings', [] );
+        $settings    = get_option( 'jat_search_intel_settings', [] );
         $settings['ga4_property_id'] = $property_id;
-        update_option( 'search_intel_settings', $settings );
+        update_option( 'jat_search_intel_settings', $settings );
         $this->settings['ga4_property_id'] = $property_id;
         wp_send_json_success( [ 'message' => $property_id !== '' ? 'Property ID saved.' : 'Property ID cleared.' ] );
     }
@@ -388,7 +388,7 @@ class GA4_Integration {
      * @return array With 'seo', 'aeo', 'geo' keys.
      */
     private function get_post_scores( int $post_id ): array {
-        $scores = get_post_meta( $post_id, '_search_intel_scores', true );
+        $scores = get_post_meta( $post_id, '_jat_search_intel_scores', true );
         if ( is_array( $scores ) ) {
             return [
                 'seo' => (float) ( $scores['seo'] ?? 0 ),
@@ -408,11 +408,11 @@ class GA4_Integration {
      */
     public function register_admin_page(): void {
         add_submenu_page(
-            'search-intel',
+            'jat-search-intel',
             'GA4 Insights',
             'GA4 Insights',
             'manage_options',
-            'search-intel-ga4',
+            'jat-search-intel-ga4',
             [ $this, 'render_admin_page' ]
         );
     }
@@ -468,7 +468,7 @@ class GA4_Integration {
                 var btn = $(this), val = $('#si_ga4_property_id').val();
                 btn.prop('disabled', true);
                 $('#si-ga4-status').html('<span style="color:#dba617;">Saving...</span>');
-                $.post(ajaxUrl, { action: 'search_intel_save_ga4_settings', nonce: nonce, ga4_property_id: val }, function(r){
+                $.post(ajaxUrl, { action: 'jat_search_intel_save_ga4_settings', nonce: nonce, ga4_property_id: val }, function(r){
                     btn.prop('disabled', false);
                     if (r.success) {
                         $('#si-ga4-status').html('<span style="color:#00a32a;">&#10003; ' + r.data.message + '</span>');

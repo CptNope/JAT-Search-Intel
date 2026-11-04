@@ -1,5 +1,5 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -15,7 +15,7 @@ class Robots_Txt {
 	/**
 	 * Option key for custom robots.txt content.
 	 */
-	private const OPTION_KEY = 'search_intel_robots_txt';
+	private const OPTION_KEY = 'jat_search_intel_robots_txt';
 
 	/** @var array */
 	private $settings;
@@ -34,8 +34,8 @@ class Robots_Txt {
 
 		if ( is_admin() ) {
 			add_action( 'admin_menu', [ $this, 'register_admin_page' ] );
-			add_action( 'wp_ajax_search_intel_save_robots_txt', [ $this, 'ajax_save' ] );
-			add_action( 'wp_ajax_search_intel_validate_robots_txt', [ $this, 'ajax_validate' ] );
+			add_action( 'wp_ajax_jat_search_intel_save_robots_txt', [ $this, 'ajax_save' ] );
+			add_action( 'wp_ajax_jat_search_intel_validate_robots_txt', [ $this, 'ajax_validate' ] );
 		}
 	}
 
@@ -158,11 +158,11 @@ class Robots_Txt {
 	 */
 	public function register_admin_page(): void {
 		add_submenu_page(
-			'search-intel',
+			'jat-search-intel',
 			__( 'Robots.txt', 'jat-search-intel' ),
 			__( 'Robots.txt', 'jat-search-intel' ),
 			'manage_options',
-			'search-intel-robots',
+			'jat-search-intel-robots',
 			[ $this, 'render_admin_page' ]
 		);
 	}
@@ -178,7 +178,7 @@ class Robots_Txt {
 		$content = $this->get_content();
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'Search Intel — Robots.txt Editor', 'jat-search-intel' ); ?></h1>
+			<h1><?php esc_html_e( 'JAT Search Intel — Robots.txt Editor', 'jat-search-intel' ); ?></h1>
 			<p class="description"><?php esc_html_e( 'Edit your virtual robots.txt file. WordPress generates robots.txt dynamically — this editor overrides the default output.', 'jat-search-intel' ); ?></p>
 
 			<div style="margin-top:20px;">

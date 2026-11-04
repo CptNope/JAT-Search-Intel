@@ -1,8 +1,8 @@
 <?php
-namespace Search_Intel\Tests\Unit;
+namespace JAT_Search_Intel\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\Link_Checker;
+use JAT_Search_Intel\Link_Checker;
 
 class LinkCheckerTest extends TestCase {
 
@@ -160,7 +160,7 @@ class LinkCheckerTest extends TestCase {
 
 	public function test_clear_results(): void {
 		global $si_test_state;
-		$si_test_state['options']['search_intel_broken_links'] = [ [ 'url' => 'x', 'broken' => true ] ];
+		$si_test_state['options']['jat_search_intel_broken_links'] = [ [ 'url' => 'x', 'broken' => true ] ];
 
 		$this->checker->clear_results();
 		$this->assertEmpty( $this->checker->get_broken_links() );
@@ -174,16 +174,16 @@ class LinkCheckerTest extends TestCase {
 		global $si_test_state;
 		$this->checker->schedule();
 
-		$this->assertArrayHasKey( 'search_intel_check_links', $si_test_state['scheduled_events'] ?? [] );
+		$this->assertArrayHasKey( 'jat_search_intel_check_links', $si_test_state['scheduled_events'] ?? [] );
 	}
 
 	public function test_unschedule_removes_event(): void {
 		global $si_test_state;
-		$si_test_state['scheduled_events']['search_intel_check_links'] = time();
+		$si_test_state['scheduled_events']['jat_search_intel_check_links'] = time();
 
 		$this->checker->unschedule();
 
-		$this->assertArrayNotHasKey( 'search_intel_check_links', $si_test_state['scheduled_events'] ?? [] );
+		$this->assertArrayNotHasKey( 'jat_search_intel_check_links', $si_test_state['scheduled_events'] ?? [] );
 	}
 
 	public function test_run_batch_check_resets_offset_when_no_posts(): void {
@@ -191,8 +191,8 @@ class LinkCheckerTest extends TestCase {
 		// No posts — should reset offset and set last scan time.
 		$this->checker->run_batch_check();
 
-		$this->assertEquals( 0, $si_test_state['options']['search_intel_link_checker_offset'] ?? -1 );
-		$this->assertNotEmpty( $si_test_state['options']['search_intel_link_checker_last_scan'] ?? '' );
+		$this->assertEquals( 0, $si_test_state['options']['jat_search_intel_link_checker_offset'] ?? -1 );
+		$this->assertNotEmpty( $si_test_state['options']['jat_search_intel_link_checker_last_scan'] ?? '' );
 	}
 
 	public function test_disabled_checker_does_not_register(): void {
@@ -201,6 +201,6 @@ class LinkCheckerTest extends TestCase {
 
 		$checker = new Link_Checker( [ 'enable_link_checker' => false ] );
 		// Should not register any cron hooks.
-		$this->assertArrayNotHasKey( 'search_intel_check_links', $si_test_state['actions'] ?? [] );
+		$this->assertArrayNotHasKey( 'jat_search_intel_check_links', $si_test_state['actions'] ?? [] );
 	}
 }

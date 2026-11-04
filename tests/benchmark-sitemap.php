@@ -1,12 +1,12 @@
 <?php
 /**
  * Sitemap cold benchmark — run inside wp-env via:
- * npx wp-env run cli -- wp eval-file /var/www/html/wp-content/plugins/Search-Intel/tests/benchmark-sitemap.php
+ * npx wp-env run cli -- wp eval-file /var/www/html/wp-content/plugins/jat-search-intel/tests/benchmark-sitemap.php
  */
 
 // Clear any cached sitemaps.
 global $wpdb;
-$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '%search_intel_sitemap%'" );
+$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '%jat_search_intel_sitemap%'" );
 $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_si_%'" );
 
 $post_count = wp_count_posts( 'post' );
@@ -25,7 +25,7 @@ echo 'HTTP status: ' . $status . PHP_EOL;
 echo 'Body length: ' . strlen( $body ) . ' bytes' . PHP_EOL;
 
 // Benchmark cold post sitemap page 1.
-$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '%search_intel_sitemap%'" );
+$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '%jat_search_intel_sitemap%'" );
 $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_si_%'" );
 
 $start2    = microtime( true );

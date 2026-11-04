@@ -7,12 +7,12 @@ import { test, expect } from '@playwright/test';
 test.describe('Migration Wizard', () => {
 
   test('migration page loads', async ({ page }) => {
-    await page.goto('/wp-admin/admin.php?page=search-intel-migration');
+    await page.goto('/wp-admin/admin.php?page=jat-search-intel-migration');
     await expect(page.locator('h1')).toContainText('SEO Plugin Migration');
   });
 
   test('migration page shows info when no sources detected', async ({ page }) => {
-    await page.goto('/wp-admin/admin.php?page=search-intel-migration');
+    await page.goto('/wp-admin/admin.php?page=jat-search-intel-migration');
     // On a fresh install with no other SEO plugins, it should show the info notice.
     const notice = page.locator('.notice-info');
     const cards = page.locator('.card');
@@ -23,14 +23,14 @@ test.describe('Migration Wizard', () => {
   });
 
   test('migration page lists supported plugins in info text', async ({ page }) => {
-    await page.goto('/wp-admin/admin.php?page=search-intel-migration');
+    await page.goto('/wp-admin/admin.php?page=jat-search-intel-migration');
     const content = await page.locator('.wrap').textContent();
     expect(content).toContain('Yoast SEO');
     expect(content).toContain('Rank Math');
   });
 
   test('migration page renders correct structure', async ({ page }) => {
-    await page.goto('/wp-admin/admin.php?page=search-intel-migration');
+    await page.goto('/wp-admin/admin.php?page=jat-search-intel-migration');
     const wrap = page.locator('.wrap');
     await expect(wrap).toBeVisible();
 

@@ -1,12 +1,12 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 /**
- * Role-Based Access Control for Search Intel.
+ * Role-Based Access Control for JAT Search Intel.
  *
  * Provides a custom "SEO Editor" role, per-module permissions,
  * view-only mode for authors, and settings lock.
@@ -19,22 +19,22 @@ class RBAC {
 	private $settings;
 
 	/** Custom role slug. */
-	public const ROLE_SEO_EDITOR = 'search_intel_seo_editor';
+	public const ROLE_SEO_EDITOR = 'jat_search_intel_seo_editor';
 
 	/** Module capability prefixes. */
 	public const MODULES = [
-		'seo'     => 'search_intel_manage_seo',
-		'aeo'     => 'search_intel_manage_aeo',
-		'geo'     => 'search_intel_manage_geo',
-		'sitemap' => 'search_intel_manage_sitemap',
-		'settings' => 'search_intel_manage_settings',
+		'seo'     => 'jat_search_intel_manage_seo',
+		'aeo'     => 'jat_search_intel_manage_aeo',
+		'geo'     => 'jat_search_intel_manage_geo',
+		'sitemap' => 'jat_search_intel_manage_sitemap',
+		'settings' => 'jat_search_intel_manage_settings',
 	];
 
 	/** View-only capability. */
-	public const CAP_VIEW = 'search_intel_view_scores';
+	public const CAP_VIEW = 'jat_search_intel_view_scores';
 
 	/** Settings lock capability. */
-	public const CAP_SETTINGS = 'search_intel_manage_settings';
+	public const CAP_SETTINGS = 'jat_search_intel_manage_settings';
 
 	/**
 	 * @param array $settings Plugin settings.
@@ -47,8 +47,8 @@ class RBAC {
 		}
 
 		add_action( 'admin_init', [ $this, 'ensure_role_exists' ] );
-		add_filter( 'search_intel_user_can_module', [ $this, 'check_module_access' ], 10, 3 );
-		add_filter( 'search_intel_user_can_edit', [ $this, 'check_edit_access' ], 10, 2 );
+		add_filter( 'jat_search_intel_user_can_module', [ $this, 'check_module_access' ], 10, 3 );
+		add_filter( 'jat_search_intel_user_can_edit', [ $this, 'check_edit_access' ], 10, 2 );
 	}
 
 	// ── Role Management ──────────────────────────────────────────────────────
@@ -89,7 +89,7 @@ class RBAC {
 			'edit_pages'   => true,
 			'upload_files' => true,
 
-			// Search Intel view.
+			// JAT Search Intel view.
 			self::CAP_VIEW => true,
 		];
 
@@ -292,7 +292,7 @@ class RBAC {
 	}
 
 	/**
-	 * Get a summary of all users and their Search Intel permissions.
+	 * Get a summary of all users and their JAT Search Intel permissions.
 	 *
 	 * @return array
 	 */

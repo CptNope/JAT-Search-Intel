@@ -10,7 +10,7 @@
         var btn = $(this);
         btn.prop('disabled', true);
         $('#si-progress-rescore').show();
-        runBatch('search_intel_bulk_rescore', 0, 'rescore');
+        runBatch('jat_search_intel_bulk_rescore', 0, 'rescore');
     });
 
     // ── Bulk Regenerate ─────────────────────────────────────────────────────
@@ -19,7 +19,7 @@
         var btn = $(this);
         btn.prop('disabled', true);
         $('#si-progress-regenerate').show();
-        runBatch('search_intel_bulk_regenerate', 0, 'regenerate');
+        runBatch('jat_search_intel_bulk_regenerate', 0, 'regenerate');
     });
 
     /**
@@ -64,7 +64,7 @@
         btn.prop('disabled', true);
 
         $.post(siBulkTools.ajaxUrl, {
-            action: 'search_intel_bulk_sitemap_warm',
+            action: 'jat_search_intel_bulk_sitemap_warm',
             nonce: siBulkTools.nonce
         }, function (response) {
             btn.prop('disabled', false);
@@ -89,7 +89,7 @@
 
     $('#si-btn-export').on('click', function () {
         $.post(siBulkTools.ajaxUrl, {
-            action: 'search_intel_export_settings',
+            action: 'jat_search_intel_export_settings',
             nonce: siBulkTools.nonce
         }, function (response) {
             if (!response.success) {
@@ -102,7 +102,7 @@
             var url = URL.createObjectURL(blob);
             var a = document.createElement('a');
             a.href = url;
-            a.download = 'search-intel-settings-' + new Date().toISOString().slice(0, 10) + '.json';
+            a.download = 'jat-search-intel-settings-' + new Date().toISOString().slice(0, 10) + '.json';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -135,9 +135,9 @@
             // Validate JSON before sending.
             try {
                 var parsed = JSON.parse(json);
-                if (!parsed.plugin || parsed.plugin !== 'search-intel') {
+                if (!parsed.plugin || parsed.plugin !== 'jat-search-intel') {
                     $('#si-result-import')
-                        .html('<span class="si-error">Invalid Search Intel settings file.</span>')
+                        .html('<span class="si-error">Invalid JAT Search Intel settings file.</span>')
                         .show();
                     return;
                 }
@@ -151,7 +151,7 @@
             $('#si-btn-import').prop('disabled', true);
 
             $.post(siBulkTools.ajaxUrl, {
-                action: 'search_intel_import_settings',
+                action: 'jat_search_intel_import_settings',
                 nonce: siBulkTools.nonce,
                 import_data: json,
                 import_mode: mode
@@ -217,7 +217,7 @@
         var postType = $('#si-bulk-post-type').val();
 
         $.post(siBulkTools.ajaxUrl, {
-            action: 'search_intel_bulk_ai_generate',
+            action: 'jat_search_intel_bulk_ai_generate',
             nonce: siBulkTools.nonce,
             offset: offset,
             post_type: postType,

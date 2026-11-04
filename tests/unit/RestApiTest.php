@@ -1,9 +1,9 @@
 <?php
-namespace Search_Intel\Tests\Unit;
+namespace JAT_Search_Intel\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\Rest_Api;
-use Search_Intel\Core;
+use JAT_Search_Intel\Rest_Api;
+use JAT_Search_Intel\Core;
 
 class RestApiTest extends TestCase {
 
@@ -24,7 +24,7 @@ class RestApiTest extends TestCase {
         ];
 
         // Set up default settings.
-        $si_test_state['options']['search_intel_settings'] = Core::get_default_settings();
+        $si_test_state['options']['jat_search_intel_settings'] = Core::get_default_settings();
 
         // Add a test post.
         $si_test_state['posts'][1] = [
@@ -43,23 +43,23 @@ class RestApiTest extends TestCase {
 
         // Set some scores in post meta.
         $si_test_state['post_meta'][1] = [
-            '_search_intel_seo_score'         => 75,
-            '_search_intel_aeo_score'         => 60,
-            '_search_intel_geo_score'         => 50,
-            '_search_intel_readability_score'  => 80,
-            '_search_intel_focus_keyword'      => 'test keyword',
-            '_search_intel_description'        => 'Test meta description',
-            '_search_intel_title'              => 'Custom SEO Title',
-            '_search_intel_ai_summary'         => 'AI summary of the post.',
-            '_search_intel_content_type'        => 'article',
-            '_search_intel_content_intent'      => 'informational',
-            '_search_intel_audience'            => 'developers',
-            '_search_intel_topics'              => [ 'testing', 'seo' ],
-            '_search_intel_entities'            => [ 'Search Intel' ],
-            '_search_intel_expertise_level'     => 'expert',
-            '_search_intel_fact_checked'        => '',
-            '_search_intel_local_relevance'     => '',
-            '_search_intel_local_location'      => '',
+            '_jat_search_intel_seo_score'         => 75,
+            '_jat_search_intel_aeo_score'         => 60,
+            '_jat_search_intel_geo_score'         => 50,
+            '_jat_search_intel_readability_score'  => 80,
+            '_jat_search_intel_focus_keyword'      => 'test keyword',
+            '_jat_search_intel_description'        => 'Test meta description',
+            '_jat_search_intel_title'              => 'Custom SEO Title',
+            '_jat_search_intel_ai_summary'         => 'AI summary of the post.',
+            '_jat_search_intel_content_type'        => 'article',
+            '_jat_search_intel_content_intent'      => 'informational',
+            '_jat_search_intel_audience'            => 'developers',
+            '_jat_search_intel_topics'              => [ 'testing', 'seo' ],
+            '_jat_search_intel_entities'            => [ 'JAT Search Intel' ],
+            '_jat_search_intel_expertise_level'     => 'expert',
+            '_jat_search_intel_fact_checked'        => '',
+            '_jat_search_intel_local_relevance'     => '',
+            '_jat_search_intel_local_location'      => '',
         ];
 
         $this->core     = Core::get_instance();
@@ -70,7 +70,7 @@ class RestApiTest extends TestCase {
     // ── GET /scores/{id} ────────────────────────────────────────────────────
 
     public function test_get_scores_returns_all_four_scores(): void {
-        $request = new \WP_REST_Request( 'GET', '/search-intel/v1/scores/1' );
+        $request = new \WP_REST_Request( 'GET', '/jat-search-intel/v1/scores/1' );
         $request->set_param( 'id', 1 );
 
         $response = $this->rest_api->get_scores( $request );
@@ -87,7 +87,7 @@ class RestApiTest extends TestCase {
     }
 
     public function test_get_scores_returns_404_for_missing_post(): void {
-        $request = new \WP_REST_Request( 'GET', '/search-intel/v1/scores/999' );
+        $request = new \WP_REST_Request( 'GET', '/jat-search-intel/v1/scores/999' );
         $request->set_param( 'id', 999 );
 
         $response = $this->rest_api->get_scores( $request );
@@ -107,7 +107,7 @@ class RestApiTest extends TestCase {
             'post_author'   => 1,
         ];
 
-        $request = new \WP_REST_Request( 'GET', '/search-intel/v1/scores/2' );
+        $request = new \WP_REST_Request( 'GET', '/jat-search-intel/v1/scores/2' );
         $request->set_param( 'id', 2 );
 
         $response = $this->rest_api->get_scores( $request );
@@ -122,7 +122,7 @@ class RestApiTest extends TestCase {
     // ── GET /geo/{id} ───────────────────────────────────────────────────────
 
     public function test_get_geo_returns_full_metadata(): void {
-        $request = new \WP_REST_Request( 'GET', '/search-intel/v1/geo/1' );
+        $request = new \WP_REST_Request( 'GET', '/jat-search-intel/v1/geo/1' );
         $request->set_param( 'id', 1 );
 
         $response = $this->rest_api->get_geo( $request );
@@ -133,7 +133,7 @@ class RestApiTest extends TestCase {
         $this->assertEquals( 1, $data['post_id'] );
         $this->assertEquals( 'AI summary of the post.', $data['ai_summary'] );
         $this->assertEquals( [ 'testing', 'seo' ], $data['topics'] );
-        $this->assertEquals( [ 'Search Intel' ], $data['entities'] );
+        $this->assertEquals( [ 'JAT Search Intel' ], $data['entities'] );
         $this->assertEquals( 'article', $data['content_type'] );
         $this->assertEquals( 'informational', $data['content_intent'] );
         $this->assertEquals( 'developers', $data['audience'] );
@@ -142,7 +142,7 @@ class RestApiTest extends TestCase {
     }
 
     public function test_get_geo_returns_404_for_missing_post(): void {
-        $request = new \WP_REST_Request( 'GET', '/search-intel/v1/geo/999' );
+        $request = new \WP_REST_Request( 'GET', '/jat-search-intel/v1/geo/999' );
         $request->set_param( 'id', 999 );
 
         $response = $this->rest_api->get_geo( $request );
@@ -152,7 +152,7 @@ class RestApiTest extends TestCase {
     // ── GET /meta/{id} ──────────────────────────────────────────────────────
 
     public function test_get_meta_returns_all_fields(): void {
-        $request = new \WP_REST_Request( 'GET', '/search-intel/v1/meta/1' );
+        $request = new \WP_REST_Request( 'GET', '/jat-search-intel/v1/meta/1' );
         $request->set_param( 'id', 1 );
 
         $response = $this->rest_api->get_meta( $request );
@@ -170,7 +170,7 @@ class RestApiTest extends TestCase {
     // ── PUT /meta/{id} ──────────────────────────────────────────────────────
 
     public function test_update_meta_changes_fields(): void {
-        $request = new \WP_REST_Request( 'PUT', '/search-intel/v1/meta/1' );
+        $request = new \WP_REST_Request( 'PUT', '/jat-search-intel/v1/meta/1' );
         $request->set_param( 'id', 1 );
         $request->set_json_params( [
             'title'         => 'Updated Title',
@@ -190,11 +190,11 @@ class RestApiTest extends TestCase {
 
         // Verify meta was actually updated.
         global $si_test_state;
-        $this->assertEquals( 'Updated Title', $si_test_state['post_meta'][1]['_search_intel_title'] );
+        $this->assertEquals( 'Updated Title', $si_test_state['post_meta'][1]['_jat_search_intel_title'] );
     }
 
     public function test_update_meta_ignores_unknown_fields(): void {
-        $request = new \WP_REST_Request( 'PUT', '/search-intel/v1/meta/1' );
+        $request = new \WP_REST_Request( 'PUT', '/jat-search-intel/v1/meta/1' );
         $request->set_param( 'id', 1 );
         $request->set_json_params( [
             'unknown_field' => 'should be ignored',
@@ -209,7 +209,7 @@ class RestApiTest extends TestCase {
     }
 
     public function test_update_meta_returns_404_for_missing_post(): void {
-        $request = new \WP_REST_Request( 'PUT', '/search-intel/v1/meta/999' );
+        $request = new \WP_REST_Request( 'PUT', '/jat-search-intel/v1/meta/999' );
         $request->set_param( 'id', 999 );
         $request->set_json_params( [ 'title' => 'Test' ] );
 
@@ -220,7 +220,7 @@ class RestApiTest extends TestCase {
     // ── POST /analyze/{id} ──────────────────────────────────────────────────
 
     public function test_analyze_post_returns_results(): void {
-        $request = new \WP_REST_Request( 'POST', '/search-intel/v1/analyze/1' );
+        $request = new \WP_REST_Request( 'POST', '/jat-search-intel/v1/analyze/1' );
         $request->set_param( 'id', 1 );
 
         $response = $this->rest_api->analyze_post( $request );
@@ -233,14 +233,14 @@ class RestApiTest extends TestCase {
     }
 
     public function test_analyze_post_saves_scores(): void {
-        $request = new \WP_REST_Request( 'POST', '/search-intel/v1/analyze/1' );
+        $request = new \WP_REST_Request( 'POST', '/jat-search-intel/v1/analyze/1' );
         $request->set_param( 'id', 1 );
 
         $this->rest_api->analyze_post( $request );
 
         global $si_test_state;
         // Scores should be integers stored in post meta.
-        $this->assertIsInt( $si_test_state['post_meta'][1]['_search_intel_seo_score'] ?? null );
+        $this->assertIsInt( $si_test_state['post_meta'][1]['_jat_search_intel_seo_score'] ?? null );
     }
 
     // ── GET /settings ───────────────────────────────────────────────────────
@@ -260,7 +260,7 @@ class RestApiTest extends TestCase {
     // ── PUT /settings ───────────────────────────────────────────────────────
 
     public function test_update_settings_changes_values(): void {
-        $request = new \WP_REST_Request( 'PUT', '/search-intel/v1/settings' );
+        $request = new \WP_REST_Request( 'PUT', '/jat-search-intel/v1/settings' );
         $request->set_json_params( [
             'separator'  => '-',
             'enable_seo' => false,
@@ -276,13 +276,13 @@ class RestApiTest extends TestCase {
 
         // Verify persisted.
         global $si_test_state;
-        $saved = $si_test_state['options']['search_intel_settings'];
+        $saved = $si_test_state['options']['jat_search_intel_settings'];
         $this->assertEquals( '-', $saved['separator'] );
         $this->assertFalse( $saved['enable_seo'] );
     }
 
     public function test_update_settings_rejects_unknown_keys(): void {
-        $request = new \WP_REST_Request( 'PUT', '/search-intel/v1/settings' );
+        $request = new \WP_REST_Request( 'PUT', '/jat-search-intel/v1/settings' );
         $request->set_json_params( [
             'evil_key'  => 'should be ignored',
             'separator' => '~',
@@ -335,7 +335,7 @@ class RestApiTest extends TestCase {
     // ── POST /bulk/rescore ──────────────────────────────────────────────────
 
     public function test_bulk_rescore_processes_batch(): void {
-        $request = new \WP_REST_Request( 'POST', '/search-intel/v1/bulk/rescore' );
+        $request = new \WP_REST_Request( 'POST', '/jat-search-intel/v1/bulk/rescore' );
         $request->set_param( 'post_type', 'post' );
         $request->set_param( 'batch_size', 10 );
         $request->set_param( 'offset', 0 );

@@ -1,12 +1,12 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
 /**
- * Core orchestrator class for Search Intel plugin.
+ * Core orchestrator class for JAT Search Intel plugin.
  */
 class Core {
 
@@ -344,7 +344,7 @@ class Core {
         if ( ! empty( $conflicts ) ) {
             add_action( 'admin_notices', function () use ( $conflicts ) {
                 echo '<div class="notice notice-warning is-dismissible"><p>';
-                echo '<strong>' . esc_html__( 'Search Intel:', 'jat-search-intel' ) . '</strong> ';
+                echo '<strong>' . esc_html__( 'JAT Search Intel:', 'jat-search-intel' ) . '</strong> ';
                 printf(
                     /* translators: %s: comma-separated list of plugin names */
                     esc_html__( 'Potential SEO plugin conflicts detected: %s. Consider disabling overlapping features to avoid duplicate meta tags.', 'jat-search-intel' ),
@@ -356,7 +356,7 @@ class Core {
     }
 
     /**
-     * Detect active plugins that may conflict with Search Intel.
+     * Detect active plugins that may conflict with JAT Search Intel.
      *
      * @return string[] Names of conflicting plugins.
      */
@@ -385,7 +385,7 @@ class Core {
      * Get merged settings.
      */
     public function get_settings(): array {
-        $saved = get_option( 'search_intel_settings', [] );
+        $saved = get_option( 'jat_search_intel_settings', [] );
         return wp_parse_args( $saved, self::get_default_settings() );
     }
 

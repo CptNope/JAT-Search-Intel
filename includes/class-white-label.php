@@ -1,15 +1,15 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 /**
- * White-label support for Search Intel.
+ * White-label support for JAT Search Intel.
  *
  * Allows customizing the plugin name, branding (logo, colors),
- * removing "Search Intel" references, and reseller support.
+ * removing "JAT Search Intel" references, and reseller support.
  *
  * @since 3.0.0
  */
@@ -29,9 +29,9 @@ class White_Label {
 		}
 
 		add_filter( 'all_plugins', [ $this, 'filter_plugin_meta' ] );
-		add_filter( 'search_intel_plugin_name', [ $this, 'get_custom_name' ] );
-		add_filter( 'search_intel_brand_color', [ $this, 'get_brand_color' ] );
-		add_filter( 'search_intel_brand_logo', [ $this, 'get_brand_logo' ] );
+		add_filter( 'jat_search_intel_plugin_name', [ $this, 'get_custom_name' ] );
+		add_filter( 'jat_search_intel_brand_color', [ $this, 'get_brand_color' ] );
+		add_filter( 'jat_search_intel_brand_logo', [ $this, 'get_brand_logo' ] );
 		add_action( 'admin_head', [ $this, 'inject_brand_css' ] );
 	}
 
@@ -45,7 +45,7 @@ class White_Label {
 	public function get_config(): array {
 		return [
 			'enabled'      => ! empty( $this->settings['enable_white_label'] ),
-			'plugin_name'  => $this->settings['wl_plugin_name'] ?? 'Search Intel',
+			'plugin_name'  => $this->settings['wl_plugin_name'] ?? 'JAT Search Intel',
 			'plugin_uri'   => $this->settings['wl_plugin_uri'] ?? '',
 			'author_name'  => $this->settings['wl_author_name'] ?? '',
 			'author_uri'   => $this->settings['wl_author_uri'] ?? '',
@@ -63,7 +63,7 @@ class White_Label {
 	 * @return bool
 	 */
 	public function save_config( array $config ): bool {
-		$settings = get_option( 'search_intel_settings', [] );
+		$settings = get_option( 'jat_search_intel_settings', [] );
 		$settings = is_array( $settings ) ? $settings : [];
 
 		$fields = [
@@ -87,19 +87,19 @@ class White_Label {
 			}
 		}
 
-		return update_option( 'search_intel_settings', $settings );
+		return update_option( 'jat_search_intel_settings', $settings );
 	}
 
 	// ── Plugin Meta Filter ───────────────────────────────────────────────────
 
 	/**
-	 * Filter the plugin list to replace Search Intel branding.
+	 * Filter the plugin list to replace JAT Search Intel branding.
 	 *
 	 * @param array $plugins All plugins data.
 	 * @return array
 	 */
 	public function filter_plugin_meta( array $plugins ): array {
-		$basename = defined( 'SEARCH_INTEL_BASENAME' ) ? SEARCH_INTEL_BASENAME : 'search-intel/search-intel.php';
+		$basename = defined( 'JAT_SEARCH_INTEL_BASENAME' ) ? JAT_SEARCH_INTEL_BASENAME : 'jat-search-intel/jat-search-intel.php';
 
 		if ( ! isset( $plugins[ $basename ] ) ) {
 			return $plugins;
@@ -174,7 +174,7 @@ class White_Label {
 	 */
 	public function inject_brand_css(): void {
 		$screen = get_current_screen();
-		if ( ! $screen || strpos( $screen->id, 'search-intel' ) === false ) {
+		if ( ! $screen || strpos( $screen->id, 'jat-search-intel' ) === false ) {
 			return;
 		}
 
@@ -183,21 +183,21 @@ class White_Label {
 
 		echo '<style>';
 		printf(
-			'.search-intel-brand-color { color: %s; } .search-intel-brand-bg { background-color: %s; }',
+			'.jat-search-intel-brand-color { color: %s; } .jat-search-intel-brand-bg { background-color: %s; }',
 			esc_attr( $color ),
 			esc_attr( $color )
 		);
 
 		if ( ! empty( $logo ) ) {
 			printf(
-				'.search-intel-logo { background-image: url(%s); background-size: contain; background-repeat: no-repeat; }',
+				'.jat-search-intel-logo { background-image: url(%s); background-size: contain; background-repeat: no-repeat; }',
 				esc_url( $logo )
 			);
 		}
 
 		// Hide default branding if configured.
 		if ( ! empty( $this->settings['wl_hide_branding'] ) ) {
-			echo '.search-intel-branding { display: none !important; }';
+			echo '.jat-search-intel-branding { display: none !important; }';
 		}
 
 		echo '</style>';
@@ -213,7 +213,7 @@ class White_Label {
 	public function export_reseller_config(): array {
 		return [
 			'white_label' => $this->get_config(),
-			'version'     => SEARCH_INTEL_VERSION,
+			'version'     => JAT_SEARCH_INTEL_VERSION,
 			'exported'    => gmdate( 'Y-m-d\TH:i:s\Z' ),
 		];
 	}
@@ -231,7 +231,7 @@ class White_Label {
 
 		$wl = $config['white_label'];
 
-		$settings = get_option( 'search_intel_settings', [] );
+		$settings = get_option( 'jat_search_intel_settings', [] );
 		$settings = is_array( $settings ) ? $settings : [];
 
 		$settings['enable_white_label'] = true;
@@ -253,6 +253,6 @@ class White_Label {
 			}
 		}
 
-		return update_option( 'search_intel_settings', $settings );
+		return update_option( 'jat_search_intel_settings', $settings );
 	}
 }
