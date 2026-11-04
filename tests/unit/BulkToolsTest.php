@@ -1,9 +1,9 @@
 <?php
-namespace Search_Intel\Tests\Unit;
+namespace JAT_Search_Intel\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\Bulk_Tools;
-use Search_Intel\Core;
+use JAT_Search_Intel\Bulk_Tools;
+use JAT_Search_Intel\Core;
 
 class BulkToolsTest extends TestCase {
 
@@ -23,7 +23,7 @@ class BulkToolsTest extends TestCase {
             'current_user' => 1,
         ];
 
-        $si_test_state['options']['search_intel_settings'] = Core::get_default_settings();
+        $si_test_state['options']['jat_search_intel_settings'] = Core::get_default_settings();
 
         // Add test posts.
         for ( $i = 1; $i <= 3; $i++ ) {
@@ -54,11 +54,11 @@ class BulkToolsTest extends TestCase {
 
         $actions = array_keys( $si_test_state['actions'] );
 
-        $this->assertContains( 'wp_ajax_si_bulk_rescore', $actions );
-        $this->assertContains( 'wp_ajax_si_bulk_regenerate', $actions );
-        $this->assertContains( 'wp_ajax_si_bulk_sitemap_warm', $actions );
-        $this->assertContains( 'wp_ajax_si_export_settings', $actions );
-        $this->assertContains( 'wp_ajax_si_import_settings', $actions );
+        $this->assertContains( 'wp_ajax_jat_search_intel_bulk_rescore', $actions );
+        $this->assertContains( 'wp_ajax_jat_search_intel_bulk_regenerate', $actions );
+        $this->assertContains( 'wp_ajax_jat_search_intel_bulk_sitemap_warm', $actions );
+        $this->assertContains( 'wp_ajax_jat_search_intel_export_settings', $actions );
+        $this->assertContains( 'wp_ajax_jat_search_intel_import_settings', $actions );
     }
 
     // ── Export Settings ─────────────────────────────────────────────────────
@@ -82,7 +82,7 @@ class BulkToolsTest extends TestCase {
         $current = Core::get_default_settings();
         $current['separator'] = '|';
         $current['enable_seo'] = true;
-        $si_test_state['options']['search_intel_settings'] = $current;
+        $si_test_state['options']['jat_search_intel_settings'] = $current;
 
         // Import with merge mode — only change separator.
         $defaults = Core::get_default_settings();
@@ -94,9 +94,9 @@ class BulkToolsTest extends TestCase {
                 $new_settings[ $key ] = sanitize_text_field( $value );
             }
         }
-        update_option( 'search_intel_settings', $new_settings );
+        update_option( 'jat_search_intel_settings', $new_settings );
 
-        $saved = $si_test_state['options']['search_intel_settings'];
+        $saved = $si_test_state['options']['jat_search_intel_settings'];
         $this->assertEquals( '-', $saved['separator'] );
         $this->assertTrue( $saved['enable_seo'] ); // Preserved.
     }
@@ -110,7 +110,7 @@ class BulkToolsTest extends TestCase {
         $current = Core::get_default_settings();
         $current['separator'] = '~';
         $current['enable_seo'] = false;
-        $si_test_state['options']['search_intel_settings'] = $current;
+        $si_test_state['options']['jat_search_intel_settings'] = $current;
 
         // Overwrite mode: start from defaults, apply import.
         $defaults = Core::get_default_settings();
@@ -121,9 +121,9 @@ class BulkToolsTest extends TestCase {
                 $new[ $key ] = sanitize_text_field( $value );
             }
         }
-        update_option( 'search_intel_settings', $new );
+        update_option( 'jat_search_intel_settings', $new );
 
-        $saved = $si_test_state['options']['search_intel_settings'];
+        $saved = $si_test_state['options']['jat_search_intel_settings'];
         $this->assertEquals( '-', $saved['separator'] );
         $this->assertTrue( $saved['enable_seo'] ); // Reset to default true.
     }
@@ -143,9 +143,9 @@ class BulkToolsTest extends TestCase {
             }
             $new[ $key ] = sanitize_text_field( $value );
         }
-        update_option( 'search_intel_settings', $new );
+        update_option( 'jat_search_intel_settings', $new );
 
-        $saved = $si_test_state['options']['search_intel_settings'];
+        $saved = $si_test_state['options']['jat_search_intel_settings'];
         $this->assertEquals( '+', $saved['separator'] );
         $this->assertArrayNotHasKey( 'evil_key', $saved );
     }
@@ -208,13 +208,13 @@ class BulkToolsTest extends TestCase {
         $current['separator'] = '>>>';
         $current['enable_og'] = false;
         $current['sitemap_max_urls'] = 5000;
-        $si_test_state['options']['search_intel_settings'] = $current;
+        $si_test_state['options']['jat_search_intel_settings'] = $current;
 
         // "Export" them.
         $exported = $this->core->get_settings();
 
         // Reset to defaults.
-        $si_test_state['options']['search_intel_settings'] = Core::get_default_settings();
+        $si_test_state['options']['jat_search_intel_settings'] = Core::get_default_settings();
 
         // "Import" them back (merge mode).
         $new = $this->core->get_settings();
@@ -234,9 +234,9 @@ class BulkToolsTest extends TestCase {
                 $new[ $key ] = sanitize_text_field( $value );
             }
         }
-        update_option( 'search_intel_settings', $new );
+        update_option( 'jat_search_intel_settings', $new );
 
-        $saved = $si_test_state['options']['search_intel_settings'];
+        $saved = $si_test_state['options']['jat_search_intel_settings'];
         $this->assertEquals( '>>>', $saved['separator'] );
         $this->assertFalse( $saved['enable_og'] );
         $this->assertEquals( 5000, $saved['sitemap_max_urls'] );

@@ -6,11 +6,11 @@
  * SEO / AEO / GEO / Readability and uses the AI Engine to generate
  * actionable fixes the author can preview and apply with one click.
  *
- * @package Search_Intel
+ * @package JAT_Search_Intel
  * @since   3.4.0
  */
 
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -25,22 +25,22 @@ class AI_Optimizer {
 	private $core;
 
 	/** @var string Post meta key for cached suggestions. */
-	private const SUGGESTIONS_META_KEY = '_search_intel_ai_suggestions';
+	private const SUGGESTIONS_META_KEY = '_jat_search_intel_ai_suggestions';
 
 	/** @var string Post meta key for failing checks snapshot. */
-	private const FAILING_CHECKS_META_KEY = '_search_intel_failing_checks';
+	private const FAILING_CHECKS_META_KEY = '_jat_search_intel_failing_checks';
 
 	/** @var string Post meta key for pre-optimization snapshot (rollback). */
-	private const SNAPSHOT_META_KEY = '_search_intel_ai_snapshot';
+	private const SNAPSHOT_META_KEY = '_jat_search_intel_ai_snapshot';
 
 	/** @var array Meta keys we snapshot and can restore. */
 	private const TRACKED_META_KEYS = [
-		'_search_intel_title',
-		'_search_intel_description',
-		'_search_intel_focus_keyword',
-		'_search_intel_faqs',
-		'_search_intel_ai_summary',
-		'_search_intel_entities',
+		'_jat_search_intel_title',
+		'_jat_search_intel_description',
+		'_jat_search_intel_focus_keyword',
+		'_jat_search_intel_faqs',
+		'_jat_search_intel_ai_summary',
+		'_jat_search_intel_entities',
 	];
 
 	/**
@@ -58,7 +58,7 @@ class AI_Optimizer {
 		}
 
 		// Capture failing checks after every analysis.
-		add_action( 'search_intel_post_analyzed', [ $this, 'capture_failing_checks' ], 20, 4 );
+		add_action( 'jat_search_intel_post_analyzed', [ $this, 'capture_failing_checks' ], 20, 4 );
 
 		if ( is_admin() ) {
 			add_action( 'add_meta_boxes', [ $this, 'register_meta_box' ] );
@@ -66,10 +66,10 @@ class AI_Optimizer {
 		}
 
 		// AJAX endpoints.
-		add_action( 'wp_ajax_si_ai_get_suggestions', [ $this, 'ajax_get_suggestions' ] );
-		add_action( 'wp_ajax_si_ai_apply_suggestion', [ $this, 'ajax_apply_suggestion' ] );
-		add_action( 'wp_ajax_si_ai_auto_optimize', [ $this, 'ajax_auto_optimize' ] );
-		add_action( 'wp_ajax_si_ai_rollback', [ $this, 'ajax_rollback' ] );
+		add_action( 'wp_ajax_jat_search_intel_ai_get_suggestions', [ $this, 'ajax_get_suggestions' ] );
+		add_action( 'wp_ajax_jat_search_intel_ai_apply_suggestion', [ $this, 'ajax_apply_suggestion' ] );
+		add_action( 'wp_ajax_jat_search_intel_ai_auto_optimize', [ $this, 'ajax_auto_optimize' ] );
+		add_action( 'wp_ajax_jat_search_intel_ai_rollback', [ $this, 'ajax_rollback' ] );
 	}
 
 	/*----------------------------------------------------------------------
@@ -174,13 +174,13 @@ class AI_Optimizer {
 	private function generate_suggestions( \WP_Post $post, array $failing ): array {
 		$ai = $this->core->ai_engine;
 		if ( ! $ai->is_configured() ) {
-			return [ $this->make_suggestion( 'config', 'AI provider not configured', 'Configure an AI provider in Search Intel → Settings to enable AI suggestions.', 'info' ) ];
+			return [ $this->make_suggestion( 'config', 'AI provider not configured', 'Configure an AI provider in JAT Search Intel → Settings to enable AI suggestions.', 'info' ) ];
 		}
 
 		$content     = wp_strip_all_tags( $post->post_content );
 		$title       = $post->post_title;
-		$keyword     = get_post_meta( $post->ID, '_search_intel_focus_keyword', true ) ?: '';
-		$description = get_post_meta( $post->ID, '_search_intel_description', true ) ?: '';
+		$keyword     = get_post_meta( $post->ID, '_jat_search_intel_focus_keyword', true ) ?: '';
+		$description = get_post_meta( $post->ID, '_jat_search_intel_description', true ) ?: '';
 		$excerpt     = mb_substr( $content, 0, 2000 );
 
 		$suggestions = [];
@@ -230,7 +230,7 @@ class AI_Optimizer {
 						'AI-generated meta description',
 						$result['text'],
 						'apply',
-						[ 'meta_key' => '_search_intel_description', 'value' => $result['text'] ]
+						[ 'meta_key' => '_jat_search_intel_description', 'value' => $result['text'] ]
 					);
 				}
 			} else {
@@ -265,7 +265,7 @@ class AI_Optimizer {
 					'Suggested focus keyword',
 					$kw,
 					'apply',
-					[ 'meta_key' => '_search_intel_focus_keyword', 'value' => $kw ]
+					[ 'meta_key' => '_jat_search_intel_focus_keyword', 'value' => $kw ]
 				);
 			}
 		}
@@ -333,7 +333,7 @@ class AI_Optimizer {
 					'AI-generated FAQ schema',
 					$result['text'],
 					'apply',
-					[ 'meta_key' => '_search_intel_faqs', 'value' => $result['text'], 'type' => 'json' ]
+					[ 'meta_key' => '_jat_search_intel_faqs', 'value' => $result['text'], 'type' => 'json' ]
 				);
 			}
 		}
@@ -409,7 +409,7 @@ class AI_Optimizer {
 					'AI summary for LLM indexing',
 					$result['text'],
 					'apply',
-					[ 'meta_key' => '_search_intel_ai_summary', 'value' => $result['text'] ]
+					[ 'meta_key' => '_jat_search_intel_ai_summary', 'value' => $result['text'] ]
 				);
 			}
 		}
@@ -468,7 +468,7 @@ class AI_Optimizer {
 					'Entities to define for semantic clarity',
 					$result['text'],
 					'apply',
-					[ 'meta_key' => '_search_intel_entities', 'value' => $result['text'], 'type' => 'json' ]
+					[ 'meta_key' => '_jat_search_intel_entities', 'value' => $result['text'], 'type' => 'json' ]
 				);
 			}
 		}
@@ -561,7 +561,7 @@ class AI_Optimizer {
 	 * AJAX: Get AI suggestions for a post.
 	 */
 	public function ajax_get_suggestions(): void {
-		check_ajax_referer( 'search_intel_nonce', 'nonce' );
+		check_ajax_referer( 'jat_search_intel_nonce', 'nonce' );
 
 		$post_id = absint( $_POST['post_id'] ?? 0 );
 		if ( ! $post_id || ! current_user_can( 'edit_post', $post_id ) ) {
@@ -575,10 +575,10 @@ class AI_Optimizer {
 			'suggestions' => $suggestions,
 			'post_id'     => $post_id,
 			'scores'      => [
-				'seo'         => (float) get_post_meta( $post_id, '_search_intel_seo_score', true ),
-				'aeo'         => (float) get_post_meta( $post_id, '_search_intel_aeo_score', true ),
-				'geo'         => (float) get_post_meta( $post_id, '_search_intel_geo_score', true ),
-				'readability' => (float) get_post_meta( $post_id, '_search_intel_readability_score', true ),
+				'seo'         => (float) get_post_meta( $post_id, '_jat_search_intel_seo_score', true ),
+				'aeo'         => (float) get_post_meta( $post_id, '_jat_search_intel_aeo_score', true ),
+				'geo'         => (float) get_post_meta( $post_id, '_jat_search_intel_geo_score', true ),
+				'readability' => (float) get_post_meta( $post_id, '_jat_search_intel_readability_score', true ),
 			],
 		] );
 	}
@@ -587,10 +587,10 @@ class AI_Optimizer {
 	 * AJAX: Apply a specific AI suggestion.
 	 */
 	public function ajax_apply_suggestion(): void {
-		check_ajax_referer( 'search_intel_nonce', 'nonce' );
+		check_ajax_referer( 'jat_search_intel_nonce', 'nonce' );
 
 		$post_id       = absint( $_POST['post_id'] ?? 0 );
-		$suggestion_id = sanitize_text_field( $_POST['suggestion_id'] ?? '' );
+		$suggestion_id = isset( $_POST['suggestion_id'] ) ? sanitize_text_field( wp_unslash( $_POST['suggestion_id'] ) ) : '';
 
 		if ( ! $post_id || ! current_user_can( 'edit_post', $post_id ) ) {
 			wp_send_json_error( [ 'message' => 'Unauthorized.' ], 403 );
@@ -672,10 +672,10 @@ class AI_Optimizer {
 			'post_content' => $post->post_content,
 			'meta'         => [],
 			'scores'       => [
-				'seo'         => (float) get_post_meta( $post_id, '_search_intel_seo_score', true ),
-				'aeo'         => (float) get_post_meta( $post_id, '_search_intel_aeo_score', true ),
-				'geo'         => (float) get_post_meta( $post_id, '_search_intel_geo_score', true ),
-				'readability' => (float) get_post_meta( $post_id, '_search_intel_readability_score', true ),
+				'seo'         => (float) get_post_meta( $post_id, '_jat_search_intel_seo_score', true ),
+				'aeo'         => (float) get_post_meta( $post_id, '_jat_search_intel_aeo_score', true ),
+				'geo'         => (float) get_post_meta( $post_id, '_jat_search_intel_geo_score', true ),
+				'readability' => (float) get_post_meta( $post_id, '_jat_search_intel_readability_score', true ),
 			],
 		];
 
@@ -699,9 +699,9 @@ class AI_Optimizer {
 	 * AJAX: Auto-optimize post content using AI based on failing checks.
 	 */
 	public function ajax_auto_optimize(): void {
-		check_ajax_referer( 'search_intel_nonce', 'nonce' );
+		check_ajax_referer( 'jat_search_intel_nonce', 'nonce' );
 
-		$post_id = (int) ( $_POST['post_id'] ?? 0 );
+		$post_id = absint( $_POST['post_id'] ?? 0 );
 		if ( ! $post_id || ! current_user_can( 'edit_post', $post_id ) ) {
 			wp_send_json_error( [ 'message' => 'Unauthorized.' ], 403 );
 		}
@@ -726,8 +726,8 @@ class AI_Optimizer {
 
 		$title       = $post->post_title;
 		$content     = $post->post_content;
-		$description = get_post_meta( $post_id, '_search_intel_description', true ) ?: '';
-		$keyword     = get_post_meta( $post_id, '_search_intel_focus_keyword', true ) ?: '';
+		$description = get_post_meta( $post_id, '_jat_search_intel_description', true ) ?: '';
+		$keyword     = get_post_meta( $post_id, '_jat_search_intel_focus_keyword', true ) ?: '';
 
 		// Build the issue list for AI.
 		$issue_lines = [];
@@ -802,7 +802,7 @@ class AI_Optimizer {
 			);
 			if ( $meta_result['success'] && ! empty( $meta_result['text'] ) ) {
 				$new_desc = sanitize_text_field( trim( $meta_result['text'], "\" \n\r\t" ) );
-				update_post_meta( $post_id, '_search_intel_description', $new_desc );
+				update_post_meta( $post_id, '_jat_search_intel_description', $new_desc );
 				$changes_made[] = 'Meta description generated';
 			}
 		}
@@ -821,7 +821,7 @@ class AI_Optimizer {
 				$faq_text = preg_replace( '/\s*```\s*$/', '', $faq_text );
 				$faqs     = json_decode( $faq_text, true );
 				if ( is_array( $faqs ) && ! empty( $faqs ) ) {
-					update_post_meta( $post_id, '_search_intel_faqs', $faqs );
+					update_post_meta( $post_id, '_jat_search_intel_faqs', $faqs );
 					$changes_made[] = count( $faqs ) . ' FAQ entries added';
 				}
 			}
@@ -836,7 +836,7 @@ class AI_Optimizer {
 				[ 'max_tokens' => 150, 'temperature' => 0.3 ]
 			);
 			if ( $summary_result['success'] && ! empty( $summary_result['text'] ) ) {
-				update_post_meta( $post_id, '_search_intel_ai_summary', sanitize_textarea_field( $summary_result['text'] ) );
+				update_post_meta( $post_id, '_jat_search_intel_ai_summary', sanitize_textarea_field( $summary_result['text'] ) );
 				$changes_made[] = 'AI summary generated';
 			}
 		}
@@ -858,10 +858,10 @@ class AI_Optimizer {
 					'geo'         => (float) ( $results['geo_score']['score'] ?? 0 ),
 					'readability' => (float) ( $results['readability_score']['score'] ?? 0 ),
 				];
-				update_post_meta( $post_id, '_search_intel_seo_score', $new_scores['seo'] );
-				update_post_meta( $post_id, '_search_intel_aeo_score', $new_scores['aeo'] );
-				update_post_meta( $post_id, '_search_intel_geo_score', $new_scores['geo'] );
-				update_post_meta( $post_id, '_search_intel_readability_score', $new_scores['readability'] );
+				update_post_meta( $post_id, '_jat_search_intel_seo_score', $new_scores['seo'] );
+				update_post_meta( $post_id, '_jat_search_intel_aeo_score', $new_scores['aeo'] );
+				update_post_meta( $post_id, '_jat_search_intel_geo_score', $new_scores['geo'] );
+				update_post_meta( $post_id, '_jat_search_intel_readability_score', $new_scores['readability'] );
 			}
 		}
 
@@ -883,9 +883,9 @@ class AI_Optimizer {
 	 * AJAX: Rollback to the previous snapshot.
 	 */
 	public function ajax_rollback(): void {
-		check_ajax_referer( 'search_intel_nonce', 'nonce' );
+		check_ajax_referer( 'jat_search_intel_nonce', 'nonce' );
 
-		$post_id = (int) ( $_POST['post_id'] ?? 0 );
+		$post_id = absint( $_POST['post_id'] ?? 0 );
 		if ( ! $post_id || ! current_user_can( 'edit_post', $post_id ) ) {
 			wp_send_json_error( [ 'message' => 'Unauthorized.' ], 403 );
 		}
@@ -920,10 +920,10 @@ class AI_Optimizer {
 
 		// Restore scores.
 		if ( ! empty( $snapshot['scores'] ) ) {
-			update_post_meta( $post_id, '_search_intel_seo_score', $snapshot['scores']['seo'] ?? 0 );
-			update_post_meta( $post_id, '_search_intel_aeo_score', $snapshot['scores']['aeo'] ?? 0 );
-			update_post_meta( $post_id, '_search_intel_geo_score', $snapshot['scores']['geo'] ?? 0 );
-			update_post_meta( $post_id, '_search_intel_readability_score', $snapshot['scores']['readability'] ?? 0 );
+			update_post_meta( $post_id, '_jat_search_intel_seo_score', $snapshot['scores']['seo'] ?? 0 );
+			update_post_meta( $post_id, '_jat_search_intel_aeo_score', $snapshot['scores']['aeo'] ?? 0 );
+			update_post_meta( $post_id, '_jat_search_intel_geo_score', $snapshot['scores']['geo'] ?? 0 );
+			update_post_meta( $post_id, '_jat_search_intel_readability_score', $snapshot['scores']['readability'] ?? 0 );
 		}
 
 		wp_send_json_success( [
@@ -962,8 +962,8 @@ class AI_Optimizer {
 		$post_types = $this->settings['enabled_post_types'] ?? [ 'post', 'page' ];
 		foreach ( $post_types as $pt ) {
 			add_meta_box(
-				'search-intel-ai-optimizer',
-				__( 'Search Intel — AI Optimizer', 'search-intel' ),
+				'jat-search-intel-ai-optimizer',
+				__( 'JAT Search Intel — AI Optimizer', 'jat-search-intel' ),
 				[ $this, 'render_meta_box' ],
 				$pt,
 				'side',
@@ -979,10 +979,10 @@ class AI_Optimizer {
 	 */
 	public function render_meta_box( \WP_Post $post ): void {
 		$scores = [
-			'seo'         => (float) get_post_meta( $post->ID, '_search_intel_seo_score', true ),
-			'aeo'         => (float) get_post_meta( $post->ID, '_search_intel_aeo_score', true ),
-			'geo'         => (float) get_post_meta( $post->ID, '_search_intel_geo_score', true ),
-			'readability' => (float) get_post_meta( $post->ID, '_search_intel_readability_score', true ),
+			'seo'         => (float) get_post_meta( $post->ID, '_jat_search_intel_seo_score', true ),
+			'aeo'         => (float) get_post_meta( $post->ID, '_jat_search_intel_aeo_score', true ),
+			'geo'         => (float) get_post_meta( $post->ID, '_jat_search_intel_geo_score', true ),
+			'readability' => (float) get_post_meta( $post->ID, '_jat_search_intel_readability_score', true ),
 		];
 
 		$failing = get_post_meta( $post->ID, self::FAILING_CHECKS_META_KEY, true );
@@ -998,29 +998,29 @@ class AI_Optimizer {
 		?>
 		<div id="si-ai-optimizer" data-post-id="<?php echo esc_attr( (string) $post->ID ); ?>">
 			<div class="si-ai-scores" style="margin-bottom:12px;">
-				<span class="si-score-badge" style="background:<?php echo $this->score_color( $scores['seo'] ); ?>">SEO <?php echo esc_html( (string) $scores['seo'] ); ?></span>
-				<span class="si-score-badge" style="background:<?php echo $this->score_color( $scores['aeo'] ); ?>">AEO <?php echo esc_html( (string) $scores['aeo'] ); ?></span>
-				<span class="si-score-badge" style="background:<?php echo $this->score_color( $scores['geo'] ); ?>">GEO <?php echo esc_html( (string) $scores['geo'] ); ?></span>
-				<span class="si-score-badge" style="background:<?php echo $this->score_color( $scores['readability'] ); ?>">READ <?php echo esc_html( (string) $scores['readability'] ); ?></span>
+				<span class="si-score-badge" style="background:<?php echo esc_attr( $this->score_color( $scores['seo'] ) ); ?>">SEO <?php echo esc_html( (string) $scores['seo'] ); ?></span>
+				<span class="si-score-badge" style="background:<?php echo esc_attr( $this->score_color( $scores['aeo'] ) ); ?>">AEO <?php echo esc_html( (string) $scores['aeo'] ); ?></span>
+				<span class="si-score-badge" style="background:<?php echo esc_attr( $this->score_color( $scores['geo'] ) ); ?>">GEO <?php echo esc_html( (string) $scores['geo'] ); ?></span>
+				<span class="si-score-badge" style="background:<?php echo esc_attr( $this->score_color( $scores['readability'] ) ); ?>">READ <?php echo esc_html( (string) $scores['readability'] ); ?></span>
 			</div>
 
 			<?php if ( $fail_count > 0 ) : ?>
 				<p style="color:#d63638;margin:0 0 8px;">
-					<strong><?php echo esc_html( (string) $fail_count ); ?></strong> <?php esc_html_e( 'issues found', 'search-intel' ); ?>
+					<strong><?php echo esc_html( (string) $fail_count ); ?></strong> <?php esc_html_e( 'issues found', 'jat-search-intel' ); ?>
 				</p>
 			<?php else : ?>
-				<p style="color:#00a32a;margin:0 0 8px;"><?php esc_html_e( 'All checks passing!', 'search-intel' ); ?></p>
+				<p style="color:#00a32a;margin:0 0 8px;"><?php esc_html_e( 'All checks passing!', 'jat-search-intel' ); ?></p>
 			<?php endif; ?>
 
 			<div class="si-ai-actions" style="margin-bottom:10px;">
 				<button type="button" class="button button-primary" id="si-ai-auto-optimize-btn" <?php echo $fail_count === 0 ? 'disabled' : ''; ?>
 					title="AI will rewrite content, title, meta, FAQ, and summary to fix all failing checks. A rollback snapshot is created first.">
-					<?php esc_html_e( 'Auto-Optimize', 'search-intel' ); ?>
+					<?php esc_html_e( 'Auto-Optimize', 'jat-search-intel' ); ?>
 				</button>
 
 				<button type="button" class="button" id="si-ai-rollback-btn" <?php echo $has_snapshots ? '' : 'disabled'; ?>
 					title="Undo the last AI optimization and restore the previous version.">
-					<?php esc_html_e( 'Rollback', 'search-intel' ); ?>
+					<?php esc_html_e( 'Rollback', 'jat-search-intel' ); ?>
 					<?php if ( $snap_count > 0 ) : ?>
 						<span class="si-rollback-count">(<?php echo esc_html( (string) $snap_count ); ?>)</span>
 					<?php endif; ?>
@@ -1030,7 +1030,7 @@ class AI_Optimizer {
 			<?php if ( $has_snapshots && $last_snap ) : ?>
 				<div id="si-ai-snapshot-info" class="si-snapshot-info">
 					<?php /* translators: %s: snapshot date */ ?>
-					<?php printf( esc_html__( 'Last snapshot: %s', 'search-intel' ), esc_html( $last_snap['date'] ?? '' ) ); ?>
+					<?php printf( esc_html__( 'Last snapshot: %s', 'jat-search-intel' ), esc_html( $last_snap['date'] ?? '' ) ); ?>
 				</div>
 			<?php else : ?>
 				<div id="si-ai-snapshot-info" class="si-snapshot-info" style="display:none;"></div>
@@ -1041,7 +1041,7 @@ class AI_Optimizer {
 			<hr style="margin:10px 0;">
 
 			<button type="button" class="button" id="si-ai-generate-btn" <?php echo $fail_count === 0 ? 'disabled' : ''; ?> style="width:100%;">
-				<?php echo $has_cached ? esc_html__( 'Regenerate AI Suggestions', 'search-intel' ) : esc_html__( 'Generate AI Suggestions', 'search-intel' ); ?>
+				<?php echo $has_cached ? esc_html__( 'Regenerate AI Suggestions', 'jat-search-intel' ) : esc_html__( 'Generate AI Suggestions', 'jat-search-intel' ); ?>
 			</button>
 
 			<div id="si-ai-suggestions-list" style="margin-top:12px;">
@@ -1052,7 +1052,7 @@ class AI_Optimizer {
 
 			<div id="si-ai-loading" style="display:none;margin-top:10px;">
 				<span class="spinner is-active" style="float:none;margin:0 5px 0 0;"></span>
-				<span id="si-ai-loading-text"><?php esc_html_e( 'Generating AI suggestions…', 'search-intel' ); ?></span>
+				<span id="si-ai-loading-text"><?php esc_html_e( 'Generating AI suggestions…', 'jat-search-intel' ); ?></span>
 			</div>
 		</div>
 
@@ -1085,7 +1085,7 @@ class AI_Optimizer {
 	 */
 	private function render_suggestions( array $suggestions ): void {
 		if ( empty( $suggestions ) ) {
-			echo '<p>' . esc_html__( 'No suggestions at this time.', 'search-intel' ) . '</p>';
+			echo '<p>' . esc_html__( 'No suggestions at this time.', 'jat-search-intel' ) . '</p>';
 			return;
 		}
 
@@ -1103,10 +1103,10 @@ class AI_Optimizer {
 				<p><?php echo esc_html( $s['text'] ?? '' ); ?></p>
 				<?php if ( ( $s['action'] ?? '' ) === 'apply' && ! empty( $s['apply_data'] ) ) : ?>
 					<button type="button" class="button si-ai-apply-btn" data-suggestion-id="<?php echo esc_attr( $s['id'] ?? '' ); ?>">
-						<?php esc_html_e( 'Apply', 'search-intel' ); ?>
+						<?php esc_html_e( 'Apply', 'jat-search-intel' ); ?>
 					</button>
 				<?php elseif ( ( $s['action'] ?? '' ) === 'review' ) : ?>
-					<em style="font-size:11px;color:#646970;"><?php esc_html_e( 'Review and apply manually', 'search-intel' ); ?></em>
+					<em style="font-size:11px;color:#646970;"><?php esc_html_e( 'Review and apply manually', 'jat-search-intel' ); ?></em>
 				<?php endif; ?>
 			</div>
 			<?php
@@ -1141,15 +1141,15 @@ class AI_Optimizer {
 
 		wp_enqueue_script(
 			'si-ai-optimizer',
-			SEARCH_INTEL_URL . 'admin/js/ai-optimizer.js',
+			JAT_SEARCH_INTEL_URL . 'admin/js/ai-optimizer.js',
 			[ 'jquery' ],
-			SEARCH_INTEL_VERSION,
+			JAT_SEARCH_INTEL_VERSION,
 			true
 		);
 
 		wp_localize_script( 'si-ai-optimizer', 'siAiOptimizer', [
 			'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-			'nonce'   => wp_create_nonce( 'search_intel_nonce' ),
+			'nonce'   => wp_create_nonce( 'jat_search_intel_nonce' ),
 		] );
 	}
 }

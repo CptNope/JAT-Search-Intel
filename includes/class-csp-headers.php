@@ -1,5 +1,5 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * CSP Headers — Content Security Policy for plugin endpoints.
  *
- * Adds Content-Security-Policy headers on Search Intel admin pages
+ * Adds Content-Security-Policy headers on JAT Search Intel admin pages
  * and REST API endpoints to mitigate XSS and injection attacks.
  *
  * @since 2.0.1
@@ -19,11 +19,11 @@ class CSP_Headers {
 	 * Admin page slugs that belong to this plugin.
 	 */
 	private const PLUGIN_PAGES = [
-		'search-intel',
-		'search-intel-bulk',
-		'search-intel-redirects',
-		'search-intel-broken-links',
-		'search-intel-robots-txt',
+		'jat-search-intel',
+		'jat-search-intel-bulk',
+		'jat-search-intel-redirects',
+		'jat-search-intel-broken-links',
+		'jat-search-intel-robots-txt',
 	];
 
 	/** @var array */
@@ -107,7 +107,7 @@ class CSP_Headers {
 			$route = $request->get_route();
 		}
 
-		if ( 0 === strpos( $route, '/search-intel/' ) ) {
+		if ( 0 === strpos( $route, '/jat-search-intel/' ) ) {
 			$policy = $this->build_policy( 'rest' );
 
 			if ( ! headers_sent() ) {
@@ -125,7 +125,7 @@ class CSP_Headers {
 	 * @return bool
 	 */
 	public function is_plugin_admin_page(): bool {
-		$page = $_GET['page'] ?? '';
+		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only view/pagination parameter.
 		return in_array( $page, self::PLUGIN_PAGES, true );
 	}
 }

@@ -65,7 +65,7 @@ function ScoreRing( { label, score, color } ) {
  * falling back to WordPress admin defaults.
  */
 function getScoreColor( score ) {
-	const theme = window.searchIntelTheme?.colors || {};
+	const theme = window.jatSearchIntelTheme?.colors || {};
 	const good    = theme.primary   || '#00a32a';
 	const warning = theme.secondary || '#dba617';
 	const poor    = theme.tertiary  || '#cc1818';
@@ -82,8 +82,8 @@ function getScoreColor( score ) {
 export default function ScorePanel() {
 	const { isAnalyzing, analysisResults } = useSelect(
 		( select ) => ( {
-			isAnalyzing: select( 'search-intel/editor' ).isAnalyzing(),
-			analysisResults: select( 'search-intel/editor' ).getAnalysisResults(),
+			isAnalyzing: select( 'jat-search-intel/editor' ).isAnalyzing(),
+			analysisResults: select( 'jat-search-intel/editor' ).getAnalysisResults(),
 		} ),
 		[]
 	);
@@ -101,7 +101,7 @@ export default function ScorePanel() {
 		[]
 	);
 
-	const { runAnalysis } = useDispatch( 'search-intel/editor' );
+	const { runAnalysis } = useDispatch( 'jat-search-intel/editor' );
 
 	const checks = analysisResults?.checks || {};
 
@@ -109,22 +109,22 @@ export default function ScorePanel() {
 		<div className="si-panel si-panel--scores">
 			<div className="si-score-rings">
 				<ScoreRing
-					label={ __( 'SEO', 'search-intel' ) }
+					label={ __( 'SEO', 'jat-search-intel' ) }
 					score={ seoScore }
 					color={ getScoreColor( seoScore ) }
 				/>
 				<ScoreRing
-					label={ __( 'AEO', 'search-intel' ) }
+					label={ __( 'AEO', 'jat-search-intel' ) }
 					score={ aeoScore }
 					color={ getScoreColor( aeoScore ) }
 				/>
 				<ScoreRing
-					label={ __( 'GEO', 'search-intel' ) }
+					label={ __( 'GEO', 'jat-search-intel' ) }
 					score={ geoScore }
 					color={ getScoreColor( geoScore ) }
 				/>
 				<ScoreRing
-					label={ __( 'Read', 'search-intel' ) }
+					label={ __( 'Read', 'jat-search-intel' ) }
 					score={ readabilityScore }
 					color={ getScoreColor( readabilityScore ) }
 				/>
@@ -138,10 +138,10 @@ export default function ScorePanel() {
 			>
 				{ isAnalyzing ? (
 					<>
-						<Spinner /> { __( 'Analyzing…', 'search-intel' ) }
+						<Spinner /> { __( 'Analyzing…', 'jat-search-intel' ) }
 					</>
 				) : (
-					__( 'Run Analysis', 'search-intel' )
+					__( 'Run Analysis', 'jat-search-intel' )
 				) }
 			</Button>
 

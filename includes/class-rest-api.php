@@ -1,21 +1,21 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 /**
- * REST API controller for Search Intel.
+ * REST API controller for JAT Search Intel.
  *
- * Registers endpoints under the search-intel/v1 namespace.
+ * Registers endpoints under the jat-search-intel/v1 namespace.
  *
  * @since 1.3.0
  */
 class Rest_Api {
 
 	/** @var string */
-	private const NAMESPACE = 'search-intel/v1';
+	private const NAMESPACE = 'jat-search-intel/v1';
 
 	/** @var array Plugin settings. */
 	private $settings;
@@ -177,10 +177,10 @@ class Rest_Api {
 
 		return new \WP_REST_Response( [
 			'post_id'     => $post_id,
-			'seo_score'   => (int) get_post_meta( $post_id, '_search_intel_seo_score', true ),
-			'aeo_score'   => (int) get_post_meta( $post_id, '_search_intel_aeo_score', true ),
-			'geo_score'   => (int) get_post_meta( $post_id, '_search_intel_geo_score', true ),
-			'readability' => (int) get_post_meta( $post_id, '_search_intel_readability_score', true ),
+			'seo_score'   => (int) get_post_meta( $post_id, '_jat_search_intel_seo_score', true ),
+			'aeo_score'   => (int) get_post_meta( $post_id, '_jat_search_intel_aeo_score', true ),
+			'geo_score'   => (int) get_post_meta( $post_id, '_jat_search_intel_geo_score', true ),
+			'readability' => (int) get_post_meta( $post_id, '_jat_search_intel_readability_score', true ),
 		], 200 );
 	}
 
@@ -195,17 +195,17 @@ class Rest_Api {
 			return new \WP_REST_Response( [ 'code' => 'not_found', 'message' => 'Post not found.' ], 404 );
 		}
 
-		$ai_summary     = get_post_meta( $post_id, '_search_intel_ai_summary', true );
-		$topics         = get_post_meta( $post_id, '_search_intel_topics', true );
-		$entities       = get_post_meta( $post_id, '_search_intel_entities', true );
-		$content_type   = get_post_meta( $post_id, '_search_intel_content_type', true );
-		$content_intent = get_post_meta( $post_id, '_search_intel_content_intent', true );
-		$audience       = get_post_meta( $post_id, '_search_intel_audience', true );
-		$expertise      = get_post_meta( $post_id, '_search_intel_expertise_level', true );
-		$fact_checked   = get_post_meta( $post_id, '_search_intel_fact_checked', true );
-		$local_rel      = get_post_meta( $post_id, '_search_intel_local_relevance', true );
-		$local_loc      = get_post_meta( $post_id, '_search_intel_local_location', true );
-		$geo_score      = (int) get_post_meta( $post_id, '_search_intel_geo_score', true );
+		$ai_summary     = get_post_meta( $post_id, '_jat_search_intel_ai_summary', true );
+		$topics         = get_post_meta( $post_id, '_jat_search_intel_topics', true );
+		$entities       = get_post_meta( $post_id, '_jat_search_intel_entities', true );
+		$content_type   = get_post_meta( $post_id, '_jat_search_intel_content_type', true );
+		$content_intent = get_post_meta( $post_id, '_jat_search_intel_content_intent', true );
+		$audience       = get_post_meta( $post_id, '_jat_search_intel_audience', true );
+		$expertise      = get_post_meta( $post_id, '_jat_search_intel_expertise_level', true );
+		$fact_checked   = get_post_meta( $post_id, '_jat_search_intel_fact_checked', true );
+		$local_rel      = get_post_meta( $post_id, '_jat_search_intel_local_relevance', true );
+		$local_loc      = get_post_meta( $post_id, '_jat_search_intel_local_location', true );
+		$geo_score      = (int) get_post_meta( $post_id, '_jat_search_intel_geo_score', true );
 
 		return new \WP_REST_Response( [
 			'post_id'          => $post_id,
@@ -224,7 +224,7 @@ class Rest_Api {
 	}
 
 	/**
-	 * GET /meta/{id} — all Search Intel meta fields.
+	 * GET /meta/{id} — all JAT Search Intel meta fields.
 	 */
 	public function get_meta( \WP_REST_Request $request ): \WP_REST_Response {
 		$post_id = (int) $request['id'];
@@ -245,7 +245,7 @@ class Rest_Api {
 	}
 
 	/**
-	 * PUT /meta/{id} — update Search Intel meta fields.
+	 * PUT /meta/{id} — update JAT Search Intel meta fields.
 	 */
 	public function update_meta( \WP_REST_Request $request ): \WP_REST_Response {
 		$post_id = (int) $request['id'];
@@ -302,23 +302,23 @@ class Rest_Api {
 
 		$content     = wp_strip_all_tags( $post->post_content );
 		$title       = $post->post_title;
-		$keyword     = get_post_meta( $post_id, '_search_intel_focus_keyword', true ) ?: '';
-		$description = get_post_meta( $post_id, '_search_intel_description', true ) ?: '';
+		$keyword     = get_post_meta( $post_id, '_jat_search_intel_focus_keyword', true ) ?: '';
+		$description = get_post_meta( $post_id, '_jat_search_intel_description', true ) ?: '';
 
 		$results = $this->core->analyzer->analyze( $post_id, $content, $title, $keyword, $description );
 
 		// Store scores in post meta.
 		if ( isset( $results['seo']['score'] ) ) {
-			update_post_meta( $post_id, '_search_intel_seo_score', (int) $results['seo']['score'] );
+			update_post_meta( $post_id, '_jat_search_intel_seo_score', (int) $results['seo']['score'] );
 		}
 		if ( isset( $results['aeo']['score'] ) ) {
-			update_post_meta( $post_id, '_search_intel_aeo_score', (int) $results['aeo']['score'] );
+			update_post_meta( $post_id, '_jat_search_intel_aeo_score', (int) $results['aeo']['score'] );
 		}
 		if ( isset( $results['geo']['score'] ) ) {
-			update_post_meta( $post_id, '_search_intel_geo_score', (int) $results['geo']['score'] );
+			update_post_meta( $post_id, '_jat_search_intel_geo_score', (int) $results['geo']['score'] );
 		}
 		if ( isset( $results['readability']['score'] ) ) {
-			update_post_meta( $post_id, '_search_intel_readability_score', (int) $results['readability']['score'] );
+			update_post_meta( $post_id, '_jat_search_intel_readability_score', (int) $results['readability']['score'] );
 		}
 
 		return new \WP_REST_Response( [
@@ -357,22 +357,22 @@ class Rest_Api {
 
 			$content     = wp_strip_all_tags( $post->post_content );
 			$title       = $post->post_title;
-			$keyword     = get_post_meta( $post_id, '_search_intel_focus_keyword', true ) ?: '';
-			$description = get_post_meta( $post_id, '_search_intel_description', true ) ?: '';
+			$keyword     = get_post_meta( $post_id, '_jat_search_intel_focus_keyword', true ) ?: '';
+			$description = get_post_meta( $post_id, '_jat_search_intel_description', true ) ?: '';
 
 			$results = $this->core->analyzer->analyze( $post_id, $content, $title, $keyword, $description );
 
 			if ( isset( $results['seo']['score'] ) ) {
-				update_post_meta( $post_id, '_search_intel_seo_score', (int) $results['seo']['score'] );
+				update_post_meta( $post_id, '_jat_search_intel_seo_score', (int) $results['seo']['score'] );
 			}
 			if ( isset( $results['aeo']['score'] ) ) {
-				update_post_meta( $post_id, '_search_intel_aeo_score', (int) $results['aeo']['score'] );
+				update_post_meta( $post_id, '_jat_search_intel_aeo_score', (int) $results['aeo']['score'] );
 			}
 			if ( isset( $results['geo']['score'] ) ) {
-				update_post_meta( $post_id, '_search_intel_geo_score', (int) $results['geo']['score'] );
+				update_post_meta( $post_id, '_jat_search_intel_geo_score', (int) $results['geo']['score'] );
 			}
 			if ( isset( $results['readability']['score'] ) ) {
-				update_post_meta( $post_id, '_search_intel_readability_score', (int) $results['readability']['score'] );
+				update_post_meta( $post_id, '_jat_search_intel_readability_score', (int) $results['readability']['score'] );
 			}
 
 			$scored[] = $post_id;
@@ -428,7 +428,7 @@ class Rest_Api {
 			$updated[ $key ] = $current[ $key ];
 		}
 
-		update_option( 'search_intel_settings', $current );
+		update_option( 'jat_search_intel_settings', $current );
 
 		return new \WP_REST_Response( [
 			'updated'  => $updated,
@@ -455,35 +455,35 @@ class Rest_Api {
 	 */
 	private function get_meta_fields(): array {
 		return [
-			'title'                  => '_search_intel_title',
-			'description'            => '_search_intel_description',
-			'focus_keyword'          => '_search_intel_focus_keyword',
-			'secondary_keywords'     => '_search_intel_secondary_keywords',
-			'canonical'              => '_search_intel_canonical',
-			'noindex'                => '_search_intel_noindex',
-			'nofollow'               => '_search_intel_nofollow',
-			'social_title'           => '_search_intel_social_title',
-			'social_description'     => '_search_intel_social_description',
-			'social_image'           => '_search_intel_social_image',
-			'schema_type'            => '_search_intel_schema_type',
-			'faqs'                   => '_search_intel_faqs',
-			'direct_answer'          => '_search_intel_direct_answer',
-			'citations'              => '_search_intel_citations',
-			'ai_summary'             => '_search_intel_ai_summary',
-			'topics'                 => '_search_intel_topics',
-			'entities'               => '_search_intel_entities',
-			'expertise_level'        => '_search_intel_expertise_level',
-			'content_type'           => '_search_intel_content_type',
-			'content_intent'         => '_search_intel_content_intent',
-			'audience'               => '_search_intel_audience',
-			'fact_checked'           => '_search_intel_fact_checked',
-			'author_expertise_notes' => '_search_intel_author_expertise_notes',
-			'local_relevance'        => '_search_intel_local_relevance',
-			'local_location'         => '_search_intel_local_location',
-			'seo_score'              => '_search_intel_seo_score',
-			'aeo_score'              => '_search_intel_aeo_score',
-			'geo_score'              => '_search_intel_geo_score',
-			'readability_score'      => '_search_intel_readability_score',
+			'title'                  => '_jat_search_intel_title',
+			'description'            => '_jat_search_intel_description',
+			'focus_keyword'          => '_jat_search_intel_focus_keyword',
+			'secondary_keywords'     => '_jat_search_intel_secondary_keywords',
+			'canonical'              => '_jat_search_intel_canonical',
+			'noindex'                => '_jat_search_intel_noindex',
+			'nofollow'               => '_jat_search_intel_nofollow',
+			'social_title'           => '_jat_search_intel_social_title',
+			'social_description'     => '_jat_search_intel_social_description',
+			'social_image'           => '_jat_search_intel_social_image',
+			'schema_type'            => '_jat_search_intel_schema_type',
+			'faqs'                   => '_jat_search_intel_faqs',
+			'direct_answer'          => '_jat_search_intel_direct_answer',
+			'citations'              => '_jat_search_intel_citations',
+			'ai_summary'             => '_jat_search_intel_ai_summary',
+			'topics'                 => '_jat_search_intel_topics',
+			'entities'               => '_jat_search_intel_entities',
+			'expertise_level'        => '_jat_search_intel_expertise_level',
+			'content_type'           => '_jat_search_intel_content_type',
+			'content_intent'         => '_jat_search_intel_content_intent',
+			'audience'               => '_jat_search_intel_audience',
+			'fact_checked'           => '_jat_search_intel_fact_checked',
+			'author_expertise_notes' => '_jat_search_intel_author_expertise_notes',
+			'local_relevance'        => '_jat_search_intel_local_relevance',
+			'local_location'         => '_jat_search_intel_local_location',
+			'seo_score'              => '_jat_search_intel_seo_score',
+			'aeo_score'              => '_jat_search_intel_aeo_score',
+			'geo_score'              => '_jat_search_intel_geo_score',
+			'readability_score'      => '_jat_search_intel_readability_score',
 		];
 	}
 

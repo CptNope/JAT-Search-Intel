@@ -4,7 +4,7 @@
  */
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\Title_Engine;
+use JAT_Search_Intel\Title_Engine;
 
 class TitleEngineTest extends TestCase {
 
@@ -120,7 +120,7 @@ class TitleEngineTest extends TestCase {
 
     public function test_resolve_title_uses_seo_override_when_set(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_title'] = 'Custom SEO Title';
+        $si_test_state['post_meta'][1]['_jat_search_intel_title'] = 'Custom SEO Title';
 
         $engine = $this->make_engine();
         $result = $engine->resolve_title( '' );

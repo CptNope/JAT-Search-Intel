@@ -1,8 +1,8 @@
 <?php
-namespace Search_Intel\Tests\Unit;
+namespace JAT_Search_Intel\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\RBAC;
+use JAT_Search_Intel\RBAC;
 
 class RBACTest extends TestCase {
 
@@ -36,17 +36,17 @@ class RBACTest extends TestCase {
 		$rbac = $this->make();
 		$caps = $rbac->get_seo_editor_caps();
 
-		$this->assertTrue( $caps['search_intel_manage_seo'] );
-		$this->assertTrue( $caps['search_intel_manage_aeo'] );
-		$this->assertTrue( $caps['search_intel_manage_geo'] );
-		$this->assertTrue( $caps['search_intel_manage_sitemap'] );
+		$this->assertTrue( $caps['jat_search_intel_manage_seo'] );
+		$this->assertTrue( $caps['jat_search_intel_manage_aeo'] );
+		$this->assertTrue( $caps['jat_search_intel_manage_geo'] );
+		$this->assertTrue( $caps['jat_search_intel_manage_sitemap'] );
 	}
 
 	public function test_get_seo_editor_caps_no_settings(): void {
 		$rbac = $this->make();
 		$caps = $rbac->get_seo_editor_caps();
 
-		$this->assertFalse( $caps['search_intel_manage_settings'] );
+		$this->assertFalse( $caps['jat_search_intel_manage_settings'] );
 	}
 
 	public function test_get_seo_editor_caps_has_wp_basics(): void {
@@ -79,8 +79,8 @@ class RBACTest extends TestCase {
 	public function test_check_module_access_user_with_cap(): void {
 		global $si_test_state;
 		$si_test_state['users'][2] = [
-			'ID' => 2, 'user_login' => 'editor', 'roles' => [ 'search_intel_seo_editor' ],
-			'caps' => [ 'search_intel_manage_seo' => true ],
+			'ID' => 2, 'user_login' => 'editor', 'roles' => [ 'jat_search_intel_seo_editor' ],
+			'caps' => [ 'jat_search_intel_manage_seo' => true ],
 		];
 
 		$rbac = $this->make();
@@ -93,7 +93,7 @@ class RBACTest extends TestCase {
 		global $si_test_state;
 		$si_test_state['users'][3] = [
 			'ID' => 3, 'user_login' => 'author', 'roles' => [ 'author' ],
-			'caps' => [ 'search_intel_view_scores' => true ],
+			'caps' => [ 'jat_search_intel_view_scores' => true ],
 		];
 
 		$rbac = $this->make();
@@ -111,7 +111,7 @@ class RBACTest extends TestCase {
 		global $si_test_state;
 		$si_test_state['users'][1] = [
 			'ID' => 1, 'user_login' => 'user', 'roles' => [ 'editor' ],
-			'caps' => [ 'search_intel_manage_seo' => true ],
+			'caps' => [ 'jat_search_intel_manage_seo' => true ],
 		];
 
 		$rbac = $this->make();
@@ -135,8 +135,8 @@ class RBACTest extends TestCase {
 	public function test_check_edit_access_seo_editor(): void {
 		global $si_test_state;
 		$si_test_state['users'][2] = [
-			'ID' => 2, 'user_login' => 'editor', 'roles' => [ 'search_intel_seo_editor' ],
-			'caps' => [ 'search_intel_manage_seo' => true ],
+			'ID' => 2, 'user_login' => 'editor', 'roles' => [ 'jat_search_intel_seo_editor' ],
+			'caps' => [ 'jat_search_intel_manage_seo' => true ],
 		];
 
 		$rbac = $this->make();
@@ -147,7 +147,7 @@ class RBACTest extends TestCase {
 		global $si_test_state;
 		$si_test_state['users'][3] = [
 			'ID' => 3, 'user_login' => 'author', 'roles' => [ 'author' ],
-			'caps' => [ 'search_intel_view_scores' => true ],
+			'caps' => [ 'jat_search_intel_view_scores' => true ],
 		];
 
 		$rbac = $this->make();
@@ -160,7 +160,7 @@ class RBACTest extends TestCase {
 		global $si_test_state;
 		$si_test_state['users'][3] = [
 			'ID' => 3, 'user_login' => 'author', 'roles' => [ 'author' ],
-			'caps' => [ 'search_intel_view_scores' => true ],
+			'caps' => [ 'jat_search_intel_view_scores' => true ],
 		];
 
 		$rbac = $this->make();
@@ -171,7 +171,7 @@ class RBACTest extends TestCase {
 		global $si_test_state;
 		$si_test_state['users'][1] = [
 			'ID' => 1, 'user_login' => 'admin', 'roles' => [ 'administrator' ],
-			'caps' => [ 'manage_options' => true, 'search_intel_view_scores' => true ],
+			'caps' => [ 'manage_options' => true, 'jat_search_intel_view_scores' => true ],
 		];
 
 		$rbac = $this->make();
@@ -181,8 +181,8 @@ class RBACTest extends TestCase {
 	public function test_is_view_only_false_for_seo_editor(): void {
 		global $si_test_state;
 		$si_test_state['users'][2] = [
-			'ID' => 2, 'user_login' => 'editor', 'roles' => [ 'search_intel_seo_editor' ],
-			'caps' => [ 'search_intel_view_scores' => true, 'search_intel_manage_seo' => true ],
+			'ID' => 2, 'user_login' => 'editor', 'roles' => [ 'jat_search_intel_seo_editor' ],
+			'caps' => [ 'jat_search_intel_view_scores' => true, 'jat_search_intel_manage_seo' => true ],
 		];
 
 		$rbac = $this->make();
@@ -195,7 +195,7 @@ class RBACTest extends TestCase {
 		global $si_test_state;
 		$si_test_state['users'][2] = [
 			'ID' => 2, 'user_login' => 'editor', 'roles' => [ 'editor' ],
-			'caps' => [ 'search_intel_manage_seo' => true ],
+			'caps' => [ 'jat_search_intel_manage_seo' => true ],
 		];
 
 		$rbac = $this->make( [ 'enable_rbac' => true, 'enable_settings_lock' => true ] );

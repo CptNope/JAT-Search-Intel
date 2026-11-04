@@ -1,8 +1,8 @@
 <?php
-namespace Search_Intel\Tests\Unit;
+namespace JAT_Search_Intel\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\CSP_Headers;
+use JAT_Search_Intel\CSP_Headers;
 
 class CSPHeadersTest extends TestCase {
 
@@ -60,19 +60,19 @@ class CSPHeadersTest extends TestCase {
 	}
 
 	public function test_is_plugin_admin_page_true(): void {
-		$_GET['page'] = 'search-intel';
+		$_GET['page'] = 'jat-search-intel';
 		$this->assertTrue( $this->csp->is_plugin_admin_page() );
 		unset( $_GET['page'] );
 	}
 
 	public function test_is_plugin_admin_page_redirects(): void {
-		$_GET['page'] = 'search-intel-redirects';
+		$_GET['page'] = 'jat-search-intel-redirects';
 		$this->assertTrue( $this->csp->is_plugin_admin_page() );
 		unset( $_GET['page'] );
 	}
 
 	public function test_is_plugin_admin_page_broken_links(): void {
-		$_GET['page'] = 'search-intel-broken-links';
+		$_GET['page'] = 'jat-search-intel-broken-links';
 		$this->assertTrue( $this->csp->is_plugin_admin_page() );
 		unset( $_GET['page'] );
 	}

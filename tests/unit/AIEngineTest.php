@@ -1,7 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\AI_Engine;
+use JAT_Search_Intel\AI_Engine;
 
 class AIEngineTest extends TestCase {
 
@@ -167,7 +167,7 @@ class AIEngineTest extends TestCase {
     public function test_is_rate_limited_true_when_count_exceeds(): void {
         global $si_test_state;
         $si_test_state['transients'] = [
-            'search_intel_ai_rate_limit' => [ 'count' => 31 ],
+            'jat_search_intel_ai_rate_limit' => [ 'count' => 31 ],
         ];
 
         $ai = $this->make();
@@ -192,7 +192,7 @@ class AIEngineTest extends TestCase {
     public function test_is_budget_exceeded_true_when_over(): void {
         global $si_test_state;
         $si_test_state['options'] = [
-            'search_intel_ai_token_usage' => [
+            'jat_search_intel_ai_token_usage' => [
                 'total_tokens' => 200000,
                 'month_tokens' => 100001,
                 'month'        => gmdate( 'Y-m' ),
@@ -206,7 +206,7 @@ class AIEngineTest extends TestCase {
     public function test_get_token_usage_resets_on_new_month(): void {
         global $si_test_state;
         $si_test_state['options'] = [
-            'search_intel_ai_token_usage' => [
+            'jat_search_intel_ai_token_usage' => [
                 'total_tokens' => 50000,
                 'month_tokens' => 50000,
                 'month'        => '2020-01',
@@ -236,7 +236,7 @@ class AIEngineTest extends TestCase {
         global $si_test_state;
         $si_test_state['options']    = [];
         $si_test_state['transients'] = [
-            'search_intel_ai_rate_limit' => [ 'count' => 999 ],
+            'jat_search_intel_ai_rate_limit' => [ 'count' => 999 ],
         ];
 
         // Use OpenAI with a saved key — Ollama skips rate limiting by design.
@@ -251,7 +251,7 @@ class AIEngineTest extends TestCase {
     public function test_chat_fails_when_budget_exceeded(): void {
         global $si_test_state;
         $si_test_state['options'] = [
-            'search_intel_ai_token_usage' => [
+            'jat_search_intel_ai_token_usage' => [
                 'total_tokens' => 100001,
                 'month_tokens' => 100001,
                 'month'        => gmdate( 'Y-m' ),

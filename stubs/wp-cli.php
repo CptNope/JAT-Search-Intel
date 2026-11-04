@@ -2,7 +2,7 @@
 /**
  * WP-CLI stubs for Psalm static analysis.
  *
- * @package Search_Intel
+ * @package JAT_Search_Intel
  */
 
 namespace {

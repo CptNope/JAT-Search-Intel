@@ -4,7 +4,7 @@
  */
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\Schema_Manager;
+use JAT_Search_Intel\Schema_Manager;
 
 class SchemaManagerTest extends TestCase {
 
@@ -133,7 +133,7 @@ class SchemaManagerTest extends TestCase {
 
     public function test_singular_schema_includes_direct_answer_as_abstract(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_direct_answer'] = 'SEO is optimization.';
+        $si_test_state['post_meta'][1]['_jat_search_intel_direct_answer'] = 'SEO is optimization.';
 
         $mgr    = $this->make_manager();
         $schema = $mgr->get_singular_schema( 1 );
@@ -144,7 +144,7 @@ class SchemaManagerTest extends TestCase {
 
     public function test_singular_schema_includes_citations(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_citations'] = [
+        $si_test_state['post_meta'][1]['_jat_search_intel_citations'] = [
             [ 'source' => 'Google Blog', 'url' => 'https://blog.google', 'date' => '2024-01-01', 'quote' => 'Cited text' ],
         ];
 
@@ -158,7 +158,7 @@ class SchemaManagerTest extends TestCase {
 
     public function test_singular_schema_includes_audience(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_audience'] = 'developers';
+        $si_test_state['post_meta'][1]['_jat_search_intel_audience'] = 'developers';
 
         $mgr    = $this->make_manager();
         $schema = $mgr->get_singular_schema( 1 );
@@ -169,8 +169,8 @@ class SchemaManagerTest extends TestCase {
 
     public function test_singular_schema_includes_content_location(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_local_relevance'] = '1';
-        $si_test_state['post_meta'][1]['_search_intel_local_location']  = 'San Francisco, CA';
+        $si_test_state['post_meta'][1]['_jat_search_intel_local_relevance'] = '1';
+        $si_test_state['post_meta'][1]['_jat_search_intel_local_location']  = 'San Francisco, CA';
 
         $mgr    = $this->make_manager();
         $schema = $mgr->get_singular_schema( 1 );

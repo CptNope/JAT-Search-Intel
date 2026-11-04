@@ -1,54 +1,54 @@
 /**
- * Search Intel Editor Store
+ * JAT Search Intel Editor Store
  *
  * @wordpress/data store for managing SEO/AEO/GEO post meta
  * in the Gutenberg sidebar panel.
  *
- * Store name: 'search-intel/editor'
+ * Store name: 'jat-search-intel/editor'
  */
 
 import { createReduxStore, register } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 
 /**
- * Meta key map — mirrors the PHP _search_intel_* meta keys.
+ * Meta key map — mirrors the PHP _jat_search_intel_* meta keys.
  */
 export const META_KEYS = {
 	// SEO
-	title: '_search_intel_title',
-	description: '_search_intel_description',
-	focusKeyword: '_search_intel_focus_keyword',
-	canonicalUrl: '_search_intel_canonical_url',
-	noindex: '_search_intel_noindex',
-	nofollow: '_search_intel_nofollow',
-	ogTitle: '_search_intel_og_title',
-	ogDescription: '_search_intel_og_description',
-	ogImage: '_search_intel_og_image',
-	twitterTitle: '_search_intel_twitter_title',
-	twitterDescription: '_search_intel_twitter_description',
-	twitterImage: '_search_intel_twitter_image',
-	secondaryKeywords: '_search_intel_secondary_keywords',
+	title: '_jat_search_intel_title',
+	description: '_jat_search_intel_description',
+	focusKeyword: '_jat_search_intel_focus_keyword',
+	canonicalUrl: '_jat_search_intel_canonical_url',
+	noindex: '_jat_search_intel_noindex',
+	nofollow: '_jat_search_intel_nofollow',
+	ogTitle: '_jat_search_intel_og_title',
+	ogDescription: '_jat_search_intel_og_description',
+	ogImage: '_jat_search_intel_og_image',
+	twitterTitle: '_jat_search_intel_twitter_title',
+	twitterDescription: '_jat_search_intel_twitter_description',
+	twitterImage: '_jat_search_intel_twitter_image',
+	secondaryKeywords: '_jat_search_intel_secondary_keywords',
 
 	// AEO
-	directAnswer: '_search_intel_direct_answer',
-	schemaType: '_search_intel_schema_type',
+	directAnswer: '_jat_search_intel_direct_answer',
+	schemaType: '_jat_search_intel_schema_type',
 
 	// GEO
-	aiSummary: '_search_intel_ai_summary',
-	keyTopics: '_search_intel_key_topics',
-	contentType: '_search_intel_content_type',
-	contentIntent: '_search_intel_content_intent',
-	targetAudience: '_search_intel_target_audience',
-	expertiseLevel: '_search_intel_expertise_level',
-	factCheckDate: '_search_intel_fact_check_date',
-	localRelevance: '_search_intel_local_relevance',
-	localLocation: '_search_intel_local_location',
+	aiSummary: '_jat_search_intel_ai_summary',
+	keyTopics: '_jat_search_intel_key_topics',
+	contentType: '_jat_search_intel_content_type',
+	contentIntent: '_jat_search_intel_content_intent',
+	targetAudience: '_jat_search_intel_target_audience',
+	expertiseLevel: '_jat_search_intel_expertise_level',
+	factCheckDate: '_jat_search_intel_fact_check_date',
+	localRelevance: '_jat_search_intel_local_relevance',
+	localLocation: '_jat_search_intel_local_location',
 
 	// Scores
-	seoScore: '_search_intel_seo_score',
-	aeoScore: '_search_intel_aeo_score',
-	geoScore: '_search_intel_geo_score',
-	readabilityScore: '_search_intel_readability_score',
+	seoScore: '_jat_search_intel_seo_score',
+	aeoScore: '_jat_search_intel_aeo_score',
+	geoScore: '_jat_search_intel_geo_score',
+	readabilityScore: '_jat_search_intel_readability_score',
 };
 
 /**
@@ -90,7 +90,7 @@ const actions = {
 
 			try {
 				const response = await window.wp.apiFetch( {
-					path: `/search-intel/v1/analyze/${ postId }`,
+					path: `/jat-search-intel/v1/analyze/${ postId }`,
 					method: 'POST',
 				} );
 
@@ -110,7 +110,7 @@ const actions = {
 				}
 			} catch ( error ) {
 				// eslint-disable-next-line no-console
-				console.error( 'Search Intel analysis error:', error );
+				console.error( 'JAT Search Intel analysis error:', error );
 			} finally {
 				dispatch.setIsAnalyzing( false );
 			}
@@ -154,7 +154,7 @@ const selectors = {
 /**
  * Create and register the store.
  */
-const store = createReduxStore( 'search-intel/editor', {
+const store = createReduxStore( 'jat-search-intel/editor', {
 	reducer,
 	actions,
 	selectors,
@@ -204,7 +204,7 @@ subscribe( () => {
 	}
 
 	// Don't auto-analyze if already running.
-	if ( globalSelect( 'search-intel/editor' ).isAnalyzing() ) {
+	if ( globalSelect( 'jat-search-intel/editor' ).isAnalyzing() ) {
 		return;
 	}
 
@@ -216,7 +216,7 @@ subscribe( () => {
 	_autoAnalysisTimeout = setTimeout( () => {
 		// Only auto-analyze if the post has been saved at least once.
 		if ( ! editor.isEditedPostNew() ) {
-			globalDispatch( 'search-intel/editor' ).runAnalysis();
+			globalDispatch( 'jat-search-intel/editor' ).runAnalysis();
 		}
 	}, 2000 );
 } );

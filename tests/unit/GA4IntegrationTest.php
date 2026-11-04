@@ -2,10 +2,10 @@
 
 declare( strict_types=1 );
 
-namespace Search_Intel\Tests\Unit;
+namespace JAT_Search_Intel\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\GA4_Integration;
+use JAT_Search_Intel\GA4_Integration;
 
 class GA4IntegrationTest extends TestCase {
 

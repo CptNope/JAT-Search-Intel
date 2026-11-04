@@ -5,9 +5,9 @@
  */
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\Admin;
-use Search_Intel\Core;
-use Search_Intel\Content_Analyzer;
+use JAT_Search_Intel\Admin;
+use JAT_Search_Intel\Core;
+use JAT_Search_Intel\Content_Analyzer;
 
 class CrossModuleTest extends TestCase {
 
@@ -30,7 +30,7 @@ class CrossModuleTest extends TestCase {
             1 => [
                 'ID'                => 1,
                 'post_title'        => 'Cross Module Test',
-                'post_content'      => '<p>Content for cross-module testing of the Search Intel plugin with enough words to test analysis.</p>',
+                'post_content'      => '<p>Content for cross-module testing of the JAT Search Intel plugin with enough words to test analysis.</p>',
                 'post_excerpt'      => 'Cross module excerpt.',
                 'post_author'       => 1,
                 'post_type'         => 'post',
@@ -46,12 +46,12 @@ class CrossModuleTest extends TestCase {
     public function test_metabox_save_title_read_by_seo(): void {
         $admin = $this->make_admin();
         $_POST = [
-            'search_intel_metabox_nonce' => 'test_nonce',
+            'jat_search_intel_metabox_nonce' => 'test_nonce',
             'si_title' => 'Saved SEO Title',
         ];
         $admin->save_metabox_data( 1, get_post( 1 ) );
 
-        $seo = new \Search_Intel\SEO_Manager( Core::get_default_settings() );
+        $seo = new \JAT_Search_Intel\SEO_Manager( Core::get_default_settings() );
         $title = $seo->get_title( 1 );
 
         $this->assertEquals( 'Saved SEO Title', $title );
@@ -60,12 +60,12 @@ class CrossModuleTest extends TestCase {
     public function test_metabox_save_description_read_by_seo(): void {
         $admin = $this->make_admin();
         $_POST = [
-            'search_intel_metabox_nonce' => 'test_nonce',
+            'jat_search_intel_metabox_nonce' => 'test_nonce',
             'si_description' => 'Saved meta description for SEO.',
         ];
         $admin->save_metabox_data( 1, get_post( 1 ) );
 
-        $seo  = new \Search_Intel\SEO_Manager( Core::get_default_settings() );
+        $seo  = new \JAT_Search_Intel\SEO_Manager( Core::get_default_settings() );
         $desc = $seo->get_description( 1 );
 
         $this->assertEquals( 'Saved meta description for SEO.', $desc );
@@ -74,12 +74,12 @@ class CrossModuleTest extends TestCase {
     public function test_metabox_save_canonical_read_by_seo(): void {
         $admin = $this->make_admin();
         $_POST = [
-            'search_intel_metabox_nonce' => 'test_nonce',
+            'jat_search_intel_metabox_nonce' => 'test_nonce',
             'si_canonical' => 'https://example.com/custom-canonical',
         ];
         $admin->save_metabox_data( 1, get_post( 1 ) );
 
-        $canonical = get_post_meta( 1, '_search_intel_canonical', true );
+        $canonical = get_post_meta( 1, '_jat_search_intel_canonical', true );
         $this->assertEquals( 'https://example.com/custom-canonical', $canonical );
     }
 
@@ -88,14 +88,14 @@ class CrossModuleTest extends TestCase {
     public function test_metabox_save_faqs_read_by_aeo(): void {
         $admin = $this->make_admin();
         $_POST = [
-            'search_intel_metabox_nonce' => 'test_nonce',
+            'jat_search_intel_metabox_nonce' => 'test_nonce',
             'si_faqs' => json_encode( [
                 [ 'question' => 'What is GEO?', 'answer' => 'Generative Engine Optimization.' ],
             ] ),
         ];
         $admin->save_metabox_data( 1, get_post( 1 ) );
 
-        $aeo  = new \Search_Intel\AEO_Manager( Core::get_default_settings() );
+        $aeo  = new \JAT_Search_Intel\AEO_Manager( Core::get_default_settings() );
         $faqs = $aeo->get_faq_schema( 1 );
 
         $this->assertNotEmpty( $faqs );
@@ -104,12 +104,12 @@ class CrossModuleTest extends TestCase {
     public function test_metabox_save_direct_answer_rendered_by_aeo(): void {
         $admin = $this->make_admin();
         $_POST = [
-            'search_intel_metabox_nonce' => 'test_nonce',
+            'jat_search_intel_metabox_nonce' => 'test_nonce',
             'si_direct_answer' => 'GEO optimizes for AI engines.',
         ];
         $admin->save_metabox_data( 1, get_post( 1 ) );
 
-        $aeo = new \Search_Intel\AEO_Manager( Core::get_default_settings() );
+        $aeo = new \JAT_Search_Intel\AEO_Manager( Core::get_default_settings() );
         ob_start();
         $aeo->render_direct_answer_meta();
         $output = ob_get_clean();
@@ -122,12 +122,12 @@ class CrossModuleTest extends TestCase {
     public function test_metabox_save_schema_type_read_by_schema(): void {
         $admin = $this->make_admin();
         $_POST = [
-            'search_intel_metabox_nonce' => 'test_nonce',
+            'jat_search_intel_metabox_nonce' => 'test_nonce',
             'si_schema_type' => 'BlogPosting',
         ];
         $admin->save_metabox_data( 1, get_post( 1 ) );
 
-        $schema = new \Search_Intel\Schema_Manager( Core::get_default_settings() );
+        $schema = new \JAT_Search_Intel\Schema_Manager( Core::get_default_settings() );
         $result = $schema->get_singular_schema( 1 );
 
         $this->assertEquals( 'BlogPosting', $result['@type'] );
@@ -136,14 +136,14 @@ class CrossModuleTest extends TestCase {
     public function test_metabox_save_citations_in_schema(): void {
         $admin = $this->make_admin();
         $_POST = [
-            'search_intel_metabox_nonce' => 'test_nonce',
+            'jat_search_intel_metabox_nonce' => 'test_nonce',
             'si_citations' => json_encode( [
                 [ 'source' => 'Research Paper', 'url' => 'https://example.com/paper', 'date' => '2025-06-01', 'quote' => 'Key finding.' ],
             ] ),
         ];
         $admin->save_metabox_data( 1, get_post( 1 ) );
 
-        $schema = new \Search_Intel\Schema_Manager( Core::get_default_settings() );
+        $schema = new \JAT_Search_Intel\Schema_Manager( Core::get_default_settings() );
         $result = $schema->get_singular_schema( 1 );
 
         $this->assertArrayHasKey( 'citation', $result );
@@ -155,14 +155,14 @@ class CrossModuleTest extends TestCase {
     public function test_metabox_save_entities_used_by_geo(): void {
         $admin = $this->make_admin();
         $_POST = [
-            'search_intel_metabox_nonce' => 'test_nonce',
+            'jat_search_intel_metabox_nonce' => 'test_nonce',
             'si_entities' => json_encode( [
                 [ 'name' => 'WordPress', 'type' => 'SoftwareApplication', 'url' => 'https://wordpress.org' ],
             ] ),
         ];
         $admin->save_metabox_data( 1, get_post( 1 ) );
 
-        $geo    = new \Search_Intel\GEO_Manager( Core::get_default_settings() );
+        $geo    = new \JAT_Search_Intel\GEO_Manager( Core::get_default_settings() );
         $result = $geo->enhance_content_entities( '<p>WordPress powers the web.</p>' );
 
         $this->assertStringContainsString( 'schema.org/SoftwareApplication', $result );
@@ -239,11 +239,11 @@ class CrossModuleTest extends TestCase {
     public function test_user_eeat_credentials_affect_geo_score(): void {
         global $si_test_state;
 
-        $geo      = new \Search_Intel\GEO_Manager( Core::get_default_settings() );
+        $geo      = new \JAT_Search_Intel\GEO_Manager( Core::get_default_settings() );
         $baseline = $geo->get_geo_score( 1 );
 
         // Add credentials
-        $si_test_state['user_meta'][1]['search_intel_credentials'] = [ 'PhD in CS', 'AWS Certified' ];
+        $si_test_state['user_meta'][1]['jat_search_intel_credentials'] = [ 'PhD in CS', 'AWS Certified' ];
         $with_creds = $geo->get_geo_score( 1 );
 
         $this->assertGreaterThanOrEqual( $baseline['score'], $with_creds['score'] );

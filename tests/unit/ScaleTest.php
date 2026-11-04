@@ -1,8 +1,8 @@
 <?php
-namespace Search_Intel\Tests\Unit;
+namespace JAT_Search_Intel\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\Scale;
+use JAT_Search_Intel\Scale;
 
 class ScaleTest extends TestCase {
 
@@ -152,9 +152,9 @@ class ScaleTest extends TestCase {
 		] );
 
 		$this->assertEquals( 1, $count );
-		$this->assertEquals( 'New Title', $si_test_state['post_meta'][1]['_search_intel_title'] );
-		$this->assertEquals( 'New Desc', $si_test_state['post_meta'][1]['_search_intel_description'] );
-		$this->assertEquals( 'seo', $si_test_state['post_meta'][1]['_search_intel_focus_keyword'] );
+		$this->assertEquals( 'New Title', $si_test_state['post_meta'][1]['_jat_search_intel_title'] );
+		$this->assertEquals( 'New Desc', $si_test_state['post_meta'][1]['_jat_search_intel_description'] );
+		$this->assertEquals( 'seo', $si_test_state['post_meta'][1]['_jat_search_intel_focus_keyword'] );
 	}
 
 	public function test_bulk_update_meta_ignores_invalid_fields(): void {

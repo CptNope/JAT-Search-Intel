@@ -2,10 +2,10 @@
 
 declare( strict_types=1 );
 
-namespace Search_Intel\Tests\Unit;
+namespace JAT_Search_Intel\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\Custom_Reports;
+use JAT_Search_Intel\Custom_Reports;
 
 class CustomReportsTest extends TestCase {
 
@@ -262,6 +262,6 @@ class CustomReportsTest extends TestCase {
 
         $this->assertArrayHasKey( 'last_email', $si_test_state );
         $this->assertSame( 'test@example.com', $si_test_state['last_email']['to'] );
-        $this->assertStringContainsString( 'Search Intel Report', $si_test_state['last_email']['subject'] );
+        $this->assertStringContainsString( 'JAT Search Intel Report', $si_test_state['last_email']['subject'] );
     }
 }

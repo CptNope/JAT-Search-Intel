@@ -1,8 +1,8 @@
 <?php
-namespace Search_Intel\Tests\Unit;
+namespace JAT_Search_Intel\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\Visibility_Dashboard;
+use JAT_Search_Intel\Visibility_Dashboard;
 
 class VisibilityDashboardTest extends TestCase {
 
@@ -134,7 +134,7 @@ class VisibilityDashboardTest extends TestCase {
 
 	public function test_get_ai_referral_summary_with_data(): void {
 		global $si_test_state;
-		$si_test_state['options']['search_intel_ai_referrals'] = [
+		$si_test_state['options']['jat_search_intel_ai_referrals'] = [
 			[ 'date' => gmdate( 'Y-m-d' ), 'source' => 'ChatGPT' ],
 			[ 'date' => gmdate( 'Y-m-d' ), 'source' => 'Perplexity' ],
 			[ 'date' => gmdate( 'Y-m-d' ), 'source' => 'ChatGPT' ],
@@ -155,7 +155,7 @@ class VisibilityDashboardTest extends TestCase {
 
 	public function test_get_llms_access_log_with_entries(): void {
 		global $si_test_state;
-		$si_test_state['options']['search_intel_llms_access_log'] = [
+		$si_test_state['options']['jat_search_intel_llms_access_log'] = [
 			[ 'time' => '2026-01-01 12:00:00', 'endpoint' => 'llms.txt', 'bot' => 'OpenAI GPTBot' ],
 			[ 'time' => '2026-01-02 12:00:00', 'endpoint' => 'llms-full.txt', 'bot' => 'Claude' ],
 		];
@@ -175,7 +175,7 @@ class VisibilityDashboardTest extends TestCase {
 
 	public function test_get_visibility_trend_with_data(): void {
 		global $si_test_state;
-		$si_test_state['options']['search_intel_visibility_trend'] = [
+		$si_test_state['options']['jat_search_intel_visibility_trend'] = [
 			[ 'date' => '2026-01-01', 'score' => 55, 'grade' => 'D' ],
 			[ 'date' => '2026-01-02', 'score' => 60, 'grade' => 'D' ],
 		];
@@ -188,7 +188,7 @@ class VisibilityDashboardTest extends TestCase {
 		$this->dashboard->record_daily_score();
 
 		global $si_test_state;
-		$trend = $si_test_state['options']['search_intel_visibility_trend'] ?? [];
+		$trend = $si_test_state['options']['jat_search_intel_visibility_trend'] ?? [];
 
 		$this->assertNotEmpty( $trend );
 		$this->assertEquals( gmdate( 'Y-m-d' ), $trend[0]['date'] );

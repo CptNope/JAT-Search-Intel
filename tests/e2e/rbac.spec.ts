@@ -9,22 +9,22 @@ import { test, expect } from '@playwright/test';
 
 test.describe('RBAC — Admin Access', () => {
 
-  test('admin sees Search Intel menu', async ({ page }) => {
+  test('admin sees JAT Search Intel menu', async ({ page }) => {
     await page.goto('/wp-admin/');
-    const menu = page.locator('#adminmenu a:has-text("Search Intel")');
+    const menu = page.locator('#adminmenu a:has-text("JAT Search Intel")');
     await expect(menu).toBeVisible();
   });
 
   test('admin can access settings page', async ({ page }) => {
-    await page.goto('/wp-admin/admin.php?page=search-intel');
-    await expect(page.locator('h1').first()).toContainText(/Search Intel/);
+    await page.goto('/wp-admin/admin.php?page=jat-search-intel');
+    await expect(page.locator('h1').first()).toContainText(/JAT Search Intel/);
     // Admin should see a save button — full access.
     const submit = page.locator('input[type="submit"]');
     await expect(submit).toBeVisible();
   });
 
   test('admin can access bulk editor if Scale is enabled', async ({ page }) => {
-    await page.goto('/wp-admin/admin.php?page=search-intel-bulk-editor');
+    await page.goto('/wp-admin/admin.php?page=jat-search-intel-bulk-editor');
     await page.waitForLoadState('domcontentloaded');
     const heading = page.locator('h1');
     const count = await heading.count();
@@ -41,13 +41,13 @@ test.describe('RBAC — Admin Access', () => {
   });
 
   test('admin can access migration page', async ({ page }) => {
-    await page.goto('/wp-admin/admin.php?page=search-intel-migration');
+    await page.goto('/wp-admin/admin.php?page=jat-search-intel-migration');
     await expect(page.locator('h1')).toContainText('SEO Plugin Migration');
   });
 
   test('admin sees metabox on post editor', async ({ page }) => {
     await page.goto('/wp-admin/post-new.php');
-    const metabox = page.locator('#search-intel-seo');
+    const metabox = page.locator('#jat-search-intel-seo');
     await expect(metabox).toBeVisible({ timeout: 10_000 });
   });
 });
@@ -77,14 +77,14 @@ test.describe('RBAC — Author Access', () => {
     }
 
     // Try to access settings — should get permission denied.
-    await page.goto('/wp-admin/admin.php?page=search-intel');
+    await page.goto('/wp-admin/admin.php?page=jat-search-intel');
     await page.waitForLoadState('domcontentloaded');
     const body = await page.locator('body').textContent() ?? '';
 
     // WP shows "Sorry, you are not allowed to access this page." for unauthorized users,
     // or redirects to wp-admin which won't have our settings form.
     const hasPermissionDenied = body.includes('not allowed') || body.includes('cheatin');
-    const hasSettingsForm = body.includes('search-intel') && (await page.locator('input[type="submit"]').count()) > 0;
+    const hasSettingsForm = body.includes('jat-search-intel') && (await page.locator('input[type="submit"]').count()) > 0;
 
     // Author should either see a permission denied message or NOT see the settings form.
     expect(hasPermissionDenied || !hasSettingsForm).toBe(true);

@@ -1,5 +1,5 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -18,7 +18,7 @@ class SRI {
 	/**
 	 * Option key for cached integrity hashes.
 	 */
-	private const OPTION_KEY = 'search_intel_sri_hashes';
+	private const OPTION_KEY = 'jat_search_intel_sri_hashes';
 
 	/**
 	 * Hash algorithm.
@@ -58,13 +58,13 @@ class SRI {
 			return '';
 		}
 
-		$content = file_get_contents( $file_path );
+		$content = file_get_contents( $file_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Hashing a local plugin asset file.
 		if ( false === $content ) {
 			return '';
 		}
 
 		$hash = hash( self::ALGO, $content, true );
-		return self::ALGO . '-' . base64_encode( $hash );
+		return self::ALGO . '-' . base64_encode( $hash ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- SRI hashes are base64 by specification.
 	}
 
 	/**
@@ -159,7 +159,7 @@ class SRI {
 	 * @return bool
 	 */
 	public function is_plugin_asset( string $src ): bool {
-		return false !== strpos( $src, 'search-intel' );
+		return false !== strpos( $src, 'jat-search-intel' );
 	}
 
 	/**
@@ -172,8 +172,8 @@ class SRI {
 		// Strip query strings.
 		$src = strtok( $src, '?' );
 
-		$plugin_url = defined( 'SEARCH_INTEL_URL' ) ? SEARCH_INTEL_URL : '';
-		$plugin_dir = defined( 'SEARCH_INTEL_DIR' ) ? SEARCH_INTEL_DIR : '';
+		$plugin_url = defined( 'JAT_SEARCH_INTEL_URL' ) ? JAT_SEARCH_INTEL_URL : '';
+		$plugin_dir = defined( 'JAT_SEARCH_INTEL_DIR' ) ? JAT_SEARCH_INTEL_DIR : '';
 
 		if ( ! $plugin_url || ! $plugin_dir ) {
 			return '';

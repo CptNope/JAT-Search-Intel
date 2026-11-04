@@ -6,11 +6,11 @@
  * supports CSV/JSON export for all report types, and offers a custom report
  * builder allowing users to pick modules, date range, and post types.
  *
- * @package Search_Intel
+ * @package JAT_Search_Intel
  * @since   3.3.0
  */
 
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
@@ -22,7 +22,7 @@ class Custom_Reports {
     private $settings;
 
     /** @var string Option key for scheduled report config. */
-    private const SCHEDULE_KEY = 'search_intel_report_schedules';
+    private const SCHEDULE_KEY = 'jat_search_intel_report_schedules';
 
     /** @var string Transient prefix for generated reports. */
     private const REPORT_TRANSIENT_PREFIX = 'si_report_';
@@ -40,16 +40,16 @@ class Custom_Reports {
         }
 
         // Scheduled report cron.
-        add_action( 'search_intel_send_scheduled_report', [ $this, 'process_scheduled_reports' ] );
+        add_action( 'jat_search_intel_send_scheduled_report', [ $this, 'process_scheduled_reports' ] );
 
-        if ( ! wp_next_scheduled( 'search_intel_send_scheduled_report' ) ) {
-            wp_schedule_event( time(), 'daily', 'search_intel_send_scheduled_report' );
+        if ( ! wp_next_scheduled( 'jat_search_intel_send_scheduled_report' ) ) {
+            wp_schedule_event( time(), 'daily', 'jat_search_intel_send_scheduled_report' );
         }
 
         // AJAX endpoints for export.
-        add_action( 'wp_ajax_search_intel_export_csv', [ $this, 'ajax_export_csv' ] );
-        add_action( 'wp_ajax_search_intel_export_json', [ $this, 'ajax_export_json' ] );
-        add_action( 'wp_ajax_search_intel_generate_pdf', [ $this, 'ajax_generate_pdf' ] );
+        add_action( 'wp_ajax_jat_search_intel_export_csv', [ $this, 'ajax_export_csv' ] );
+        add_action( 'wp_ajax_jat_search_intel_export_json', [ $this, 'ajax_export_json' ] );
+        add_action( 'wp_ajax_jat_search_intel_generate_pdf', [ $this, 'ajax_generate_pdf' ] );
 
         if ( is_admin() ) {
             add_action( 'admin_menu', [ $this, 'register_admin_page' ] );
@@ -115,10 +115,10 @@ class Custom_Reports {
 
             // Read scores from individual meta keys (set by bulk rescore / content analyzer).
             $meta_map = [
-                'seo'         => '_search_intel_seo_score',
-                'aeo'         => '_search_intel_aeo_score',
-                'geo'         => '_search_intel_geo_score',
-                'readability' => '_search_intel_readability_score',
+                'seo'         => '_jat_search_intel_seo_score',
+                'aeo'         => '_jat_search_intel_aeo_score',
+                'geo'         => '_jat_search_intel_geo_score',
+                'readability' => '_jat_search_intel_readability_score',
             ];
 
             foreach ( $modules as $mod ) {
@@ -166,7 +166,7 @@ class Custom_Reports {
             return '';
         }
 
-        $output = fopen( 'php://temp', 'r+' );
+        $output = fopen( 'php://temp', 'r+' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- In-memory stream for fputcsv().
         if ( $output === false ) {
             return '';
         }
@@ -176,7 +176,7 @@ class Custom_Reports {
         foreach ( $modules as $mod ) {
             $headers[] = strtoupper( $mod ) . ' Score';
         }
-        fputcsv( $output, $headers );
+        fputcsv( $output, $headers, ',', '"', '\\' );
 
         // Data rows.
         foreach ( $rows as $row ) {
@@ -190,12 +190,12 @@ class Custom_Reports {
             foreach ( $modules as $mod ) {
                 $line[] = $row[ $mod ] ?? 0;
             }
-            fputcsv( $output, $line );
+            fputcsv( $output, $line, ',', '"', '\\' );
         }
 
         rewind( $output );
         $csv = stream_get_contents( $output );
-        fclose( $output );
+        fclose( $output ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
 
         return $csv !== false ? $csv : '';
     }
@@ -208,14 +208,14 @@ class Custom_Reports {
             wp_die( 'Unauthorized', 403 );
         }
 
-        check_ajax_referer( 'search_intel_export', 'nonce' );
+        check_ajax_referer( 'jat_search_intel_export', 'nonce' );
 
         $config = $this->get_config_from_request();
         $report = $this->build_report( $config );
         $csv    = $this->to_csv( $report );
 
         header( 'Content-Type: text/csv; charset=utf-8' );
-        header( 'Content-Disposition: attachment; filename="search-intel-report-' . gmdate( 'Y-m-d' ) . '.csv"' );
+        header( 'Content-Disposition: attachment; filename="jat-search-intel-report-' . gmdate( 'Y-m-d' ) . '.csv"' );
         echo $csv; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CSV binary.
         wp_die();
     }
@@ -242,14 +242,14 @@ class Custom_Reports {
             wp_die( 'Unauthorized', 403 );
         }
 
-        check_ajax_referer( 'search_intel_export', 'nonce' );
+        check_ajax_referer( 'jat_search_intel_export', 'nonce' );
 
         $config = $this->get_config_from_request();
         $report = $this->build_report( $config );
         $json   = $this->to_json( $report );
 
         header( 'Content-Type: application/json; charset=utf-8' );
-        header( 'Content-Disposition: attachment; filename="search-intel-report-' . gmdate( 'Y-m-d' ) . '.json"' );
+        header( 'Content-Disposition: attachment; filename="jat-search-intel-report-' . gmdate( 'Y-m-d' ) . '.json"' );
         echo $json; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON binary.
         wp_die();
     }
@@ -280,7 +280,7 @@ class Custom_Reports {
         <html>
         <head>
             <meta charset="utf-8">
-            <title>Search Intel Report — <?php echo esc_html( $site ); ?></title>
+            <title>JAT Search Intel Report — <?php echo esc_html( $site ); ?></title>
             <style>
                 body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 40px; color: #1e1e1e; }
                 h1 { border-bottom: 2px solid #2271b1; padding-bottom: 10px; }
@@ -332,7 +332,7 @@ class Custom_Reports {
             </table>
 
             <div class="footer">
-                Report generated by Search Intel v<?php echo defined( 'SEARCH_INTEL_VERSION' ) ? esc_html( SEARCH_INTEL_VERSION ) : ''; ?>
+                Report generated by JAT Search Intel v<?php echo defined( 'JAT_SEARCH_INTEL_VERSION' ) ? esc_html( JAT_SEARCH_INTEL_VERSION ) : ''; ?>
             </div>
         </body>
         </html>
@@ -348,7 +348,7 @@ class Custom_Reports {
             wp_die( 'Unauthorized', 403 );
         }
 
-        check_ajax_referer( 'search_intel_export', 'nonce' );
+        check_ajax_referer( 'jat_search_intel_export', 'nonce' );
 
         $config = $this->get_config_from_request();
         $report = $this->build_report( $config );
@@ -431,7 +431,7 @@ class Custom_Reports {
                 continue;
             }
 
-            $subject = 'Search Intel Report — ' . get_bloginfo( 'name' ) . ' — ' . gmdate( 'Y-m-d' );
+            $subject = 'JAT Search Intel Report — ' . get_bloginfo( 'name' ) . ' — ' . gmdate( 'Y-m-d' );
 
             wp_mail( $email, $subject, $html, [ 'Content-Type: text/html; charset=UTF-8' ] );
 
@@ -496,11 +496,11 @@ class Custom_Reports {
      */
     public function register_admin_page(): void {
         add_submenu_page(
-            'search-intel',
+            'jat-search-intel',
             'Reports & Export',
             'Reports',
             'manage_options',
-            'search-intel-reports',
+            'jat-search-intel-reports',
             [ $this, 'render_admin_page' ]
         );
     }
@@ -510,7 +510,7 @@ class Custom_Reports {
      */
     public function render_admin_page(): void {
         $schedules = $this->get_schedules();
-        $nonce     = wp_create_nonce( 'search_intel_export' );
+        $nonce     = wp_create_nonce( 'jat_search_intel_export' );
         ?>
         <div class="wrap">
             <h1>Reports &amp; Export</h1>
@@ -543,9 +543,9 @@ class Custom_Reports {
                     <tr>
                         <th>Format</th>
                         <td>
-                            <button type="submit" name="action" value="search_intel_export_csv" class="button">Download CSV</button>
-                            <button type="submit" name="action" value="search_intel_export_json" class="button">Download JSON</button>
-                            <button type="submit" name="action" value="search_intel_generate_pdf" class="button button-primary">Generate PDF</button>
+                            <button type="submit" name="action" value="jat_search_intel_export_csv" class="button">Download CSV</button>
+                            <button type="submit" name="action" value="jat_search_intel_export_json" class="button">Download JSON</button>
+                            <button type="submit" name="action" value="jat_search_intel_generate_pdf" class="button button-primary">Generate PDF</button>
                         </td>
                     </tr>
                 </table>

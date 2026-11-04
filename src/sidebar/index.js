@@ -1,5 +1,5 @@
 /**
- * Search Intel — Gutenberg Sidebar Panel
+ * JAT Search Intel — Gutenberg Sidebar Panel
  *
  * Registers a PluginDocumentSettingPanel in the Block Editor
  * with SEO, AEO, GEO, and Analysis tabs.
@@ -22,27 +22,27 @@ import './sidebar.css';
 const TABS = [
 	{
 		name: 'seo',
-		title: __( 'SEO', 'search-intel' ),
+		title: __( 'SEO', 'jat-search-intel' ),
 		className: 'si-sidebar-tab',
 	},
 	{
 		name: 'aeo',
-		title: __( 'AEO', 'search-intel' ),
+		title: __( 'AEO', 'jat-search-intel' ),
 		className: 'si-sidebar-tab',
 	},
 	{
 		name: 'geo',
-		title: __( 'GEO', 'search-intel' ),
+		title: __( 'GEO', 'jat-search-intel' ),
 		className: 'si-sidebar-tab',
 	},
 	{
 		name: 'analysis',
-		title: __( 'Analysis', 'search-intel' ),
+		title: __( 'Analysis', 'jat-search-intel' ),
 		className: 'si-sidebar-tab',
 	},
 ];
 
-function SearchIntelSidebar() {
+function JATSearchIntelSidebar() {
 	const postType = useSelect(
 		( select ) => select( 'core/editor' ).getCurrentPostType(),
 		[]
@@ -55,9 +55,9 @@ function SearchIntelSidebar() {
 
 	return (
 		<PluginDocumentSettingPanel
-			name="search-intel-panel"
-			title={ __( 'Search Intel', 'search-intel' ) }
-			className="search-intel-sidebar"
+			name="jat-search-intel-panel"
+			title={ __( 'JAT Search Intel', 'jat-search-intel' ) }
+			className="jat-search-intel-sidebar"
 		>
 			<TabPanel
 				className="si-sidebar-tabs"
@@ -82,7 +82,7 @@ function SearchIntelSidebar() {
 	);
 }
 
-registerPlugin( 'search-intel-sidebar', {
-	render: SearchIntelSidebar,
+registerPlugin( 'jat-search-intel-sidebar', {
+	render: JATSearchIntelSidebar,
 	icon: 'chart-line',
 } );

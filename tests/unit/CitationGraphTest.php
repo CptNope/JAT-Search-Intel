@@ -1,8 +1,8 @@
 <?php
-namespace Search_Intel\Tests\Unit;
+namespace JAT_Search_Intel\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\Citation_Graph;
+use JAT_Search_Intel\Citation_Graph;
 
 class CitationGraphTest extends TestCase {
 
@@ -232,8 +232,8 @@ class CitationGraphTest extends TestCase {
 		$post = (object) $si_test_state['posts'][1];
 		$this->graph->update_post_graph( 1, $post );
 
-		$this->assertArrayHasKey( '_search_intel_internal_links', $si_test_state['post_meta'][1] ?? [] );
-		$this->assertArrayHasKey( '_search_intel_external_links', $si_test_state['post_meta'][1] ?? [] );
+		$this->assertArrayHasKey( '_jat_search_intel_internal_links', $si_test_state['post_meta'][1] ?? [] );
+		$this->assertArrayHasKey( '_jat_search_intel_external_links', $si_test_state['post_meta'][1] ?? [] );
 	}
 
 	public function test_update_post_graph_skips_revision(): void {
@@ -248,7 +248,7 @@ class CitationGraphTest extends TestCase {
 		$this->graph->update_post_graph( 1, $post );
 
 		// Draft should be skipped.
-		$this->assertArrayNotHasKey( '_search_intel_internal_links', $si_test_state['post_meta'][1] ?? [] );
+		$this->assertArrayNotHasKey( '_jat_search_intel_internal_links', $si_test_state['post_meta'][1] ?? [] );
 	}
 
 	// ── Disabled ─────────────────────────────────────────────────────────────

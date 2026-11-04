@@ -14,20 +14,16 @@ blob-report/
 
 # ── Node / Build ─────────────────────────────────────────────────────────
 node_modules/
-src/
-package.json
 package-lock.json
-webpack.config.js
 .wp-env.json
+# src/, package.json and webpack.config.js ship with the plugin so the
+# compiled build/ files can be regenerated (WordPress.org source requirement).
 
 # ── Composer Dev ──────────────────────────────────────────────────────────
 composer.json
 composer.lock
-vendor/bin/
-vendor/phpunit/
-vendor/wp-coding-standards/
-vendor/squizlabs/
-vendor/phpstan/
+vendor
+/vendor/
 
 # ── CI / Config ──────────────────────────────────────────────────────────
 .github/
@@ -38,12 +34,24 @@ vendor/phpstan/
 .eslintrc.json
 phpstan.neon
 phpstan.neon.dist
+phpstan-constants.php
+psalm.xml
+psalm-baseline.xml
+phpcs.xml.dist
+stubs/
+.stylelintrc.json
+bin/
+dist/
 phpstan-baseline.neon
 .php-cs-fixer.dist.php
 
 # ── Documentation (dev-only) ─────────────────────────────────────────────
 CONTRIBUTING.md
 CHANGELOG.md
+README.md
+ROADMAP.md
+AGENTS.md
+CLAUDE.md
 
 # ── IDE & OS ─────────────────────────────────────────────────────────────
 .idea/
@@ -54,3 +62,5 @@ Thumbs.db
 # ── Docker ───────────────────────────────────────────────────────────────
 .docker/
 docker-compose.yml
+
+.gitattributes

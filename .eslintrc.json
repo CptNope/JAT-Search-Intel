@@ -7,7 +7,7 @@
   "globals": {
     "wp": "readonly",
     "ajaxurl": "readonly",
-    "searchIntel": "readonly",
+    "jatSearchIntel": "readonly",
     "tinymce": "readonly"
   },
   "parserOptions": {

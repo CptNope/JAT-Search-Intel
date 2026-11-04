@@ -5,8 +5,8 @@
  */
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\GEO_Manager;
-use Search_Intel\Core;
+use JAT_Search_Intel\GEO_Manager;
+use JAT_Search_Intel\Core;
 
 class GEOOutputTest extends TestCase {
 
@@ -42,7 +42,7 @@ class GEOOutputTest extends TestCase {
 
     public function test_ai_meta_renders_ai_summary(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_ai_summary'] = 'This article covers GEO optimization.';
+        $si_test_state['post_meta'][1]['_jat_search_intel_ai_summary'] = 'This article covers GEO optimization.';
 
         $mgr = $this->make_geo();
         ob_start();
@@ -73,7 +73,7 @@ class GEOOutputTest extends TestCase {
 
     public function test_ai_meta_renders_content_intent(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_content_intent'] = 'educational';
+        $si_test_state['post_meta'][1]['_jat_search_intel_content_intent'] = 'educational';
 
         $mgr = $this->make_geo();
         ob_start();
@@ -86,7 +86,7 @@ class GEOOutputTest extends TestCase {
 
     public function test_ai_meta_renders_audience(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_audience'] = 'developers';
+        $si_test_state['post_meta'][1]['_jat_search_intel_audience'] = 'developers';
 
         $mgr = $this->make_geo();
         ob_start();
@@ -99,8 +99,8 @@ class GEOOutputTest extends TestCase {
 
     public function test_ai_meta_renders_geo_placename(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_local_relevance'] = '1';
-        $si_test_state['post_meta'][1]['_search_intel_local_location']  = 'Austin, TX';
+        $si_test_state['post_meta'][1]['_jat_search_intel_local_relevance'] = '1';
+        $si_test_state['post_meta'][1]['_jat_search_intel_local_location']  = 'Austin, TX';
 
         $mgr = $this->make_geo();
         ob_start();
@@ -113,7 +113,7 @@ class GEOOutputTest extends TestCase {
 
     public function test_ai_meta_renders_keywords(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_topics'] = [ 'SEO', 'AEO', 'GEO' ];
+        $si_test_state['post_meta'][1]['_jat_search_intel_topics'] = [ 'SEO', 'AEO', 'GEO' ];
 
         $mgr = $this->make_geo();
         ob_start();
@@ -146,7 +146,7 @@ class GEOOutputTest extends TestCase {
 
     public function test_freshness_includes_fact_check_date(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_fact_checked'] = '2026-03-01';
+        $si_test_state['post_meta'][1]['_jat_search_intel_fact_checked'] = '2026-03-01';
 
         $mgr = $this->make_geo();
         ob_start();
@@ -161,7 +161,7 @@ class GEOOutputTest extends TestCase {
 
     public function test_entity_markup_wraps_entity_name(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_entities'] = [
+        $si_test_state['post_meta'][1]['_jat_search_intel_entities'] = [
             [ 'name' => 'Google', 'type' => 'Organization', 'url' => 'https://google.com' ],
         ];
 
@@ -175,7 +175,7 @@ class GEOOutputTest extends TestCase {
 
     public function test_entity_markup_adds_link_when_url_provided(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_entities'] = [
+        $si_test_state['post_meta'][1]['_jat_search_intel_entities'] = [
             [ 'name' => 'Google', 'type' => 'Organization', 'url' => 'https://google.com' ],
         ];
 
@@ -188,7 +188,7 @@ class GEOOutputTest extends TestCase {
 
     public function test_entity_invalid_type_falls_back_to_thing(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_entities'] = [
+        $si_test_state['post_meta'][1]['_jat_search_intel_entities'] = [
             [ 'name' => 'Test', 'type' => 'EvilType', 'url' => '' ],
         ];
 
@@ -201,7 +201,7 @@ class GEOOutputTest extends TestCase {
 
     public function test_entity_markup_only_wraps_first_occurrence(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_entities'] = [
+        $si_test_state['post_meta'][1]['_jat_search_intel_entities'] = [
             [ 'name' => 'Google', 'type' => 'Organization', 'url' => '' ],
         ];
 
@@ -230,7 +230,7 @@ class GEOOutputTest extends TestCase {
         $mgr      = $this->make_geo();
         $baseline = $mgr->get_geo_score( 1 );
 
-        $si_test_state['post_meta'][1]['_search_intel_ai_summary'] = 'Summary of the article.';
+        $si_test_state['post_meta'][1]['_jat_search_intel_ai_summary'] = 'Summary of the article.';
         $with_summary = $mgr->get_geo_score( 1 );
 
         $this->assertGreaterThan( $baseline['score'], $with_summary['score'] );
@@ -242,7 +242,7 @@ class GEOOutputTest extends TestCase {
         $mgr      = $this->make_geo();
         $baseline = $mgr->get_geo_score( 1 );
 
-        $si_test_state['post_meta'][1]['_search_intel_topics'] = [ 'SEO', 'AEO', 'GEO' ];
+        $si_test_state['post_meta'][1]['_jat_search_intel_topics'] = [ 'SEO', 'AEO', 'GEO' ];
         $with_topics = $mgr->get_geo_score( 1 );
 
         $this->assertGreaterThan( $baseline['score'], $with_topics['score'] );
@@ -259,7 +259,7 @@ class GEOOutputTest extends TestCase {
 
     public function test_ai_crawl_directives_renders_when_noindex_set(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_ai_noindex'] = '1';
+        $si_test_state['post_meta'][1]['_jat_search_intel_ai_noindex'] = '1';
 
         $mgr = $this->make_geo();
         ob_start();

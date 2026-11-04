@@ -1,12 +1,12 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
 /**
- * Core orchestrator class for Search Intel plugin.
+ * Core orchestrator class for JAT Search Intel plugin.
  */
 class Core {
 
@@ -145,11 +145,23 @@ class Core {
     /** @var Custom_Reports */
     public $custom_reports;
 
+    /** @var Rank_Tracker */
+    public $rank_tracker;
+
+    /** @var AI_Search */
+    public $ai_search;
+
+    /** @var Media_SEO */
+    public $media_seo;
+
+    /** @var Feed_SEO */
+    public $feed_seo;
+
+    /** @var Custom_Schema */
+    public $custom_schema;
+
     /** @var AI_Optimizer */
     public $ai_optimizer;
-
-    /** @var Plugin_Updater */
-    public $plugin_updater;
 
     /**
      * Get singleton instance.
@@ -164,20 +176,38 @@ class Core {
     /**
      * Constructor — boot all modules.
      */
+    /** @var array<string,mixed> Settings snapshot used to build lazy modules. */
+    private $boot_settings = [];
+
+    /** @var array<string,string> Deferred modules: property => class name. */
+    private $lazy_modules = [];
+
+    /**
+     * Constructor — boot modules.
+     *
+     * Modules whose feature toggle is off register no hooks, so constructing
+     * them on every request only costs file loads and allocations. Those are
+     * deferred: they are built the first time something reads the property
+     * (see __get()), which keeps $core->module access working everywhere.
+     */
     private function __construct() {
-        $this->load_textdomain();
+        $settings            = $this->get_settings();
+        $this->boot_settings = $settings;
+        $is_admin            = is_admin();
+        $on                  = static function ( string $key ) use ( $settings ): bool {
+            return ! empty( $settings[ $key ] );
+        };
 
-        $settings = $this->get_settings();
-
+        // Always-on front-end output and editor integration.
         $this->seo          = new SEO_Manager( $settings );
-        $this->title_engine  = new Title_Engine( $settings );
-        $this->schema        = new Schema_Manager( $settings );
-        $this->aeo           = new AEO_Manager( $settings );
-        $this->geo           = new GEO_Manager( $settings );
-        $this->analyzer      = new Content_Analyzer( $settings );
-        $this->sitemap       = new Sitemap( $settings );
+        $this->title_engine = new Title_Engine( $settings );
+        $this->schema       = new Schema_Manager( $settings );
+        $this->aeo          = new AEO_Manager( $settings );
+        $this->geo          = new GEO_Manager( $settings );
+        $this->analyzer     = new Content_Analyzer( $settings );
+        $this->sitemap      = new Sitemap( $settings );
 
-        if ( is_admin() ) {
+        if ( $is_admin ) {
             $this->admin      = new Admin( $settings, $this );
             $this->bulk_tools = new Bulk_Tools( $settings, $this );
         }
@@ -188,110 +218,66 @@ class Core {
         // Block editor integration — sidebar, custom blocks, meta registration.
         $this->blocks = new Blocks();
 
-        // Privacy & GDPR compliance — exporters, erasers, privacy policy.
-        $this->privacy = new Privacy();
-
-        // Redirect Manager — 301/302/307/410 with exact, prefix, regex matching.
+        // Redirect Manager — also needed for slug-change detection on every save.
         $this->redirects = new Redirect_Manager( $settings );
 
-        // IndexNow — ping search engines on publish/update.
-        $this->indexnow = new IndexNow( $settings );
-
-        // WooCommerce — product schema, breadcrumbs, sitemap (only when WC active).
-        $this->woocommerce = new WooCommerce( $settings );
-
-        // Local Business schema — address, hours, geo, multi-location.
-        $this->local_business = new Local_Business( $settings );
-
-        // Robots.txt visual editor.
-        $this->robots_txt = new Robots_Txt( $settings );
-
-        // Audit log for settings changes.
-        $this->audit_log = new Audit_Log( $settings );
-
-        // Broken link checker — background HTTP HEAD scan.
-        $this->link_checker = new Link_Checker( $settings );
-
-        // Internal linking suggestions — related content matching.
-        $this->internal_linker = new Internal_Linker( $settings );
-
-        // Content Security Policy headers on plugin endpoints.
-        $this->csp_headers = new CSP_Headers( $settings );
-
-        // Subresource Integrity for admin assets.
-        $this->sri = new SRI( $settings );
-
-        // Additional schema types — VideoObject, Recipe, Event, Review, Course, Software, JobPosting.
-        $this->schema_types = new Schema_Types( $settings );
-
-        // Q&A Detection Engine — classify content for FAQPage, HowTo, QAPage, DefinedTerm.
-        $this->qa_detector = new QA_Detector( $settings );
-
-        // FAQ Generator — local pattern matching + optional AI enhancement.
-        $this->faq_generator = new FAQ_Generator( $settings, $this->qa_detector );
-
-        // AI Visibility Dashboard — GEO health score, API integrations, llms.txt tracking.
-        $this->visibility_dashboard = new Visibility_Dashboard( $settings );
-
-        // Citation Graph Builder — link graph, topic clusters, orphaned content.
-        $this->citation_graph = new Citation_Graph( $settings );
-
-        // Topical Authority Map — authority scoring, content gaps, multimodal analysis.
-        $this->authority_map = new Authority_Map( $settings );
-
-        // Multisite — network defaults, per-site overrides, centralized reporting.
-        $this->multisite = new Multisite( $settings );
-
-        // Plugin Migration — Yoast, Rank Math, AIOSEO, SEOPress, TSF.
-        $this->migration = new Migration( $settings );
-
-        // Role-Based Access Control — SEO Editor role, per-module permissions.
-        $this->rbac = new RBAC( $settings );
-
-        // Multi-Language — WPML, Polylang, hreflang, per-language sitemap/llms.txt.
-        $this->multilang = new Multilang( $settings );
-
-        // White-Label — custom branding, reseller support.
-        $this->white_label = new White_Label( $settings );
-
-        // Scale — object cache, background queue, bulk editor, headless REST.
-        $this->scale = new Scale( $settings );
-
-        // MainWP Child Reporter — expose scores and actions to MainWP Dashboard.
+        // WooCommerce / MainWP / Multisite gate themselves on their environment.
+        $this->woocommerce     = new WooCommerce( $settings );
         $this->mainwp_reporter = new MainWP_Reporter( $settings );
 
-        // Notifications — email digest, score alerts, Slack, dashboard widget.
-        $this->notifications = new Notifications( $settings );
-
-        // AI Engine — LLM abstraction (OpenAI, Anthropic, Ollama).
-        $this->ai_engine = new AI_Engine( $settings );
-
-        // Content Decay — historical scores, decay detection, refresh suggestions.
-        $this->content_decay = new Content_Decay( $settings );
-
-        // Keyword Cannibalization — duplicate keyword detection and action suggestions.
-        $this->keyword_cannibalization = new Keyword_Cannibalization( $settings );
-
-        // Advanced Internal Linking — suggestions, orphan alerts, equity flow, broken links.
-        $this->advanced_linking = new Advanced_Linking( $settings );
-
-        // Historical Analytics — per-post charts, site-wide trends, before/after, change log.
-        $this->historical_analytics = new Historical_Analytics( $settings );
-
-        // GA4 Integration — organic traffic correlation, distribution opportunities, optimization priorities.
-        $this->ga4_integration = new GA4_Integration( $settings );
-
-        // Core Web Vitals — PageSpeed Insights, CWV tracking, SEO correlation.
-        $this->core_web_vitals = new Core_Web_Vitals( $settings );
-
-        // Custom Reports — PDF generation, scheduled email, CSV/JSON export, report builder.
-        $this->custom_reports = new Custom_Reports( $settings );
-
-        // AI Optimizer — score-driven content improvement suggestions.
+        // AI Optimizer is on unless explicitly disabled.
         $this->ai_optimizer = new AI_Optimizer( $settings, $this );
 
-        // Plugin Updater — GitHub-based auto-update via WP native update system.
-        $this->plugin_updater = new Plugin_Updater();
+        /*
+         * Conditionally-booted modules: property => [ boot now?, class ].
+         * "Boot now" mirrors exactly when the module's constructor would add hooks.
+         */
+        $modules = [
+            'privacy'                 => [ $is_admin, Privacy::class ],
+            'migration'               => [ $is_admin, Migration::class ],
+            'robots_txt'              => [ $is_admin || $on( 'enable_robots_editor' ), Robots_Txt::class ],
+            'faq_generator'           => [ $is_admin, FAQ_Generator::class ],
+            'multisite'               => [ is_multisite(), Multisite::class ],
+            'indexnow'                => [ $on( 'enable_indexnow' ) || $on( 'indexnow_api_key' ), IndexNow::class ],
+            'local_business'          => [ $on( 'enable_local_business' ), Local_Business::class ],
+            'audit_log'               => [ $on( 'enable_audit_log' ), Audit_Log::class ],
+            'link_checker'            => [ $on( 'enable_link_checker' ), Link_Checker::class ],
+            'internal_linker'         => [ $on( 'enable_internal_linker' ), Internal_Linker::class ],
+            'csp_headers'             => [ $on( 'enable_csp_headers' ), CSP_Headers::class ],
+            'sri'                     => [ $on( 'enable_sri' ), SRI::class ],
+            'schema_types'            => [ $on( 'enable_schema_types' ), Schema_Types::class ],
+            'qa_detector'             => [ $on( 'enable_qa_detector' ), QA_Detector::class ],
+            'visibility_dashboard'    => [ $on( 'enable_visibility_dashboard' ), Visibility_Dashboard::class ],
+            'citation_graph'          => [ $on( 'enable_citation_graph' ), Citation_Graph::class ],
+            'authority_map'           => [ $on( 'enable_authority_map' ), Authority_Map::class ],
+            'rbac'                    => [ $on( 'enable_rbac' ), RBAC::class ],
+            'multilang'               => [ $on( 'enable_multilang' ), Multilang::class ],
+            'white_label'             => [ $on( 'enable_white_label' ), White_Label::class ],
+            'scale'                   => [ $on( 'enable_scale' ), Scale::class ],
+            'notifications'           => [ $on( 'enable_notifications' ), Notifications::class ],
+            'ai_engine'               => [ false, AI_Engine::class ],
+            'content_decay'           => [ $on( 'enable_content_decay' ), Content_Decay::class ],
+            'keyword_cannibalization' => [ $on( 'enable_cannibalization' ), Keyword_Cannibalization::class ],
+            'advanced_linking'        => [ $on( 'enable_advanced_linking' ), Advanced_Linking::class ],
+            'historical_analytics'    => [ $on( 'enable_historical_analytics' ), Historical_Analytics::class ],
+            'ga4_integration'         => [ $on( 'enable_ga4' ), GA4_Integration::class ],
+            'core_web_vitals'         => [ $on( 'enable_cwv' ), Core_Web_Vitals::class ],
+            'custom_reports'          => [ $on( 'enable_custom_reports' ), Custom_Reports::class ],
+            'media_seo'               => [ $on( 'enable_image_alt' ) || $on( 'redirect_attachments' ), Media_SEO::class ],
+            'feed_seo'                => [ $on( 'enable_rss_footer' ), Feed_SEO::class ],
+            'custom_schema'           => [ $on( 'enable_schema' ), Custom_Schema::class ],
+            'ai_search'               => [ true, AI_Search::class ],
+            'rank_tracker'            => [ $is_admin || $on( 'enable_rank_tracking' ), Rank_Tracker::class ],
+        ];
+
+        foreach ( $modules as $prop => list( $boot, $class ) ) {
+            if ( $boot ) {
+                $this->{$prop} = $this->build_module( $class );
+            } else {
+                unset( $this->{$prop} );
+                $this->lazy_modules[ $prop ] = $class;
+            }
+        }
 
         // Auto-redirect on slug change.
         add_action( 'post_updated', [ $this->redirects, 'detect_slug_change' ], 10, 3 );
@@ -299,8 +285,51 @@ class Core {
         // Prefetch all post meta on singular pages to avoid N+1 queries
         add_action( 'wp', [ $this, 'prefetch_post_meta' ] );
 
-        // Compatibility checks
+        // Compatibility checks (admin_init only fires in wp-admin).
         add_action( 'admin_init', [ $this, 'check_compatibility' ] );
+    }
+
+    /**
+     * Instantiate a module class with the arguments it expects.
+     *
+     * @param string $class Fully-qualified class name.
+     * @return object
+     */
+    private function build_module( string $class ) {
+        switch ( $class ) {
+            case Privacy::class:
+                return new Privacy();
+            case FAQ_Generator::class:
+                return new FAQ_Generator( $this->boot_settings, $this->qa_detector );
+            default:
+                return new $class( $this->boot_settings );
+        }
+    }
+
+    /**
+     * Build a deferred module on first access.
+     *
+     * @param string $name Property name.
+     * @return mixed|null Module instance, or null for unknown properties.
+     */
+    public function __get( string $name ) {
+        if ( isset( $this->lazy_modules[ $name ] ) ) {
+            $class = $this->lazy_modules[ $name ];
+            unset( $this->lazy_modules[ $name ] );
+            $this->{$name} = $this->build_module( $class );
+            return $this->{$name};
+        }
+        return null;
+    }
+
+    /**
+     * Report deferred modules as set so isset( $core->module ) keeps working.
+     *
+     * @param string $name Property name.
+     * @return bool
+     */
+    public function __isset( string $name ): bool {
+        return isset( $this->lazy_modules[ $name ] );
     }
 
     /**
@@ -335,10 +364,10 @@ class Core {
         if ( ! empty( $conflicts ) ) {
             add_action( 'admin_notices', function () use ( $conflicts ) {
                 echo '<div class="notice notice-warning is-dismissible"><p>';
-                echo '<strong>' . esc_html__( 'Search Intel:', 'search-intel' ) . '</strong> ';
+                echo '<strong>' . esc_html__( 'JAT Search Intel:', 'jat-search-intel' ) . '</strong> ';
                 printf(
                     /* translators: %s: comma-separated list of plugin names */
-                    esc_html__( 'Potential SEO plugin conflicts detected: %s. Consider disabling overlapping features to avoid duplicate meta tags.', 'search-intel' ),
+                    esc_html__( 'Potential SEO plugin conflicts detected: %s. Consider disabling overlapping features to avoid duplicate meta tags.', 'jat-search-intel' ),
                     '<strong>' . esc_html( implode( ', ', $conflicts ) ) . '</strong>'
                 );
                 echo '</p></div>';
@@ -347,7 +376,7 @@ class Core {
     }
 
     /**
-     * Detect active plugins that may conflict with Search Intel.
+     * Detect active plugins that may conflict with JAT Search Intel.
      *
      * @return string[] Names of conflicting plugins.
      */
@@ -357,7 +386,6 @@ class Core {
             'all-in-one-seo-pack/all_in_one_seo_pack.php' => 'All in One SEO',
             'seo-by-rank-math/rank-math.php'         => 'Rank Math',
             'autodescription/autodescription.php'     => 'The SEO Framework',
-            'flavor/flavor.php'                       => 'flavor',
         ];
 
         $conflicts = [];
@@ -374,17 +402,10 @@ class Core {
     }
 
     /**
-     * Load plugin text domain.
-     */
-    private function load_textdomain(): void {
-        load_plugin_textdomain( 'search-intel', false, dirname( SEARCH_INTEL_BASENAME ) . '/languages' );
-    }
-
-    /**
      * Get merged settings.
      */
     public function get_settings(): array {
-        $saved = get_option( 'search_intel_settings', [] );
+        $saved = get_option( 'jat_search_intel_settings', [] );
         return wp_parse_args( $saved, self::get_default_settings() );
     }
 
@@ -575,6 +596,28 @@ class Core {
 
             // Custom Reports & Export (v3.3)
             'enable_custom_reports'  => false,
+
+            // Data management
+            'delete_data_on_uninstall' => false,
+
+            // v3.5 — SEO
+            'enable_news_sitemap'    => false,
+            'news_post_types'        => [ 'post' ],
+            'news_publication_name'  => '',
+            'enable_video_sitemap'   => false,
+            'enable_image_alt'       => true,
+            'redirect_attachments'   => true,
+            'enable_rss_footer'      => true,
+            'rss_after_content'      => 'The post %%POSTLINK%% appeared first on %%BLOGLINK%%.',
+
+            // v3.5 — AEO/GEO
+            'enable_markdown_endpoints' => true,
+            'enable_ai_crawler_log'  => false,
+            'ai_crawler_rules'       => [],
+
+            // v3.5 — Rank tracking
+            'enable_rank_tracking'   => false,
+            'tracked_keywords'       => [],
         ];
     }
 }

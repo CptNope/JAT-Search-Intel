@@ -4,7 +4,7 @@
  */
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\Content_Analyzer;
+use JAT_Search_Intel\Content_Analyzer;
 
 class ContentAnalyzerTest extends TestCase {
 
@@ -237,9 +237,9 @@ class ContentAnalyzerTest extends TestCase {
 
     public function test_social_check_passes_when_all_set(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_social_title']       = 'Social Title';
-        $si_test_state['post_meta'][1]['_search_intel_social_description'] = 'Social Desc';
-        $si_test_state['post_meta'][1]['_search_intel_social_image']       = 'https://example.com/img.jpg';
+        $si_test_state['post_meta'][1]['_jat_search_intel_social_title']       = 'Social Title';
+        $si_test_state['post_meta'][1]['_jat_search_intel_social_description'] = 'Social Desc';
+        $si_test_state['post_meta'][1]['_jat_search_intel_social_image']       = 'https://example.com/img.jpg';
 
         $content = '<p>' . str_repeat( 'Word ', 100 ) . '</p>';
         $result  = $this->analyzer->analyze( 1, $content, 'Title', 'kw', 'desc' );
@@ -255,7 +255,7 @@ class ContentAnalyzerTest extends TestCase {
 
     public function test_secondary_keyword_check_when_present(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_secondary_keywords'] = 'optimization, ranking';
+        $si_test_state['post_meta'][1]['_jat_search_intel_secondary_keywords'] = 'optimization, ranking';
 
         $content = '<p>Search engine optimization helps improve your ranking in results.</p>';
         $result  = $this->analyzer->analyze( 1, $content, 'Title', 'seo', 'desc' );
@@ -286,10 +286,10 @@ class ContentAnalyzerTest extends TestCase {
 
         $content = '<p>' . str_repeat( 'Word ', 500 ) . '</p>';
 
-        $si_test_state['post_meta'][1]['_search_intel_entities'] = [];
+        $si_test_state['post_meta'][1]['_jat_search_intel_entities'] = [];
         $score_no_entities = $this->analyzer->analyze( 1, $content, 'Title', 'kw', 'desc' );
 
-        $si_test_state['post_meta'][1]['_search_intel_entities'] = [
+        $si_test_state['post_meta'][1]['_jat_search_intel_entities'] = [
             [ 'name' => 'Google', 'type' => 'Organization', 'url' => '' ],
             [ 'name' => 'SEO', 'type' => 'Thing', 'url' => '' ],
             [ 'name' => 'Web', 'type' => 'Thing', 'url' => '' ],
@@ -304,10 +304,10 @@ class ContentAnalyzerTest extends TestCase {
 
         $content = '<p>' . str_repeat( 'Word ', 500 ) . '</p>';
 
-        $si_test_state['post_meta'][1]['_search_intel_ai_summary'] = '';
+        $si_test_state['post_meta'][1]['_jat_search_intel_ai_summary'] = '';
         $no_summary = $this->analyzer->analyze( 1, $content, 'Title', 'kw', 'desc' );
 
-        $si_test_state['post_meta'][1]['_search_intel_ai_summary'] = 'This is a comprehensive AI summary of the article content for generative engines.';
+        $si_test_state['post_meta'][1]['_jat_search_intel_ai_summary'] = 'This is a comprehensive AI summary of the article content for generative engines.';
         $with_summary = $this->analyzer->analyze( 1, $content, 'Title', 'kw', 'desc' );
 
         $this->assertGreaterThan( $no_summary['geo_score']['score'], $with_summary['geo_score']['score'] );

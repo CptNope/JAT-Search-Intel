@@ -1,5 +1,5 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
@@ -42,7 +42,7 @@ class SEO_Manager {
      */
     public function get_title( $post_id = null ): string {
         if ( $post_id ) {
-            $custom = get_post_meta( $post_id, '_search_intel_title', true );
+            $custom = get_post_meta( $post_id, '_jat_search_intel_title', true );
             if ( $custom ) {
                 return $custom;
             }
@@ -56,7 +56,7 @@ class SEO_Manager {
      */
     public function get_description( $post_id = null ): string {
         if ( $post_id ) {
-            $custom = get_post_meta( $post_id, '_search_intel_description', true );
+            $custom = get_post_meta( $post_id, '_jat_search_intel_description', true );
             if ( $custom ) {
                 return $this->truncate_description( $custom );
             }
@@ -116,7 +116,7 @@ class SEO_Manager {
      * Render basic meta tags (description, author).
      */
     public function render_meta_tags(): void {
-        echo "\n<!-- Search Intel v" . esc_attr( SEARCH_INTEL_VERSION ) . " -->\n";
+        echo "\n<!-- JAT Search Intel v" . esc_attr( JAT_SEARCH_INTEL_VERSION ) . " -->\n";
 
         $description = '';
         $robots      = '';
@@ -161,7 +161,7 @@ class SEO_Manager {
 
         if ( is_singular() ) {
             $post_id   = get_queried_object_id();
-            $custom    = get_post_meta( $post_id, '_search_intel_canonical', true );
+            $custom    = get_post_meta( $post_id, '_jat_search_intel_canonical', true );
             $canonical = $custom ?: get_permalink( $post_id );
         } elseif ( is_front_page() ) {
             $canonical = home_url( '/' );
@@ -188,8 +188,8 @@ class SEO_Manager {
 
         if ( is_singular() ) {
             $post_id = get_queried_object_id();
-            $noindex = get_post_meta( $post_id, '_search_intel_noindex', true );
-            $nofollow = get_post_meta( $post_id, '_search_intel_nofollow', true );
+            $noindex = get_post_meta( $post_id, '_jat_search_intel_noindex', true );
+            $nofollow = get_post_meta( $post_id, '_jat_search_intel_nofollow', true );
 
             if ( $noindex ) {
                 $directives[] = 'noindex';
@@ -236,8 +236,8 @@ class SEO_Manager {
             $post    = get_post( $post_id );
 
             $tags['og:type']        = ( 'post' === $post->post_type ) ? 'article' : 'website';
-            $social_title = get_post_meta( $post_id, '_search_intel_social_title', true );
-            $social_desc  = get_post_meta( $post_id, '_search_intel_social_description', true );
+            $social_title = get_post_meta( $post_id, '_jat_search_intel_social_title', true );
+            $social_desc  = get_post_meta( $post_id, '_jat_search_intel_social_description', true );
             $tags['og:title']       = $social_title ?: $this->get_title( $post_id );
             $tags['og:description'] = $social_desc ?: $this->get_description( $post_id );
             $tags['og:url']         = get_permalink( $post_id );
@@ -309,8 +309,8 @@ class SEO_Manager {
         if ( is_singular() ) {
             $post_id = get_queried_object_id();
 
-            $social_title = get_post_meta( $post_id, '_search_intel_social_title', true );
-            $social_desc  = get_post_meta( $post_id, '_search_intel_social_description', true );
+            $social_title = get_post_meta( $post_id, '_jat_search_intel_social_title', true );
+            $social_desc  = get_post_meta( $post_id, '_jat_search_intel_social_description', true );
             $tags['twitter:title']       = $social_title ?: $this->get_title( $post_id );
             $tags['twitter:description'] = $social_desc ?: $this->get_description( $post_id );
 
@@ -344,9 +344,9 @@ class SEO_Manager {
      */
     private function get_og_image( int $post_id ): array {
         // Check for social image override (v1.1), then legacy OG image
-        $custom_image = get_post_meta( $post_id, '_search_intel_social_image', true );
+        $custom_image = get_post_meta( $post_id, '_jat_search_intel_social_image', true );
         if ( ! $custom_image ) {
-            $custom_image = get_post_meta( $post_id, '_search_intel_og_image', true );
+            $custom_image = get_post_meta( $post_id, '_jat_search_intel_og_image', true );
         }
         if ( $custom_image ) {
             $attachment_id = attachment_url_to_postid( $custom_image );

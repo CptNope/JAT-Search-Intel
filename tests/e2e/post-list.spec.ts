@@ -6,7 +6,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Post List Columns', () => {
 
-  test('Search Intel column header is visible', async ({ page }) => {
+  test('JAT Search Intel column header is visible', async ({ page }) => {
     await page.goto('/wp-admin/edit.php');
     const header = page.locator('th#si_scores');
     await expect(header).toBeVisible();

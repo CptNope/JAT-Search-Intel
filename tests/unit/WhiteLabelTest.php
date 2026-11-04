@@ -1,8 +1,8 @@
 <?php
-namespace Search_Intel\Tests\Unit;
+namespace JAT_Search_Intel\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\White_Label;
+use JAT_Search_Intel\White_Label;
 
 class WhiteLabelTest extends TestCase {
 
@@ -52,7 +52,7 @@ class WhiteLabelTest extends TestCase {
 		$wl = new White_Label( [ 'enable_white_label' => true ] );
 		$config = $wl->get_config();
 
-		$this->assertEquals( 'Search Intel', $config['plugin_name'] );
+		$this->assertEquals( 'JAT Search Intel', $config['plugin_name'] );
 		$this->assertEquals( '#2271b1', $config['brand_color'] );
 		$this->assertFalse( $config['hide_branding'] );
 	}
@@ -67,7 +67,7 @@ class WhiteLabelTest extends TestCase {
 			'wl_brand_color' => '#123abc',
 		] );
 
-		$settings = $si_test_state['options']['search_intel_settings'];
+		$settings = $si_test_state['options']['jat_search_intel_settings'];
 		$this->assertEquals( 'New Name', $settings['wl_plugin_name'] );
 		$this->assertEquals( '#123abc', $settings['wl_brand_color'] );
 	}
@@ -78,12 +78,12 @@ class WhiteLabelTest extends TestCase {
 		$wl = $this->make();
 
 		$plugins = [
-			'search-intel/search-intel.php' => [
-				'Name'        => 'Search Intel',
-				'Title'       => 'Search Intel',
+			'jat-search-intel/jat-search-intel.php' => [
+				'Name'        => 'JAT Search Intel',
+				'Title'       => 'JAT Search Intel',
 				'Description' => 'Original description',
-				'Author'      => 'Search Intel',
-				'AuthorName'  => 'Search Intel',
+				'Author'      => 'JAT Search Intel',
+				'AuthorName'  => 'JAT Search Intel',
 				'AuthorURI'   => 'https://searchintel.io',
 				'PluginURI'   => 'https://searchintel.io',
 			],
@@ -91,12 +91,12 @@ class WhiteLabelTest extends TestCase {
 
 		$filtered = $wl->filter_plugin_meta( $plugins );
 
-		$this->assertEquals( 'My SEO Tool', $filtered['search-intel/search-intel.php']['Name'] );
-		$this->assertEquals( 'My SEO Tool', $filtered['search-intel/search-intel.php']['Title'] );
-		$this->assertEquals( 'Custom SEO plugin', $filtered['search-intel/search-intel.php']['Description'] );
-		$this->assertEquals( 'My Agency', $filtered['search-intel/search-intel.php']['Author'] );
-		$this->assertEquals( 'https://myagency.com', $filtered['search-intel/search-intel.php']['AuthorURI'] );
-		$this->assertEquals( 'https://mytool.com', $filtered['search-intel/search-intel.php']['PluginURI'] );
+		$this->assertEquals( 'My SEO Tool', $filtered['jat-search-intel/jat-search-intel.php']['Name'] );
+		$this->assertEquals( 'My SEO Tool', $filtered['jat-search-intel/jat-search-intel.php']['Title'] );
+		$this->assertEquals( 'Custom SEO plugin', $filtered['jat-search-intel/jat-search-intel.php']['Description'] );
+		$this->assertEquals( 'My Agency', $filtered['jat-search-intel/jat-search-intel.php']['Author'] );
+		$this->assertEquals( 'https://myagency.com', $filtered['jat-search-intel/jat-search-intel.php']['AuthorURI'] );
+		$this->assertEquals( 'https://mytool.com', $filtered['jat-search-intel/jat-search-intel.php']['PluginURI'] );
 	}
 
 	public function test_filter_plugin_meta_ignores_other_plugins(): void {
@@ -116,12 +116,12 @@ class WhiteLabelTest extends TestCase {
 
 	public function test_get_custom_name(): void {
 		$wl = $this->make();
-		$this->assertEquals( 'My SEO Tool', $wl->get_custom_name( 'Search Intel' ) );
+		$this->assertEquals( 'My SEO Tool', $wl->get_custom_name( 'JAT Search Intel' ) );
 	}
 
 	public function test_get_custom_name_fallback(): void {
 		$wl = new White_Label( [ 'enable_white_label' => true ] );
-		$this->assertEquals( 'Search Intel', $wl->get_custom_name( 'Search Intel' ) );
+		$this->assertEquals( 'JAT Search Intel', $wl->get_custom_name( 'JAT Search Intel' ) );
 	}
 
 	public function test_get_brand_color(): void {
@@ -161,7 +161,7 @@ class WhiteLabelTest extends TestCase {
 		$result = $wl->import_reseller_config( $config );
 		$this->assertTrue( $result );
 
-		$settings = $si_test_state['options']['search_intel_settings'];
+		$settings = $si_test_state['options']['jat_search_intel_settings'];
 		$this->assertTrue( $settings['enable_white_label'] );
 		$this->assertEquals( 'Imported Tool', $settings['wl_plugin_name'] );
 		$this->assertEquals( '#abcdef', $settings['wl_brand_color'] );

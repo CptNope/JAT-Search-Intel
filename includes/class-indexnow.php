@@ -1,5 +1,5 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -26,7 +26,7 @@ class IndexNow {
 	/**
 	 * Option key for the ping log.
 	 */
-	private const LOG_OPTION = 'search_intel_indexnow_log';
+	private const LOG_OPTION = 'jat_search_intel_indexnow_log';
 
 	/**
 	 * Max log entries to keep.

@@ -1,5 +1,5 @@
 /**
- * Search Intel — Breadcrumbs Block
+ * JAT Search Intel — Breadcrumbs Block
  *
  * Theme-aware breadcrumb navigation.
  * Dynamic block — rendered via PHP on frontend.
@@ -10,12 +10,12 @@ import { __ } from '@wordpress/i18n';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import { PanelBody, SelectControl, TextControl } from '@wordpress/components';
 
-registerBlockType( 'search-intel/breadcrumbs', {
-	title: __( 'Breadcrumbs', 'search-intel' ),
-	description: __( 'Theme-aware breadcrumb navigation with BreadcrumbList schema.', 'search-intel' ),
+registerBlockType( 'jat-search-intel/breadcrumbs', {
+	title: __( 'Breadcrumbs', 'jat-search-intel' ),
+	description: __( 'Theme-aware breadcrumb navigation with BreadcrumbList schema.', 'jat-search-intel' ),
 	category: 'widgets',
 	icon: 'arrow-right-alt',
-	keywords: [ __( 'breadcrumbs', 'search-intel' ), __( 'navigation', 'search-intel' ), __( 'path', 'search-intel' ) ],
+	keywords: [ __( 'breadcrumbs', 'jat-search-intel' ), __( 'navigation', 'jat-search-intel' ), __( 'path', 'jat-search-intel' ) ],
 	supports: {
 		html: false,
 		align: [ 'wide', 'full' ],
@@ -50,36 +50,36 @@ registerBlockType( 'search-intel/breadcrumbs', {
 		return (
 			<div { ...blockProps }>
 				<InspectorControls>
-					<PanelBody title={ __( 'Breadcrumb Settings', 'search-intel' ) }>
+					<PanelBody title={ __( 'Breadcrumb Settings', 'jat-search-intel' ) }>
 						<SelectControl
-							label={ __( 'Separator', 'search-intel' ) }
+							label={ __( 'Separator', 'jat-search-intel' ) }
 							value={ separator }
 							options={ SEPARATOR_OPTIONS }
 							onChange={ ( val ) => setAttributes( { separator: val } ) }
 						/>
 						<TextControl
-							label={ __( 'Home Label', 'search-intel' ) }
+							label={ __( 'Home Label', 'jat-search-intel' ) }
 							value={ homeLabel }
 							onChange={ ( val ) => setAttributes( { homeLabel: val } ) }
 						/>
 					</PanelBody>
 				</InspectorControls>
 
-				<nav className="si-breadcrumbs" aria-label={ __( 'Breadcrumb', 'search-intel' ) }>
+				<nav className="si-breadcrumbs" aria-label={ __( 'Breadcrumb', 'jat-search-intel' ) }>
 					<span className="si-breadcrumbs__item si-breadcrumbs__item--home">
 						{ homeLabel }
 					</span>
 					<span className="si-breadcrumbs__separator">{ ` ${ separator } ` }</span>
 					<span className="si-breadcrumbs__item si-breadcrumbs__item--category">
-						{ __( 'Category', 'search-intel' ) }
+						{ __( 'Category', 'jat-search-intel' ) }
 					</span>
 					<span className="si-breadcrumbs__separator">{ ` ${ separator } ` }</span>
 					<span className="si-breadcrumbs__item si-breadcrumbs__item--current">
-						{ __( 'Current Page', 'search-intel' ) }
+						{ __( 'Current Page', 'jat-search-intel' ) }
 					</span>
 				</nav>
 				<p className="si-breadcrumbs__note">
-					{ __( 'Preview — actual breadcrumbs render from page hierarchy on the frontend.', 'search-intel' ) }
+					{ __( 'Preview — actual breadcrumbs render from page hierarchy on the frontend.', 'jat-search-intel' ) }
 				</p>
 			</div>
 		);

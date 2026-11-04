@@ -1,5 +1,5 @@
 /**
- * Search Intel — FAQ Block
+ * JAT Search Intel — FAQ Block
  *
  * Visual FAQ editor with live schema preview.
  * Outputs FAQPage JSON-LD structured data.
@@ -13,12 +13,12 @@ import { plus, trash } from '@wordpress/icons';
 
 import './editor.css';
 
-registerBlockType( 'search-intel/faq', {
-	title: __( 'FAQ', 'search-intel' ),
-	description: __( 'Add frequently asked questions with automatic FAQPage schema markup.', 'search-intel' ),
+registerBlockType( 'jat-search-intel/faq', {
+	title: __( 'FAQ', 'jat-search-intel' ),
+	description: __( 'Add frequently asked questions with automatic FAQPage schema markup.', 'jat-search-intel' ),
 	category: 'widgets',
 	icon: 'editor-help',
-	keywords: [ __( 'faq', 'search-intel' ), __( 'questions', 'search-intel' ), __( 'schema', 'search-intel' ) ],
+	keywords: [ __( 'faq', 'jat-search-intel' ), __( 'questions', 'jat-search-intel' ), __( 'schema', 'jat-search-intel' ) ],
 	supports: {
 		html: false,
 		align: [ 'wide', 'full' ],
@@ -54,15 +54,15 @@ registerBlockType( 'search-intel/faq', {
 		return (
 			<div { ...blockProps }>
 				<InspectorControls>
-					<PanelBody title={ __( 'FAQ Schema', 'search-intel' ) }>
-						<p>{ __( 'This block automatically generates FAQPage schema markup from your questions and answers.', 'search-intel' ) }</p>
-						<p><strong>{ items.filter( ( i ) => i.question && i.answer ).length }</strong> { __( 'valid FAQ items', 'search-intel' ) }</p>
+					<PanelBody title={ __( 'FAQ Schema', 'jat-search-intel' ) }>
+						<p>{ __( 'This block automatically generates FAQPage schema markup from your questions and answers.', 'jat-search-intel' ) }</p>
+						<p><strong>{ items.filter( ( i ) => i.question && i.answer ).length }</strong> { __( 'valid FAQ items', 'jat-search-intel' ) }</p>
 					</PanelBody>
 				</InspectorControls>
 
 				<div className="si-faq-block__header">
 					<span className="si-faq-block__icon">❓</span>
-					<span className="si-faq-block__title">{ __( 'FAQ', 'search-intel' ) }</span>
+					<span className="si-faq-block__title">{ __( 'FAQ', 'jat-search-intel' ) }</span>
 				</div>
 
 				{ items.map( ( item, index ) => (
@@ -71,7 +71,7 @@ registerBlockType( 'search-intel/faq', {
 							<span className="si-faq-item__number">{ index + 1 }</span>
 							<Button
 								icon={ trash }
-								label={ __( 'Remove', 'search-intel' ) }
+								label={ __( 'Remove', 'jat-search-intel' ) }
 								onClick={ () => removeItem( index ) }
 								isSmall
 								isDestructive
@@ -81,7 +81,7 @@ registerBlockType( 'search-intel/faq', {
 						<RichText
 							tagName="h3"
 							className="si-faq-item__question"
-							placeholder={ __( 'Question…', 'search-intel' ) }
+							placeholder={ __( 'Question…', 'jat-search-intel' ) }
 							value={ item.question }
 							onChange={ ( val ) => updateItem( index, 'question', val ) }
 							allowedFormats={ [ 'core/bold', 'core/italic' ] }
@@ -89,7 +89,7 @@ registerBlockType( 'search-intel/faq', {
 						<RichText
 							tagName="div"
 							className="si-faq-item__answer"
-							placeholder={ __( 'Answer…', 'search-intel' ) }
+							placeholder={ __( 'Answer…', 'jat-search-intel' ) }
 							value={ item.answer }
 							onChange={ ( val ) => updateItem( index, 'answer', val ) }
 							allowedFormats={ [ 'core/bold', 'core/italic', 'core/link' ] }
@@ -103,7 +103,7 @@ registerBlockType( 'search-intel/faq', {
 					className="si-faq-block__add"
 					onClick={ addItem }
 				>
-					{ __( 'Add Question', 'search-intel' ) }
+					{ __( 'Add Question', 'jat-search-intel' ) }
 				</Button>
 			</div>
 		);

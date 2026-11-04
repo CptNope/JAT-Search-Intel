@@ -1,5 +1,5 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -27,9 +27,9 @@ class WooCommerce {
 			return;
 		}
 
-		add_filter( 'search_intel_singular_schema', [ $this, 'inject_product_schema' ], 20, 2 );
-		add_filter( 'search_intel_breadcrumbs', [ $this, 'product_breadcrumbs' ], 10, 2 );
-		add_filter( 'search_intel_sitemap_post_types', [ $this, 'add_product_sitemap' ] );
+		add_filter( 'jat_search_intel_singular_schema', [ $this, 'inject_product_schema' ], 20, 2 );
+		add_filter( 'jat_search_intel_breadcrumbs', [ $this, 'product_breadcrumbs' ], 10, 2 );
+		add_filter( 'jat_search_intel_sitemap_post_types', [ $this, 'add_product_sitemap' ] );
 		add_action( 'add_meta_boxes', [ $this, 'add_product_metabox' ] );
 		add_action( 'save_post_product', [ $this, 'save_product_metabox' ] );
 	}
@@ -84,7 +84,7 @@ class WooCommerce {
 		}
 
 		// Brand (custom meta or taxonomy)
-		$brand = get_post_meta( $post_id, '_search_intel_product_brand', true );
+		$brand = get_post_meta( $post_id, '_jat_search_intel_product_brand', true );
 		if ( $brand ) {
 			$product_schema['brand'] = [
 				'@type' => 'Brand',
@@ -93,13 +93,13 @@ class WooCommerce {
 		}
 
 		// GTIN
-		$gtin = get_post_meta( $post_id, '_search_intel_product_gtin', true );
+		$gtin = get_post_meta( $post_id, '_jat_search_intel_product_gtin', true );
 		if ( $gtin ) {
 			$product_schema['gtin'] = $gtin;
 		}
 
 		// MPN
-		$mpn = get_post_meta( $post_id, '_search_intel_product_mpn', true );
+		$mpn = get_post_meta( $post_id, '_jat_search_intel_product_mpn', true );
 		if ( $mpn ) {
 			$product_schema['mpn'] = $mpn;
 		}
@@ -150,7 +150,7 @@ class WooCommerce {
 		$offer['availability'] = $availability_map[ $stock_status ] ?? 'https://schema.org/InStock';
 
 		// Condition (custom meta, default to new)
-		$condition = get_post_meta( $product->get_id(), '_search_intel_product_condition', true );
+		$condition = get_post_meta( $product->get_id(), '_jat_search_intel_product_condition', true );
 		$condition_map = [
 			'new'         => 'https://schema.org/NewCondition',
 			'used'        => 'https://schema.org/UsedCondition',
@@ -214,7 +214,7 @@ class WooCommerce {
 
 		// Home
 		$crumbs[] = [
-			'name' => __( 'Home', 'search-intel' ),
+			'name' => __( 'Home', 'jat-search-intel' ),
 			'url'  => home_url( '/' ),
 		];
 
@@ -276,8 +276,8 @@ class WooCommerce {
 	 */
 	public function add_product_metabox(): void {
 		add_meta_box(
-			'search-intel-product',
-			__( 'Search Intel — Product Data', 'search-intel' ),
+			'jat-search-intel-product',
+			__( 'JAT Search Intel — Product Data', 'jat-search-intel' ),
 			[ $this, 'render_product_metabox' ],
 			'product',
 			'side',
@@ -293,29 +293,29 @@ class WooCommerce {
 	public function render_product_metabox( $post ): void {
 		wp_nonce_field( 'si_product_meta', 'si_product_meta_nonce' );
 
-		$brand     = get_post_meta( $post->ID, '_search_intel_product_brand', true );
-		$gtin      = get_post_meta( $post->ID, '_search_intel_product_gtin', true );
-		$mpn       = get_post_meta( $post->ID, '_search_intel_product_mpn', true );
-		$condition = get_post_meta( $post->ID, '_search_intel_product_condition', true ) ?: 'new';
+		$brand     = get_post_meta( $post->ID, '_jat_search_intel_product_brand', true );
+		$gtin      = get_post_meta( $post->ID, '_jat_search_intel_product_gtin', true );
+		$mpn       = get_post_meta( $post->ID, '_jat_search_intel_product_mpn', true );
+		$condition = get_post_meta( $post->ID, '_jat_search_intel_product_condition', true ) ?: 'new';
 		?>
 		<p>
-			<label for="si-product-brand"><strong><?php esc_html_e( 'Brand', 'search-intel' ); ?></strong></label><br>
+			<label for="si-product-brand"><strong><?php esc_html_e( 'Brand', 'jat-search-intel' ); ?></strong></label><br>
 			<input type="text" id="si-product-brand" name="si_product_brand" value="<?php echo esc_attr( $brand ); ?>" class="widefat" />
 		</p>
 		<p>
-			<label for="si-product-gtin"><strong><?php esc_html_e( 'GTIN / EAN / UPC', 'search-intel' ); ?></strong></label><br>
+			<label for="si-product-gtin"><strong><?php esc_html_e( 'GTIN / EAN / UPC', 'jat-search-intel' ); ?></strong></label><br>
 			<input type="text" id="si-product-gtin" name="si_product_gtin" value="<?php echo esc_attr( $gtin ); ?>" class="widefat" />
 		</p>
 		<p>
-			<label for="si-product-mpn"><strong><?php esc_html_e( 'MPN', 'search-intel' ); ?></strong></label><br>
+			<label for="si-product-mpn"><strong><?php esc_html_e( 'MPN', 'jat-search-intel' ); ?></strong></label><br>
 			<input type="text" id="si-product-mpn" name="si_product_mpn" value="<?php echo esc_attr( $mpn ); ?>" class="widefat" />
 		</p>
 		<p>
-			<label for="si-product-condition"><strong><?php esc_html_e( 'Condition', 'search-intel' ); ?></strong></label><br>
+			<label for="si-product-condition"><strong><?php esc_html_e( 'Condition', 'jat-search-intel' ); ?></strong></label><br>
 			<select id="si-product-condition" name="si_product_condition" class="widefat">
-				<option value="new" <?php selected( $condition, 'new' ); ?>><?php esc_html_e( 'New', 'search-intel' ); ?></option>
-				<option value="used" <?php selected( $condition, 'used' ); ?>><?php esc_html_e( 'Used', 'search-intel' ); ?></option>
-				<option value="refurbished" <?php selected( $condition, 'refurbished' ); ?>><?php esc_html_e( 'Refurbished', 'search-intel' ); ?></option>
+				<option value="new" <?php selected( $condition, 'new' ); ?>><?php esc_html_e( 'New', 'jat-search-intel' ); ?></option>
+				<option value="used" <?php selected( $condition, 'used' ); ?>><?php esc_html_e( 'Used', 'jat-search-intel' ); ?></option>
+				<option value="refurbished" <?php selected( $condition, 'refurbished' ); ?>><?php esc_html_e( 'Refurbished', 'jat-search-intel' ); ?></option>
 			</select>
 		</p>
 		<?php
@@ -337,10 +337,10 @@ class WooCommerce {
 		}
 
 		$fields = [
-			'si_product_brand'     => '_search_intel_product_brand',
-			'si_product_gtin'      => '_search_intel_product_gtin',
-			'si_product_mpn'       => '_search_intel_product_mpn',
-			'si_product_condition' => '_search_intel_product_condition',
+			'si_product_brand'     => '_jat_search_intel_product_brand',
+			'si_product_gtin'      => '_jat_search_intel_product_gtin',
+			'si_product_mpn'       => '_jat_search_intel_product_mpn',
+			'si_product_condition' => '_jat_search_intel_product_condition',
 		];
 
 		foreach ( $fields as $post_key => $meta_key ) {

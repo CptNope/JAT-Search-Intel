@@ -7,7 +7,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Repeaters', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/wp-admin/post-new.php');
-    await expect(page.locator('#search-intel-seo')).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator('#jat-search-intel-seo')).toBeVisible({ timeout: 10_000 });
   });
 
   // ── FAQ repeater ──────────────────────────────────────────────────

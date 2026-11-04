@@ -1,8 +1,8 @@
 <?php
-namespace Search_Intel\Tests\Unit;
+namespace JAT_Search_Intel\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\QA_Detector;
+use JAT_Search_Intel\QA_Detector;
 
 class QADetectorTest extends TestCase {
 
@@ -271,7 +271,7 @@ class QADetectorTest extends TestCase {
 			'ID' => 1, 'post_title' => 'Test', 'post_content' => '<h2>What is X?</h2><p>X is a thing.</p>',
 			'post_status' => 'publish', 'post_type' => 'post', 'post_author' => 1,
 		];
-		$si_test_state['post_meta'][1]['_search_intel_faqs'] = [
+		$si_test_state['post_meta'][1]['_jat_search_intel_faqs'] = [
 			[ 'question' => 'Manual Q', 'answer' => 'Manual A' ],
 		];
 
@@ -300,6 +300,6 @@ class QADetectorTest extends TestCase {
 
 		$detector = new QA_Detector( [ 'enable_qa_detector' => false ] );
 
-		$this->assertArrayNotHasKey( 'search_intel_singular_schema', $si_test_state['filters'] ?? [] );
+		$this->assertArrayNotHasKey( 'jat_search_intel_singular_schema', $si_test_state['filters'] ?? [] );
 	}
 }

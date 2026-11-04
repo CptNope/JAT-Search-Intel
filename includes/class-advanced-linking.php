@@ -6,11 +6,11 @@
  * similarity), alerts on orphaned content in the post editor sidebar, visualizes
  * link equity flow, and detects broken internal links with auto-fix suggestions.
  *
- * @package Search_Intel
+ * @package JAT_Search_Intel
  * @since   3.2.0
  */
 
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
@@ -22,13 +22,13 @@ class Advanced_Linking {
     private $settings;
 
     /** @var string Transient prefix for link suggestions cache. */
-    private const SUGGEST_CACHE_PREFIX = 'si_link_suggest_';
+    private const SUGGEST_CACHE_PREFIX = 'jat_search_intel_link_suggest_';
 
     /** @var int Suggestion cache TTL (4 hours). */
     private const SUGGEST_TTL = 14400;
 
     /** @var string Post meta key for broken internal links. */
-    private const BROKEN_LINKS_KEY = '_search_intel_broken_internal_links';
+    private const BROKEN_LINKS_KEY = '_jat_search_intel_broken_internal_links';
 
     /**
      * Constructor.
@@ -46,10 +46,10 @@ class Advanced_Linking {
         add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
 
         // Broken internal link check on cron.
-        add_action( 'search_intel_broken_link_check', [ $this, 'run_broken_link_check' ] );
+        add_action( 'jat_search_intel_broken_link_check', [ $this, 'run_broken_link_check' ] );
 
-        if ( ! wp_next_scheduled( 'search_intel_broken_link_check' ) ) {
-            wp_schedule_event( time(), 'daily', 'search_intel_broken_link_check' );
+        if ( ! wp_next_scheduled( 'jat_search_intel_broken_link_check' ) ) {
+            wp_schedule_event( time(), 'daily', 'jat_search_intel_broken_link_check' );
         }
 
         // Admin page.
@@ -560,7 +560,7 @@ class Advanced_Linking {
      * Register REST routes for link suggestions.
      */
     public function register_rest_routes(): void {
-        register_rest_route( 'search-intel/v1', '/link-suggestions/(?P<id>\d+)', [
+        register_rest_route( 'jat-search-intel/v1', '/link-suggestions/(?P<id>\d+)', [
             'methods'             => 'GET',
             'callback'            => [ $this, 'rest_get_suggestions' ],
             'permission_callback' => function () {
@@ -573,7 +573,7 @@ class Advanced_Linking {
             ],
         ] );
 
-        register_rest_route( 'search-intel/v1', '/orphan-check/(?P<id>\d+)', [
+        register_rest_route( 'jat-search-intel/v1', '/orphan-check/(?P<id>\d+)', [
             'methods'             => 'GET',
             'callback'            => [ $this, 'rest_orphan_check' ],
             'permission_callback' => function () {
@@ -621,11 +621,11 @@ class Advanced_Linking {
      */
     public function register_admin_page(): void {
         add_submenu_page(
-            'search-intel',
+            'jat-search-intel',
             'Internal Linking',
             'Internal Linking',
             'manage_options',
-            'search-intel-advanced-linking',
+            'jat-search-intel-advanced-linking',
             [ $this, 'render_admin_page' ]
         );
     }

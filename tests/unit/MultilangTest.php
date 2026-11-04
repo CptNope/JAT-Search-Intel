@@ -1,8 +1,8 @@
 <?php
-namespace Search_Intel\Tests\Unit;
+namespace JAT_Search_Intel\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\Multilang;
+use JAT_Search_Intel\Multilang;
 
 class MultilangTest extends TestCase {
 
@@ -65,29 +65,29 @@ class MultilangTest extends TestCase {
 
 	public function test_get_lang_meta_falls_back_to_base(): void {
 		global $si_test_state;
-		$si_test_state['post_meta'][1]['_search_intel_title'] = 'Base Title';
+		$si_test_state['post_meta'][1]['_jat_search_intel_title'] = 'Base Title';
 
 		$ml = $this->make();
-		$val = $ml->get_lang_meta( 1, '_search_intel_title', 'en' );
+		$val = $ml->get_lang_meta( 1, '_jat_search_intel_title', 'en' );
 		$this->assertEquals( 'Base Title', $val );
 	}
 
 	public function test_get_lang_meta_uses_lang_specific(): void {
 		global $si_test_state;
-		$si_test_state['post_meta'][1]['_search_intel_title'] = 'Base Title';
-		$si_test_state['post_meta'][1]['_search_intel_title_fr'] = 'Titre Français';
+		$si_test_state['post_meta'][1]['_jat_search_intel_title'] = 'Base Title';
+		$si_test_state['post_meta'][1]['_jat_search_intel_title_fr'] = 'Titre Français';
 
 		$ml = $this->make();
-		$val = $ml->get_lang_meta( 1, '_search_intel_title', 'fr' );
+		$val = $ml->get_lang_meta( 1, '_jat_search_intel_title', 'fr' );
 		$this->assertEquals( 'Titre Français', $val );
 	}
 
 	public function test_save_lang_meta(): void {
 		global $si_test_state;
 		$ml = $this->make();
-		$ml->save_lang_meta( 1, '_search_intel_title', 'Título', 'es' );
+		$ml->save_lang_meta( 1, '_jat_search_intel_title', 'Título', 'es' );
 
-		$this->assertEquals( 'Título', $si_test_state['post_meta'][1]['_search_intel_title_es'] );
+		$this->assertEquals( 'Título', $si_test_state['post_meta'][1]['_jat_search_intel_title_es'] );
 	}
 
 	// ── Language Sitemap URLs ────────────────────────────────────────────────

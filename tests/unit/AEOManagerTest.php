@@ -4,7 +4,7 @@
  */
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\AEO_Manager;
+use JAT_Search_Intel\AEO_Manager;
 
 class AEOManagerTest extends TestCase {
 
@@ -61,7 +61,7 @@ class AEOManagerTest extends TestCase {
 
     public function test_get_faq_schema_with_faqs(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_faqs'] = [
+        $si_test_state['post_meta'][1]['_jat_search_intel_faqs'] = [
             [ 'question' => 'What is SEO?', 'answer' => 'Search Engine Optimization.' ],
             [ 'question' => 'Why SEO?', 'answer' => 'To improve visibility.' ],
         ];
@@ -83,7 +83,7 @@ class AEOManagerTest extends TestCase {
 
     public function test_faq_schema_question_format(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_faqs'] = [
+        $si_test_state['post_meta'][1]['_jat_search_intel_faqs'] = [
             [ 'question' => 'Test Q?', 'answer' => 'Test A.' ],
         ];
 
@@ -108,7 +108,7 @@ class AEOManagerTest extends TestCase {
 
     public function test_get_howto_schema_with_type_set(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_schema_type'] = 'HowTo';
+        $si_test_state['post_meta'][1]['_jat_search_intel_schema_type'] = 'HowTo';
         $si_test_state['posts'][1]['post_content'] = '<h2>Step 1: Do this</h2><p>Instructions.</p><h2>Step 2: Do that</h2><p>More instructions.</p>';
 
         $mgr    = $this->make_manager();
@@ -127,7 +127,7 @@ class AEOManagerTest extends TestCase {
 
     public function test_render_direct_answer_meta_outputs_tag(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_direct_answer'] = 'SEO stands for Search Engine Optimization.';
+        $si_test_state['post_meta'][1]['_jat_search_intel_direct_answer'] = 'SEO stands for Search Engine Optimization.';
 
         $mgr = $this->make_manager();
         ob_start();

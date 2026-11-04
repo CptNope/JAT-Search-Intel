@@ -1,8 +1,8 @@
 <?php
-namespace Search_Intel\Tests\Unit;
+namespace JAT_Search_Intel\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\Schema_Types;
+use JAT_Search_Intel\Schema_Types;
 
 class SchemaTypesTest extends TestCase {
 
@@ -79,8 +79,8 @@ class SchemaTypesTest extends TestCase {
 			'post_type'    => 'post',
 			'post_author'  => 1,
 		];
-		$si_test_state['post_meta'][1]['_search_intel_video_url'] = 'https://example.com/video.mp4';
-		$si_test_state['post_meta'][1]['_search_intel_video_name'] = 'My Video';
+		$si_test_state['post_meta'][1]['_jat_search_intel_video_url'] = 'https://example.com/video.mp4';
+		$si_test_state['post_meta'][1]['_jat_search_intel_video_name'] = 'My Video';
 
 		$schema = $this->types->get_video_schema( 1 );
 
@@ -115,11 +115,11 @@ class SchemaTypesTest extends TestCase {
 			'ID' => 1, 'post_title' => 'Recipe Post', 'post_content' => '',
 			'post_status' => 'publish', 'post_type' => 'post', 'post_author' => 1,
 		];
-		$si_test_state['post_meta'][1]['_search_intel_recipe_name']        = 'Chocolate Cake';
-		$si_test_state['post_meta'][1]['_search_intel_recipe_ingredients'] = [ 'flour', 'sugar', 'cocoa' ];
-		$si_test_state['post_meta'][1]['_search_intel_recipe_steps']       = [ 'Mix dry', 'Add wet', 'Bake' ];
-		$si_test_state['post_meta'][1]['_search_intel_recipe_cook_time']   = 'PT30M';
-		$si_test_state['post_meta'][1]['_search_intel_recipe_calories']    = '350 calories';
+		$si_test_state['post_meta'][1]['_jat_search_intel_recipe_name']        = 'Chocolate Cake';
+		$si_test_state['post_meta'][1]['_jat_search_intel_recipe_ingredients'] = [ 'flour', 'sugar', 'cocoa' ];
+		$si_test_state['post_meta'][1]['_jat_search_intel_recipe_steps']       = [ 'Mix dry', 'Add wet', 'Bake' ];
+		$si_test_state['post_meta'][1]['_jat_search_intel_recipe_cook_time']   = 'PT30M';
+		$si_test_state['post_meta'][1]['_jat_search_intel_recipe_calories']    = '350 calories';
 
 		$schema = $this->types->get_recipe_schema( 1 );
 
@@ -138,7 +138,7 @@ class SchemaTypesTest extends TestCase {
 			'ID' => 1, 'post_title' => 'Test', 'post_content' => '',
 			'post_status' => 'publish', 'post_type' => 'post', 'post_author' => 1,
 		];
-		$si_test_state['post_meta'][1]['_search_intel_recipe_name'] = 'Cake';
+		$si_test_state['post_meta'][1]['_jat_search_intel_recipe_name'] = 'Cake';
 
 		$this->assertNull( $this->types->get_recipe_schema( 1 ) );
 	}
@@ -151,12 +151,12 @@ class SchemaTypesTest extends TestCase {
 			'ID' => 1, 'post_title' => 'Event Post', 'post_content' => '',
 			'post_status' => 'publish', 'post_type' => 'post', 'post_author' => 1,
 		];
-		$si_test_state['post_meta'][1]['_search_intel_event_name']       = 'Tech Conference';
-		$si_test_state['post_meta'][1]['_search_intel_event_start_date'] = '2026-06-15T09:00:00';
-		$si_test_state['post_meta'][1]['_search_intel_event_location']   = 'Convention Center';
-		$si_test_state['post_meta'][1]['_search_intel_event_performer']  = 'Jane Doe';
-		$si_test_state['post_meta'][1]['_search_intel_event_organizer']  = 'Tech Corp';
-		$si_test_state['post_meta'][1]['_search_intel_event_price']      = '99';
+		$si_test_state['post_meta'][1]['_jat_search_intel_event_name']       = 'Tech Conference';
+		$si_test_state['post_meta'][1]['_jat_search_intel_event_start_date'] = '2026-06-15T09:00:00';
+		$si_test_state['post_meta'][1]['_jat_search_intel_event_location']   = 'Convention Center';
+		$si_test_state['post_meta'][1]['_jat_search_intel_event_performer']  = 'Jane Doe';
+		$si_test_state['post_meta'][1]['_jat_search_intel_event_organizer']  = 'Tech Corp';
+		$si_test_state['post_meta'][1]['_jat_search_intel_event_price']      = '99';
 
 		$schema = $this->types->get_event_schema( 1 );
 
@@ -175,7 +175,7 @@ class SchemaTypesTest extends TestCase {
 			'ID' => 1, 'post_title' => 'Test', 'post_content' => '',
 			'post_status' => 'publish', 'post_type' => 'post', 'post_author' => 1,
 		];
-		$si_test_state['post_meta'][1]['_search_intel_event_start_date'] = '2026-06-15';
+		$si_test_state['post_meta'][1]['_jat_search_intel_event_start_date'] = '2026-06-15';
 
 		$this->assertNull( $this->types->get_event_schema( 1 ) );
 	}
@@ -186,7 +186,7 @@ class SchemaTypesTest extends TestCase {
 			'ID' => 1, 'post_title' => 'Test', 'post_content' => '',
 			'post_status' => 'publish', 'post_type' => 'post', 'post_author' => 1,
 		];
-		$si_test_state['post_meta'][1]['_search_intel_event_name'] = 'Conference';
+		$si_test_state['post_meta'][1]['_jat_search_intel_event_name'] = 'Conference';
 
 		$this->assertNull( $this->types->get_event_schema( 1 ) );
 	}
@@ -199,11 +199,11 @@ class SchemaTypesTest extends TestCase {
 			'ID' => 1, 'post_title' => 'Review Post', 'post_content' => '',
 			'post_status' => 'publish', 'post_type' => 'post', 'post_author' => 1,
 		];
-		$si_test_state['post_meta'][1]['_search_intel_review_item_name'] = 'iPhone 15';
-		$si_test_state['post_meta'][1]['_search_intel_review_item_type'] = 'Product';
-		$si_test_state['post_meta'][1]['_search_intel_review_rating']    = '4.5';
-		$si_test_state['post_meta'][1]['_search_intel_review_pros']      = [ 'Great camera', 'Fast' ];
-		$si_test_state['post_meta'][1]['_search_intel_review_cons']      = [ 'Expensive' ];
+		$si_test_state['post_meta'][1]['_jat_search_intel_review_item_name'] = 'iPhone 15';
+		$si_test_state['post_meta'][1]['_jat_search_intel_review_item_type'] = 'Product';
+		$si_test_state['post_meta'][1]['_jat_search_intel_review_rating']    = '4.5';
+		$si_test_state['post_meta'][1]['_jat_search_intel_review_pros']      = [ 'Great camera', 'Fast' ];
+		$si_test_state['post_meta'][1]['_jat_search_intel_review_cons']      = [ 'Expensive' ];
 
 		$schema = $this->types->get_review_schema( 1 );
 
@@ -228,10 +228,10 @@ class SchemaTypesTest extends TestCase {
 			'ID' => 1, 'post_title' => 'Course Post', 'post_content' => '',
 			'post_status' => 'publish', 'post_type' => 'post', 'post_author' => 1,
 		];
-		$si_test_state['post_meta'][1]['_search_intel_course_name']     = 'PHP Masterclass';
-		$si_test_state['post_meta'][1]['_search_intel_course_provider'] = 'Udemy';
-		$si_test_state['post_meta'][1]['_search_intel_course_duration'] = 'PT20H';
-		$si_test_state['post_meta'][1]['_search_intel_course_price']    = '49.99';
+		$si_test_state['post_meta'][1]['_jat_search_intel_course_name']     = 'PHP Masterclass';
+		$si_test_state['post_meta'][1]['_jat_search_intel_course_provider'] = 'Udemy';
+		$si_test_state['post_meta'][1]['_jat_search_intel_course_duration'] = 'PT20H';
+		$si_test_state['post_meta'][1]['_jat_search_intel_course_price']    = '49.99';
 
 		$schema = $this->types->get_course_schema( 1 );
 
@@ -255,11 +255,11 @@ class SchemaTypesTest extends TestCase {
 			'ID' => 1, 'post_title' => 'Software Post', 'post_content' => '',
 			'post_status' => 'publish', 'post_type' => 'post', 'post_author' => 1,
 		];
-		$si_test_state['post_meta'][1]['_search_intel_software_name']     = 'MyApp';
-		$si_test_state['post_meta'][1]['_search_intel_software_os']       = 'Windows, macOS';
-		$si_test_state['post_meta'][1]['_search_intel_software_category'] = 'DeveloperApplication';
-		$si_test_state['post_meta'][1]['_search_intel_software_price']    = '0';
-		$si_test_state['post_meta'][1]['_search_intel_software_rating']   = '4.8';
+		$si_test_state['post_meta'][1]['_jat_search_intel_software_name']     = 'MyApp';
+		$si_test_state['post_meta'][1]['_jat_search_intel_software_os']       = 'Windows, macOS';
+		$si_test_state['post_meta'][1]['_jat_search_intel_software_category'] = 'DeveloperApplication';
+		$si_test_state['post_meta'][1]['_jat_search_intel_software_price']    = '0';
+		$si_test_state['post_meta'][1]['_jat_search_intel_software_rating']   = '4.8';
 
 		$schema = $this->types->get_software_schema( 1 );
 
@@ -284,12 +284,12 @@ class SchemaTypesTest extends TestCase {
 			'ID' => 1, 'post_title' => 'Job Post', 'post_content' => '',
 			'post_status' => 'publish', 'post_type' => 'post', 'post_author' => 1,
 		];
-		$si_test_state['post_meta'][1]['_search_intel_job_title']           = 'Senior PHP Developer';
-		$si_test_state['post_meta'][1]['_search_intel_job_company']         = 'Acme Inc';
-		$si_test_state['post_meta'][1]['_search_intel_job_location']        = 'New York, NY';
-		$si_test_state['post_meta'][1]['_search_intel_job_employment_type'] = 'FULL_TIME';
-		$si_test_state['post_meta'][1]['_search_intel_job_salary']          = '120000';
-		$si_test_state['post_meta'][1]['_search_intel_job_salary_unit']     = 'YEAR';
+		$si_test_state['post_meta'][1]['_jat_search_intel_job_title']           = 'Senior PHP Developer';
+		$si_test_state['post_meta'][1]['_jat_search_intel_job_company']         = 'Acme Inc';
+		$si_test_state['post_meta'][1]['_jat_search_intel_job_location']        = 'New York, NY';
+		$si_test_state['post_meta'][1]['_jat_search_intel_job_employment_type'] = 'FULL_TIME';
+		$si_test_state['post_meta'][1]['_jat_search_intel_job_salary']          = '120000';
+		$si_test_state['post_meta'][1]['_jat_search_intel_job_salary_unit']     = 'YEAR';
 
 		$schema = $this->types->get_job_posting_schema( 1 );
 
@@ -310,7 +310,7 @@ class SchemaTypesTest extends TestCase {
 
 	public function test_inject_schema_type_adds_additional_type(): void {
 		global $si_test_state;
-		$si_test_state['post_meta'][1]['_search_intel_schema_type_extra'] = 'recipe';
+		$si_test_state['post_meta'][1]['_jat_search_intel_schema_type_extra'] = 'recipe';
 
 		$schema = $this->types->inject_schema_type( [ '@type' => 'Article' ], 1 );
 

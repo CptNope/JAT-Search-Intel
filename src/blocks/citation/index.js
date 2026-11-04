@@ -1,5 +1,5 @@
 /**
- * Search Intel — Citation Block
+ * JAT Search Intel — Citation Block
  *
  * Inline source citation block for referencing external sources.
  * Adds structured citation metadata for AI and search engines.
@@ -13,20 +13,20 @@ import { PanelBody, TextControl, SelectControl } from '@wordpress/components';
 import './editor.css';
 
 const SOURCE_TYPE_OPTIONS = [
-	{ label: __( 'Website', 'search-intel' ), value: 'website' },
-	{ label: __( 'Journal Article', 'search-intel' ), value: 'journal' },
-	{ label: __( 'Book', 'search-intel' ), value: 'book' },
-	{ label: __( 'Report', 'search-intel' ), value: 'report' },
-	{ label: __( 'News Article', 'search-intel' ), value: 'news' },
-	{ label: __( 'Government', 'search-intel' ), value: 'government' },
+	{ label: __( 'Website', 'jat-search-intel' ), value: 'website' },
+	{ label: __( 'Journal Article', 'jat-search-intel' ), value: 'journal' },
+	{ label: __( 'Book', 'jat-search-intel' ), value: 'book' },
+	{ label: __( 'Report', 'jat-search-intel' ), value: 'report' },
+	{ label: __( 'News Article', 'jat-search-intel' ), value: 'news' },
+	{ label: __( 'Government', 'jat-search-intel' ), value: 'government' },
 ];
 
-registerBlockType( 'search-intel/citation', {
-	title: __( 'Citation', 'search-intel' ),
-	description: __( 'Inline source citation with structured metadata for AI and search engines.', 'search-intel' ),
+registerBlockType( 'jat-search-intel/citation', {
+	title: __( 'Citation', 'jat-search-intel' ),
+	description: __( 'Inline source citation with structured metadata for AI and search engines.', 'jat-search-intel' ),
 	category: 'widgets',
 	icon: 'format-quote',
-	keywords: [ __( 'citation', 'search-intel' ), __( 'source', 'search-intel' ), __( 'reference', 'search-intel' ) ],
+	keywords: [ __( 'citation', 'jat-search-intel' ), __( 'source', 'jat-search-intel' ), __( 'reference', 'jat-search-intel' ) ],
 	supports: {
 		html: false,
 	},
@@ -64,32 +64,32 @@ registerBlockType( 'search-intel/citation', {
 		return (
 			<div { ...blockProps }>
 				<InspectorControls>
-					<PanelBody title={ __( 'Citation Details', 'search-intel' ) }>
+					<PanelBody title={ __( 'Citation Details', 'jat-search-intel' ) }>
 						<TextControl
-							label={ __( 'Source Name', 'search-intel' ) }
+							label={ __( 'Source Name', 'jat-search-intel' ) }
 							value={ sourceName }
 							onChange={ ( val ) => setAttributes( { sourceName: val } ) }
-							placeholder={ __( 'e.g. Harvard Business Review', 'search-intel' ) }
+							placeholder={ __( 'e.g. Harvard Business Review', 'jat-search-intel' ) }
 						/>
 						<TextControl
-							label={ __( 'Source URL', 'search-intel' ) }
+							label={ __( 'Source URL', 'jat-search-intel' ) }
 							value={ sourceUrl }
 							onChange={ ( val ) => setAttributes( { sourceUrl: val } ) }
 							type="url"
 						/>
 						<SelectControl
-							label={ __( 'Source Type', 'search-intel' ) }
+							label={ __( 'Source Type', 'jat-search-intel' ) }
 							value={ sourceType }
 							options={ SOURCE_TYPE_OPTIONS }
 							onChange={ ( val ) => setAttributes( { sourceType: val } ) }
 						/>
 						<TextControl
-							label={ __( 'Author', 'search-intel' ) }
+							label={ __( 'Author', 'jat-search-intel' ) }
 							value={ author }
 							onChange={ ( val ) => setAttributes( { author: val } ) }
 						/>
 						<TextControl
-							label={ __( 'Date', 'search-intel' ) }
+							label={ __( 'Date', 'jat-search-intel' ) }
 							value={ date }
 							onChange={ ( val ) => setAttributes( { date: val } ) }
 							type="date"
@@ -101,7 +101,7 @@ registerBlockType( 'search-intel/citation', {
 				<RichText
 					tagName="blockquote"
 					className="si-citation__text"
-					placeholder={ __( 'Quote or referenced text…', 'search-intel' ) }
+					placeholder={ __( 'Quote or referenced text…', 'jat-search-intel' ) }
 					value={ text }
 					onChange={ ( val ) => setAttributes( { text: val } ) }
 					allowedFormats={ [ 'core/bold', 'core/italic' ] }

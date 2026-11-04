@@ -1,5 +1,5 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -36,7 +36,7 @@ class QA_Detector {
 		$this->settings = $settings;
 
 		if ( ! empty( $settings['enable_qa_detector'] ) ) {
-			add_filter( 'search_intel_singular_schema', [ $this, 'auto_inject_schema' ], 20, 2 );
+			add_filter( 'jat_search_intel_singular_schema', [ $this, 'auto_inject_schema' ], 20, 2 );
 		}
 	}
 
@@ -323,7 +323,7 @@ class QA_Detector {
 		}
 
 		// Only inject if no manual FAQ meta is set.
-		$manual_faqs = get_post_meta( $post_id, '_search_intel_faqs', true );
+		$manual_faqs = get_post_meta( $post_id, '_jat_search_intel_faqs', true );
 		if ( ! empty( $manual_faqs ) ) {
 			return $schema;
 		}
@@ -341,7 +341,7 @@ class QA_Detector {
 				];
 			}
 			// Save as transient so AEO_Manager's auto_detect_faqs can use it.
-			set_transient( 'si_auto_faq_' . $post_id, $faqs, DAY_IN_SECONDS );
+			set_transient( 'jat_search_intel_auto_faq_' . $post_id, $faqs, DAY_IN_SECONDS );
 		}
 
 		return $schema;

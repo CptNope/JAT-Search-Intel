@@ -1,5 +1,5 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -26,14 +26,14 @@ class Visibility_Dashboard {
 
 		// Admin page and AJAX endpoints.
 		add_action( 'admin_menu', [ $this, 'register_admin_page' ] );
-		add_action( 'wp_ajax_si_refresh_visibility', [ $this, 'ajax_refresh' ] );
+		add_action( 'wp_ajax_jat_search_intel_refresh_visibility', [ $this, 'ajax_refresh' ] );
 
 		// Track llms.txt access via query var detection.
-		add_action( 'template_redirect', [ $this, 'track_llms_access' ], 5 );
+		add_action( 'template_redirect', [ $this, 'track_llms_access' ], 0 ); // Before llms.txt is served (priority 1) and exits.
 
 		// Schedule daily cron for API data sync.
 		add_action( 'init', [ $this, 'schedule_sync' ] );
-		add_action( 'search_intel_visibility_sync', [ $this, 'run_sync' ] );
+		add_action( 'jat_search_intel_visibility_sync', [ $this, 'run_sync' ] );
 	}
 
 	// ── GEO Health Score ─────────────────────────────────────────────────────
@@ -152,8 +152,8 @@ class Visibility_Dashboard {
 
 		$with_meta = 0;
 		foreach ( $posts as $pid ) {
-			$summary = get_post_meta( $pid, '_search_intel_ai_summary', true );
-			$topics  = get_post_meta( $pid, '_search_intel_topics', true );
+			$summary = get_post_meta( $pid, '_jat_search_intel_ai_summary', true );
+			$topics  = get_post_meta( $pid, '_jat_search_intel_topics', true );
 			if ( $summary || $topics ) {
 				$with_meta++;
 			}
@@ -205,7 +205,7 @@ class Visibility_Dashboard {
 
 		$with_entities = 0;
 		foreach ( $posts as $pid ) {
-			$topics = get_post_meta( $pid, '_search_intel_topics', true );
+			$topics = get_post_meta( $pid, '_jat_search_intel_topics', true );
 			if ( $topics && is_array( $topics ) && count( $topics ) > 0 ) {
 				$with_entities++;
 			}
@@ -332,7 +332,7 @@ class Visibility_Dashboard {
 		$end   = gmdate( 'Y-m-d', strtotime( '-2 days' ) );
 
 		$response = wp_remote_post(
-			"https://www.googleapis.com/webmasters/v3/sites/{$site_url}/searchAnalytics/query",
+			'https://searchconsole.googleapis.com/webmasters/v3/sites/' . rawurlencode( $site_url ) . '/searchAnalytics/query',
 			[
 				'headers' => [
 					'Authorization' => 'Bearer ' . $access_token,
@@ -397,18 +397,18 @@ class Visibility_Dashboard {
 	 * Track access to the llms.txt endpoint and log AI bot visits.
 	 */
 	public function track_llms_access(): void {
-		$is_llms      = get_query_var( 'search_intel_llms_txt' );
-		$is_llms_full = get_query_var( 'search_intel_llms_full_txt' );
+		$is_llms      = get_query_var( 'jat_search_intel_llms_txt' );
+		$is_llms_full = get_query_var( 'jat_search_intel_llms_full_txt' );
 
 		if ( ! $is_llms && ! $is_llms_full ) {
 			return;
 		}
 
-		$user_agent = sanitize_text_field( $_SERVER['HTTP_USER_AGENT'] ?? '' );
-		$ip         = sanitize_text_field( $_SERVER['REMOTE_ADDR'] ?? '' );
+		$user_agent = isset( $_SERVER['HTTP_USER_AGENT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : '';
+		$ip         = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
 		$bot        = $this->identify_ai_bot( $user_agent );
 
-		$log = get_option( 'search_intel_llms_access_log', [] );
+		$log = get_option( 'jat_search_intel_llms_access_log', [] );
 		if ( ! is_array( $log ) ) {
 			$log = [];
 		}
@@ -417,7 +417,7 @@ class Visibility_Dashboard {
 			'time'       => current_time( 'mysql' ),
 			'endpoint'   => $is_llms_full ? 'llms-full.txt' : 'llms.txt',
 			'user_agent' => $user_agent,
-			'ip'         => $ip,
+			'ip'         => '' !== $ip ? hash( 'sha256', $ip . wp_salt() ) : '', // Hashed: raw IPs are never stored.
 			'bot'        => $bot,
 		];
 
@@ -426,7 +426,7 @@ class Visibility_Dashboard {
 			$log = array_slice( $log, -500 );
 		}
 
-		update_option( 'search_intel_llms_access_log', $log, false );
+		update_option( 'jat_search_intel_llms_access_log', $log, false );
 	}
 
 	/**
@@ -436,7 +436,7 @@ class Visibility_Dashboard {
 	 * @return array
 	 */
 	public function get_llms_access_log( int $limit = 50 ): array {
-		$log = get_option( 'search_intel_llms_access_log', [] );
+		$log = get_option( 'jat_search_intel_llms_access_log', [] );
 		if ( ! is_array( $log ) ) {
 			return [];
 		}
@@ -513,7 +513,7 @@ class Visibility_Dashboard {
 	 * @return array{total: int, by_source: array, trend: array}
 	 */
 	public function get_ai_referral_summary( int $days = 30 ): array {
-		$log = get_option( 'search_intel_ai_referrals', [] );
+		$log = get_option( 'jat_search_intel_ai_referrals', [] );
 		if ( ! is_array( $log ) ) {
 			$log = [];
 		}
@@ -536,6 +536,16 @@ class Visibility_Dashboard {
 			$by_day[ $day ]    = ( $by_day[ $day ] ?? 0 ) + 1;
 		}
 
+		// Visits recorded by the AI Search analytics module.
+		$recorded = AI_Search::summary( 'referrals', $days );
+		$total   += $recorded['total'];
+		foreach ( $recorded['by_label'] as $src => $count ) {
+			$by_source[ $src ] = ( $by_source[ $src ] ?? 0 ) + $count;
+		}
+		foreach ( $recorded['by_day'] as $day => $count ) {
+			$by_day[ $day ] = ( $by_day[ $day ] ?? 0 ) + $count;
+		}
+
 		arsort( $by_source );
 		ksort( $by_day );
 
@@ -555,7 +565,7 @@ class Visibility_Dashboard {
 	 * @return array Daily score entries.
 	 */
 	public function get_visibility_trend( int $days = 30 ): array {
-		$trend = get_option( 'search_intel_visibility_trend', [] );
+		$trend = get_option( 'jat_search_intel_visibility_trend', [] );
 		if ( ! is_array( $trend ) ) {
 			return [];
 		}
@@ -568,7 +578,7 @@ class Visibility_Dashboard {
 	 */
 	public function record_daily_score(): void {
 		$health = $this->calculate_health_score();
-		$trend  = get_option( 'search_intel_visibility_trend', [] );
+		$trend  = get_option( 'jat_search_intel_visibility_trend', [] );
 		if ( ! is_array( $trend ) ) {
 			$trend = [];
 		}
@@ -583,7 +593,7 @@ class Visibility_Dashboard {
 					'score' => $health['score'],
 					'grade' => $health['grade'],
 				];
-				update_option( 'search_intel_visibility_trend', $trend, false );
+				update_option( 'jat_search_intel_visibility_trend', $trend, false );
 				return;
 			}
 		}
@@ -599,7 +609,7 @@ class Visibility_Dashboard {
 			$trend = array_slice( $trend, -365 );
 		}
 
-		update_option( 'search_intel_visibility_trend', $trend, false );
+		update_option( 'jat_search_intel_visibility_trend', $trend, false );
 	}
 
 	// ── Recommendations ──────────────────────────────────────────────────────
@@ -689,10 +699,10 @@ class Visibility_Dashboard {
 			$with_schema = 0;
 
 			foreach ( $posts as $pid ) {
-				if ( get_post_meta( $pid, '_search_intel_ai_summary', true ) ) {
+				if ( get_post_meta( $pid, '_jat_search_intel_ai_summary', true ) ) {
 					$with_meta++;
 				}
-				if ( get_post_meta( $pid, '_search_intel_schema_type_extra', true ) ) {
+				if ( get_post_meta( $pid, '_jat_search_intel_schema_type_extra', true ) ) {
 					$with_schema++;
 				}
 			}
@@ -752,8 +762,8 @@ class Visibility_Dashboard {
 	 * Schedule daily visibility sync.
 	 */
 	public function schedule_sync(): void {
-		if ( ! wp_next_scheduled( 'search_intel_visibility_sync' ) ) {
-			wp_schedule_event( time(), 'daily', 'search_intel_visibility_sync' );
+		if ( ! wp_next_scheduled( 'jat_search_intel_visibility_sync' ) ) {
+			wp_schedule_event( time(), 'daily', 'jat_search_intel_visibility_sync' );
 		}
 	}
 
@@ -771,11 +781,11 @@ class Visibility_Dashboard {
 	 */
 	public function register_admin_page(): void {
 		add_submenu_page(
-			'search-intel',
+			'jat-search-intel',
 			'AI Visibility Dashboard',
 			'Visibility',
 			'manage_options',
-			'search-intel-visibility',
+			'jat-search-intel-visibility',
 			[ $this, 'render_admin_page' ]
 		);
 	}
@@ -796,7 +806,7 @@ class Visibility_Dashboard {
 		printf(
 			'<div class="si-score-card"><h2>GEO Health Score: <span class="grade-%s">%d/100 (%s)</span></h2></div>',
 			esc_attr( strtolower( $health['grade'] ) ),
-			$health['score'],
+			absint( $health['score'] ),
 			esc_html( $health['grade'] )
 		);
 
@@ -807,8 +817,8 @@ class Visibility_Dashboard {
 			printf(
 				'<tr><td>%s</td><td>%d / %d</td><td>%s</td></tr>',
 				esc_html( $factor['label'] ),
-				$factor['score'],
-				$factor['max'],
+				absint( $factor['score'] ),
+				absint( $factor['max'] ),
 				esc_html( $factor['detail'] )
 			);
 		}
@@ -828,11 +838,11 @@ class Visibility_Dashboard {
 		}
 
 		// AI Referral summary.
-		printf( '<h3>AI Referral Traffic (30d)</h3><p>Total: %d visits</p>', $ai_ref['total'] );
+		printf( '<h3>AI Referral Traffic (30d)</h3><p>Total: %d visits</p>', absint( $ai_ref['total'] ) );
 		if ( ! empty( $ai_ref['by_source'] ) ) {
 			echo '<ul>';
 			foreach ( $ai_ref['by_source'] as $src => $cnt ) {
-				printf( '<li>%s: %d</li>', esc_html( $src ), $cnt );
+				printf( '<li>%s: %d</li>', esc_html( $src ), absint( $cnt ) );
 			}
 			echo '</ul>';
 		}

@@ -9,7 +9,7 @@ import { test, expect } from '@playwright/test';
 
 /** Navigate to the bulk editor and return true if the page rendered. */
 async function gotoAndCheck(page: import('@playwright/test').Page): Promise<boolean> {
-  await page.goto('/wp-admin/admin.php?page=search-intel-bulk-editor');
+  await page.goto('/wp-admin/admin.php?page=jat-search-intel-bulk-editor');
   await page.waitForLoadState('domcontentloaded');
   const heading = page.locator('h1');
   const count = await heading.count();

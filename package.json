@@ -1,8 +1,8 @@
 {
-  "name": "search-intel",
-  "version": "3.4.2",
+  "name": "jat-search-intel",
+  "version": "3.5.0",
   "private": true,
-  "description": "Search Intel WordPress SEO Plugin",
+  "description": "JAT Search Intel WordPress SEO Plugin",
   "scripts": {
     "build": "wp-scripts build",
     "start": "wp-scripts start",

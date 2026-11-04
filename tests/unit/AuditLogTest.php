@@ -1,8 +1,8 @@
 <?php
-namespace Search_Intel\Tests\Unit;
+namespace JAT_Search_Intel\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\Audit_Log;
+use JAT_Search_Intel\Audit_Log;
 
 class AuditLogTest extends TestCase {
 
@@ -29,7 +29,7 @@ class AuditLogTest extends TestCase {
 
 	public function test_constructor_registers_update_option_hook(): void {
 		global $si_test_state;
-		$hooks = array_column( $si_test_state['actions']['update_option_search_intel_settings'] ?? [], 'callback' );
+		$hooks = array_column( $si_test_state['actions']['update_option_jat_search_intel_settings'] ?? [], 'callback' );
 		$found = false;
 		foreach ( $hooks as $cb ) {
 			if ( is_array( $cb ) && $cb[1] === 'log_settings_change' ) $found = true;
@@ -41,7 +41,7 @@ class AuditLogTest extends TestCase {
 		global $si_test_state;
 		$si_test_state['actions'] = [];
 		new Audit_Log( [ 'enable_audit_log' => false ] );
-		$hooks = $si_test_state['actions']['update_option_search_intel_settings'] ?? [];
+		$hooks = $si_test_state['actions']['update_option_jat_search_intel_settings'] ?? [];
 		$this->assertEmpty( $hooks );
 	}
 

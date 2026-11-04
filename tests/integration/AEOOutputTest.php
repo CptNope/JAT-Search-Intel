@@ -5,8 +5,8 @@
  */
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\AEO_Manager;
-use Search_Intel\Core;
+use JAT_Search_Intel\AEO_Manager;
+use JAT_Search_Intel\Core;
 
 class AEOOutputTest extends TestCase {
 
@@ -42,7 +42,7 @@ class AEOOutputTest extends TestCase {
 
     public function test_direct_answer_meta_renders_when_set(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_direct_answer'] = 'SEO means Search Engine Optimization.';
+        $si_test_state['post_meta'][1]['_jat_search_intel_direct_answer'] = 'SEO means Search Engine Optimization.';
 
         $mgr = $this->make_aeo();
         ob_start();
@@ -64,7 +64,7 @@ class AEOOutputTest extends TestCase {
 
     public function test_direct_answer_meta_escapes_content(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_direct_answer'] = 'Use <strong>bold</strong> & "quotes"';
+        $si_test_state['post_meta'][1]['_jat_search_intel_direct_answer'] = 'Use <strong>bold</strong> & "quotes"';
 
         $mgr = $this->make_aeo();
         ob_start();
@@ -78,18 +78,39 @@ class AEOOutputTest extends TestCase {
 
     public function test_faq_schema_renders_when_faqs_exist(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_faqs'] = [
+        $si_test_state['post_meta'][1]['_jat_search_intel_faqs'] = [
             [ 'question' => 'What is SEO?', 'answer' => 'SEO stands for Search Engine Optimization.' ],
             [ 'question' => 'Why use AEO?', 'answer' => 'AEO targets AI answer engines.' ],
         ];
 
-        $mgr = $this->make_aeo();
+        // Standalone output when the shared schema graph is off.
+        $mgr = $this->make_aeo( [ 'enable_schema' => false ] );
         ob_start();
         $mgr->render_aeo_schema();
         $output = ob_get_clean();
 
         $this->assertStringContainsString( 'FAQPage', $output );
         $this->assertStringContainsString( 'What is SEO?', $output );
+    }
+
+    public function test_faq_joins_shared_graph_when_schema_enabled(): void {
+        global $si_test_state;
+        $si_test_state['post_meta'][1]['_jat_search_intel_faqs'] = [
+            [ 'question' => 'What is SEO?', 'answer' => 'SEO stands for Search Engine Optimization.' ],
+        ];
+
+        $mgr = $this->make_aeo();
+        ob_start();
+        $mgr->render_aeo_schema();
+        $this->assertSame( '', ob_get_clean(), 'No separate script tag in graph mode' );
+
+        $nodes = $mgr->add_graph_nodes( [], [ 'page_id' => 'https://example.com/post/' ] );
+        $faq   = array_values( array_filter( $nodes, static function ( $n ) { return 'FAQPage' === $n['@type']; } ) );
+
+        $this->assertCount( 1, $faq );
+        $this->assertSame( 'https://example.com/post/#faqpage', $faq[0]['@id'] );
+        $this->assertSame( [ '@id' => 'https://example.com/post/' ], $faq[0]['isPartOf'] );
+        $this->assertArrayNotHasKey( '@context', $faq[0] );
     }
 
     public function test_faq_schema_empty_without_faqs(): void {
@@ -103,7 +124,7 @@ class AEOOutputTest extends TestCase {
 
     public function test_faq_schema_disabled_when_setting_off(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_faqs'] = [
+        $si_test_state['post_meta'][1]['_jat_search_intel_faqs'] = [
             [ 'question' => 'Q?', 'answer' => 'A.' ],
         ];
 
@@ -117,11 +138,11 @@ class AEOOutputTest extends TestCase {
 
     public function test_faq_schema_is_valid_json_ld(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_faqs'] = [
+        $si_test_state['post_meta'][1]['_jat_search_intel_faqs'] = [
             [ 'question' => 'What is SEO?', 'answer' => 'It is optimization.' ],
         ];
 
-        $mgr = $this->make_aeo();
+        $mgr = $this->make_aeo( [ 'enable_schema' => false ] );
         ob_start();
         $mgr->render_aeo_schema();
         $output = ob_get_clean();

@@ -1,12 +1,12 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
 /**
- * Bulk Tools for Search Intel.
+ * Bulk Tools for JAT Search Intel.
  *
  * Provides bulk rescore, regenerate, sitemap cache warm,
  * and settings export/import functionality.
@@ -29,12 +29,12 @@ class Bulk_Tools {
         $this->settings = $settings;
         $this->core     = $core;
 
-        add_action( 'wp_ajax_si_bulk_rescore', [ $this, 'ajax_bulk_rescore' ] );
-        add_action( 'wp_ajax_si_bulk_regenerate', [ $this, 'ajax_bulk_regenerate' ] );
-        add_action( 'wp_ajax_si_bulk_ai_generate', [ $this, 'ajax_bulk_ai_generate' ] );
-        add_action( 'wp_ajax_si_bulk_sitemap_warm', [ $this, 'ajax_bulk_sitemap_warm' ] );
-        add_action( 'wp_ajax_si_export_settings', [ $this, 'ajax_export_settings' ] );
-        add_action( 'wp_ajax_si_import_settings', [ $this, 'ajax_import_settings' ] );
+        add_action( 'wp_ajax_jat_search_intel_bulk_rescore', [ $this, 'ajax_bulk_rescore' ] );
+        add_action( 'wp_ajax_jat_search_intel_bulk_regenerate', [ $this, 'ajax_bulk_regenerate' ] );
+        add_action( 'wp_ajax_jat_search_intel_bulk_ai_generate', [ $this, 'ajax_bulk_ai_generate' ] );
+        add_action( 'wp_ajax_jat_search_intel_bulk_sitemap_warm', [ $this, 'ajax_bulk_sitemap_warm' ] );
+        add_action( 'wp_ajax_jat_search_intel_export_settings', [ $this, 'ajax_export_settings' ] );
+        add_action( 'wp_ajax_jat_search_intel_import_settings', [ $this, 'ajax_import_settings' ] );
     }
 
     /**
@@ -43,9 +43,9 @@ class Bulk_Tools {
     public function enqueue_assets(): void {
         wp_enqueue_script(
             'si-bulk-tools',
-            SEARCH_INTEL_URL . 'admin/js/bulk-tools.js',
+            JAT_SEARCH_INTEL_URL . 'admin/js/bulk-tools.js',
             [ 'jquery' ],
-            SEARCH_INTEL_VERSION,
+            JAT_SEARCH_INTEL_VERSION,
             true
         );
 
@@ -53,12 +53,12 @@ class Bulk_Tools {
             'ajaxUrl' => admin_url( 'admin-ajax.php' ),
             'nonce'   => wp_create_nonce( 'si_bulk_tools' ),
             'i18n'    => [
-                'processing'  => __( 'Processing...', 'search-intel' ),
-                'complete'    => __( 'Complete!', 'search-intel' ),
-                'error'       => __( 'An error occurred.', 'search-intel' ),
-                'confirm'     => __( 'Are you sure? This will overwrite current settings.', 'search-intel' ),
-                'exported'    => __( 'Settings exported successfully.', 'search-intel' ),
-                'imported'    => __( 'Settings imported successfully.', 'search-intel' ),
+                'processing'  => __( 'Processing...', 'jat-search-intel' ),
+                'complete'    => __( 'Complete!', 'jat-search-intel' ),
+                'error'       => __( 'An error occurred.', 'jat-search-intel' ),
+                'confirm'     => __( 'Are you sure? This will overwrite current settings.', 'jat-search-intel' ),
+                'exported'    => __( 'Settings exported successfully.', 'jat-search-intel' ),
+                'imported'    => __( 'Settings imported successfully.', 'jat-search-intel' ),
             ],
         ] );
     }
@@ -112,7 +112,7 @@ class Bulk_Tools {
 
         $batch_size  = 20;
         $offset      = absint( $_POST['offset'] ?? 0 );
-        $post_type   = sanitize_text_field( $_POST['post_type'] ?? 'post' );
+        $post_type   = isset( $_POST['post_type'] ) ? sanitize_text_field( wp_unslash( $_POST['post_type'] ) ) : 'post';
         $query_types = $this->resolve_post_types( $post_type );
 
         $posts = get_posts( [
@@ -130,15 +130,15 @@ class Bulk_Tools {
         foreach ( $posts as $post ) {
             $content     = wp_strip_all_tags( $post->post_content );
             $title       = $post->post_title;
-            $keyword     = get_post_meta( $post->ID, '_search_intel_focus_keyword', true ) ?: '';
-            $description = get_post_meta( $post->ID, '_search_intel_description', true ) ?: '';
+            $keyword     = get_post_meta( $post->ID, '_jat_search_intel_focus_keyword', true ) ?: '';
+            $description = get_post_meta( $post->ID, '_jat_search_intel_description', true ) ?: '';
 
             // Capture old scores for change log.
             $old_scores = [
-                'seo'         => (float) get_post_meta( $post->ID, '_search_intel_seo_score', true ),
-                'aeo'         => (float) get_post_meta( $post->ID, '_search_intel_aeo_score', true ),
-                'geo'         => (float) get_post_meta( $post->ID, '_search_intel_geo_score', true ),
-                'readability' => (float) get_post_meta( $post->ID, '_search_intel_readability_score', true ),
+                'seo'         => (float) get_post_meta( $post->ID, '_jat_search_intel_seo_score', true ),
+                'aeo'         => (float) get_post_meta( $post->ID, '_jat_search_intel_aeo_score', true ),
+                'geo'         => (float) get_post_meta( $post->ID, '_jat_search_intel_geo_score', true ),
+                'readability' => (float) get_post_meta( $post->ID, '_jat_search_intel_readability_score', true ),
             ];
 
             $results = $this->core->analyzer->analyze( $post->ID, $content, $title, $keyword, $description );
@@ -150,13 +150,13 @@ class Bulk_Tools {
                 'readability' => (float) ( $results['readability']['score'] ?? 0 ),
             ];
 
-            update_post_meta( $post->ID, '_search_intel_seo_score', $new_scores['seo'] );
-            update_post_meta( $post->ID, '_search_intel_aeo_score', $new_scores['aeo'] );
-            update_post_meta( $post->ID, '_search_intel_geo_score', $new_scores['geo'] );
-            update_post_meta( $post->ID, '_search_intel_readability_score', $new_scores['readability'] );
+            update_post_meta( $post->ID, '_jat_search_intel_seo_score', $new_scores['seo'] );
+            update_post_meta( $post->ID, '_jat_search_intel_aeo_score', $new_scores['aeo'] );
+            update_post_meta( $post->ID, '_jat_search_intel_geo_score', $new_scores['geo'] );
+            update_post_meta( $post->ID, '_jat_search_intel_readability_score', $new_scores['readability'] );
 
             /** This action is documented in class-content-analyzer.php */
-            do_action( 'search_intel_post_analyzed', $post->ID, $new_scores, $old_scores, $results );
+            do_action( 'jat_search_intel_post_analyzed', $post->ID, $new_scores, $old_scores, $results );
 
             $processed++;
         }
@@ -188,7 +188,7 @@ class Bulk_Tools {
 
         $batch_size  = 20;
         $offset      = absint( $_POST['offset'] ?? 0 );
-        $post_type   = sanitize_text_field( $_POST['post_type'] ?? 'post' );
+        $post_type   = isset( $_POST['post_type'] ) ? sanitize_text_field( wp_unslash( $_POST['post_type'] ) ) : 'post';
         $query_types = $this->resolve_post_types( $post_type );
 
         $posts = get_posts( [
@@ -205,25 +205,25 @@ class Bulk_Tools {
         $processed = 0;
         foreach ( $posts as $post ) {
             // Regenerate description if empty.
-            $existing_desc = get_post_meta( $post->ID, '_search_intel_description', true );
+            $existing_desc = get_post_meta( $post->ID, '_jat_search_intel_description', true );
             if ( empty( $existing_desc ) ) {
                 $auto_desc = $this->core->seo->get_description( $post->ID );
                 if ( $auto_desc ) {
-                    update_post_meta( $post->ID, '_search_intel_description', sanitize_text_field( $auto_desc ) );
+                    update_post_meta( $post->ID, '_jat_search_intel_description', sanitize_text_field( $auto_desc ) );
                 }
             }
 
             // Regenerate AI summary if empty.
-            $existing_summary = get_post_meta( $post->ID, '_search_intel_ai_summary', true );
+            $existing_summary = get_post_meta( $post->ID, '_jat_search_intel_ai_summary', true );
             if ( empty( $existing_summary ) ) {
                 $auto_summary = wp_trim_words( wp_strip_all_tags( $post->post_content ), 50, '...' );
                 if ( $auto_summary ) {
-                    update_post_meta( $post->ID, '_search_intel_ai_summary', sanitize_text_field( $auto_summary ) );
+                    update_post_meta( $post->ID, '_jat_search_intel_ai_summary', sanitize_text_field( $auto_summary ) );
                 }
             }
 
             // Auto-detect content type if empty.
-            $existing_type = get_post_meta( $post->ID, '_search_intel_content_type', true );
+            $existing_type = get_post_meta( $post->ID, '_jat_search_intel_content_type', true );
             if ( empty( $existing_type ) ) {
                 $content_lower = strtolower( $post->post_content );
                 if ( str_contains( $content_lower, 'how to' ) || str_contains( $content_lower, 'step' ) ) {
@@ -235,7 +235,7 @@ class Bulk_Tools {
                 } else {
                     $type = 'article';
                 }
-                update_post_meta( $post->ID, '_search_intel_content_type', $type );
+                update_post_meta( $post->ID, '_jat_search_intel_content_type', $type );
             }
 
             $processed++;
@@ -280,7 +280,7 @@ class Bulk_Tools {
         $post_type   = sanitize_text_field( wp_unslash( $_POST['post_type'] ?? 'post' ) );
         $query_types = $this->resolve_post_types( $post_type );
         $mode        = sanitize_text_field( wp_unslash( $_POST['mode'] ?? 'empty_only' ) );
-        $fields      = array_map( 'sanitize_text_field', (array) ( $_POST['fields'] ?? [] ) );
+        $fields      = isset( $_POST['fields'] ) ? array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['fields'] ) ) : [];
 
         $valid_fields = [
             'seo_title', 'meta_description', 'focus_keyword', 'secondary_keywords',
@@ -315,14 +315,14 @@ class Bulk_Tools {
         foreach ( $posts as $post ) {
             $content = wp_strip_all_tags( $post->post_content );
             $title   = $post->post_title;
-            $keyword = get_post_meta( $post->ID, '_search_intel_focus_keyword', true ) ?: '';
+            $keyword = get_post_meta( $post->ID, '_jat_search_intel_focus_keyword', true ) ?: '';
             $snippet = mb_substr( $content, 0, 3000 );
 
             // ── SEO Fields ──────────────────────────────────────────────
 
             // SEO Title.
             if ( in_array( 'seo_title', $fields, true ) ) {
-                $existing = get_post_meta( $post->ID, '_search_intel_title', true );
+                $existing = get_post_meta( $post->ID, '_jat_search_intel_title', true );
                 if ( 'overwrite_all' === $mode || empty( $existing ) ) {
                     $system = 'You are an SEO copywriter. Write a click-optimized SEO title for this article. '
                             . 'It must be 50-60 characters, include the main topic, and be compelling for search results. '
@@ -331,7 +331,7 @@ class Bulk_Tools {
 
                     $result = $ai_engine->chat( $system, $user, [ 'max_tokens' => 80, 'temperature' => 0.4 ] );
                     if ( $result['success'] && ! empty( $result['text'] ) ) {
-                        update_post_meta( $post->ID, '_search_intel_title', sanitize_text_field( trim( $result['text'], " \t\n\r\"'" ) ) );
+                        update_post_meta( $post->ID, '_jat_search_intel_title', sanitize_text_field( trim( $result['text'], " \t\n\r\"'" ) ) );
                         $generated++;
                     } else {
                         $errors++;
@@ -341,11 +341,11 @@ class Bulk_Tools {
 
             // Meta description.
             if ( in_array( 'meta_description', $fields, true ) ) {
-                $existing = get_post_meta( $post->ID, '_search_intel_description', true );
+                $existing = get_post_meta( $post->ID, '_jat_search_intel_description', true );
                 if ( 'overwrite_all' === $mode || empty( $existing ) ) {
                     $result = $ai_engine->generate_meta_description( $content, $keyword, $title );
                     if ( $result['success'] && ! empty( $result['text'] ) ) {
-                        update_post_meta( $post->ID, '_search_intel_description', sanitize_text_field( $result['text'] ) );
+                        update_post_meta( $post->ID, '_jat_search_intel_description', sanitize_text_field( $result['text'] ) );
                         $generated++;
                     } else {
                         $errors++;
@@ -355,7 +355,7 @@ class Bulk_Tools {
 
             // Focus keyword.
             if ( in_array( 'focus_keyword', $fields, true ) ) {
-                $existing = get_post_meta( $post->ID, '_search_intel_focus_keyword', true );
+                $existing = get_post_meta( $post->ID, '_jat_search_intel_focus_keyword', true );
                 if ( 'overwrite_all' === $mode || empty( $existing ) ) {
                     $system = 'You are an SEO keyword researcher. Identify the single best focus keyword or keyphrase '
                             . '(2-4 words) for this article. The keyword should have search intent and be specific enough to rank for. '
@@ -365,7 +365,7 @@ class Bulk_Tools {
                     $result = $ai_engine->chat( $system, $user, [ 'max_tokens' => 30, 'temperature' => 0.2 ] );
                     if ( $result['success'] && ! empty( $result['text'] ) ) {
                         $kw = strtolower( trim( $result['text'], " \t\n\r\0\x0B\"'" ) );
-                        update_post_meta( $post->ID, '_search_intel_focus_keyword', sanitize_text_field( $kw ) );
+                        update_post_meta( $post->ID, '_jat_search_intel_focus_keyword', sanitize_text_field( $kw ) );
                         $generated++;
                     } else {
                         $errors++;
@@ -375,7 +375,7 @@ class Bulk_Tools {
 
             // Secondary keywords.
             if ( in_array( 'secondary_keywords', $fields, true ) ) {
-                $existing = get_post_meta( $post->ID, '_search_intel_secondary_keywords', true );
+                $existing = get_post_meta( $post->ID, '_jat_search_intel_secondary_keywords', true );
                 if ( 'overwrite_all' === $mode || empty( $existing ) ) {
                     $system = 'You are an SEO keyword researcher. Identify 3-5 secondary keywords or keyphrases related to this article. '
                             . 'These should be semantically related terms that support the main topic. '
@@ -385,7 +385,7 @@ class Bulk_Tools {
                     $result = $ai_engine->chat( $system, $user, [ 'max_tokens' => 80, 'temperature' => 0.3 ] );
                     if ( $result['success'] && ! empty( $result['text'] ) ) {
                         $kws = strtolower( trim( $result['text'], " \t\n\r\"'" ) );
-                        update_post_meta( $post->ID, '_search_intel_secondary_keywords', sanitize_text_field( $kws ) );
+                        update_post_meta( $post->ID, '_jat_search_intel_secondary_keywords', sanitize_text_field( $kws ) );
                         $generated++;
                     } else {
                         $errors++;
@@ -395,7 +395,7 @@ class Bulk_Tools {
 
             // Social/OG title.
             if ( in_array( 'social_title', $fields, true ) ) {
-                $existing = get_post_meta( $post->ID, '_search_intel_social_title', true );
+                $existing = get_post_meta( $post->ID, '_jat_search_intel_social_title', true );
                 if ( 'overwrite_all' === $mode || empty( $existing ) ) {
                     $system = 'You are a social media copywriter. Write an engaging share title for this article '
                             . 'that would perform well on Facebook, LinkedIn, and X/Twitter. Max 70 characters. '
@@ -404,7 +404,7 @@ class Bulk_Tools {
 
                     $result = $ai_engine->chat( $system, $user, [ 'max_tokens' => 80, 'temperature' => 0.5 ] );
                     if ( $result['success'] && ! empty( $result['text'] ) ) {
-                        update_post_meta( $post->ID, '_search_intel_social_title', sanitize_text_field( trim( $result['text'], " \t\n\r\"'" ) ) );
+                        update_post_meta( $post->ID, '_jat_search_intel_social_title', sanitize_text_field( trim( $result['text'], " \t\n\r\"'" ) ) );
                         $generated++;
                     } else {
                         $errors++;
@@ -414,7 +414,7 @@ class Bulk_Tools {
 
             // Social/OG description.
             if ( in_array( 'social_description', $fields, true ) ) {
-                $existing = get_post_meta( $post->ID, '_search_intel_social_description', true );
+                $existing = get_post_meta( $post->ID, '_jat_search_intel_social_description', true );
                 if ( 'overwrite_all' === $mode || empty( $existing ) ) {
                     $system = 'You are a social media copywriter. Write a compelling share description for this article. '
                             . '100-150 characters, optimized for social media engagement. Return ONLY the description.';
@@ -422,7 +422,7 @@ class Bulk_Tools {
 
                     $result = $ai_engine->chat( $system, $user, [ 'max_tokens' => 100, 'temperature' => 0.4 ] );
                     if ( $result['success'] && ! empty( $result['text'] ) ) {
-                        update_post_meta( $post->ID, '_search_intel_social_description', sanitize_text_field( trim( $result['text'], " \t\n\r\"'" ) ) );
+                        update_post_meta( $post->ID, '_jat_search_intel_social_description', sanitize_text_field( trim( $result['text'], " \t\n\r\"'" ) ) );
                         $generated++;
                     } else {
                         $errors++;
@@ -434,7 +434,7 @@ class Bulk_Tools {
 
             // Direct answer.
             if ( in_array( 'direct_answer', $fields, true ) ) {
-                $existing = get_post_meta( $post->ID, '_search_intel_direct_answer', true );
+                $existing = get_post_meta( $post->ID, '_jat_search_intel_direct_answer', true );
                 if ( 'overwrite_all' === $mode || empty( $existing ) ) {
                     $system = 'You are a featured snippet optimizer. Write a concise, direct answer to the main question '
                             . 'this article addresses. The answer should be 40-60 words, factual, self-contained, and suitable '
@@ -443,7 +443,7 @@ class Bulk_Tools {
 
                     $result = $ai_engine->chat( $system, $user, [ 'max_tokens' => 150, 'temperature' => 0.2 ] );
                     if ( $result['success'] && ! empty( $result['text'] ) ) {
-                        update_post_meta( $post->ID, '_search_intel_direct_answer', sanitize_text_field( trim( $result['text'], " \t\n\r\"'" ) ) );
+                        update_post_meta( $post->ID, '_jat_search_intel_direct_answer', sanitize_text_field( trim( $result['text'], " \t\n\r\"'" ) ) );
                         $generated++;
                     } else {
                         $errors++;
@@ -453,7 +453,7 @@ class Bulk_Tools {
 
             // FAQs.
             if ( in_array( 'faqs', $fields, true ) ) {
-                $existing = get_post_meta( $post->ID, '_search_intel_faqs', true );
+                $existing = get_post_meta( $post->ID, '_jat_search_intel_faqs', true );
                 if ( 'overwrite_all' === $mode || empty( $existing ) ) {
                     $system = 'You are an FAQ content strategist. Based on the article below, generate 5 frequently asked questions '
                             . 'with concise, factual answers (2-3 sentences each). '
@@ -477,7 +477,7 @@ class Bulk_Tools {
                                 }
                             }
                             if ( ! empty( $faq_items ) ) {
-                                update_post_meta( $post->ID, '_search_intel_faqs', $faq_items );
+                                update_post_meta( $post->ID, '_jat_search_intel_faqs', $faq_items );
                                 $generated++;
                             }
                         } else {
@@ -493,7 +493,7 @@ class Bulk_Tools {
 
             // AI summary.
             if ( in_array( 'ai_summary', $fields, true ) ) {
-                $existing = get_post_meta( $post->ID, '_search_intel_ai_summary', true );
+                $existing = get_post_meta( $post->ID, '_jat_search_intel_ai_summary', true );
                 if ( 'overwrite_all' === $mode || empty( $existing ) ) {
                     $system = 'You are an SEO content strategist. Write a concise, factual summary of the following article. '
                             . 'The summary should be 40-60 words, written for AI systems and LLMs to understand the core topic. '
@@ -502,7 +502,7 @@ class Bulk_Tools {
 
                     $result = $ai_engine->chat( $system, $user, [ 'max_tokens' => 150, 'temperature' => 0.3 ] );
                     if ( $result['success'] && ! empty( $result['text'] ) ) {
-                        update_post_meta( $post->ID, '_search_intel_ai_summary', sanitize_text_field( $result['text'] ) );
+                        update_post_meta( $post->ID, '_jat_search_intel_ai_summary', sanitize_text_field( $result['text'] ) );
                         $generated++;
                     } else {
                         $errors++;
@@ -512,7 +512,7 @@ class Bulk_Tools {
 
             // Key topics.
             if ( in_array( 'key_topics', $fields, true ) ) {
-                $existing = get_post_meta( $post->ID, '_search_intel_topics', true );
+                $existing = get_post_meta( $post->ID, '_jat_search_intel_topics', true );
                 if ( 'overwrite_all' === $mode || empty( $existing ) ) {
                     $system = 'You are a content taxonomist. Identify 3-7 key topics covered in this article. '
                             . 'These are the core subject tags an AI system would use to index this content. '
@@ -523,7 +523,7 @@ class Bulk_Tools {
                     if ( $result['success'] && ! empty( $result['text'] ) ) {
                         $topics = array_filter( array_map( 'trim', explode( ',', $result['text'] ) ) );
                         $topics = array_map( 'sanitize_text_field', $topics );
-                        update_post_meta( $post->ID, '_search_intel_topics', $topics );
+                        update_post_meta( $post->ID, '_jat_search_intel_topics', $topics );
                         $generated++;
                     } else {
                         $errors++;
@@ -533,7 +533,7 @@ class Bulk_Tools {
 
             // Entities.
             if ( in_array( 'entities', $fields, true ) ) {
-                $existing = get_post_meta( $post->ID, '_search_intel_entities', true );
+                $existing = get_post_meta( $post->ID, '_jat_search_intel_entities', true );
                 if ( 'overwrite_all' === $mode || empty( $existing ) ) {
                     $system = 'You are a named entity extraction system. Extract the key entities mentioned in this article. '
                             . 'For each entity, provide name and type (Person, Organization, Place, Product, Concept, Event, Technology). '
@@ -561,7 +561,7 @@ class Bulk_Tools {
                                 }
                             }
                             if ( ! empty( $entities ) ) {
-                                update_post_meta( $post->ID, '_search_intel_entities', $entities );
+                                update_post_meta( $post->ID, '_jat_search_intel_entities', $entities );
                                 $generated++;
                             }
                         } else {
@@ -575,7 +575,7 @@ class Bulk_Tools {
 
             // Content type.
             if ( in_array( 'content_type', $fields, true ) ) {
-                $existing = get_post_meta( $post->ID, '_search_intel_content_type', true );
+                $existing = get_post_meta( $post->ID, '_jat_search_intel_content_type', true );
                 if ( 'overwrite_all' === $mode || empty( $existing ) ) {
                     $system = 'Classify this article into exactly one content type. '
                             . 'Choose from: article, guide, tutorial, review, opinion, news, case-study, comparison, listicle, reference. '
@@ -585,7 +585,7 @@ class Bulk_Tools {
                     $result = $ai_engine->chat( $system, $user, [ 'max_tokens' => 15, 'temperature' => 0.1 ] );
                     if ( $result['success'] && ! empty( $result['text'] ) ) {
                         $ct = strtolower( trim( $result['text'], " \t\n\r\"'" ) );
-                        update_post_meta( $post->ID, '_search_intel_content_type', sanitize_text_field( $ct ) );
+                        update_post_meta( $post->ID, '_jat_search_intel_content_type', sanitize_text_field( $ct ) );
                         $generated++;
                     } else {
                         $errors++;
@@ -595,7 +595,7 @@ class Bulk_Tools {
 
             // Content intent.
             if ( in_array( 'content_intent', $fields, true ) ) {
-                $existing = get_post_meta( $post->ID, '_search_intel_content_intent', true );
+                $existing = get_post_meta( $post->ID, '_jat_search_intel_content_intent', true );
                 if ( 'overwrite_all' === $mode || empty( $existing ) ) {
                     $system = 'Classify the search intent of this article into exactly one category. '
                             . 'Choose from: informational, commercial, navigational, transactional. '
@@ -605,7 +605,7 @@ class Bulk_Tools {
                     $result = $ai_engine->chat( $system, $user, [ 'max_tokens' => 15, 'temperature' => 0.1 ] );
                     if ( $result['success'] && ! empty( $result['text'] ) ) {
                         $intent = strtolower( trim( $result['text'], " \t\n\r\"'" ) );
-                        update_post_meta( $post->ID, '_search_intel_content_intent', sanitize_text_field( $intent ) );
+                        update_post_meta( $post->ID, '_jat_search_intel_content_intent', sanitize_text_field( $intent ) );
                         $generated++;
                     } else {
                         $errors++;
@@ -615,7 +615,7 @@ class Bulk_Tools {
 
             // Target audience.
             if ( in_array( 'audience', $fields, true ) ) {
-                $existing = get_post_meta( $post->ID, '_search_intel_audience', true );
+                $existing = get_post_meta( $post->ID, '_jat_search_intel_audience', true );
                 if ( 'overwrite_all' === $mode || empty( $existing ) ) {
                     $system = 'Identify the target audience for this article in a brief phrase (3-8 words). '
                             . 'Examples: "WordPress developers", "small business owners", "beginner photographers", "marketing professionals". '
@@ -625,7 +625,7 @@ class Bulk_Tools {
                     $result = $ai_engine->chat( $system, $user, [ 'max_tokens' => 30, 'temperature' => 0.2 ] );
                     if ( $result['success'] && ! empty( $result['text'] ) ) {
                         $aud = strtolower( trim( $result['text'], " \t\n\r\"'" ) );
-                        update_post_meta( $post->ID, '_search_intel_audience', sanitize_text_field( $aud ) );
+                        update_post_meta( $post->ID, '_jat_search_intel_audience', sanitize_text_field( $aud ) );
                         $generated++;
                     } else {
                         $errors++;
@@ -635,7 +635,7 @@ class Bulk_Tools {
 
             // Expertise level.
             if ( in_array( 'expertise_level', $fields, true ) ) {
-                $existing = get_post_meta( $post->ID, '_search_intel_expertise_level', true );
+                $existing = get_post_meta( $post->ID, '_jat_search_intel_expertise_level', true );
                 if ( 'overwrite_all' === $mode || empty( $existing ) ) {
                     $system = 'Assess the expertise level required to understand this article. '
                             . 'Choose from: beginner, intermediate, advanced, expert. '
@@ -645,7 +645,7 @@ class Bulk_Tools {
                     $result = $ai_engine->chat( $system, $user, [ 'max_tokens' => 15, 'temperature' => 0.1 ] );
                     if ( $result['success'] && ! empty( $result['text'] ) ) {
                         $level = strtolower( trim( $result['text'], " \t\n\r\"'" ) );
-                        update_post_meta( $post->ID, '_search_intel_expertise_level', sanitize_text_field( $level ) );
+                        update_post_meta( $post->ID, '_jat_search_intel_expertise_level', sanitize_text_field( $level ) );
                         $generated++;
                     } else {
                         $errors++;
@@ -701,7 +701,7 @@ class Bulk_Tools {
             'warmed'  => $warmed,
             'message' => sprintf(
                 /* translators: %d: number of sitemaps warmed */
-                __( 'Cleared and queued %d sitemap caches for regeneration.', 'search-intel' ),
+                __( 'Cleared and queued %d sitemap caches for regeneration.', 'jat-search-intel' ),
                 count( $warmed )
             ),
         ] );
@@ -720,11 +720,11 @@ class Bulk_Tools {
         }
 
         $data = [
-            'plugin'   => 'search-intel',
-            'version'  => SEARCH_INTEL_VERSION,
+            'plugin'   => 'jat-search-intel',
+            'version'  => JAT_SEARCH_INTEL_VERSION,
             'exported' => gmdate( 'Y-m-d\TH:i:s\Z' ),
             'settings' => $this->core->get_settings(),
-            'social'   => get_option( 'search_intel_social_profiles', [] ),
+            'social'   => get_option( 'jat_search_intel_social_profiles', [] ),
         ];
 
         wp_send_json_success( $data );
@@ -742,14 +742,14 @@ class Bulk_Tools {
             wp_send_json_error( [ 'message' => 'Unauthorized.' ], 403 );
         }
 
-        $json = wp_unslash( $_POST['import_data'] ?? '' );
+        $json = isset( $_POST['import_data'] ) ? wp_unslash( $_POST['import_data'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- JSON is decoded and every setting is re-sanitized by Admin::sanitize_settings().
         $data = json_decode( $json, true );
 
-        if ( ! is_array( $data ) || empty( $data['plugin'] ) || 'search-intel' !== $data['plugin'] ) {
-            wp_send_json_error( [ 'message' => __( 'Invalid Search Intel settings file.', 'search-intel' ) ] );
+        if ( ! is_array( $data ) || empty( $data['plugin'] ) || 'jat-search-intel' !== $data['plugin'] ) {
+            wp_send_json_error( [ 'message' => __( 'Invalid JAT Search Intel settings file.', 'jat-search-intel' ) ] );
         }
 
-        $mode = sanitize_text_field( $_POST['import_mode'] ?? 'merge' );
+        $mode = isset( $_POST['import_mode'] ) ? sanitize_key( wp_unslash( $_POST['import_mode'] ) ) : 'merge';
 
         // Validate settings keys against defaults.
         $defaults = Core::get_default_settings();
@@ -783,18 +783,18 @@ class Bulk_Tools {
                 }
             }
 
-            update_option( 'search_intel_settings', $new_settings );
+            update_option( 'jat_search_intel_settings', $new_settings );
         }
 
         if ( ! empty( $data['social'] ) && is_array( $data['social'] ) ) {
             $social = array_map( 'esc_url_raw', $data['social'] );
-            update_option( 'search_intel_social_profiles', $social );
+            update_option( 'jat_search_intel_social_profiles', $social );
         }
 
         wp_send_json_success( [
             'message' => sprintf(
                 /* translators: %s: merge or overwrite */
-                __( 'Settings imported (%s mode).', 'search-intel' ),
+                __( 'Settings imported (%s mode).', 'jat-search-intel' ),
                 $mode
             ),
         ] );

@@ -6,11 +6,11 @@
  * (LCP, INP, CLS), maintain trend data over time, and correlate CWV
  * performance with SEO scores.
  *
- * @package Search_Intel
+ * @package JAT_Search_Intel
  * @since   3.3.0
  */
 
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
@@ -22,10 +22,10 @@ class Core_Web_Vitals {
     private $settings;
 
     /** @var string Post meta key for CWV data. */
-    private const CWV_META_KEY = '_search_intel_cwv';
+    private const CWV_META_KEY = '_jat_search_intel_cwv';
 
     /** @var string Option key for site-wide CWV history. */
-    private const SITE_CWV_KEY = 'search_intel_site_cwv_history';
+    private const SITE_CWV_KEY = 'jat_search_intel_site_cwv_history';
 
     /** @var string PageSpeed Insights API endpoint. */
     private const PSI_API_URL = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed';
@@ -46,16 +46,16 @@ class Core_Web_Vitals {
         }
 
         // Weekly CWV scan cron.
-        add_action( 'search_intel_cwv_scan', [ $this, 'run_scan' ] );
+        add_action( 'jat_search_intel_cwv_scan', [ $this, 'run_scan' ] );
 
-        if ( ! wp_next_scheduled( 'search_intel_cwv_scan' ) ) {
-            wp_schedule_event( time(), 'weekly', 'search_intel_cwv_scan' );
+        if ( ! wp_next_scheduled( 'jat_search_intel_cwv_scan' ) ) {
+            wp_schedule_event( time(), 'weekly', 'jat_search_intel_cwv_scan' );
         }
 
         if ( is_admin() ) {
             add_action( 'admin_menu', [ $this, 'register_admin_page' ] );
-            add_action( 'wp_ajax_si_save_psi_key', [ $this, 'ajax_save_psi_key' ] );
-            add_action( 'wp_ajax_si_run_cwv_scan', [ $this, 'ajax_run_scan' ] );
+            add_action( 'wp_ajax_jat_search_intel_save_psi_key', [ $this, 'ajax_save_psi_key' ] );
+            add_action( 'wp_ajax_jat_search_intel_run_cwv_scan', [ $this, 'ajax_run_scan' ] );
         }
     }
 
@@ -68,9 +68,9 @@ class Core_Web_Vitals {
             wp_send_json_error( [ 'message' => 'Unauthorized.' ] );
         }
         $key      = sanitize_text_field( wp_unslash( $_POST['psi_api_key'] ?? '' ) );
-        $settings = get_option( 'search_intel_settings', [] );
+        $settings = get_option( 'jat_search_intel_settings', [] );
         $settings['psi_api_key'] = $key;
-        update_option( 'search_intel_settings', $settings );
+        update_option( 'jat_search_intel_settings', $settings );
         $this->settings['psi_api_key'] = $key;
         wp_send_json_success( [ 'message' => $key !== '' ? 'API key saved.' : 'API key cleared.' ] );
     }
@@ -345,7 +345,7 @@ class Core_Web_Vitals {
         foreach ( $post_ids as $pid ) {
             $pid    = (int) $pid;
             $cwv    = $this->get_latest_cwv( $pid );
-            $scores = get_post_meta( $pid, '_search_intel_scores', true );
+            $scores = get_post_meta( $pid, '_jat_search_intel_scores', true );
 
             if ( empty( $cwv ) ) {
                 continue;
@@ -418,11 +418,11 @@ class Core_Web_Vitals {
      */
     public function register_admin_page(): void {
         add_submenu_page(
-            'search-intel',
+            'jat-search-intel',
             'Core Web Vitals',
             'Web Vitals',
             'manage_options',
-            'search-intel-cwv',
+            'jat-search-intel-cwv',
             [ $this, 'render_admin_page' ]
         );
     }
@@ -508,7 +508,7 @@ class Core_Web_Vitals {
                 if (!val || val === '••••••••••••••••') { $('#si-psi-status').html('<span style="color:#d63638;">Enter a key first.</span>'); return; }
                 btn.prop('disabled', true);
                 $('#si-psi-status').html('<span style="color:#dba617;">Saving...</span>');
-                $.post(ajaxUrl, { action: 'si_save_psi_key', nonce: nonce, psi_api_key: val }, function(r){
+                $.post(ajaxUrl, { action: 'jat_search_intel_save_psi_key', nonce: nonce, psi_api_key: val }, function(r){
                     btn.prop('disabled', false);
                     if (r.success) {
                         $('#si-psi-status').html('<span style="color:#00a32a;">&#10003; ' + r.data.message + '</span>');
@@ -526,7 +526,7 @@ class Core_Web_Vitals {
                 var btn = $(this);
                 btn.prop('disabled', true);
                 $('#si-scan-status').html('<span style="color:#dba617;">Scanning... this may take a minute.</span>');
-                $.post(ajaxUrl, { action: 'si_run_cwv_scan', nonce: nonce }, function(r){
+                $.post(ajaxUrl, { action: 'jat_search_intel_run_cwv_scan', nonce: nonce }, function(r){
                     btn.prop('disabled', false);
                     if (r.success) {
                         $('#si-scan-status').html('<span style="color:#00a32a;">&#10003; ' + r.data.message + '</span>');

@@ -1,8 +1,8 @@
 <?php
-namespace Search_Intel\Tests\Unit;
+namespace JAT_Search_Intel\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\Migration;
+use JAT_Search_Intel\Migration;
 
 class MigrationTest extends TestCase {
 
@@ -110,8 +110,8 @@ class MigrationTest extends TestCase {
 		$result = $this->migration->migrate( 'yoast' );
 
 		$this->assertEquals( 1, $result['migrated'] );
-		$this->assertEquals( 'Yoast Title', $si_test_state['post_meta'][1]['_search_intel_title'] );
-		$this->assertEquals( 'Yoast description', $si_test_state['post_meta'][1]['_search_intel_description'] );
+		$this->assertEquals( 'Yoast Title', $si_test_state['post_meta'][1]['_jat_search_intel_title'] );
+		$this->assertEquals( 'Yoast description', $si_test_state['post_meta'][1]['_jat_search_intel_description'] );
 	}
 
 	public function test_migrate_does_not_overwrite_by_default(): void {
@@ -121,13 +121,13 @@ class MigrationTest extends TestCase {
 			'post_status' => 'publish', 'post_type' => 'post', 'post_author' => 1,
 		];
 		$si_test_state['post_meta'][1]['_yoast_wpseo_title'] = 'Yoast Title';
-		$si_test_state['post_meta'][1]['_search_intel_title'] = 'Existing Title';
+		$si_test_state['post_meta'][1]['_jat_search_intel_title'] = 'Existing Title';
 
 		$result = $this->migration->migrate( 'yoast', false );
 
 		$this->assertEquals( 0, $result['migrated'] );
 		$this->assertEquals( 1, $result['skipped'] );
-		$this->assertEquals( 'Existing Title', $si_test_state['post_meta'][1]['_search_intel_title'] );
+		$this->assertEquals( 'Existing Title', $si_test_state['post_meta'][1]['_jat_search_intel_title'] );
 	}
 
 	public function test_migrate_overwrite_replaces_existing(): void {
@@ -137,12 +137,12 @@ class MigrationTest extends TestCase {
 			'post_status' => 'publish', 'post_type' => 'post', 'post_author' => 1,
 		];
 		$si_test_state['post_meta'][1]['_yoast_wpseo_title'] = 'Yoast Title';
-		$si_test_state['post_meta'][1]['_search_intel_title'] = 'Existing Title';
+		$si_test_state['post_meta'][1]['_jat_search_intel_title'] = 'Existing Title';
 
 		$result = $this->migration->migrate( 'yoast', true );
 
 		$this->assertEquals( 1, $result['migrated'] );
-		$this->assertEquals( 'Yoast Title', $si_test_state['post_meta'][1]['_search_intel_title'] );
+		$this->assertEquals( 'Yoast Title', $si_test_state['post_meta'][1]['_jat_search_intel_title'] );
 	}
 
 	public function test_migrate_canonical_sanitized_as_url(): void {
@@ -155,7 +155,7 @@ class MigrationTest extends TestCase {
 
 		$this->migration->migrate( 'yoast' );
 
-		$this->assertEquals( 'https://example.com/page', $si_test_state['post_meta'][1]['_search_intel_canonical'] );
+		$this->assertEquals( 'https://example.com/page', $si_test_state['post_meta'][1]['_jat_search_intel_canonical'] );
 	}
 
 	public function test_migrate_multiple_sources(): void {
@@ -169,7 +169,7 @@ class MigrationTest extends TestCase {
 
 		$result = $this->migration->migrate( 'rankmath' );
 		$this->assertEquals( 1, $result['migrated'] );
-		$this->assertEquals( 'RM Title', $si_test_state['post_meta'][1]['_search_intel_title'] );
+		$this->assertEquals( 'RM Title', $si_test_state['post_meta'][1]['_jat_search_intel_title'] );
 	}
 
 	// ── Redirect Migration ───────────────────────────────────────────────────
@@ -189,7 +189,7 @@ class MigrationTest extends TestCase {
 		$result = $this->migration->migrate( 'yoast' );
 		$this->assertEquals( 1, $result['redirects'] );
 
-		$redirects = $si_test_state['options']['search_intel_redirects'];
+		$redirects = $si_test_state['options']['jat_search_intel_redirects'];
 		$this->assertCount( 1, $redirects );
 		$this->assertEquals( '/old-page', $redirects[0]['from'] );
 		$this->assertEquals( '/new-page', $redirects[0]['to'] );

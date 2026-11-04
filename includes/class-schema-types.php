@@ -1,5 +1,5 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Additional Schema Types — VideoObject, Recipe, Event, Review, Course, SoftwareApplication, JobPosting.
  *
  * Each schema type is driven by post meta and rendered as JSON-LD on the front end.
- * Meta keys follow the pattern: _search_intel_{type}_{field}
+ * Meta keys follow the pattern: _jat_search_intel_{type}_{field}
  *
  * @since 2.1.0
  */
@@ -41,7 +41,8 @@ class Schema_Types {
 
 		if ( ! empty( $settings['enable_schema_types'] ) ) {
 			add_action( 'wp_head', [ $this, 'render_schemas' ], 15 );
-			add_filter( 'search_intel_singular_schema', [ $this, 'inject_schema_type' ], 10, 2 );
+			add_filter( 'jat_search_intel_schema_graph', [ $this, 'add_graph_nodes' ], 10, 2 );
+			add_filter( 'jat_search_intel_singular_schema', [ $this, 'inject_schema_type' ], 10, 2 );
 		}
 	}
 
@@ -49,8 +50,49 @@ class Schema_Types {
 	 * Render additional schema types as standalone JSON-LD blocks.
 	 */
 	public function render_schemas(): void {
+		if ( $this->in_graph() ) {
+			return; // Added to the shared graph via add_graph_nodes().
+		}
+
+		foreach ( $this->get_type_nodes() as $schema ) {
+			$output = array_merge( [ '@context' => 'https://schema.org' ], $schema );
+			printf(
+				"\n" . '<script type="application/ld+json">%s</script>' . "\n",
+				wp_json_encode( $output, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_PRETTY_PRINT )
+			);
+		}
+	}
+
+	/**
+	 * Add the extra schema type nodes to the shared graph.
+	 *
+	 * @param array $nodes   Graph nodes.
+	 * @param array $context Graph context.
+	 * @return array
+	 */
+	public function add_graph_nodes( array $nodes, array $context = [] ): array {
+		foreach ( $this->get_type_nodes() as $i => $node ) {
+			unset( $node['@context'] );
+			if ( empty( $node['@id'] ) && ! empty( $context['page_id'] ) ) {
+				$type        = is_array( $node['@type'] ) ? reset( $node['@type'] ) : (string) $node['@type'];
+				$node['@id'] = $context['page_id'] . '#' . strtolower( $type ) . ( $i ? '-' . $i : '' );
+			}
+			if ( ! empty( $context['page_id'] ) ) {
+				$node['mainEntityOfPage'] = [ '@id' => $context['page_id'] ];
+			}
+			$nodes[] = $node;
+		}
+		return $nodes;
+	}
+
+	/**
+	 * Extra schema type nodes for the current singular request.
+	 *
+	 * @return array<int,array<string,mixed>>
+	 */
+	public function get_type_nodes(): array {
 		if ( ! is_singular() ) {
-			return;
+			return [];
 		}
 
 		$post_id = get_queried_object_id();
@@ -63,7 +105,7 @@ class Schema_Types {
 		}
 
 		// Meta-driven schema types.
-		$meta_type = get_post_meta( $post_id, '_search_intel_schema_type_extra', true );
+		$meta_type = get_post_meta( $post_id, '_jat_search_intel_schema_type_extra', true );
 		if ( $meta_type && isset( self::TYPES[ $meta_type ] ) ) {
 			$method = 'get_' . $meta_type . '_schema';
 			if ( method_exists( $this, $method ) ) {
@@ -74,13 +116,7 @@ class Schema_Types {
 			}
 		}
 
-		foreach ( $schemas as $schema ) {
-			$output = array_merge( [ '@context' => 'https://schema.org' ], $schema );
-			printf(
-				"\n" . '<script type="application/ld+json">%s</script>' . "\n",
-				wp_json_encode( $output, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT )
-			);
-		}
+		return $schemas;
 	}
 
 	/**
@@ -91,7 +127,7 @@ class Schema_Types {
 	 * @return array
 	 */
 	public function inject_schema_type( array $schema, int $post_id ): array {
-		$extra_type = get_post_meta( $post_id, '_search_intel_schema_type_extra', true );
+		$extra_type = get_post_meta( $post_id, '_jat_search_intel_schema_type_extra', true );
 		if ( $extra_type && isset( self::TYPES[ $extra_type ] ) ) {
 			$schema['additionalType'] = 'https://schema.org/' . self::TYPES[ $extra_type ];
 		}
@@ -111,7 +147,7 @@ class Schema_Types {
 		}
 
 		// Check for explicit video meta first.
-		$video_url = get_post_meta( $post_id, '_search_intel_video_url', true );
+		$video_url = get_post_meta( $post_id, '_jat_search_intel_video_url', true );
 		if ( $video_url ) {
 			return $this->build_video_schema( $post_id, $video_url );
 		}
@@ -137,11 +173,11 @@ class Schema_Types {
 	 * @return array
 	 */
 	private function build_video_schema( int $post_id, string $video_url ): array {
-		$name        = get_post_meta( $post_id, '_search_intel_video_name', true ) ?: get_the_title( $post_id );
-		$description = get_post_meta( $post_id, '_search_intel_video_description', true ) ?: wp_trim_words( wp_strip_all_tags( get_post( $post_id )->post_content ?? '' ), 30, '...' );
-		$thumbnail   = get_post_meta( $post_id, '_search_intel_video_thumbnail', true ) ?: get_the_post_thumbnail_url( $post_id, 'full' );
-		$upload_date = get_post_meta( $post_id, '_search_intel_video_upload_date', true ) ?: get_the_date( 'c', $post_id );
-		$duration    = get_post_meta( $post_id, '_search_intel_video_duration', true );
+		$name        = get_post_meta( $post_id, '_jat_search_intel_video_name', true ) ?: get_the_title( $post_id );
+		$description = get_post_meta( $post_id, '_jat_search_intel_video_description', true ) ?: wp_trim_words( wp_strip_all_tags( get_post( $post_id )->post_content ?? '' ), 30, '...' );
+		$thumbnail   = get_post_meta( $post_id, '_jat_search_intel_video_thumbnail', true ) ?: get_the_post_thumbnail_url( $post_id, 'full' );
+		$upload_date = get_post_meta( $post_id, '_jat_search_intel_video_upload_date', true ) ?: get_the_date( 'c', $post_id );
+		$duration    = get_post_meta( $post_id, '_jat_search_intel_video_duration', true );
 
 		$schema = [
 			'@type'        => 'VideoObject',
@@ -169,13 +205,13 @@ class Schema_Types {
 	 * @return array|null
 	 */
 	public function get_recipe_schema( int $post_id ): ?array {
-		$name = get_post_meta( $post_id, '_search_intel_recipe_name', true );
+		$name = get_post_meta( $post_id, '_jat_search_intel_recipe_name', true );
 		if ( ! $name ) {
 			$name = get_the_title( $post_id );
 		}
 
-		$ingredients = get_post_meta( $post_id, '_search_intel_recipe_ingredients', true );
-		$steps       = get_post_meta( $post_id, '_search_intel_recipe_steps', true );
+		$ingredients = get_post_meta( $post_id, '_jat_search_intel_recipe_ingredients', true );
+		$steps       = get_post_meta( $post_id, '_jat_search_intel_recipe_steps', true );
 
 		if ( empty( $ingredients ) || empty( $steps ) ) {
 			return null;
@@ -199,27 +235,27 @@ class Schema_Types {
 		}
 
 		// Optional fields.
-		$description = get_post_meta( $post_id, '_search_intel_recipe_description', true );
+		$description = get_post_meta( $post_id, '_jat_search_intel_recipe_description', true );
 		if ( $description ) {
 			$schema['description'] = sanitize_text_field( $description );
 		}
 
-		$cook_time = get_post_meta( $post_id, '_search_intel_recipe_cook_time', true );
+		$cook_time = get_post_meta( $post_id, '_jat_search_intel_recipe_cook_time', true );
 		if ( $cook_time ) {
 			$schema['cookTime'] = sanitize_text_field( $cook_time );
 		}
 
-		$prep_time = get_post_meta( $post_id, '_search_intel_recipe_prep_time', true );
+		$prep_time = get_post_meta( $post_id, '_jat_search_intel_recipe_prep_time', true );
 		if ( $prep_time ) {
 			$schema['prepTime'] = sanitize_text_field( $prep_time );
 		}
 
-		$servings = get_post_meta( $post_id, '_search_intel_recipe_servings', true );
+		$servings = get_post_meta( $post_id, '_jat_search_intel_recipe_servings', true );
 		if ( $servings ) {
 			$schema['recipeYield'] = sanitize_text_field( $servings );
 		}
 
-		$calories = get_post_meta( $post_id, '_search_intel_recipe_calories', true );
+		$calories = get_post_meta( $post_id, '_jat_search_intel_recipe_calories', true );
 		if ( $calories ) {
 			$schema['nutrition'] = [
 				'@type'    => 'NutritionInformation',
@@ -242,8 +278,8 @@ class Schema_Types {
 	 * @return array|null
 	 */
 	public function get_event_schema( int $post_id ): ?array {
-		$name       = get_post_meta( $post_id, '_search_intel_event_name', true );
-		$start_date = get_post_meta( $post_id, '_search_intel_event_start_date', true );
+		$name       = get_post_meta( $post_id, '_jat_search_intel_event_name', true );
+		$start_date = get_post_meta( $post_id, '_jat_search_intel_event_start_date', true );
 
 		if ( ! $name || ! $start_date ) {
 			return null;
@@ -255,19 +291,19 @@ class Schema_Types {
 			'startDate' => sanitize_text_field( $start_date ),
 		];
 
-		$end_date = get_post_meta( $post_id, '_search_intel_event_end_date', true );
+		$end_date = get_post_meta( $post_id, '_jat_search_intel_event_end_date', true );
 		if ( $end_date ) {
 			$schema['endDate'] = sanitize_text_field( $end_date );
 		}
 
-		$description = get_post_meta( $post_id, '_search_intel_event_description', true );
+		$description = get_post_meta( $post_id, '_jat_search_intel_event_description', true );
 		if ( $description ) {
 			$schema['description'] = sanitize_text_field( $description );
 		}
 
 		// Location.
-		$location_name = get_post_meta( $post_id, '_search_intel_event_location', true );
-		$location_addr = get_post_meta( $post_id, '_search_intel_event_address', true );
+		$location_name = get_post_meta( $post_id, '_jat_search_intel_event_location', true );
+		$location_addr = get_post_meta( $post_id, '_jat_search_intel_event_address', true );
 		if ( $location_name ) {
 			$location = [
 				'@type' => 'Place',
@@ -280,7 +316,7 @@ class Schema_Types {
 		}
 
 		// Performer.
-		$performer = get_post_meta( $post_id, '_search_intel_event_performer', true );
+		$performer = get_post_meta( $post_id, '_jat_search_intel_event_performer', true );
 		if ( $performer ) {
 			$schema['performer'] = [
 				'@type' => 'Person',
@@ -289,7 +325,7 @@ class Schema_Types {
 		}
 
 		// Organizer.
-		$organizer = get_post_meta( $post_id, '_search_intel_event_organizer', true );
+		$organizer = get_post_meta( $post_id, '_jat_search_intel_event_organizer', true );
 		if ( $organizer ) {
 			$schema['organizer'] = [
 				'@type' => 'Organization',
@@ -298,8 +334,8 @@ class Schema_Types {
 		}
 
 		// Offers (price).
-		$price    = get_post_meta( $post_id, '_search_intel_event_price', true );
-		$currency = get_post_meta( $post_id, '_search_intel_event_currency', true );
+		$price    = get_post_meta( $post_id, '_jat_search_intel_event_price', true );
+		$currency = get_post_meta( $post_id, '_jat_search_intel_event_currency', true );
 		if ( $price ) {
 			$schema['offers'] = [
 				'@type'         => 'Offer',
@@ -324,7 +360,7 @@ class Schema_Types {
 	 * @return array|null
 	 */
 	public function get_review_schema( int $post_id ): ?array {
-		$item_name = get_post_meta( $post_id, '_search_intel_review_item_name', true );
+		$item_name = get_post_meta( $post_id, '_jat_search_intel_review_item_name', true );
 		if ( ! $item_name ) {
 			return null;
 		}
@@ -332,7 +368,7 @@ class Schema_Types {
 		$schema = [
 			'@type'        => 'Review',
 			'itemReviewed' => [
-				'@type' => sanitize_text_field( get_post_meta( $post_id, '_search_intel_review_item_type', true ) ?: 'Thing' ),
+				'@type' => sanitize_text_field( get_post_meta( $post_id, '_jat_search_intel_review_item_type', true ) ?: 'Thing' ),
 				'name'  => sanitize_text_field( $item_name ),
 			],
 			'author'       => [
@@ -342,9 +378,9 @@ class Schema_Types {
 		];
 
 		// Rating.
-		$rating = get_post_meta( $post_id, '_search_intel_review_rating', true );
+		$rating = get_post_meta( $post_id, '_jat_search_intel_review_rating', true );
 		if ( $rating ) {
-			$best = get_post_meta( $post_id, '_search_intel_review_best_rating', true );
+			$best = get_post_meta( $post_id, '_jat_search_intel_review_best_rating', true );
 			$schema['reviewRating'] = [
 				'@type'       => 'Rating',
 				'ratingValue' => sanitize_text_field( $rating ),
@@ -353,7 +389,7 @@ class Schema_Types {
 		}
 
 		// Pros / Cons.
-		$pros = get_post_meta( $post_id, '_search_intel_review_pros', true );
+		$pros = get_post_meta( $post_id, '_jat_search_intel_review_pros', true );
 		if ( ! empty( $pros ) && is_array( $pros ) ) {
 			$schema['positiveNotes'] = [
 				'@type'           => 'ItemList',
@@ -366,7 +402,7 @@ class Schema_Types {
 			];
 		}
 
-		$cons = get_post_meta( $post_id, '_search_intel_review_cons', true );
+		$cons = get_post_meta( $post_id, '_jat_search_intel_review_cons', true );
 		if ( ! empty( $cons ) && is_array( $cons ) ) {
 			$schema['negativeNotes'] = [
 				'@type'           => 'ItemList',
@@ -380,7 +416,7 @@ class Schema_Types {
 		}
 
 		// Body.
-		$body = get_post_meta( $post_id, '_search_intel_review_body', true );
+		$body = get_post_meta( $post_id, '_jat_search_intel_review_body', true );
 		if ( $body ) {
 			$schema['reviewBody'] = sanitize_text_field( $body );
 		}
@@ -395,7 +431,7 @@ class Schema_Types {
 	 * @return array|null
 	 */
 	public function get_course_schema( int $post_id ): ?array {
-		$name = get_post_meta( $post_id, '_search_intel_course_name', true );
+		$name = get_post_meta( $post_id, '_jat_search_intel_course_name', true );
 		if ( ! $name ) {
 			return null;
 		}
@@ -405,12 +441,12 @@ class Schema_Types {
 			'name'  => sanitize_text_field( $name ),
 		];
 
-		$description = get_post_meta( $post_id, '_search_intel_course_description', true );
+		$description = get_post_meta( $post_id, '_jat_search_intel_course_description', true );
 		if ( $description ) {
 			$schema['description'] = sanitize_text_field( $description );
 		}
 
-		$provider = get_post_meta( $post_id, '_search_intel_course_provider', true );
+		$provider = get_post_meta( $post_id, '_jat_search_intel_course_provider', true );
 		if ( $provider ) {
 			$schema['provider'] = [
 				'@type' => 'Organization',
@@ -418,13 +454,13 @@ class Schema_Types {
 			];
 		}
 
-		$duration = get_post_meta( $post_id, '_search_intel_course_duration', true );
+		$duration = get_post_meta( $post_id, '_jat_search_intel_course_duration', true );
 		if ( $duration ) {
 			$schema['timeRequired'] = sanitize_text_field( $duration );
 		}
 
-		$price    = get_post_meta( $post_id, '_search_intel_course_price', true );
-		$currency = get_post_meta( $post_id, '_search_intel_course_currency', true );
+		$price    = get_post_meta( $post_id, '_jat_search_intel_course_price', true );
+		$currency = get_post_meta( $post_id, '_jat_search_intel_course_currency', true );
 		if ( $price ) {
 			$schema['offers'] = [
 				'@type'         => 'Offer',
@@ -443,7 +479,7 @@ class Schema_Types {
 	 * @return array|null
 	 */
 	public function get_software_schema( int $post_id ): ?array {
-		$name = get_post_meta( $post_id, '_search_intel_software_name', true );
+		$name = get_post_meta( $post_id, '_jat_search_intel_software_name', true );
 		if ( ! $name ) {
 			return null;
 		}
@@ -453,18 +489,18 @@ class Schema_Types {
 			'name'  => sanitize_text_field( $name ),
 		];
 
-		$os = get_post_meta( $post_id, '_search_intel_software_os', true );
+		$os = get_post_meta( $post_id, '_jat_search_intel_software_os', true );
 		if ( $os ) {
 			$schema['operatingSystem'] = sanitize_text_field( $os );
 		}
 
-		$category = get_post_meta( $post_id, '_search_intel_software_category', true );
+		$category = get_post_meta( $post_id, '_jat_search_intel_software_category', true );
 		if ( $category ) {
 			$schema['applicationCategory'] = sanitize_text_field( $category );
 		}
 
-		$price    = get_post_meta( $post_id, '_search_intel_software_price', true );
-		$currency = get_post_meta( $post_id, '_search_intel_software_currency', true );
+		$price    = get_post_meta( $post_id, '_jat_search_intel_software_price', true );
+		$currency = get_post_meta( $post_id, '_jat_search_intel_software_currency', true );
 		if ( $price !== false && $price !== '' ) {
 			$schema['offers'] = [
 				'@type'         => 'Offer',
@@ -473,8 +509,8 @@ class Schema_Types {
 			];
 		}
 
-		$rating      = get_post_meta( $post_id, '_search_intel_software_rating', true );
-		$rating_count = get_post_meta( $post_id, '_search_intel_software_rating_count', true );
+		$rating      = get_post_meta( $post_id, '_jat_search_intel_software_rating', true );
+		$rating_count = get_post_meta( $post_id, '_jat_search_intel_software_rating_count', true );
 		if ( $rating ) {
 			$schema['aggregateRating'] = [
 				'@type'       => 'AggregateRating',
@@ -493,7 +529,7 @@ class Schema_Types {
 	 * @return array|null
 	 */
 	public function get_job_posting_schema( int $post_id ): ?array {
-		$title = get_post_meta( $post_id, '_search_intel_job_title', true );
+		$title = get_post_meta( $post_id, '_jat_search_intel_job_title', true );
 		if ( ! $title ) {
 			return null;
 		}
@@ -504,12 +540,12 @@ class Schema_Types {
 			'datePosted'  => get_the_date( 'c', $post_id ),
 		];
 
-		$description = get_post_meta( $post_id, '_search_intel_job_description', true );
+		$description = get_post_meta( $post_id, '_jat_search_intel_job_description', true );
 		if ( $description ) {
 			$schema['description'] = wp_kses_post( $description );
 		}
 
-		$company = get_post_meta( $post_id, '_search_intel_job_company', true );
+		$company = get_post_meta( $post_id, '_jat_search_intel_job_company', true );
 		if ( $company ) {
 			$schema['hiringOrganization'] = [
 				'@type' => 'Organization',
@@ -517,7 +553,7 @@ class Schema_Types {
 			];
 		}
 
-		$location = get_post_meta( $post_id, '_search_intel_job_location', true );
+		$location = get_post_meta( $post_id, '_jat_search_intel_job_location', true );
 		if ( $location ) {
 			$schema['jobLocation'] = [
 				'@type'   => 'Place',
@@ -525,15 +561,15 @@ class Schema_Types {
 			];
 		}
 
-		$employment_type = get_post_meta( $post_id, '_search_intel_job_employment_type', true );
+		$employment_type = get_post_meta( $post_id, '_jat_search_intel_job_employment_type', true );
 		if ( $employment_type ) {
 			$schema['employmentType'] = sanitize_text_field( $employment_type );
 		}
 
 		// Salary.
-		$salary_value    = get_post_meta( $post_id, '_search_intel_job_salary', true );
-		$salary_currency = get_post_meta( $post_id, '_search_intel_job_salary_currency', true );
-		$salary_unit     = get_post_meta( $post_id, '_search_intel_job_salary_unit', true );
+		$salary_value    = get_post_meta( $post_id, '_jat_search_intel_job_salary', true );
+		$salary_currency = get_post_meta( $post_id, '_jat_search_intel_job_salary_currency', true );
+		$salary_unit     = get_post_meta( $post_id, '_jat_search_intel_job_salary_unit', true );
 		if ( $salary_value ) {
 			$schema['baseSalary'] = [
 				'@type'    => 'MonetaryAmount',
@@ -546,7 +582,7 @@ class Schema_Types {
 			];
 		}
 
-		$valid_through = get_post_meta( $post_id, '_search_intel_job_valid_through', true );
+		$valid_through = get_post_meta( $post_id, '_jat_search_intel_job_valid_through', true );
 		if ( $valid_through ) {
 			$schema['validThrough'] = sanitize_text_field( $valid_through );
 		}
@@ -561,5 +597,14 @@ class Schema_Types {
 	 */
 	public static function get_types(): array {
 		return self::TYPES;
+	}
+
+	/**
+	 * Whether JSON-LD goes into the shared @graph printed by Schema_Manager.
+	 *
+	 * @return bool
+	 */
+	private function in_graph(): bool {
+		return ! empty( $this->settings['enable_schema'] );
 	}
 }

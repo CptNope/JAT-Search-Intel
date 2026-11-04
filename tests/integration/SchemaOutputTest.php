@@ -5,8 +5,8 @@
  */
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\Schema_Manager;
-use Search_Intel\Core;
+use JAT_Search_Intel\Schema_Manager;
+use JAT_Search_Intel\Core;
 
 class SchemaOutputTest extends TestCase {
 
@@ -227,7 +227,7 @@ class SchemaOutputTest extends TestCase {
 
     public function test_article_schema_with_abstract(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_direct_answer'] = 'Schema is structured data markup.';
+        $si_test_state['post_meta'][1]['_jat_search_intel_direct_answer'] = 'Schema is structured data markup.';
 
         $mgr    = $this->make_schema();
         $schema = $mgr->get_singular_schema( 1 );
@@ -238,7 +238,7 @@ class SchemaOutputTest extends TestCase {
 
     public function test_article_schema_with_citations(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_citations'] = [
+        $si_test_state['post_meta'][1]['_jat_search_intel_citations'] = [
             [ 'source' => 'Google Docs', 'url' => 'https://google.com/docs', 'date' => '2024-06-01', 'quote' => 'Important info.' ],
             [ 'source' => 'MDN', 'url' => 'https://developer.mozilla.org', 'date' => '2024-05-15', 'quote' => 'Web standard ref.' ],
         ];
@@ -254,7 +254,7 @@ class SchemaOutputTest extends TestCase {
 
     public function test_article_schema_with_audience(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_audience'] = 'marketers';
+        $si_test_state['post_meta'][1]['_jat_search_intel_audience'] = 'marketers';
 
         $mgr    = $this->make_schema();
         $schema = $mgr->get_singular_schema( 1 );
@@ -266,8 +266,8 @@ class SchemaOutputTest extends TestCase {
 
     public function test_article_schema_with_content_location(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_local_relevance'] = '1';
-        $si_test_state['post_meta'][1]['_search_intel_local_location']  = 'New York, NY';
+        $si_test_state['post_meta'][1]['_jat_search_intel_local_relevance'] = '1';
+        $si_test_state['post_meta'][1]['_jat_search_intel_local_location']  = 'New York, NY';
 
         $mgr    = $this->make_schema();
         $schema = $mgr->get_singular_schema( 1 );
@@ -278,7 +278,7 @@ class SchemaOutputTest extends TestCase {
 
     public function test_article_schema_custom_type_override(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_schema_type'] = 'BlogPosting';
+        $si_test_state['post_meta'][1]['_jat_search_intel_schema_type'] = 'BlogPosting';
 
         $mgr    = $this->make_schema();
         $schema = $mgr->get_singular_schema( 1 );

@@ -1,6 +1,6 @@
-# Search Intel — Development Roadmap
+# JAT Search Intel — Development Roadmap
 
-> A version-by-version checklist for building Search Intel from v1.0 through v4.0.
+> A version-by-version checklist for building JAT Search Intel from v1.0 through v4.0.
 
 ---
 
@@ -42,8 +42,8 @@
 - [x] HowTo schema builder
 - [x] Speakable markup for article intro
 - [x] AEO scoring algorithm
-- [x] `[search_intel_faq]` shortcode
-- [x] `[search_intel_howto]` shortcode
+- [x] `[jat_search_intel_faq]` shortcode
+- [x] `[jat_search_intel_howto]` shortcode
 
 ### GEO Manager
 
@@ -238,7 +238,7 @@
 - [x] Citation repeater: add, remove, visibility (3 tests)
 - [x] Analysis: Run Analysis button, AJAX score rings (SEO/AEO/GEO), multi-category display (5 tests)
 - [x] Settings: all 6 pages load, separator save, OG toggle, sitemap max URLs (10 tests)
-- [x] Post list: Search Intel column header, cell rendering, score data (3 tests)
+- [x] Post list: JAT Search Intel column header, cell rendering, score data (3 tests)
 - [x] Auth setup: automated WP login with stored session state (1 test)
 - [x] Run against live WP instance via Docker/wp-env ✅
 
@@ -288,7 +288,7 @@
 - [x] Live: Front-end meta output verified (description, canonical, robots, OG, Twitter, ai-summary, direct-answer, keywords, content-type, content-freshness)
 - [x] Live: Schema JSON-LD renders on singular posts (Article, headline, description, abstract)
 - [x] Live: Settings pages save and persist (General, SEO, AEO, GEO, Sitemap, Social)
-- [x] Live: Post list Search Intel column with score display (3/4 format)
+- [x] Live: Post list JAT Search Intel column with score display (3/4 format)
 - [x] Live: AJAX content analysis returns SEO/AEO/GEO/Readability score rings
 - [x] Bug fix: `speakable_selectors` sanitize crash when array passed to `explode()` (class-admin.php:187)
 - [x] Live: Block theme (Twenty Twenty-Four v1.4 FSE) — wp_head fires, SI comment marker + description + canonical + OG + JSON-LD all render correctly
@@ -300,7 +300,7 @@
 
 ### Bulk Tools Admin Page
 
-- [x] "Search Intel > Bulk Tools" admin page
+- [x] "JAT Search Intel > Bulk Tools" admin page
 - [x] Bulk regenerate metadata (re-run title templates, description fallbacks, auto-excerpts)
 - [x] Bulk rescore content (run SEO + AEO + GEO analysis on all posts)
 - [x] Bulk generate sitemap cache (pre-warm all transients)
@@ -311,27 +311,27 @@
 
 ### REST API
 
-- [x] `GET /search-intel/v1/geo/{id}` — full GEO metadata for a post
-- [x] `GET /search-intel/v1/scores/{id}` — SEO + AEO + GEO scores
-- [x] `GET/PUT /search-intel/v1/meta/{id}` — read/write SEO meta fields
-- [x] `POST /search-intel/v1/analyze/{id}` — trigger analysis, return results
-- [x] `POST /search-intel/v1/bulk/rescore` — queue bulk rescore job
-- [x] `GET/PUT /search-intel/v1/settings` — read/write plugin settings (admin only)
-- [x] `POST /search-intel/v1/sitemap/invalidate` — clear sitemap cache (admin only)
+- [x] `GET /jat-search-intel/v1/geo/{id}` — full GEO metadata for a post
+- [x] `GET /jat-search-intel/v1/scores/{id}` — SEO + AEO + GEO scores
+- [x] `GET/PUT /jat-search-intel/v1/meta/{id}` — read/write SEO meta fields
+- [x] `POST /jat-search-intel/v1/analyze/{id}` — trigger analysis, return results
+- [x] `POST /jat-search-intel/v1/bulk/rescore` — queue bulk rescore job
+- [x] `GET/PUT /jat-search-intel/v1/settings` — read/write plugin settings (admin only)
+- [x] `POST /jat-search-intel/v1/sitemap/invalidate` — clear sitemap cache (admin only)
 - [x] REST endpoint toggle in GEO settings
 - [x] Authentication via WordPress app passwords (built-in WP REST auth)
 - [x] Proper permission callbacks on all endpoints
 
 ### WP-CLI Commands
 
-- [x] `wp search-intel analyze <post_id>` — analyze a single post
-- [x] `wp search-intel rescore --all` — rescore all published posts
-- [x] `wp search-intel regenerate --all` — regenerate metadata for all posts
-- [x] `wp search-intel sitemap cache` — pre-warm sitemap caches
-- [x] `wp search-intel export > settings.json` — export settings
-- [x] `wp search-intel import < settings.json` — import settings
-- [x] `wp search-intel scores --format=table` — show all post scores
-- [x] `wp search-intel migrate --from=yoast` — migrate from another SEO plugin (CLI command added, migration class in v3.0)
+- [x] `wp jat-search-intel analyze <post_id>` — analyze a single post
+- [x] `wp jat-search-intel rescore --all` — rescore all published posts
+- [x] `wp jat-search-intel regenerate --all` — regenerate metadata for all posts
+- [x] `wp jat-search-intel sitemap cache` — pre-warm sitemap caches
+- [x] `wp jat-search-intel export > settings.json` — export settings
+- [x] `wp jat-search-intel import < settings.json` — import settings
+- [x] `wp jat-search-intel scores --format=table` — show all post scores
+- [x] `wp jat-search-intel migrate --from=yoast` — migrate from another SEO plugin (CLI command added, migration class in v3.0)
 
 ---
 
@@ -340,7 +340,7 @@
 ### Gutenberg Sidebar Panel
 
 - [x] `PluginDocumentSettingPanel` React component
-- [x] `@wordpress/data` store (`search-intel/editor`)
+- [x] `@wordpress/data` store (`jat-search-intel/editor`)
 - [x] Real-time analysis via `subscribe` to editor changes
 - [x] SEO fields in sidebar (title, description, keyword, canonical, robots)
 - [x] Social fields in sidebar (title, description, image)
@@ -351,12 +351,12 @@
 
 ### Custom Gutenberg Blocks
 
-- [x] `search-intel/faq` — visual FAQ editor with live schema preview
-- [x] `search-intel/howto` — step editor with image support per step
-- [x] `search-intel/toc` — auto-generated table of contents from headings
-- [x] `search-intel/breadcrumbs` — theme-aware breadcrumb navigation
-- [x] `search-intel/answer-box` — direct-answer formatting block
-- [x] `search-intel/citation` — inline source citation block
+- [x] `jat-search-intel/faq` — visual FAQ editor with live schema preview
+- [x] `jat-search-intel/howto` — step editor with image support per step
+- [x] `jat-search-intel/toc` — auto-generated table of contents from headings
+- [x] `jat-search-intel/breadcrumbs` — theme-aware breadcrumb navigation
+- [x] `jat-search-intel/answer-box` — direct-answer formatting block
+- [x] `jat-search-intel/citation` — inline source citation block
 - [x] Block previews in editor
 - [x] Schema output deduplication (block + wp_head don't double-output)
 
@@ -549,7 +549,7 @@
 
 - [x] Custom plugin name
 - [x] Custom branding (logo, colors)
-- [x] Remove "Search Intel" references
+- [x] Remove "JAT Search Intel" references
 - [x] Reseller support
 
 ### Scale
@@ -569,7 +569,7 @@
 - [x] Child-side reporter class (`class-mainwp-reporter.php`) — hooks into `mainwp_child_extra_execution`
 - [x] Expose site scores, feature status, post counts via MainWP Child callback API
 - [x] Remote actions: trigger rescore, regenerate, toggle features from dashboard
-- [ ] Separate MainWP Dashboard Extension plugin (new repo: `search-intel-mainwp`)
+- [ ] Separate MainWP Dashboard Extension plugin (new repo: `jat-search-intel-mainwp`)
 - [ ] Dashboard extension: network-wide scores grid with per-site drill-down
 - [ ] Dashboard extension: bulk push settings to all child sites
 - [ ] Dashboard extension: score threshold alerts (low SEO/AEO/GEO warnings)
@@ -577,16 +577,16 @@
 
 ### WP-CLI for v3.0 Features
 
-- [x] `wp search-intel migrate --from=yoast [--dry-run] [--overwrite]` — run migration from CLI
-- [x] `wp search-intel rbac grant <user_id> <module>` — grant module access
-- [x] `wp search-intel rbac revoke <user_id> <module>` — revoke module access
-- [x] `wp search-intel rbac list` — show all user permissions
-- [x] `wp search-intel multisite push-defaults` — push network defaults to all sites
-- [x] `wp search-intel multisite report [--format=table|json|csv]` — network score report
-- [x] `wp search-intel queue status` — show background queue status
-- [x] `wp search-intel queue process [--batch=10]` — manually process queued jobs
-- [x] `wp search-intel white-label export > brand.json` — export reseller config
-- [x] `wp search-intel white-label import < brand.json` — import reseller config
+- [x] `wp jat-search-intel migrate --from=yoast [--dry-run] [--overwrite]` — run migration from CLI
+- [x] `wp jat-search-intel rbac grant <user_id> <module>` — grant module access
+- [x] `wp jat-search-intel rbac revoke <user_id> <module>` — revoke module access
+- [x] `wp jat-search-intel rbac list` — show all user permissions
+- [x] `wp jat-search-intel multisite push-defaults` — push network defaults to all sites
+- [x] `wp jat-search-intel multisite report [--format=table|json|csv]` — network score report
+- [x] `wp jat-search-intel queue status` — show background queue status
+- [x] `wp jat-search-intel queue process [--batch=10]` — manually process queued jobs
+- [x] `wp jat-search-intel white-label export > brand.json` — export reseller config
+- [x] `wp jat-search-intel white-label import < brand.json` — import reseller config
 
 ### Playwright E2E Tests
 

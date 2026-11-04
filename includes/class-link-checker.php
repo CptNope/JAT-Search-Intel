@@ -1,5 +1,5 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -18,17 +18,17 @@ class Link_Checker {
 	/**
 	 * Option key for storing broken-link results.
 	 */
-	private const OPTION_KEY = 'search_intel_broken_links';
+	private const OPTION_KEY = 'jat_search_intel_broken_links';
 
 	/**
 	 * Option key for last full scan timestamp.
 	 */
-	private const LAST_SCAN_KEY = 'search_intel_link_checker_last_scan';
+	private const LAST_SCAN_KEY = 'jat_search_intel_link_checker_last_scan';
 
 	/**
 	 * WP-Cron hook name.
 	 */
-	private const CRON_HOOK = 'search_intel_check_links';
+	private const CRON_HOOK = 'jat_search_intel_check_links';
 
 	/**
 	 * Max URLs to check per cron run (to avoid timeouts).
@@ -169,7 +169,7 @@ class Link_Checker {
 	 * Picks the next batch of posts to scan and stores results.
 	 */
 	public function run_batch_check(): void {
-		$offset = (int) get_option( 'search_intel_link_checker_offset', 0 );
+		$offset = (int) get_option( 'jat_search_intel_link_checker_offset', 0 );
 		$posts  = get_posts( [
 			'post_type'      => $this->settings['enabled_post_types'] ?? [ 'post', 'page' ],
 			'post_status'    => 'publish',
@@ -182,7 +182,7 @@ class Link_Checker {
 
 		if ( empty( $posts ) ) {
 			// Reset offset — full cycle complete.
-			update_option( 'search_intel_link_checker_offset', 0, false );
+			update_option( 'jat_search_intel_link_checker_offset', 0, false );
 			update_option( self::LAST_SCAN_KEY, current_time( 'mysql' ), false );
 			return;
 		}
@@ -203,7 +203,7 @@ class Link_Checker {
 		}
 
 		update_option( self::OPTION_KEY, array_values( $existing ), false );
-		update_option( 'search_intel_link_checker_offset', $offset + self::BATCH_SIZE, false );
+		update_option( 'jat_search_intel_link_checker_offset', $offset + self::BATCH_SIZE, false );
 	}
 
 	/**
@@ -220,7 +220,7 @@ class Link_Checker {
 	 */
 	public function clear_results(): void {
 		delete_option( self::OPTION_KEY );
-		delete_option( 'search_intel_link_checker_offset' );
+		delete_option( 'jat_search_intel_link_checker_offset' );
 	}
 
 	/**
@@ -237,11 +237,11 @@ class Link_Checker {
 	 */
 	public function register_admin_page(): void {
 		add_submenu_page(
-			'search-intel',
-			__( 'Broken Links', 'search-intel' ),
-			__( 'Broken Links', 'search-intel' ),
+			'jat-search-intel',
+			__( 'Broken Links', 'jat-search-intel' ),
+			__( 'Broken Links', 'jat-search-intel' ),
 			'manage_options',
-			'search-intel-broken-links',
+			'jat-search-intel-broken-links',
 			[ $this, 'render_admin_page' ]
 		);
 	}
@@ -254,33 +254,34 @@ class Link_Checker {
 		$last_scan = $this->get_last_scan_time();
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'Broken Link Checker', 'search-intel' ); ?></h1>
+			<h1><?php esc_html_e( 'Broken Link Checker', 'jat-search-intel' ); ?></h1>
 			<p>
 				<?php
 				if ( $last_scan ) {
 					printf(
-						esc_html__( 'Last full scan: %s. Found %d broken links.', 'search-intel' ),
+						/* translators: %1$s: value, %2$d: number. */
+						esc_html__( 'Last full scan: %1$s. Found %2$d broken links.', 'jat-search-intel' ),
 						'<strong>' . esc_html( $last_scan ) . '</strong>',
 						count( $links )
 					);
 				} else {
-					esc_html_e( 'No scan completed yet. The checker runs hourly via WP-Cron.', 'search-intel' );
+					esc_html_e( 'No scan completed yet. The checker runs hourly via WP-Cron.', 'jat-search-intel' );
 				}
 				?>
 			</p>
 			<table class="wp-list-table widefat fixed striped">
 				<thead>
 					<tr>
-						<th style="width:10%"><?php esc_html_e( 'Status', 'search-intel' ); ?></th>
-						<th style="width:40%"><?php esc_html_e( 'URL', 'search-intel' ); ?></th>
-						<th style="width:25%"><?php esc_html_e( 'Found In', 'search-intel' ); ?></th>
-						<th style="width:15%"><?php esc_html_e( 'Error', 'search-intel' ); ?></th>
-						<th style="width:10%"><?php esc_html_e( 'Checked', 'search-intel' ); ?></th>
+						<th style="width:10%"><?php esc_html_e( 'Status', 'jat-search-intel' ); ?></th>
+						<th style="width:40%"><?php esc_html_e( 'URL', 'jat-search-intel' ); ?></th>
+						<th style="width:25%"><?php esc_html_e( 'Found In', 'jat-search-intel' ); ?></th>
+						<th style="width:15%"><?php esc_html_e( 'Error', 'jat-search-intel' ); ?></th>
+						<th style="width:10%"><?php esc_html_e( 'Checked', 'jat-search-intel' ); ?></th>
 					</tr>
 				</thead>
 				<tbody>
 				<?php if ( empty( $links ) ) : ?>
-					<tr><td colspan="5"><?php esc_html_e( 'No broken links found.', 'search-intel' ); ?></td></tr>
+					<tr><td colspan="5"><?php esc_html_e( 'No broken links found.', 'jat-search-intel' ); ?></td></tr>
 				<?php else : ?>
 					<?php foreach ( $links as $link ) : ?>
 						<tr>

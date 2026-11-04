@@ -1,5 +1,5 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -53,7 +53,7 @@ class Internal_Linker {
 	 * @return array List of suggested posts with relevance scores.
 	 */
 	public function get_suggestions( int $post_id ): array {
-		$cache_key = 'si_link_suggest_' . $post_id;
+		$cache_key = 'jat_search_intel_link_suggest_' . $post_id;
 		$cached    = get_transient( $cache_key );
 
 		if ( false !== $cached ) {
@@ -257,7 +257,7 @@ class Internal_Linker {
 	 * @param int $post_id Post ID.
 	 */
 	public function invalidate_cache( int $post_id ): void {
-		delete_transient( 'si_link_suggest_' . $post_id );
+		delete_transient( 'jat_search_intel_link_suggest_' . $post_id );
 	}
 
 	/**
@@ -268,7 +268,7 @@ class Internal_Linker {
 		foreach ( $post_types as $post_type ) {
 			add_meta_box(
 				'si-internal-links',
-				__( 'Internal Linking Suggestions', 'search-intel' ),
+				__( 'Internal Linking Suggestions', 'jat-search-intel' ),
 				[ $this, 'render_metabox' ],
 				$post_type,
 				'side',
@@ -286,7 +286,7 @@ class Internal_Linker {
 		$suggestions = $this->get_suggestions( $post->ID );
 
 		if ( empty( $suggestions ) ) {
-			echo '<p>' . esc_html__( 'No suggestions available yet.', 'search-intel' ) . '</p>';
+			echo '<p>' . esc_html__( 'No suggestions available yet.', 'jat-search-intel' ) . '</p>';
 			return;
 		}
 

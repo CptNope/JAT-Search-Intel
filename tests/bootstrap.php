@@ -1,14 +1,14 @@
 <?php
 /**
- * PHPUnit bootstrap for Search Intel unit tests.
+ * PHPUnit bootstrap for JAT Search Intel unit tests.
  *
  * Provides WordPress function stubs so unit tests can run
  * without a full WordPress installation.
  */
 
 // Plugin constants
-define( 'SEARCH_INTEL_VERSION', '1.1.0' );
-define( 'SEARCH_INTEL_DIR', __DIR__ . '/../' );
+define( 'JAT_SEARCH_INTEL_VERSION', '1.1.0' );
+define( 'JAT_SEARCH_INTEL_DIR', __DIR__ . '/../' );
 
 if ( ! defined( 'ARRAY_A' ) ) {
 	define( 'ARRAY_A', 'ARRAY_A' );
@@ -16,14 +16,14 @@ if ( ! defined( 'ARRAY_A' ) ) {
 if ( ! defined( 'ARRAY_N' ) ) {
 	define( 'ARRAY_N', 'ARRAY_N' );
 }
-define( 'SEARCH_INTEL_URL', 'https://example.com/wp-content/plugins/search-intel/' );
+define( 'JAT_SEARCH_INTEL_URL', 'https://example.com/wp-content/plugins/jat-search-intel/' );
 define( 'ABSPATH', dirname( __DIR__, 3 ) . '/' );
 define( 'MINUTE_IN_SECONDS', 60 );
 define( 'HOUR_IN_SECONDS', 3600 );
 define( 'DAY_IN_SECONDS', 86400 );
 define( 'WEEK_IN_SECONDS', 604800 );
 
-define( 'SEARCH_INTEL_BASENAME', 'search-intel/search-intel.php' );
+define( 'JAT_SEARCH_INTEL_BASENAME', 'jat-search-intel/jat-search-intel.php' );
 
 // ── WordPress function stubs ────────────────────────────────────────────────
 
@@ -127,12 +127,22 @@ function get_option( string $option, $default = false ) {
     return $si_test_state['options'][ $option ] ?? $default;
 }
 
-function update_option( string $option, $value ): bool {
+function update_option( string $option, $value, $autoload = null ): bool {
     global $si_test_state;
     $si_test_state['options'][ $option ] = $value;
     return true;
 }
 
+
+function add_option( string $option, $value = "", $deprecated = "", $autoload = null ): bool {
+    global $si_test_state;
+    if ( isset( $si_test_state["options"][ $option ] ) ) {
+        return false;
+    }
+    $si_test_state["options"][ $option ] = $value;
+    $si_test_state["autoload"][ $option ] = $autoload;
+    return true;
+}
 function delete_option( string $option ): bool {
     global $si_test_state;
     unset( $si_test_state['options'][ $option ] );
@@ -325,6 +335,17 @@ function is_front_page(): bool {
     return false;
 }
 
+function wp_get_document_title(): string {
+    global $si_test_state;
+    return $si_test_state['document_title'] ?? 'Test Page';
+}
+
+if ( ! function_exists( 'strip_shortcodes' ) ) {
+    function strip_shortcodes( string $content ): string {
+        return preg_replace( '/\[[^\]]+\]/', '', $content );
+    }
+}
+
 function is_home(): bool {
     return false;
 }
@@ -458,6 +479,10 @@ function wp_localize_script( string $handle, string $object_name, array $l10n ):
     return true;
 }
 
+function wp_set_script_translations( string $handle, string $domain = 'default', string $path = '' ): bool {
+    return true;
+}
+
 function wp_enqueue_media( array $args = [] ): void {}
 
 function wp_create_nonce( string $action ): string {
@@ -472,7 +497,10 @@ function do_settings_sections( string $page ): void {}
 
 function submit_button( string $text = '', string $type = 'primary', string $name = 'submit', bool $wrap = true, $other_attributes = null ): void {}
 
-function add_shortcode( string $tag, $callback ): void {}
+function add_shortcode( string $tag, $callback ): void {
+    global $si_test_state;
+    $si_test_state['shortcodes'][ $tag ] = $callback;
+}
 
 function do_shortcode( string $content ): string {
     return $content;
@@ -713,7 +741,7 @@ function plugin_dir_url( string $file ): string {
 }
 
 function plugin_basename( string $file ): string {
-    return 'search-intel/' . basename( $file );
+    return 'jat-search-intel/' . basename( $file );
 }
 
 // ── WP_REST stubs ────────────────────────────────────────────────────────
@@ -807,8 +835,15 @@ $wpdb = new class {
 
     public function prepare( string $query, ...$args ): string {
         $i = 0;
-        return preg_replace_callback( '/%[sd]/', function () use ( $args, &$i ) {
-            return "'" . ( $args[ $i++ ] ?? '' ) . "'";
+        return preg_replace_callback( '/%[sdi]/', function ( $m ) use ( $args, &$i ) {
+            $value = $args[ $i++ ] ?? '';
+            if ( '%i' === $m[0] ) {
+                return '`' . $value . '`';
+            }
+            if ( '%d' === $m[0] ) {
+                return (string) (int) $value;
+            }
+            return "'" . $value . "'";
         }, $query );
     }
 
@@ -1268,6 +1303,95 @@ function remove_role( string $role ): void {
 	unset( $si_test_state['roles'][ $role ] );
 }
 
+function wp_roles() {
+	global $si_test_state;
+	return (object) [ 'role_objects' => $si_test_state['role_objects'] ?? [] ];
+}
+
+function wp_clear_scheduled_hook( string $hook, array $args = [] ) {
+	global $si_test_state;
+	$si_test_state['cleared_hooks'][] = $hook;
+	return 0;
+}
+
+function is_main_site( $site_id = null ): bool {
+	return true;
+}
+
+if ( ! function_exists( 'delete_site_option' ) ) {
+	function delete_site_option( string $option ): bool {
+		global $si_test_state;
+		unset( $si_test_state['site_options'][ $option ] );
+		return true;
+	}
+}
+
+function post_type_exists( string $post_type ): bool {
+	return in_array( $post_type, [ 'post', 'page', 'product' ], true );
+}
+
+if ( ! function_exists( 'esc_xml' ) ) {
+	function esc_xml( string $text ): string {
+		return htmlspecialchars( $text, ENT_XML1 | ENT_QUOTES, 'UTF-8' );
+	}
+}
+
+function wp_attachment_is_image( $post = null ): bool {
+	return true;
+}
+
+function get_attached_file( int $attachment_id ): string {
+	return '/uploads/image-' . $attachment_id . '.jpg';
+}
+
+function wp_basename( string $path, string $suffix = '' ): string {
+	return basename( $path, $suffix );
+}
+
+function is_feed( $feeds = '' ): bool {
+	global $si_test_state;
+	return ! empty( $si_test_state['is_feed'] );
+}
+
+function wpautop( string $text, bool $br = true ): string {
+	return '<p>' . trim( $text ) . '</p>';
+}
+
+function shortcode_atts( array $pairs, $atts, string $shortcode = '' ): array {
+	$atts = (array) $atts;
+	$out  = [];
+	foreach ( $pairs as $name => $default ) {
+		$out[ $name ] = array_key_exists( $name, $atts ) ? $atts[ $name ] : $default;
+	}
+	return $out;
+}
+
+function map_deep( $value, callable $callback ) {
+	if ( is_array( $value ) ) {
+		foreach ( $value as $k => $v ) {
+			$value[ $k ] = map_deep( $v, $callback );
+		}
+		return $value;
+	}
+	return $callback( $value );
+}
+
+function get_post_type_object( string $post_type ) {
+	return (object) [ 'name' => $post_type, 'labels' => (object) [ 'name' => ucfirst( $post_type ) . 's' ] ];
+}
+
+function get_post_status( $post = null ) {
+	return 'publish';
+}
+
+function wp_get_post_parent_id( $post = null ): int {
+	return 0;
+}
+
+function is_attachment( $attachment = '' ): bool {
+	return false;
+}
+
 // ── Object cache stubs ──────────────────────────────────────────────────────
 
 function wp_using_ext_object_cache(): bool {
@@ -1387,15 +1511,32 @@ if ( ! defined( 'LOGGED_IN_SALT' ) ) {
 // ── Autoloader ───────────────────────────────────────────────────────────────
 
 spl_autoload_register( function ( string $class ) {
-    $prefix = 'Search_Intel\\';
+    $prefix = 'JAT_Search_Intel\\';
     if ( strpos( $class, $prefix ) !== 0 ) {
         return;
     }
 
     $relative = substr( $class, strlen( $prefix ) );
-    $file     = SEARCH_INTEL_DIR . 'includes/class-' . strtolower( str_replace( '_', '-', $relative ) ) . '.php';
+    $file     = JAT_SEARCH_INTEL_DIR . 'includes/class-' . strtolower( str_replace( '_', '-', $relative ) ) . '.php';
 
     if ( file_exists( $file ) ) {
         require_once $file;
     }
 } );
+
+if ( ! class_exists( 'WP_Error' ) ) {
+	class WP_Error {
+		private $code;
+		private $message;
+		public function __construct( $code = '', $message = '', $data = '' ) {
+			$this->code    = $code;
+			$this->message = $message;
+		}
+		public function get_error_message() {
+			return $this->message;
+		}
+		public function get_error_code() {
+			return $this->code;
+		}
+	}
+}

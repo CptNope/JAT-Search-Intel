@@ -1,5 +1,5 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -15,12 +15,28 @@ class Redirect_Manager {
 	/**
 	 * Custom DB table name (without prefix).
 	 */
-	private const TABLE_REDIRECTS = 'search_intel_redirects';
+	private const TABLE_REDIRECTS = 'jat_search_intel_redirects';
 
 	/**
 	 * Custom DB table name for 404 log (without prefix).
 	 */
-	private const TABLE_404_LOG = 'search_intel_404_log';
+	private const TABLE_404_LOG = 'jat_search_intel_404_log';
+
+	/**
+	 * Option holding the compiled lookup index of enabled rules.
+	 */
+	private const INDEX_OPTION = 'jat_search_intel_redirect_index';
+
+	/**
+	 * Above this many exact rules the index stops holding them and exact
+	 * lookups go to the (indexed) database column instead.
+	 */
+	private const INDEX_EXACT_LIMIT = 2000;
+
+	/**
+	 * Autoload the index only while it is small.
+	 */
+	private const INDEX_AUTOLOAD_LIMIT = 200;
 
 	/**
 	 * Valid HTTP status codes for redirects.
@@ -63,11 +79,11 @@ class Redirect_Manager {
 
 		if ( is_admin() ) {
 			add_action( 'admin_menu', [ $this, 'register_admin_page' ] );
-			add_action( 'wp_ajax_si_save_redirect', [ $this, 'ajax_save_redirect' ] );
-			add_action( 'wp_ajax_si_delete_redirect', [ $this, 'ajax_delete_redirect' ] );
-			add_action( 'wp_ajax_si_export_redirects', [ $this, 'ajax_export_csv' ] );
-			add_action( 'wp_ajax_si_import_redirects', [ $this, 'ajax_import_csv' ] );
-			add_action( 'wp_ajax_si_clear_404_log', [ $this, 'ajax_clear_404_log' ] );
+			add_action( 'wp_ajax_jat_search_intel_save_redirect', [ $this, 'ajax_save_redirect' ] );
+			add_action( 'wp_ajax_jat_search_intel_delete_redirect', [ $this, 'ajax_delete_redirect' ] );
+			add_action( 'wp_ajax_jat_search_intel_export_redirects', [ $this, 'ajax_export_csv' ] );
+			add_action( 'wp_ajax_jat_search_intel_import_redirects', [ $this, 'ajax_import_csv' ] );
+			add_action( 'wp_ajax_jat_search_intel_clear_404_log', [ $this, 'ajax_clear_404_log' ] );
 		}
 	}
 
@@ -157,7 +173,8 @@ class Redirect_Manager {
 			return;
 		}
 
-		wp_redirect( $target, (int) $redirect->status_code );
+		// Admin-defined rules may legitimately point at external hosts, so wp_safe_redirect() is not usable here.
+		wp_redirect( $target, (int) $redirect->status_code ); // phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect
 		exit;
 	}
 
@@ -182,7 +199,8 @@ class Redirect_Manager {
 		// Upsert — increment hit_count if URL already logged.
 		$existing = $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT id FROM {$table} WHERE url = %s LIMIT 1",
+				'SELECT id FROM %i WHERE url = %s LIMIT 1',
+				$table,
 				$url
 			)
 		);
@@ -190,7 +208,8 @@ class Redirect_Manager {
 		if ( $existing ) {
 			$wpdb->query(
 				$wpdb->prepare(
-					"UPDATE {$table} SET hit_count = hit_count + 1, last_hit = NOW(), referrer = %s, user_agent = %s, ip_hash = %s WHERE id = %d",
+					'UPDATE %i SET hit_count = hit_count + 1, last_hit = NOW(), referrer = %s, user_agent = %s, ip_hash = %s WHERE id = %d',
+					$table,
 					$referrer,
 					$user_agent,
 					$ip_hash,
@@ -214,50 +233,165 @@ class Redirect_Manager {
 	/**
 	 * Find a matching redirect rule for a given request path.
 	 *
+	 * Uses a compiled index of enabled rules so that requests which match
+	 * nothing (the vast majority) cost no database queries at all. The full
+	 * row is fetched by primary key only when a rule matches.
+	 *
 	 * @param string $request_path The incoming request path.
 	 * @return object|null The matching redirect row, or null.
 	 */
 	public function find_matching_redirect( string $request_path ) {
-		global $wpdb;
+		$index  = $this->get_index();
+		$needle = $this->normalize_for_match( $request_path );
+		$id     = 0;
 
-		$table = $wpdb->prefix . self::TABLE_REDIRECTS;
-
-		// 1. Exact match (fastest).
-		$exact = $wpdb->get_row(
-			$wpdb->prepare(
-				"SELECT * FROM {$table} WHERE match_type = 'exact' AND source_url = %s AND enabled = 1 LIMIT 1",
-				$request_path
-			)
-		);
-
-		if ( $exact ) {
-			return $exact;
+		// 1. Exact match.
+		if ( ! empty( $index['exact_in_db'] ) ) {
+			$id = $this->find_exact_in_db( $request_path );
+		} elseif ( isset( $index['exact'][ $needle ] ) ) {
+			$id = (int) $index['exact'][ $needle ];
 		}
 
-		// 2. Prefix match — find longest prefix that matches.
-		$prefixes = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT * FROM {$table} WHERE match_type = 'prefix' AND enabled = 1 AND %s LIKE CONCAT(source_url, '%%') ORDER BY CHAR_LENGTH(source_url) DESC LIMIT 1",
-				$request_path
-			)
-		);
-
-		if ( ! empty( $prefixes ) ) {
-			return $prefixes[0];
-		}
-
-		// 3. Regex match — test each pattern.
-		$regexes = $wpdb->get_results(
-			"SELECT * FROM {$table} WHERE match_type = 'regex' AND enabled = 1"
-		);
-
-		foreach ( $regexes as $rule ) {
-			if ( @preg_match( '#' . $rule->source_url . '#', $request_path ) ) {
-				return $rule;
+		// 2. Prefix match — longest prefix wins (index is pre-sorted).
+		if ( ! $id ) {
+			foreach ( $index['prefix'] as $rule ) {
+				if ( '' !== $rule[0] && 0 === strpos( $needle, $rule[0] ) ) {
+					$id = (int) $rule[1];
+					break;
+				}
 			}
 		}
 
-		return null;
+		// 3. Regex match — first matching pattern in rule order.
+		if ( ! $id ) {
+			foreach ( $index['regex'] as $rule ) {
+				if ( @preg_match( '#' . $rule[0] . '#', $request_path ) ) {
+					$id = (int) $rule[1];
+					break;
+				}
+			}
+		}
+
+		if ( ! $id ) {
+			return null;
+		}
+
+		$row = $this->get_redirect( $id );
+		if ( ! $row || empty( $row->enabled ) ) {
+			// Index is stale (row edited outside the plugin) — rebuild next time.
+			$this->flush_index();
+			return null;
+		}
+
+		return $row;
+	}
+
+	/**
+	 * Case-fold a path the same way the default MySQL collations compare.
+	 *
+	 * @param string $path Path.
+	 * @return string
+	 */
+	private function normalize_for_match( string $path ): string {
+		return function_exists( 'mb_strtolower' ) ? mb_strtolower( $path ) : strtolower( $path );
+	}
+
+	/**
+	 * Exact lookup against the database (used when there are too many exact
+	 * rules to keep in the index).
+	 *
+	 * @param string $request_path Request path.
+	 * @return int Matching rule ID or 0.
+	 */
+	private function find_exact_in_db( string $request_path ): int {
+		global $wpdb;
+		$table = $wpdb->prefix . self::TABLE_REDIRECTS;
+
+		return (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT id FROM %i WHERE match_type = 'exact' AND source_url = %s AND enabled = 1 ORDER BY id ASC LIMIT 1",
+				$table,
+				$request_path
+			)
+		);
+	}
+
+	/**
+	 * Get the compiled rule index, building it if needed.
+	 *
+	 * @return array{exact: array<string,int>, exact_in_db: bool, prefix: array<int,array{0:string,1:int}>, regex: array<int,array{0:string,1:int}>}
+	 */
+	public function get_index(): array {
+		$index = get_option( self::INDEX_OPTION, null );
+		if ( is_array( $index ) && isset( $index['exact'], $index['prefix'], $index['regex'] ) ) {
+			return $index;
+		}
+		return $this->rebuild_index();
+	}
+
+	/**
+	 * Rebuild and store the compiled rule index from the redirects table.
+	 *
+	 * @return array{exact: array<string,int>, exact_in_db: bool, prefix: array<int,array{0:string,1:int}>, regex: array<int,array{0:string,1:int}>}
+	 */
+	public function rebuild_index(): array {
+		global $wpdb;
+		$table = $wpdb->prefix . self::TABLE_REDIRECTS;
+
+		$index = [
+			'exact'       => [],
+			'exact_in_db' => false,
+			'prefix'      => [],
+			'regex'       => [],
+		];
+
+		$exact_count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE match_type = 'exact' AND enabled = 1", $table ) );
+		$index['exact_in_db'] = $exact_count > self::INDEX_EXACT_LIMIT;
+
+		if ( $index['exact_in_db'] ) {
+			$rows = $wpdb->get_results( $wpdb->prepare( "SELECT id, source_url, match_type FROM %i WHERE enabled = 1 AND match_type IN ('prefix','regex') ORDER BY id ASC", $table ) );
+		} else {
+			$rows = $wpdb->get_results( $wpdb->prepare( 'SELECT id, source_url, match_type FROM %i WHERE enabled = 1 ORDER BY id ASC', $table ) );
+		}
+
+		foreach ( (array) $rows as $row ) {
+			$source = (string) $row->source_url;
+			$id     = (int) $row->id;
+
+			if ( 'exact' === $row->match_type ) {
+				$key = $this->normalize_for_match( $source );
+				if ( ! isset( $index['exact'][ $key ] ) ) {
+					$index['exact'][ $key ] = $id;
+				}
+			} elseif ( 'prefix' === $row->match_type ) {
+				$index['prefix'][] = [ $this->normalize_for_match( $source ), $id ];
+			} elseif ( 'regex' === $row->match_type ) {
+				$index['regex'][] = [ $source, $id ];
+			}
+		}
+
+		// Longest prefix first, ties broken by rule ID.
+		usort(
+			$index['prefix'],
+			static function ( $a, $b ) {
+				return ( strlen( $b[0] ) <=> strlen( $a[0] ) ) ?: ( $a[1] <=> $b[1] );
+			}
+		);
+
+		$size     = count( $index['exact'] ) + count( $index['prefix'] ) + count( $index['regex'] );
+		$autoload = $size <= self::INDEX_AUTOLOAD_LIMIT;
+
+		delete_option( self::INDEX_OPTION );
+		add_option( self::INDEX_OPTION, $index, '', $autoload );
+
+		return $index;
+	}
+
+	/**
+	 * Drop the compiled index so it is rebuilt on the next lookup.
+	 */
+	public function flush_index(): void {
+		delete_option( self::INDEX_OPTION );
 	}
 
 	/**
@@ -269,7 +403,7 @@ class Redirect_Manager {
 	public function get_redirect( int $id ) {
 		global $wpdb;
 		$table = $wpdb->prefix . self::TABLE_REDIRECTS;
-		return $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $id ) );
+		return $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM %i WHERE id = %d', $table, $id ) );
 	}
 
 	/**
@@ -292,18 +426,29 @@ class Redirect_Manager {
 		}
 		$order = strtoupper( $order ) === 'ASC' ? 'ASC' : 'DESC';
 
-		$where = '';
+		$offset = ( max( 1, $page ) - 1 ) * $per_page;
+
 		if ( $search ) {
 			$like  = '%' . $wpdb->esc_like( $search ) . '%';
-			$where = $wpdb->prepare( ' WHERE source_url LIKE %s OR target_url LIKE %s OR note LIKE %s', $like, $like, $like );
+			$total = (int) $wpdb->get_var(
+				$wpdb->prepare( 'SELECT COUNT(*) FROM %i WHERE source_url LIKE %s OR target_url LIKE %s OR note LIKE %s', $table, $like, $like, $like )
+			);
+			// $order is whitelisted to ASC/DESC above; $orderby is passed as an identifier.
+			$items = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT * FROM %i WHERE source_url LIKE %s OR target_url LIKE %s OR note LIKE %s ORDER BY %i {$order} LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					$table, $like, $like, $like, $orderby, $per_page, $offset
+				)
+			);
+		} else {
+			$total = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i', $table ) );
+			$items = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT * FROM %i ORDER BY %i {$order} LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					$table, $orderby, $per_page, $offset
+				)
+			);
 		}
-
-		$total = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}{$where}" );
-
-		$offset = ( $page - 1 ) * $per_page;
-		$items  = $wpdb->get_results(
-			"SELECT * FROM {$table}{$where} ORDER BY {$orderby} {$order} LIMIT {$per_page} OFFSET {$offset}"
-		);
 
 		return [
 			'items' => $items ?: [],
@@ -363,10 +508,12 @@ class Redirect_Manager {
 
 		if ( $id > 0 ) {
 			$wpdb->update( $table, $row, [ 'id' => $id ], $format, [ '%d' ] );
+			$this->flush_index();
 			return $id;
 		}
 
 		$inserted = $wpdb->insert( $table, $row, $format );
+		$this->flush_index();
 		return $inserted ? (int) $wpdb->insert_id : false;
 	}
 
@@ -379,7 +526,9 @@ class Redirect_Manager {
 	public function delete_redirect( int $id ): bool {
 		global $wpdb;
 		$table = $wpdb->prefix . self::TABLE_REDIRECTS;
-		return (bool) $wpdb->delete( $table, [ 'id' => $id ], [ '%d' ] );
+		$deleted = (bool) $wpdb->delete( $table, [ 'id' => $id ], [ '%d' ] );
+		$this->flush_index();
+		return $deleted;
 	}
 
 	/**
@@ -393,10 +542,10 @@ class Redirect_Manager {
 		global $wpdb;
 		$table = $wpdb->prefix . self::TABLE_404_LOG;
 
-		$total  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
-		$offset = ( $page - 1 ) * $per_page;
+		$total  = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i', $table ) );
+		$offset = ( max( 1, $page ) - 1 ) * $per_page;
 		$items  = $wpdb->get_results(
-			"SELECT * FROM {$table} ORDER BY hit_count DESC, last_hit DESC LIMIT {$per_page} OFFSET {$offset}"
+			$wpdb->prepare( 'SELECT * FROM %i ORDER BY hit_count DESC, last_hit DESC LIMIT %d OFFSET %d', $table, $per_page, $offset )
 		);
 
 		return [
@@ -411,7 +560,7 @@ class Redirect_Manager {
 	public function clear_404_log(): void {
 		global $wpdb;
 		$table = $wpdb->prefix . self::TABLE_404_LOG;
-		$wpdb->query( "TRUNCATE TABLE {$table}" );
+		$wpdb->query( $wpdb->prepare( 'TRUNCATE TABLE %i', $table ) );
 	}
 
 	/**
@@ -422,18 +571,18 @@ class Redirect_Manager {
 	public function export_csv(): string {
 		global $wpdb;
 		$table = $wpdb->prefix . self::TABLE_REDIRECTS;
-		$rows  = $wpdb->get_results( "SELECT source_url, target_url, status_code, match_type, enabled, note FROM {$table} ORDER BY id ASC", ARRAY_A );
+		$rows  = $wpdb->get_results( $wpdb->prepare( 'SELECT source_url, target_url, status_code, match_type, enabled, note FROM %i ORDER BY id ASC', $table ), ARRAY_A );
 
-		$output = fopen( 'php://temp', 'r+' );
-		fputcsv( $output, [ 'source_url', 'target_url', 'status_code', 'match_type', 'enabled', 'note' ] );
+		$output = fopen( 'php://temp', 'r+' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- In-memory stream for fputcsv().
+		fputcsv( $output, [ 'source_url', 'target_url', 'status_code', 'match_type', 'enabled', 'note' ], ',', '"', '\\' );
 
 		foreach ( $rows as $row ) {
-			fputcsv( $output, $row );
+			fputcsv( $output, $row, ',', '"', '\\' );
 		}
 
 		rewind( $output );
 		$csv = stream_get_contents( $output );
-		fclose( $output );
+		fclose( $output ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
 
 		return $csv !== false ? $csv : '';
 	}
@@ -456,7 +605,7 @@ class Redirect_Manager {
 		array_shift( $lines );
 
 		foreach ( $lines as $line ) {
-			$cols = str_getcsv( $line );
+			$cols = str_getcsv( $line, ',', '"', '\\' );
 			if ( count( $cols ) < 2 ) {
 				$result['skipped']++;
 				continue;
@@ -527,11 +676,11 @@ class Redirect_Manager {
 	 */
 	public function register_admin_page(): void {
 		add_submenu_page(
-			'search-intel',
-			__( 'Redirects', 'search-intel' ),
-			__( 'Redirects', 'search-intel' ),
+			'jat-search-intel',
+			__( 'Redirects', 'jat-search-intel' ),
+			__( 'Redirects', 'jat-search-intel' ),
 			'manage_options',
-			'search-intel-redirects',
+			'jat-search-intel-redirects',
 			[ $this, 'render_admin_page' ]
 		);
 	}
@@ -544,19 +693,19 @@ class Redirect_Manager {
 			return;
 		}
 
-		$tab = sanitize_text_field( $_GET['tab'] ?? 'redirects' );
+		$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'redirects'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only view/pagination parameter.
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'Search Intel — Redirects', 'search-intel' ); ?></h1>
+			<h1><?php esc_html_e( 'JAT Search Intel — Redirects', 'jat-search-intel' ); ?></h1>
 
 			<nav class="nav-tab-wrapper">
-				<a href="?page=search-intel-redirects&tab=redirects"
+				<a href="?page=jat-search-intel-redirects&tab=redirects"
 				   class="nav-tab <?php echo 'redirects' === $tab ? 'nav-tab-active' : ''; ?>">
-					<?php esc_html_e( 'Redirect Rules', 'search-intel' ); ?>
+					<?php esc_html_e( 'Redirect Rules', 'jat-search-intel' ); ?>
 				</a>
-				<a href="?page=search-intel-redirects&tab=404log"
+				<a href="?page=jat-search-intel-redirects&tab=404log"
 				   class="nav-tab <?php echo '404log' === $tab ? 'nav-tab-active' : ''; ?>">
-					<?php esc_html_e( '404 Log', 'search-intel' ); ?>
+					<?php esc_html_e( '404 Log', 'jat-search-intel' ); ?>
 				</a>
 			</nav>
 
@@ -575,10 +724,10 @@ class Redirect_Manager {
 	 * Render the Redirect Rules tab.
 	 */
 	private function render_redirects_tab(): void {
-		$page     = max( 1, (int) ( $_GET['paged'] ?? 1 ) );
-		$search   = sanitize_text_field( $_GET['s'] ?? '' );
-		$orderby  = sanitize_key( $_GET['orderby'] ?? 'id' );
-		$order    = sanitize_key( $_GET['order'] ?? 'DESC' );
+		$page     = max( 1, absint( $_GET['paged'] ?? 1 ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only view/pagination parameter.
+		$search   = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only view/pagination parameter.
+		$orderby  = sanitize_key( $_GET['orderby'] ?? 'id' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only view/pagination parameter.
+		$order    = sanitize_key( $_GET['order'] ?? 'DESC' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only view/pagination parameter.
 		$result   = $this->get_redirects( $page, 25, $search, $orderby, $order );
 		$total    = $result['total'];
 		$items    = $result['items'];
@@ -588,33 +737,33 @@ class Redirect_Manager {
 		<div class="si-redirects-wrap" style="margin-top: 20px;">
 			<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
 				<form method="get" style="display:flex; gap:8px; align-items:center;">
-					<input type="hidden" name="page" value="search-intel-redirects" />
+					<input type="hidden" name="page" value="jat-search-intel-redirects" />
 					<input type="search" name="s" value="<?php echo esc_attr( $search ); ?>"
-						   placeholder="<?php esc_attr_e( 'Search redirects…', 'search-intel' ); ?>" class="regular-text" />
-					<button type="submit" class="button"><?php esc_html_e( 'Search', 'search-intel' ); ?></button>
+						   placeholder="<?php esc_attr_e( 'Search redirects…', 'jat-search-intel' ); ?>" class="regular-text" />
+					<button type="submit" class="button"><?php esc_html_e( 'Search', 'jat-search-intel' ); ?></button>
 				</form>
 				<div style="display:flex; gap:8px;">
-					<button type="button" class="button" id="si-import-csv"><?php esc_html_e( 'Import CSV', 'search-intel' ); ?></button>
-					<button type="button" class="button" id="si-export-csv"><?php esc_html_e( 'Export CSV', 'search-intel' ); ?></button>
-					<button type="button" class="button button-primary" id="si-add-redirect"><?php esc_html_e( 'Add Redirect', 'search-intel' ); ?></button>
+					<button type="button" class="button" id="si-import-csv"><?php esc_html_e( 'Import CSV', 'jat-search-intel' ); ?></button>
+					<button type="button" class="button" id="si-export-csv"><?php esc_html_e( 'Export CSV', 'jat-search-intel' ); ?></button>
+					<button type="button" class="button button-primary" id="si-add-redirect"><?php esc_html_e( 'Add Redirect', 'jat-search-intel' ); ?></button>
 				</div>
 			</div>
 
 			<table class="wp-list-table widefat fixed striped">
 				<thead>
 					<tr>
-						<th style="width:30%"><?php esc_html_e( 'Source URL', 'search-intel' ); ?></th>
-						<th style="width:25%"><?php esc_html_e( 'Target URL', 'search-intel' ); ?></th>
-						<th style="width:8%"><?php esc_html_e( 'Code', 'search-intel' ); ?></th>
-						<th style="width:8%"><?php esc_html_e( 'Type', 'search-intel' ); ?></th>
-						<th style="width:7%"><?php esc_html_e( 'Hits', 'search-intel' ); ?></th>
-						<th style="width:10%"><?php esc_html_e( 'Last Hit', 'search-intel' ); ?></th>
-						<th style="width:12%"><?php esc_html_e( 'Actions', 'search-intel' ); ?></th>
+						<th style="width:30%"><?php esc_html_e( 'Source URL', 'jat-search-intel' ); ?></th>
+						<th style="width:25%"><?php esc_html_e( 'Target URL', 'jat-search-intel' ); ?></th>
+						<th style="width:8%"><?php esc_html_e( 'Code', 'jat-search-intel' ); ?></th>
+						<th style="width:8%"><?php esc_html_e( 'Type', 'jat-search-intel' ); ?></th>
+						<th style="width:7%"><?php esc_html_e( 'Hits', 'jat-search-intel' ); ?></th>
+						<th style="width:10%"><?php esc_html_e( 'Last Hit', 'jat-search-intel' ); ?></th>
+						<th style="width:12%"><?php esc_html_e( 'Actions', 'jat-search-intel' ); ?></th>
 					</tr>
 				</thead>
 				<tbody>
 				<?php if ( empty( $items ) ) : ?>
-					<tr><td colspan="7"><?php esc_html_e( 'No redirect rules found.', 'search-intel' ); ?></td></tr>
+					<tr><td colspan="7"><?php esc_html_e( 'No redirect rules found.', 'jat-search-intel' ); ?></td></tr>
 				<?php else : ?>
 					<?php foreach ( $items as $item ) : ?>
 						<tr data-id="<?php echo esc_attr( $item->id ); ?>">
@@ -625,8 +774,8 @@ class Redirect_Manager {
 							<td><?php echo esc_html( number_format_i18n( $item->hit_count ) ); ?></td>
 							<td><?php echo $item->last_hit ? esc_html( human_time_diff( strtotime( $item->last_hit ) ) . ' ago' ) : '—'; ?></td>
 							<td>
-								<button class="button button-small si-edit-redirect" data-id="<?php echo esc_attr( $item->id ); ?>"><?php esc_html_e( 'Edit', 'search-intel' ); ?></button>
-								<button class="button button-small button-link-delete si-delete-redirect" data-id="<?php echo esc_attr( $item->id ); ?>"><?php esc_html_e( 'Delete', 'search-intel' ); ?></button>
+								<button class="button button-small si-edit-redirect" data-id="<?php echo esc_attr( $item->id ); ?>"><?php esc_html_e( 'Edit', 'jat-search-intel' ); ?></button>
+								<button class="button button-small button-link-delete si-delete-redirect" data-id="<?php echo esc_attr( $item->id ); ?>"><?php esc_html_e( 'Delete', 'jat-search-intel' ); ?></button>
 							</td>
 						</tr>
 					<?php endforeach; ?>
@@ -638,12 +787,12 @@ class Redirect_Manager {
 				<div class="tablenav bottom">
 					<div class="tablenav-pages">
 						<?php
-						echo paginate_links( [
+						echo wp_kses_post( (string) paginate_links( [
 							'base'    => add_query_arg( 'paged', '%#%' ),
 							'format'  => '',
 							'current' => $page,
 							'total'   => $pages,
-						] );
+						] ) );
 						?>
 					</div>
 				</div>
@@ -654,19 +803,19 @@ class Redirect_Manager {
 		<div id="si-redirect-modal" style="display:none;">
 			<div class="si-modal-backdrop"></div>
 			<div class="si-modal-content" style="max-width:550px;margin:50px auto;background:#fff;padding:25px;border-radius:6px;position:relative;z-index:100001;">
-				<h2 id="si-modal-title"><?php esc_html_e( 'Add Redirect', 'search-intel' ); ?></h2>
+				<h2 id="si-modal-title"><?php esc_html_e( 'Add Redirect', 'jat-search-intel' ); ?></h2>
 				<input type="hidden" id="si-redirect-id" value="0" />
 				<table class="form-table">
 					<tr>
-						<th><label for="si-source-url"><?php esc_html_e( 'Source URL', 'search-intel' ); ?></label></th>
+						<th><label for="si-source-url"><?php esc_html_e( 'Source URL', 'jat-search-intel' ); ?></label></th>
 						<td><input type="text" id="si-source-url" class="large-text" placeholder="/old-page" /></td>
 					</tr>
 					<tr>
-						<th><label for="si-target-url"><?php esc_html_e( 'Target URL', 'search-intel' ); ?></label></th>
+						<th><label for="si-target-url"><?php esc_html_e( 'Target URL', 'jat-search-intel' ); ?></label></th>
 						<td><input type="text" id="si-target-url" class="large-text" placeholder="/new-page" /></td>
 					</tr>
 					<tr>
-						<th><label for="si-status-code"><?php esc_html_e( 'Status Code', 'search-intel' ); ?></label></th>
+						<th><label for="si-status-code"><?php esc_html_e( 'Status Code', 'jat-search-intel' ); ?></label></th>
 						<td>
 							<select id="si-status-code">
 								<?php foreach ( self::STATUS_CODES as $code => $label ) : ?>
@@ -676,7 +825,7 @@ class Redirect_Manager {
 						</td>
 					</tr>
 					<tr>
-						<th><label for="si-match-type"><?php esc_html_e( 'Match Type', 'search-intel' ); ?></label></th>
+						<th><label for="si-match-type"><?php esc_html_e( 'Match Type', 'jat-search-intel' ); ?></label></th>
 						<td>
 							<select id="si-match-type">
 								<?php foreach ( self::MATCH_TYPES as $type => $label ) : ?>
@@ -686,17 +835,17 @@ class Redirect_Manager {
 						</td>
 					</tr>
 					<tr>
-						<th><label for="si-redirect-note"><?php esc_html_e( 'Note', 'search-intel' ); ?></label></th>
+						<th><label for="si-redirect-note"><?php esc_html_e( 'Note', 'jat-search-intel' ); ?></label></th>
 						<td><input type="text" id="si-redirect-note" class="large-text" /></td>
 					</tr>
 					<tr>
-						<th><?php esc_html_e( 'Enabled', 'search-intel' ); ?></th>
-						<td><label><input type="checkbox" id="si-redirect-enabled" checked /> <?php esc_html_e( 'Active', 'search-intel' ); ?></label></td>
+						<th><?php esc_html_e( 'Enabled', 'jat-search-intel' ); ?></th>
+						<td><label><input type="checkbox" id="si-redirect-enabled" checked /> <?php esc_html_e( 'Active', 'jat-search-intel' ); ?></label></td>
 					</tr>
 				</table>
 				<p>
-					<button class="button button-primary" id="si-save-redirect"><?php esc_html_e( 'Save Redirect', 'search-intel' ); ?></button>
-					<button class="button si-close-modal"><?php esc_html_e( 'Cancel', 'search-intel' ); ?></button>
+					<button class="button button-primary" id="si-save-redirect"><?php esc_html_e( 'Save Redirect', 'jat-search-intel' ); ?></button>
+					<button class="button si-close-modal"><?php esc_html_e( 'Cancel', 'jat-search-intel' ); ?></button>
 				</p>
 			</div>
 		</div>
@@ -710,7 +859,7 @@ class Redirect_Manager {
 	 * Render the 404 Log tab.
 	 */
 	private function render_404_log_tab(): void {
-		$page   = max( 1, (int) ( $_GET['paged'] ?? 1 ) );
+		$page   = max( 1, absint( $_GET['paged'] ?? 1 ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only view/pagination parameter.
 		$result = $this->get_404_log( $page, 50 );
 		$items  = $result['items'];
 		$total  = $result['total'];
@@ -718,22 +867,22 @@ class Redirect_Manager {
 		?>
 		<div style="margin-top: 20px;">
 			<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-				<p><?php printf( esc_html__( '%s unique 404 URLs logged.', 'search-intel' ), '<strong>' . number_format_i18n( $total ) . '</strong>' ); ?></p>
-				<button type="button" class="button" id="si-clear-404-log"><?php esc_html_e( 'Clear Log', 'search-intel' ); ?></button>
+				<p><?php /* translators: %s: number of logged 404 URLs. */ printf( esc_html__( '%s unique 404 URLs logged.', 'jat-search-intel' ), '<strong>' . esc_html( number_format_i18n( $total ) ) . '</strong>' ); ?></p>
+				<button type="button" class="button" id="si-clear-404-log"><?php esc_html_e( 'Clear Log', 'jat-search-intel' ); ?></button>
 			</div>
 			<table class="wp-list-table widefat fixed striped">
 				<thead>
 					<tr>
-						<th style="width:40%"><?php esc_html_e( 'URL', 'search-intel' ); ?></th>
-						<th style="width:10%"><?php esc_html_e( 'Hits', 'search-intel' ); ?></th>
-						<th style="width:15%"><?php esc_html_e( 'Last Hit', 'search-intel' ); ?></th>
-						<th style="width:25%"><?php esc_html_e( 'Referrer', 'search-intel' ); ?></th>
-						<th style="width:10%"><?php esc_html_e( 'Action', 'search-intel' ); ?></th>
+						<th style="width:40%"><?php esc_html_e( 'URL', 'jat-search-intel' ); ?></th>
+						<th style="width:10%"><?php esc_html_e( 'Hits', 'jat-search-intel' ); ?></th>
+						<th style="width:15%"><?php esc_html_e( 'Last Hit', 'jat-search-intel' ); ?></th>
+						<th style="width:25%"><?php esc_html_e( 'Referrer', 'jat-search-intel' ); ?></th>
+						<th style="width:10%"><?php esc_html_e( 'Action', 'jat-search-intel' ); ?></th>
 					</tr>
 				</thead>
 				<tbody>
 				<?php if ( empty( $items ) ) : ?>
-					<tr><td colspan="5"><?php esc_html_e( 'No 404 errors logged yet.', 'search-intel' ); ?></td></tr>
+					<tr><td colspan="5"><?php esc_html_e( 'No 404 errors logged yet.', 'jat-search-intel' ); ?></td></tr>
 				<?php else : ?>
 					<?php foreach ( $items as $item ) : ?>
 						<tr>
@@ -744,7 +893,7 @@ class Redirect_Manager {
 							<td>
 								<button class="button button-small si-create-redirect-from-404"
 										data-source="<?php echo esc_attr( $item->url ); ?>">
-									<?php esc_html_e( 'Redirect', 'search-intel' ); ?>
+									<?php esc_html_e( 'Redirect', 'jat-search-intel' ); ?>
 								</button>
 							</td>
 						</tr>
@@ -756,12 +905,12 @@ class Redirect_Manager {
 			<div class="tablenav bottom">
 				<div class="tablenav-pages">
 					<?php
-					echo paginate_links( [
+					echo wp_kses_post( (string) paginate_links( [
 						'base'    => add_query_arg( 'paged', '%#%' ),
 						'format'  => '',
 						'current' => $page,
 						'total'   => $total_pages,
-					] );
+					] ) );
 					?>
 				</div>
 			</div>
@@ -780,10 +929,10 @@ class Redirect_Manager {
 		}
 
 		$data = [
-			'id'          => (int) ( $_POST['id'] ?? 0 ),
+			'id'          => absint( $_POST['id'] ?? 0 ),
 			'source_url'  => sanitize_text_field( wp_unslash( $_POST['source_url'] ?? '' ) ),
 			'target_url'  => sanitize_text_field( wp_unslash( $_POST['target_url'] ?? '' ) ),
-			'status_code' => (int) ( $_POST['status_code'] ?? 301 ),
+			'status_code' => absint( $_POST['status_code'] ?? 301 ),
 			'match_type'  => sanitize_key( $_POST['match_type'] ?? 'exact' ),
 			'enabled'     => ! empty( $_POST['enabled'] ),
 			'note'        => sanitize_text_field( wp_unslash( $_POST['note'] ?? '' ) ),
@@ -806,7 +955,7 @@ class Redirect_Manager {
 			wp_send_json_error( 'Unauthorized' );
 		}
 
-		$id = (int) ( $_POST['id'] ?? 0 );
+		$id = absint( $_POST['id'] ?? 0 );
 		if ( $this->delete_redirect( $id ) ) {
 			wp_send_json_success();
 		} else {
@@ -826,8 +975,8 @@ class Redirect_Manager {
 		$csv = $this->export_csv();
 
 		header( 'Content-Type: text/csv; charset=utf-8' );
-		header( 'Content-Disposition: attachment; filename=search-intel-redirects-' . gmdate( 'Y-m-d' ) . '.csv' );
-		echo $csv;
+		header( 'Content-Disposition: attachment; filename=jat-search-intel-redirects-' . gmdate( 'Y-m-d' ) . '.csv' );
+		echo $csv; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Raw CSV file download, not HTML.
 		exit;
 	}
 
@@ -844,8 +993,12 @@ class Redirect_Manager {
 			wp_send_json_error( 'No file uploaded.' );
 		}
 
-		$file = $_FILES['csv_file'];
-		$csv  = file_get_contents( $file['tmp_name'] );
+		// tmp_name is a server-generated path; it must not be unslashed (Windows paths).
+		$tmp = isset( $_FILES['csv_file']['tmp_name'] ) ? (string) $_FILES['csv_file']['tmp_name'] : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+		if ( '' === $tmp || ! is_uploaded_file( $tmp ) ) {
+			wp_send_json_error( 'Invalid upload.' );
+		}
+		$csv = file_get_contents( $tmp ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reading PHP's temp upload file.
 
 		if ( false === $csv ) {
 			wp_send_json_error( 'Failed to read file.' );
@@ -878,7 +1031,8 @@ class Redirect_Manager {
 		$table = $wpdb->prefix . self::TABLE_REDIRECTS;
 		$wpdb->query(
 			$wpdb->prepare(
-				"UPDATE {$table} SET hit_count = hit_count + 1, last_hit = NOW() WHERE id = %d",
+				'UPDATE %i SET hit_count = hit_count + 1, last_hit = NOW() WHERE id = %d',
+				$table,
 				$id
 			)
 		);

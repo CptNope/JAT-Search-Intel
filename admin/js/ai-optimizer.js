@@ -1,7 +1,7 @@
 /**
- * Search Intel — AI Optimizer meta box interactions.
+ * JAT Search Intel — AI Optimizer meta box interactions.
  *
- * @package Search_Intel
+ * @package JAT_Search_Intel
  * @since   3.4.0
  */
 /* global jQuery, siAiOptimizer */
@@ -46,7 +46,7 @@
 		showLoading('Optimizing with AI — this may take 30-60 seconds…');
 
 		$.post(siAiOptimizer.ajaxUrl, {
-			action:  'si_ai_auto_optimize',
+			action:  'jat_search_intel_ai_auto_optimize',
 			nonce:   siAiOptimizer.nonce,
 			post_id: postId
 		})
@@ -120,7 +120,7 @@
 		showLoading('Restoring previous version…');
 
 		$.post(siAiOptimizer.ajaxUrl, {
-			action:  'si_ai_rollback',
+			action:  'jat_search_intel_ai_rollback',
 			nonce:   siAiOptimizer.nonce,
 			post_id: postId
 		})
@@ -149,7 +149,7 @@
 		showLoading('Generating AI suggestions…');
 
 		$.post(siAiOptimizer.ajaxUrl, {
-			action:  'si_ai_get_suggestions',
+			action:  'jat_search_intel_ai_get_suggestions',
 			nonce:   siAiOptimizer.nonce,
 			post_id: postId,
 			force:   1
@@ -207,7 +207,7 @@
 		$btn_el.prop('disabled', true).text('Applying…');
 
 		$.post(siAiOptimizer.ajaxUrl, {
-			action:        'si_ai_apply_suggestion',
+			action:        'jat_search_intel_ai_apply_suggestion',
 			nonce:         siAiOptimizer.nonce,
 			post_id:       postId,
 			suggestion_id: suggestionId

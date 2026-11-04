@@ -1,8 +1,8 @@
 <?php
-namespace Search_Intel\Tests\Unit;
+namespace JAT_Search_Intel\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\Privacy;
+use JAT_Search_Intel\Privacy;
 
 class PrivacyTest extends TestCase {
 
@@ -29,11 +29,11 @@ class PrivacyTest extends TestCase {
 			'user_email' => 'author@example.com',
 		];
 		$si_test_state['user_meta'][1] = [
-			'search_intel_credentials'      => [ 'PhD in Computer Science', 'AWS Certified' ],
-			'search_intel_expertise_areas'   => [ 'Machine Learning', 'Cloud Architecture' ],
-			'search_intel_years_experience'  => '12',
-			'search_intel_social_profiles'   => [ 'https://linkedin.com/in/test', 'https://github.com/test' ],
-			'search_intel_eeat_consent'      => '1',
+			'jat_search_intel_credentials'      => [ 'PhD in Computer Science', 'AWS Certified' ],
+			'jat_search_intel_expertise_areas'   => [ 'Machine Learning', 'Cloud Architecture' ],
+			'jat_search_intel_years_experience'  => '12',
+			'jat_search_intel_social_profiles'   => [ 'https://linkedin.com/in/test', 'https://github.com/test' ],
+			'jat_search_intel_eeat_consent'      => '1',
 		];
 
 		$this->privacy = new Privacy();
@@ -67,13 +67,13 @@ class PrivacyTest extends TestCase {
 
 	// ── register_exporter() ─────────────────────────────────────────────────
 
-	public function test_register_exporter_adds_search_intel_key(): void {
+	public function test_register_exporter_adds_jat_search_intel_key(): void {
 		$exporters = $this->privacy->register_exporter( [] );
 
-		$this->assertArrayHasKey( 'search-intel', $exporters );
-		$this->assertArrayHasKey( 'exporter_friendly_name', $exporters['search-intel'] );
-		$this->assertArrayHasKey( 'callback', $exporters['search-intel'] );
-		$this->assertIsCallable( $exporters['search-intel']['callback'] );
+		$this->assertArrayHasKey( 'jat-search-intel', $exporters );
+		$this->assertArrayHasKey( 'exporter_friendly_name', $exporters['jat-search-intel'] );
+		$this->assertArrayHasKey( 'callback', $exporters['jat-search-intel'] );
+		$this->assertIsCallable( $exporters['jat-search-intel']['callback'] );
 	}
 
 	public function test_register_exporter_preserves_existing_exporters(): void {
@@ -81,18 +81,18 @@ class PrivacyTest extends TestCase {
 		$exporters = $this->privacy->register_exporter( $existing );
 
 		$this->assertArrayHasKey( 'other-plugin', $exporters );
-		$this->assertArrayHasKey( 'search-intel', $exporters );
+		$this->assertArrayHasKey( 'jat-search-intel', $exporters );
 	}
 
 	// ── register_eraser() ───────────────────────────────────────────────────
 
-	public function test_register_eraser_adds_search_intel_key(): void {
+	public function test_register_eraser_adds_jat_search_intel_key(): void {
 		$erasers = $this->privacy->register_eraser( [] );
 
-		$this->assertArrayHasKey( 'search-intel', $erasers );
-		$this->assertArrayHasKey( 'eraser_friendly_name', $erasers['search-intel'] );
-		$this->assertArrayHasKey( 'callback', $erasers['search-intel'] );
-		$this->assertIsCallable( $erasers['search-intel']['callback'] );
+		$this->assertArrayHasKey( 'jat-search-intel', $erasers );
+		$this->assertArrayHasKey( 'eraser_friendly_name', $erasers['jat-search-intel'] );
+		$this->assertArrayHasKey( 'callback', $erasers['jat-search-intel'] );
+		$this->assertIsCallable( $erasers['jat-search-intel']['callback'] );
 	}
 
 	// ── export_personal_data() ──────────────────────────────────────────────
@@ -111,8 +111,8 @@ class PrivacyTest extends TestCase {
 		$this->assertNotEmpty( $result['data'] );
 
 		$group = $result['data'][0];
-		$this->assertSame( 'search-intel-author', $group['group_id'] );
-		$this->assertSame( 'search-intel-author-1', $group['item_id'] );
+		$this->assertSame( 'jat-search-intel-author', $group['group_id'] );
+		$this->assertSame( 'jat-search-intel-author-1', $group['item_id'] );
 	}
 
 	public function test_export_includes_all_populated_fields(): void {
@@ -142,7 +142,7 @@ class PrivacyTest extends TestCase {
 	public function test_export_skips_empty_fields(): void {
 		global $si_test_state;
 		$si_test_state['user_meta'][1] = [
-			'search_intel_credentials' => [ 'PhD' ],
+			'jat_search_intel_credentials' => [ 'PhD' ],
 		];
 
 		$result = $this->privacy->export_personal_data( 'author@example.com' );
@@ -183,11 +183,11 @@ class PrivacyTest extends TestCase {
 
 		// Verify meta was actually deleted.
 		$remaining = $si_test_state['user_meta'][1] ?? [];
-		$this->assertArrayNotHasKey( 'search_intel_credentials', $remaining );
-		$this->assertArrayNotHasKey( 'search_intel_expertise_areas', $remaining );
-		$this->assertArrayNotHasKey( 'search_intel_years_experience', $remaining );
-		$this->assertArrayNotHasKey( 'search_intel_social_profiles', $remaining );
-		$this->assertArrayNotHasKey( 'search_intel_eeat_consent', $remaining );
+		$this->assertArrayNotHasKey( 'jat_search_intel_credentials', $remaining );
+		$this->assertArrayNotHasKey( 'jat_search_intel_expertise_areas', $remaining );
+		$this->assertArrayNotHasKey( 'jat_search_intel_years_experience', $remaining );
+		$this->assertArrayNotHasKey( 'jat_search_intel_social_profiles', $remaining );
+		$this->assertArrayNotHasKey( 'jat_search_intel_eeat_consent', $remaining );
 	}
 
 	public function test_erase_message_includes_count(): void {
@@ -213,7 +213,7 @@ class PrivacyTest extends TestCase {
 
 		$this->privacy->add_privacy_policy_content();
 
-		$this->assertArrayHasKey( 'Search Intel', $si_test_state['privacy_policy'] );
+		$this->assertArrayHasKey( 'JAT Search Intel', $si_test_state['privacy_policy'] );
 	}
 
 	public function test_privacy_policy_content_covers_data_collection(): void {
@@ -221,7 +221,7 @@ class PrivacyTest extends TestCase {
 
 		$this->privacy->add_privacy_policy_content();
 
-		$content = $si_test_state['privacy_policy']['Search Intel'];
+		$content = $si_test_state['privacy_policy']['JAT Search Intel'];
 
 		$this->assertStringContainsString( 'personal data we collect', $content );
 		$this->assertStringContainsString( 'credentials', $content );
@@ -233,7 +233,7 @@ class PrivacyTest extends TestCase {
 
 		$this->privacy->add_privacy_policy_content();
 
-		$content = $si_test_state['privacy_policy']['Search Intel'];
+		$content = $si_test_state['privacy_policy']['JAT Search Intel'];
 
 		$this->assertStringContainsString( 'stored locally', $content );
 		$this->assertStringContainsString( 'does not transmit', $content );
@@ -244,7 +244,7 @@ class PrivacyTest extends TestCase {
 
 		$this->privacy->add_privacy_policy_content();
 
-		$content = $si_test_state['privacy_policy']['Search Intel'];
+		$content = $si_test_state['privacy_policy']['JAT Search Intel'];
 
 		$this->assertStringContainsString( 'export', $content );
 		$this->assertStringContainsString( 'erasure', $content );
@@ -255,7 +255,7 @@ class PrivacyTest extends TestCase {
 
 		$this->privacy->add_privacy_policy_content();
 
-		$content = $si_test_state['privacy_policy']['Search Intel'];
+		$content = $si_test_state['privacy_policy']['JAT Search Intel'];
 
 		$this->assertStringContainsString( 'opt-in', $content );
 		$this->assertStringContainsString( 'sitemap', $content );

@@ -4,7 +4,7 @@
  */
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\SEO_Manager;
+use JAT_Search_Intel\SEO_Manager;
 
 class SEOManagerTest extends TestCase {
 
@@ -47,7 +47,7 @@ class SEOManagerTest extends TestCase {
 
     public function test_get_title_returns_custom_seo_title(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_title'] = 'Custom SEO Title';
+        $si_test_state['post_meta'][1]['_jat_search_intel_title'] = 'Custom SEO Title';
 
         $mgr = $this->make_manager();
         $this->assertEquals( 'Custom SEO Title', $mgr->get_title( 1 ) );
@@ -67,7 +67,7 @@ class SEOManagerTest extends TestCase {
 
     public function test_get_description_returns_custom_meta_desc(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_description'] = 'Custom meta description';
+        $si_test_state['post_meta'][1]['_jat_search_intel_description'] = 'Custom meta description';
 
         $mgr = $this->make_manager();
         $this->assertEquals( 'Custom meta description', $mgr->get_description( 1 ) );
@@ -96,7 +96,7 @@ class SEOManagerTest extends TestCase {
 
     public function test_get_description_truncates_to_max_length(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_description'] = str_repeat( 'A', 200 );
+        $si_test_state['post_meta'][1]['_jat_search_intel_description'] = str_repeat( 'A', 200 );
 
         $mgr    = $this->make_manager( [ 'description_max_length' => 100 ] );
         $result = $mgr->get_description( 1 );
@@ -126,7 +126,7 @@ class SEOManagerTest extends TestCase {
 
     public function test_filter_title_returns_custom_on_singular(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_title'] = 'Override Title';
+        $si_test_state['post_meta'][1]['_jat_search_intel_title'] = 'Override Title';
 
         $mgr = $this->make_manager();
         $this->assertEquals( 'Override Title', $mgr->filter_title( 'Original' ) );
@@ -184,7 +184,7 @@ class SEOManagerTest extends TestCase {
 
     public function test_render_meta_tags_outputs_description(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_description'] = 'A test description.';
+        $si_test_state['post_meta'][1]['_jat_search_intel_description'] = 'A test description.';
 
         $mgr = $this->make_manager();
         ob_start();
@@ -201,7 +201,7 @@ class SEOManagerTest extends TestCase {
         $mgr->render_meta_tags();
         $output = ob_get_clean();
 
-        $this->assertStringContainsString( 'Search Intel v', $output );
+        $this->assertStringContainsString( 'JAT Search Intel v', $output );
     }
 
     public function test_render_canonical_outputs_link(): void {
@@ -216,7 +216,7 @@ class SEOManagerTest extends TestCase {
 
     public function test_render_canonical_uses_custom_url(): void {
         global $si_test_state;
-        $si_test_state['post_meta'][1]['_search_intel_canonical'] = 'https://canonical.example.com/page';
+        $si_test_state['post_meta'][1]['_jat_search_intel_canonical'] = 'https://canonical.example.com/page';
 
         $mgr = $this->make_manager();
         ob_start();

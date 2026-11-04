@@ -1,10 +1,10 @@
 <?php
 /**
  * Block theme (TT4) compatibility test — run inside wp-env via:
- * npx wp-env run cli -- wp eval-file /var/www/html/wp-content/plugins/Search-Intel/tests/benchmark-blocktheme.php
+ * npx wp-env run cli -- wp eval-file /var/www/html/wp-content/plugins/jat-search-intel/tests/benchmark-blocktheme.php
  *
  * Simulates a singular post request and captures wp_head output to verify
- * Search Intel meta tags render correctly with an FSE block theme.
+ * JAT Search Intel meta tags render correctly with an FSE block theme.
  */
 
 echo '=== Block Theme (Twenty Twenty-Four) Compatibility Test ===' . PHP_EOL . PHP_EOL;
@@ -41,9 +41,9 @@ $head = ob_get_clean();
 
 echo 'wp_head output length: ' . strlen( $head ) . ' bytes' . PHP_EOL . PHP_EOL;
 
-// Check for Search Intel meta tags.
+// Check for JAT Search Intel meta tags.
 $checks = array(
-    'SI comment marker'   => '<!-- Search Intel',
+    'SI comment marker'   => '<!-- JAT Search Intel',
     'meta description'    => 'meta name="description"',
     'canonical link'      => 'rel="canonical"',
     'og:title'            => 'property="og:title"',

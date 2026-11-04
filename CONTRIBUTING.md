@@ -1,4 +1,4 @@
-# Contributing to Search Intel
+# Contributing to JAT Search Intel
 
 ## Branching Strategy
 
@@ -41,7 +41,7 @@ git push -u origin feature/my-feature
 ```bash
 git checkout develop
 git checkout -b release/1.3.0
-# Bump version in search-intel.php, readme.txt, package.json
+# Bump version in jat-search-intel.php, readme.txt, package.json
 # Update CHANGELOG.md
 # Final QA fixes
 git push -u origin release/1.3.0

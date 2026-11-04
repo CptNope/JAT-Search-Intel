@@ -1,8 +1,8 @@
 <?php
-namespace Search_Intel\Tests\Unit;
+namespace JAT_Search_Intel\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-use Search_Intel\Redirect_Manager;
+use JAT_Search_Intel\Redirect_Manager;
 
 class RedirectManagerTest extends TestCase {
 
@@ -79,7 +79,7 @@ class RedirectManagerTest extends TestCase {
 
 		$this->assertIsInt( $id );
 		$this->assertGreaterThan( 0, $id );
-		$this->assertNotEmpty( $wpdb->tables['wp_search_intel_redirects'] );
+		$this->assertNotEmpty( $wpdb->tables['wp_jat_search_intel_redirects'] );
 	}
 
 	public function test_save_redirect_rejects_empty_source(): void {
@@ -108,7 +108,7 @@ class RedirectManagerTest extends TestCase {
 			'enabled'     => true,
 		] );
 		$this->assertIsInt( $id );
-		$row = $wpdb->tables['wp_search_intel_redirects'][ $id ];
+		$row = $wpdb->tables['wp_jat_search_intel_redirects'][ $id ];
 		$this->assertEquals( 301, $row['status_code'] );
 	}
 
@@ -121,7 +121,7 @@ class RedirectManagerTest extends TestCase {
 			'enabled'     => true,
 		] );
 		$this->assertIsInt( $id );
-		$row = $wpdb->tables['wp_search_intel_redirects'][ $id ];
+		$row = $wpdb->tables['wp_jat_search_intel_redirects'][ $id ];
 		$this->assertEquals( 'exact', $row['match_type'] );
 	}
 
@@ -150,7 +150,7 @@ class RedirectManagerTest extends TestCase {
 		] );
 
 		$this->assertEquals( $id, $updated );
-		$row = $wpdb->tables['wp_search_intel_redirects'][ $id ];
+		$row = $wpdb->tables['wp_jat_search_intel_redirects'][ $id ];
 		$this->assertEquals( '/old-updated', $row['source_url'] );
 	}
 
@@ -165,7 +165,7 @@ class RedirectManagerTest extends TestCase {
 		] );
 
 		$this->assertTrue( $this->manager->delete_redirect( $id ) );
-		$this->assertArrayNotHasKey( $id, $wpdb->tables['wp_search_intel_redirects'] ?? [] );
+		$this->assertArrayNotHasKey( $id, $wpdb->tables['wp_jat_search_intel_redirects'] ?? [] );
 	}
 
 	public function test_delete_redirect_returns_false_for_nonexistent(): void {
@@ -219,7 +219,7 @@ class RedirectManagerTest extends TestCase {
 		$this->manager->detect_slug_change( 10, $post_after, $post_before );
 
 		// Same ID means get_permalink returns same URL — no redirect created
-		$table = $wpdb->tables['wp_search_intel_redirects'] ?? [];
+		$table = $wpdb->tables['wp_jat_search_intel_redirects'] ?? [];
 		$this->assertEmpty( $table );
 	}
 
@@ -234,7 +234,7 @@ class RedirectManagerTest extends TestCase {
 
 		$this->manager->detect_slug_change( 10, $post, $post );
 
-		$table = $wpdb->tables['wp_search_intel_redirects'] ?? [];
+		$table = $wpdb->tables['wp_jat_search_intel_redirects'] ?? [];
 		$this->assertEmpty( $table );
 	}
 
@@ -254,7 +254,7 @@ class RedirectManagerTest extends TestCase {
 
 		$this->manager->detect_slug_change( 10, $post_after, $post_before );
 
-		$table = $wpdb->tables['wp_search_intel_redirects'] ?? [];
+		$table = $wpdb->tables['wp_jat_search_intel_redirects'] ?? [];
 		$this->assertEmpty( $table );
 	}
 

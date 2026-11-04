@@ -1,12 +1,12 @@
 <?php
-namespace Search_Intel;
+namespace JAT_Search_Intel;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 /**
- * Scale and performance features for Search Intel.
+ * Scale and performance features for JAT Search Intel.
  *
  * Object caching support, background processing queue, bulk editor,
  * CDN-friendly output, and headless WordPress REST API support.
@@ -19,7 +19,7 @@ class Scale {
 	private $settings;
 
 	/** Queue option name. */
-	private const QUEUE_OPTION = 'search_intel_bg_queue';
+	private const QUEUE_OPTION = 'jat_search_intel_bg_queue';
 
 	/**
 	 * @param array $settings Plugin settings.
@@ -31,14 +31,14 @@ class Scale {
 			return;
 		}
 
-		add_action( 'search_intel_process_queue', [ $this, 'process_queue' ] );
+		add_action( 'jat_search_intel_process_queue', [ $this, 'process_queue' ] );
 		add_action( 'rest_api_init', [ $this, 'register_headless_routes' ] );
 		add_action( 'admin_menu', [ $this, 'register_admin_menu' ] );
-		add_action( 'wp_ajax_search_intel_bulk_edit', [ $this, 'ajax_bulk_edit' ] );
+		add_action( 'wp_ajax_jat_search_intel_bulk_edit', [ $this, 'ajax_bulk_edit' ] );
 
 		// Schedule queue processor if not already.
-		if ( ! wp_next_scheduled( 'search_intel_process_queue' ) ) {
-			wp_schedule_event( time(), 'every_five_minutes', 'search_intel_process_queue' );
+		if ( ! wp_next_scheduled( 'jat_search_intel_process_queue' ) ) {
+			wp_schedule_event( time(), 'every_five_minutes', 'jat_search_intel_process_queue' );
 		}
 	}
 
@@ -51,11 +51,11 @@ class Scale {
 	 * @param string $group Cache group.
 	 * @return mixed|false Cached value or false.
 	 */
-	public function cache_get( string $key, string $group = 'search_intel' ) {
+	public function cache_get( string $key, string $group = 'jat_search_intel' ) {
 		if ( $this->has_object_cache() ) {
 			return wp_cache_get( $key, $group );
 		}
-		return get_transient( 'si_' . $key );
+		return get_transient( 'jat_search_intel_' . $key );
 	}
 
 	/**
@@ -67,11 +67,11 @@ class Scale {
 	 * @param string $group  Cache group.
 	 * @return bool
 	 */
-	public function cache_set( string $key, $value, int $expiry = 3600, string $group = 'search_intel' ): bool {
+	public function cache_set( string $key, $value, int $expiry = 3600, string $group = 'jat_search_intel' ): bool {
 		if ( $this->has_object_cache() ) {
 			return wp_cache_set( $key, $value, $group, $expiry );
 		}
-		return set_transient( 'si_' . $key, $value, $expiry );
+		return set_transient( 'jat_search_intel_' . $key, $value, $expiry );
 	}
 
 	/**
@@ -81,11 +81,11 @@ class Scale {
 	 * @param string $group Cache group.
 	 * @return bool
 	 */
-	public function cache_delete( string $key, string $group = 'search_intel' ): bool {
+	public function cache_delete( string $key, string $group = 'jat_search_intel' ): bool {
 		if ( $this->has_object_cache() ) {
 			return wp_cache_delete( $key, $group );
 		}
-		return delete_transient( 'si_' . $key );
+		return delete_transient( 'jat_search_intel_' . $key );
 	}
 
 	/**
@@ -119,7 +119,7 @@ class Scale {
 			'created' => current_time( 'mysql' ),
 		];
 
-		update_option( self::QUEUE_OPTION, $queue );
+		update_option( self::QUEUE_OPTION, $queue, false );
 		return $job_id;
 	}
 
@@ -171,7 +171,7 @@ class Scale {
 			return true;
 		} ) );
 
-		update_option( self::QUEUE_OPTION, $queue );
+		update_option( self::QUEUE_OPTION, $queue, false );
 		return $processed;
 	}
 
@@ -195,17 +195,17 @@ class Scale {
 					return false;
 				}
 				$content     = wp_strip_all_tags( $post->post_content );
-				$keyword     = (string) get_post_meta( $post_id, '_search_intel_focus_keyword', true );
-				$description = (string) get_post_meta( $post_id, '_search_intel_description', true );
+				$keyword     = (string) get_post_meta( $post_id, '_jat_search_intel_focus_keyword', true );
+				$description = (string) get_post_meta( $post_id, '_jat_search_intel_description', true );
 				$results     = $core->analyzer->analyze( $post_id, $content, $post->post_title, $keyword, $description );
 				if ( isset( $results['seo']['score'] ) ) {
-					update_post_meta( $post_id, '_search_intel_seo_score', (int) $results['seo']['score'] );
+					update_post_meta( $post_id, '_jat_search_intel_seo_score', (int) $results['seo']['score'] );
 				}
 				if ( isset( $results['aeo']['score'] ) ) {
-					update_post_meta( $post_id, '_search_intel_aeo_score', (int) $results['aeo']['score'] );
+					update_post_meta( $post_id, '_jat_search_intel_aeo_score', (int) $results['aeo']['score'] );
 				}
 				if ( isset( $results['geo']['score'] ) ) {
-					update_post_meta( $post_id, '_search_intel_geo_score', (int) $results['geo']['score'] );
+					update_post_meta( $post_id, '_jat_search_intel_geo_score', (int) $results['geo']['score'] );
 				}
 				return true;
 
@@ -218,11 +218,11 @@ class Scale {
 				if ( ! $post ) {
 					return false;
 				}
-				$desc = get_post_meta( $post_id, '_search_intel_description', true );
+				$desc = get_post_meta( $post_id, '_jat_search_intel_description', true );
 				if ( empty( $desc ) ) {
 					$auto = $core->seo->get_description( $post_id );
 					if ( $auto ) {
-						update_post_meta( $post_id, '_search_intel_description', sanitize_text_field( $auto ) );
+						update_post_meta( $post_id, '_jat_search_intel_description', sanitize_text_field( $auto ) );
 					}
 				}
 				return true;
@@ -269,12 +269,12 @@ class Scale {
 				$rows[] = [
 					'ID'          => $post->ID,
 					'title'       => $post->post_title,
-					'seo_title'   => (string) get_post_meta( $post->ID, '_search_intel_title', true ),
-					'description' => (string) get_post_meta( $post->ID, '_search_intel_description', true ),
-					'keyword'     => (string) get_post_meta( $post->ID, '_search_intel_focus_keyword', true ),
-					'seo_score'   => (int) get_post_meta( $post->ID, '_search_intel_seo_score', true ),
-					'aeo_score'   => (int) get_post_meta( $post->ID, '_search_intel_aeo_score', true ),
-					'geo_score'   => (int) get_post_meta( $post->ID, '_search_intel_geo_score', true ),
+					'seo_title'   => (string) get_post_meta( $post->ID, '_jat_search_intel_title', true ),
+					'description' => (string) get_post_meta( $post->ID, '_jat_search_intel_description', true ),
+					'keyword'     => (string) get_post_meta( $post->ID, '_jat_search_intel_focus_keyword', true ),
+					'seo_score'   => (int) get_post_meta( $post->ID, '_jat_search_intel_seo_score', true ),
+					'aeo_score'   => (int) get_post_meta( $post->ID, '_jat_search_intel_aeo_score', true ),
+					'geo_score'   => (int) get_post_meta( $post->ID, '_jat_search_intel_geo_score', true ),
 				];
 			}
 		}
@@ -293,9 +293,9 @@ class Scale {
 	 */
 	public function bulk_update_meta( array $updates ): int {
 		$allowed = [
-			'title'       => '_search_intel_title',
-			'description' => '_search_intel_description',
-			'keyword'     => '_search_intel_focus_keyword',
+			'title'       => '_jat_search_intel_title',
+			'description' => '_jat_search_intel_description',
+			'keyword'     => '_jat_search_intel_focus_keyword',
 		];
 
 		$count = 0;
@@ -327,12 +327,12 @@ class Scale {
 	 * AJAX handler for bulk editing.
 	 */
 	public function ajax_bulk_edit(): void {
-		check_ajax_referer( 'search_intel_bulk_edit', 'nonce' );
+		check_ajax_referer( 'jat_search_intel_bulk_edit', 'nonce' );
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( 'Insufficient permissions.' );
 		}
 
-		$updates = $_POST['updates'] ?? [];
+		$updates = isset( $_POST['updates'] ) ? wp_unslash( $_POST['updates'] ) : []; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Each field is sanitized individually below.
 		if ( ! is_array( $updates ) ) {
 			wp_send_json_error( 'Invalid data.' );
 		}
@@ -347,7 +347,7 @@ class Scale {
 	 * Register REST API routes for headless WordPress support.
 	 */
 	public function register_headless_routes(): void {
-		register_rest_route( 'search-intel/v1', '/seo/(?P<id>\d+)', [
+		register_rest_route( 'jat-search-intel/v1', '/seo/(?P<id>\d+)', [
 			'methods'             => 'GET',
 			'callback'            => [ $this, 'rest_get_seo_data' ],
 			'permission_callback' => '__return_true',
@@ -360,7 +360,7 @@ class Scale {
 			],
 		] );
 
-		register_rest_route( 'search-intel/v1', '/aeo/(?P<id>\d+)', [
+		register_rest_route( 'jat-search-intel/v1', '/aeo/(?P<id>\d+)', [
 			'methods'             => 'GET',
 			'callback'            => [ $this, 'rest_get_aeo_data' ],
 			'permission_callback' => '__return_true',
@@ -373,7 +373,7 @@ class Scale {
 			],
 		] );
 
-		register_rest_route( 'search-intel/v1', '/scores/(?P<id>\d+)', [
+		register_rest_route( 'jat-search-intel/v1', '/scores/(?P<id>\d+)', [
 			'methods'             => 'GET',
 			'callback'            => [ $this, 'rest_get_scores' ],
 			'permission_callback' => '__return_true',
@@ -386,7 +386,7 @@ class Scale {
 			],
 		] );
 
-		register_rest_route( 'search-intel/v1', '/meta/(?P<id>\d+)', [
+		register_rest_route( 'jat-search-intel/v1', '/meta/(?P<id>\d+)', [
 			'methods'             => 'GET',
 			'callback'            => [ $this, 'rest_get_all_meta' ],
 			'permission_callback' => '__return_true',
@@ -416,14 +416,14 @@ class Scale {
 
 		return new \WP_REST_Response( [
 			'id'          => $post_id,
-			'title'       => (string) get_post_meta( $post_id, '_search_intel_title', true ) ?: $post->post_title,
-			'description' => (string) get_post_meta( $post_id, '_search_intel_description', true ),
-			'canonical'   => (string) get_post_meta( $post_id, '_search_intel_canonical', true ) ?: get_permalink( $post_id ),
-			'robots'      => (string) get_post_meta( $post_id, '_search_intel_robots', true ),
-			'keyword'     => (string) get_post_meta( $post_id, '_search_intel_focus_keyword', true ),
-			'og_title'    => (string) get_post_meta( $post_id, '_search_intel_og_title', true ),
-			'og_desc'     => (string) get_post_meta( $post_id, '_search_intel_og_description', true ),
-			'og_image'    => (string) get_post_meta( $post_id, '_search_intel_og_image', true ),
+			'title'       => (string) get_post_meta( $post_id, '_jat_search_intel_title', true ) ?: $post->post_title,
+			'description' => (string) get_post_meta( $post_id, '_jat_search_intel_description', true ),
+			'canonical'   => (string) get_post_meta( $post_id, '_jat_search_intel_canonical', true ) ?: get_permalink( $post_id ),
+			'robots'      => (string) get_post_meta( $post_id, '_jat_search_intel_robots', true ),
+			'keyword'     => (string) get_post_meta( $post_id, '_jat_search_intel_focus_keyword', true ),
+			'og_title'    => (string) get_post_meta( $post_id, '_jat_search_intel_og_title', true ),
+			'og_desc'     => (string) get_post_meta( $post_id, '_jat_search_intel_og_description', true ),
+			'og_image'    => (string) get_post_meta( $post_id, '_jat_search_intel_og_image', true ),
 		] );
 	}
 
@@ -443,9 +443,9 @@ class Scale {
 
 		return new \WP_REST_Response( [
 			'id'            => $post_id,
-			'ai_summary'    => (string) get_post_meta( $post_id, '_search_intel_ai_summary', true ),
-			'content_type'  => (string) get_post_meta( $post_id, '_search_intel_content_type', true ),
-			'direct_answer' => (string) get_post_meta( $post_id, '_search_intel_direct_answer', true ),
+			'ai_summary'    => (string) get_post_meta( $post_id, '_jat_search_intel_ai_summary', true ),
+			'content_type'  => (string) get_post_meta( $post_id, '_jat_search_intel_content_type', true ),
+			'direct_answer' => (string) get_post_meta( $post_id, '_jat_search_intel_direct_answer', true ),
 		] );
 	}
 
@@ -465,10 +465,10 @@ class Scale {
 
 		return new \WP_REST_Response( [
 			'id'          => $post_id,
-			'seo'         => (int) get_post_meta( $post_id, '_search_intel_seo_score', true ),
-			'aeo'         => (int) get_post_meta( $post_id, '_search_intel_aeo_score', true ),
-			'geo'         => (int) get_post_meta( $post_id, '_search_intel_geo_score', true ),
-			'readability' => (int) get_post_meta( $post_id, '_search_intel_readability_score', true ),
+			'seo'         => (int) get_post_meta( $post_id, '_jat_search_intel_seo_score', true ),
+			'aeo'         => (int) get_post_meta( $post_id, '_jat_search_intel_aeo_score', true ),
+			'geo'         => (int) get_post_meta( $post_id, '_jat_search_intel_geo_score', true ),
+			'readability' => (int) get_post_meta( $post_id, '_jat_search_intel_readability_score', true ),
 		] );
 	}
 
@@ -507,8 +507,8 @@ class Scale {
 	 * @return string Versioned URL.
 	 */
 	public function get_asset_url( string $path ): string {
-		$dir  = defined( 'SEARCH_INTEL_DIR' ) ? SEARCH_INTEL_DIR : '';
-		$url  = defined( 'SEARCH_INTEL_URL' ) ? SEARCH_INTEL_URL : '';
+		$dir  = defined( 'JAT_SEARCH_INTEL_DIR' ) ? JAT_SEARCH_INTEL_DIR : '';
+		$url  = defined( 'JAT_SEARCH_INTEL_URL' ) ? JAT_SEARCH_INTEL_URL : '';
 		$file = $dir . $path;
 
 		if ( file_exists( $file ) ) {
@@ -528,11 +528,11 @@ class Scale {
 	 */
 	public function register_admin_menu(): void {
 		add_submenu_page(
-			'search-intel',
+			'jat-search-intel',
 			'Bulk Editor',
 			'Bulk Editor',
 			'manage_options',
-			'search-intel-bulk-editor',
+			'jat-search-intel-bulk-editor',
 			[ $this, 'render_admin_page' ]
 		);
 	}
@@ -542,7 +542,7 @@ class Scale {
 	 */
 	public function render_admin_page(): void {
 		$data = $this->get_bulk_editor_data( [
-			'paged' => absint( $_GET['paged'] ?? 1 ),
+			'paged' => absint( $_GET['paged'] ?? 1 ), // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only view/pagination parameter.
 		] );
 
 		echo '<div class="wrap"><h1>Bulk Editor</h1>';
@@ -554,7 +554,7 @@ class Scale {
 		}
 
 		echo '<form method="post">';
-		wp_nonce_field( 'search_intel_bulk_edit', 'nonce' );
+		wp_nonce_field( 'jat_search_intel_bulk_edit', 'nonce' );
 		echo '<table class="widefat striped">';
 		echo '<thead><tr><th>ID</th><th>Post Title</th><th>SEO Title</th><th>Description</th><th>Keyword</th><th>SEO</th><th>AEO</th><th>GEO</th></tr></thead>';
 		echo '<tbody>';
@@ -562,17 +562,17 @@ class Scale {
 		foreach ( $data['posts'] as $row ) {
 			printf(
 				'<tr><td>%d</td><td>%s</td><td><input type="text" name="updates[%d][title]" value="%s" class="regular-text"></td><td><input type="text" name="updates[%d][description]" value="%s" class="regular-text"></td><td><input type="text" name="updates[%d][keyword]" value="%s" style="width:120px"></td><td>%d</td><td>%d</td><td>%d</td></tr>',
-				$row['ID'],
+				absint( $row['ID'] ),
 				esc_html( $row['title'] ),
-				$row['ID'],
+				absint( $row['ID'] ),
 				esc_attr( $row['seo_title'] ),
-				$row['ID'],
+				absint( $row['ID'] ),
 				esc_attr( $row['description'] ),
-				$row['ID'],
+				absint( $row['ID'] ),
 				esc_attr( $row['keyword'] ),
-				$row['seo_score'],
-				$row['aeo_score'],
-				$row['geo_score']
+				absint( $row['seo_score'] ),
+				absint( $row['aeo_score'] ),
+				absint( $row['geo_score'] )
 			);
 		}
 
@@ -587,9 +587,9 @@ class Scale {
 			for ( $i = 1; $i <= $total_pages; $i++ ) {
 				printf(
 					'<a class="page-numbers%s" href="%s">%d</a> ',
-					( $i === absint( $_GET['paged'] ?? 1 ) ) ? ' current' : '',
+					( $i === absint( $_GET['paged'] ?? 1 ) ) ? ' current' : '', // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only view/pagination parameter.
 					esc_url( add_query_arg( 'paged', $i ) ),
-					$i
+					absint( $i )
 				);
 			}
 			echo '</div></div>';
@@ -601,7 +601,7 @@ class Scale {
 			return $j['status'] === 'pending';
 		} ) );
 		if ( $pending > 0 ) {
-			printf( '<div class="notice notice-info"><p>%d background jobs pending.</p></div>', $pending );
+			printf( '<div class="notice notice-info"><p>%d background jobs pending.</p></div>', absint( $pending ) );
 		}
 
 		echo '</div>';
