@@ -439,7 +439,8 @@ class Passage_Coach {
 	 * @return array<int,array{kind:string,level:int,text:string,words:int,links:string[]}>
 	 */
 	public static function top_level_blocks( string $content ): array {
-		$parsed = function_exists( 'parse_blocks' ) && false !== strpos( $content, '<!-- wp:' )
+		$is_blocks = false !== strpos( $content, '<!-- wp:' );
+		$parsed    = function_exists( 'parse_blocks' ) && $is_blocks
 			? parse_blocks( $content )
 			: [ [ 'blockName' => null, 'innerHTML' => $content, 'attrs' => [] ] ];
 
@@ -452,6 +453,12 @@ class Passage_Coach {
 			}
 
 			if ( '' === $name ) {
+				if ( $is_blocks ) {
+					// Loose HTML inside a block post is one Classic block in the editor; keep it as one
+					// so block positions line up with what the editor shows.
+					$out[] = self::describe( 'core/freeform', $html, [] );
+					continue;
+				}
 				// Classic content: one block per top-level element.
 				foreach ( self::split_classic( $html ) as $piece ) {
 					$out[] = $piece;

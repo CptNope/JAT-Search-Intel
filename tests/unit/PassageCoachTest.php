@@ -96,6 +96,13 @@ class PassageCoachTest extends TestCase {
 		$this->assertSame( 'Two.', $blocks[1]['text'] );
 	}
 
+	public function test_loose_html_in_block_post_counts_as_one_block(): void {
+		$content = $this->p( 'One.' ) . "<p>a</p><p>b</p>\n\n" . $this->h( 'Two?' ) . "<!-- wp:list -->\n<ul><li>x</li></ul>\n<!-- /wp:list -->";
+		$blocks  = Passage_Coach::top_level_blocks( $content );
+		$this->assertCount( 4, $blocks );
+		$this->assertSame( 'heading', $blocks[2]['kind'] );
+	}
+
 	public function test_classic_content_points_at_single_block(): void {
 		$s = Passage_Coach::analyze( "<h2>Intro</h2>\n<p>About 45% of people.</p>" );
 		$this->assertNotEmpty( $s );

@@ -126,8 +126,6 @@ class Setup_Wizard {
 		$settings = array_merge( Core::get_default_settings(), is_array( $settings ) ? $settings : [] );
 		$settings = $this->apply_step( $step, (array) $input, $settings );
 
-		// Write directly: the values are sanitised here, and the settings-page sanitizer is page-scoped.
-		remove_all_filters( 'sanitize_option_jat_search_intel_settings' );
 		update_option( 'jat_search_intel_settings', $settings );
 
 		if ( $step >= 3 ) {
@@ -184,10 +182,13 @@ class Setup_Wizard {
 				break;
 
 			case 3:
-				$preset   = (string) ( $input['ai_preset'] ?? 'training' );
-				$settings = AI_Search::apply_preset( $settings, $preset );
+				// 'keep' (or nothing posted) leaves custom crawler rules alone.
+				$preset = (string) ( $input['ai_preset'] ?? 'keep' );
+				if ( 'keep' !== $preset ) {
+					$settings = AI_Search::apply_preset( $settings, $preset );
+				}
 
-				$settings['enable_geo']                = $settings['enable_geo'] || ! empty( $input['enable_llms_txt'] );
+				$settings['enable_geo']                = ! empty( $settings['enable_geo'] ) || ! empty( $input['enable_llms_txt'] );
 				$settings['enable_llms_txt']           = ! empty( $input['enable_llms_txt'] );
 				$settings['enable_markdown_endpoints'] = ! empty( $input['enable_markdown_endpoints'] );
 				break;
@@ -332,7 +333,16 @@ class Setup_Wizard {
 	 */
 	private function render_step_ai( array $s ): void {
 		$current = AI_Search::detect_preset( $s );
-		$presets = [
+		// A fresh install has no rules yet: recommend blocking training only.
+		if ( empty( $s['ai_crawler_rules'] ) ) {
+			$current = 'training';
+		}
+		$presets = [];
+		if ( '' === $current ) {
+			$presets['keep'] = [ __( 'Keep my current crawler rules', 'jat-search-intel' ), __( 'You have set crawler access individually. Nothing will change.', 'jat-search-intel' ) ];
+			$current         = 'keep';
+		}
+		$presets += [
 			'allow'    => [ __( 'Allow everything', 'jat-search-intel' ), __( 'AI search, AI answers and AI model training may all use your content.', 'jat-search-intel' ) ],
 			'training' => [ __( 'Allow AI search, block AI training (recommended)', 'jat-search-intel' ), __( 'You can still appear and be cited in ChatGPT, Perplexity, Claude and Google AI answers, but your content is not offered for training new models.', 'jat-search-intel' ) ],
 			'block'    => [ __( 'Block all AI crawlers', 'jat-search-intel' ), __( 'Keeps AI crawlers out entirely. You will not be cited by AI assistants that respect robots.txt. Regular Google and Bing search are not affected.', 'jat-search-intel' ) ],

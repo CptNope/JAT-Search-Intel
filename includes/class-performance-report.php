@@ -179,6 +179,22 @@ class Performance_Report {
 			}
 		}
 
+		// Trim before looking anything up: url_to_postid() costs queries per row.
+		$orderby  = in_array( $orderby, self::SORTABLE, true ) ? $orderby : 'clicks';
+		$activity = static function ( $r ) {
+			return $r['clicks'] * 10 + $r['ai_referrals'] * 10 + $r['impressions'] + $r['ai_crawls'];
+		};
+		$raw_sort = in_array( $orderby, [ 'clicks', 'impressions', 'ai_referrals', 'ai_crawls' ], true );
+		uasort(
+			$merged,
+			static function ( $a, $b ) use ( $orderby, $raw_sort, $activity ) {
+				$primary = $raw_sort ? $b[ $orderby ] <=> $a[ $orderby ] : 0;
+				return 0 !== $primary ? $primary : $activity( $b ) <=> $activity( $a );
+			}
+		);
+		// Sorting by GEO score or age needs the post, so look at a wider set of the most active pages.
+		$merged = array_slice( $merged, 0, $raw_sort ? self::MAX_ROWS : self::MAX_ROWS * 3, true );
+
 		$rows = [];
 		$now  = time();
 		foreach ( $merged as $path => $row ) {
@@ -196,7 +212,6 @@ class Performance_Report {
 			$rows[]       = $row;
 		}
 
-		$orderby = in_array( $orderby, self::SORTABLE, true ) ? $orderby : 'clicks';
 		usort(
 			$rows,
 			static function ( $a, $b ) use ( $orderby ) {

@@ -1622,3 +1622,16 @@ if ( ! function_exists( 'trailingslashit' ) ) {
 		return rtrim( (string) $value, '/\\' );
 	}
 }
+
+if ( ! function_exists( 'wp_slash' ) ) {
+	function wp_slash( $value ) {
+		return is_array( $value ) ? array_map( 'wp_slash', $value ) : ( is_string( $value ) ? addslashes( $value ) : $value );
+	}
+}
+
+if ( ! function_exists( 'wp_schedule_single_event' ) ) {
+	function wp_schedule_single_event( int $timestamp, string $hook, array $args = [] ): bool {
+		$GLOBALS['si_test_state']['single_events'][ $hook ] = $timestamp;
+		return true;
+	}
+}

@@ -233,6 +233,9 @@ Sends an HTTP HEAD request to each external URL linked from your content to chec
 * Fixed: canonical URL, social title/description/image, audience, key topics and fact-check date set in the block-editor sidebar were saved under keys the front end never read. They are now kept in sync both ways and existing values are copied over on update. X (Twitter) title, description and image overrides are now used.
 * Removed: CSP headers, Subresource Integrity, white-label branding and the MainWP reporter (outside the scope of an SEO plugin).
 * Security: password-protected posts no longer leak their text through auto-generated descriptions, Open Graph/X tags, schema descriptions, FAQ/HowTo/speakable schema, the direct-answer tag or the ai-summary tag. An explicitly written meta description is still used.
+* Fixed: under the block editor, the classic meta box re-saved every field with its page-load values after the sidebar saved, undoing sidebar changes (for example canonical URL and noindex). It now saves only fields changed in the meta box.
+* Fixed: the setup wizard no longer replaces individually set crawler rules, and recommends blocking AI training only on a fresh install.
+* Fixed: Readiness no longer offers a fix on a passing check; the Refresh Queue now also considers high-traffic pages beyond the 300 oldest; Readiness and Page Performance stay fast on large sites.
 * Security: REST SEO data is only public for published, non-password-protected posts; focus keywords and scores now require edit access; duplicate /scores and /meta route registrations from the headless module were removed.
 * Fixed: settings pages no longer round-trip every option through hidden fields, which could flatten nested settings and stop some checkboxes from being turned off.
 * Fixed: title templates using %category%, %search_query% or %sep% were mangled when saved.
