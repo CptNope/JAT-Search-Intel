@@ -242,7 +242,7 @@ class Upgrade {
 			$wpdb->query( $wpdb->prepare( 'ALTER TABLE %i RENAME TO %i', $old, $new ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.SchemaChange
 			$wpdb->suppress_errors( $suppress );
 			// Re-check the schema after the rename attempt (state changed since the checks above).
-			$renamed = (bool) $table_exists( $new );
+			$renamed  = $table_exists( $new );
 			$old_gone = ! $table_exists( $old ); // @phpstan-ignore-line -- schema changed by the ALTER above.
 			if ( $renamed && $old_gone ) { // @phpstan-ignore-line
 				return;

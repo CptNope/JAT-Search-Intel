@@ -19,5 +19,20 @@
     <stubs>
         <file name="vendor/php-stubs/wordpress-stubs/wordpress-stubs.php" />
         <file name="stubs/wp-cli.php" />
+        <file name="phpstan-constants.php" />
     </stubs>
+
+    <issueHandlers>
+        <!--
+            WordPress calls hook, REST, cron, AJAX and admin-page callbacks by name
+            (add_action / add_filter / register_rest_route), and other code reaches the
+            core's modules through Core::__get(). Psalm cannot follow either, so it
+            reports every one of those as possibly unused. Truly private dead code is
+            still caught by UnusedMethod / UnusedProperty / UnusedVariable.
+        -->
+        <PossiblyUnusedMethod errorLevel="suppress" />
+        <PossiblyUnusedReturnValue errorLevel="suppress" />
+        <PossiblyUnusedProperty errorLevel="suppress" />
+        <PossiblyUnusedParam errorLevel="suppress" />
+    </issueHandlers>
 </psalm>

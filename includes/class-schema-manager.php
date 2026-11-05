@@ -424,6 +424,9 @@ class Schema_Manager {
                     $ancestors = array_reverse( $ancestors );
                     foreach ( $ancestors as $ancestor_id ) {
                         $ancestor = get_term( $ancestor_id, 'category' );
+                        if ( ! $ancestor instanceof \WP_Term ) {
+                            continue;
+                        }
                         $crumbs[] = [
                             '@type'    => 'ListItem',
                             'position' => $position++,
@@ -461,12 +464,14 @@ class Schema_Manager {
                 'name'     => get_the_title( $post_id ),
             ];
         } elseif ( is_category() || is_tag() || is_tax() ) {
-            $term     = get_queried_object();
-            $crumbs[] = [
-                '@type'    => 'ListItem',
-                'position' => $position,
-                'name'     => $term->name,
-            ];
+            $term = get_queried_object();
+            if ( $term instanceof \WP_Term ) {
+                $crumbs[] = [
+                    '@type'    => 'ListItem',
+                    'position' => $position,
+                    'name'     => $term->name,
+                ];
+            }
         }
 
         if ( count( $crumbs ) < 2 ) {

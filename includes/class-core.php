@@ -293,7 +293,7 @@ class Core {
             }
             unset( $this->{$prop} );
             $this->lazy_modules[ $prop ] = $class;
-            foreach ( (array) ( $module[2] ?? [] ) as $hook => $priority ) {
+            foreach ( $module[2] ?? [] as $hook => $priority ) {
                 add_action(
                     $hook,
                     function () use ( $prop ) {

@@ -528,31 +528,24 @@ class GEO_Manager {
             if ( ! in_array( $type, $allowed_types, true ) ) {
                 $type = 'Thing';
             }
-            $url  = ! empty( $entity['url'] ) ? esc_url( $entity['url'] ) : '';
+            $url = ! empty( $entity['url'] ) ? esc_url( $entity['url'] ) : '';
 
-            // Only wrap first occurrence to avoid over-marking
-            $replacement = sprintf(
-                '<span itemscope itemtype="https://schema.org/%s"><span itemprop="name">%s</span></span>',
-                $type,
-                '$0'
-            );
-
-            if ( $url ) {
-                $replacement = sprintf(
-                    '<span itemscope itemtype="https://schema.org/%s"><a href="%s" itemprop="url"><span itemprop="name">%s</span></a></span>',
-                    $type,
-                    $url,
-                    '$0'
-                );
-            }
-
-            // Replace first occurrence only, avoiding existing HTML tags
-            $content = preg_replace(
-                '/(?<=>)([^<]*?)(' . $name . ')([^<]*?)(?=<)/i',
-                '$1' . $replacement . '$3',
+            // Wrap the first whole-word occurrence in text between tags (never inside a tag).
+            $result = preg_replace_callback(
+                '/(?<=>)([^<]*?)(?<![\w])(' . $name . ')(?![\w])/iu',
+                static function ( array $m ) use ( $type, $url ): string {
+                    $label = '<span itemprop="name">' . $m[2] . '</span>';
+                    if ( '' !== $url ) {
+                        $label = '<a href="' . $url . '" itemprop="url">' . $label . '</a>';
+                    }
+                    return $m[1] . '<span itemscope itemtype="https://schema.org/' . $type . '">' . $label . '</span>';
+                },
                 $content,
                 1
             );
+            if ( null !== $result ) {
+                $content = $result;
+            }
         }
 
         return $content;

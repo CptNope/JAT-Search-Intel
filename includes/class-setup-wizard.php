@@ -228,7 +228,7 @@ class Setup_Wizard {
 				esc_attr( $bg ),
 				esc_attr( $fg ),
 				'current' === $state ? ' aria-current="step"' : '',
-				(int) $n,
+				absint( $n ),
 				esc_html( $label )
 			);
 		}

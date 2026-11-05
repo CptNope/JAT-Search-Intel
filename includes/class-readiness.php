@@ -598,7 +598,7 @@ class Readiness {
 				$settings['enable_schema'] = true;
 				break;
 			case 'allow-ai-search':
-				foreach ( (array) ( $settings['ai_crawler_rules'] ?? [] ) as $bot => $rule ) {
+				foreach ( array_keys( (array) ( $settings['ai_crawler_rules'] ?? [] ) ) as $bot ) {
 					if ( in_array( AI_Search::BOTS[ $bot ][1] ?? '', [ 'search', 'user' ], true ) ) {
 						$settings['ai_crawler_rules'][ $bot ] = 'allow';
 					}

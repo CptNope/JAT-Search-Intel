@@ -116,7 +116,7 @@ class Admin_Menu {
 		// the first in each group get a class that hides them, and appear as tabs instead.
 		$rebuilt  = [];
 		$assigned = [];
-		foreach ( self::groups() as $key => list( $label, $slugs ) ) {
+		foreach ( self::groups() as list( $label, $slugs ) ) {
 			$first = true;
 			foreach ( $slugs as $slug ) {
 				if ( ! isset( $registered[ $slug ] ) ) {
@@ -199,7 +199,7 @@ class Admin_Menu {
 		if ( '' === $this->current_group || ! $this->tabs ) {
 			return $submenu_file;
 		}
-		return (string) array_key_first( $this->tabs );
+		return array_key_first( $this->tabs );
 	}
 
 	/**

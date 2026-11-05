@@ -33,7 +33,7 @@ class Passage_Coach {
 	/** Openings that delay the answer. */
 	private const SLOW_OPENINGS = [
 		'in this article', 'in this post', 'in this guide', 'in this blog', 'welcome to', 'have you ever',
-		'are you looking', 'if you are looking', "if you're looking", 'today we', "today, we", 'let\'s dive', 'let us dive',
+		'are you looking', 'if you are looking', "if you're looking", 'today we', 'today, we', 'let\'s dive', 'let us dive',
 		'when it comes to', 'in today\'s', 'in the world of', 'it\'s no secret', 'we all know',
 	];
 
@@ -436,7 +436,7 @@ class Passage_Coach {
 	 * Top-level blocks as the editor sees them (whitespace-only freeform blocks dropped).
 	 *
 	 * @param string $content Content.
-	 * @return array<int,array{kind:string,level:int,text:string,words:int,links:string[]}>
+	 * @return list<array{kind:string,level:int,text:string,words:int,links:string[],no_alt:int}>
 	 */
 	public static function top_level_blocks( string $content ): array {
 		$is_blocks = false !== strpos( $content, '<!-- wp:' );
@@ -540,7 +540,7 @@ class Passage_Coach {
 	 * Split classic (non-block) HTML into block-like pieces.
 	 *
 	 * @param string $html HTML.
-	 * @return array
+	 * @return list<array{kind:string,level:int,text:string,words:int,links:string[],no_alt:int}>
 	 */
 	private static function split_classic( string $html ): array {
 		$html = function_exists( 'wpautop' ) ? wpautop( $html ) : $html;
