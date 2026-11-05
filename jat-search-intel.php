@@ -57,6 +57,7 @@ function jat_search_intel_cron_hooks() {
         'jat_search_intel_daily_aggregate',
         'jat_search_intel_decay_check',
         'jat_search_intel_ga4_fetch',
+        'jat_search_intel_meta_backfill',
         'jat_search_intel_process_queue',
         'jat_search_intel_rank_tracking',
         'jat_search_intel_score_drop_check',
@@ -71,12 +72,19 @@ function jat_search_intel_cron_hooks() {
  */
 function jat_search_intel_init() {
     // Legacy-data migration, table creation and rewrite flush on version change.
-    JAT_Search_Intel\Upgrade::run();
+    // Both options are autoloaded, so this check costs nothing on normal requests.
+    if ( ! get_option( 'jat_search_intel_legacy_migrated' ) || get_option( 'jat_search_intel_version' ) !== JAT_SEARCH_INTEL_VERSION ) {
+        JAT_Search_Intel\Upgrade::run();
+    }
     return JAT_Search_Intel\Core::get_instance();
 }
 
 // Flush rewrite rules once, after every module has registered its rules.
-add_action( 'init', [ 'JAT_Search_Intel\\Upgrade', 'maybe_flush_rewrites' ], 9999 );
+add_action( 'init', function () {
+    if ( get_option( 'jat_search_intel_flush_rewrites' ) ) {
+        JAT_Search_Intel\Upgrade::maybe_flush_rewrites();
+    }
+}, 9999 );
 
 // Custom cron interval used by the background queue (Scale module).
 add_filter( 'cron_schedules', function ( $schedules ) {

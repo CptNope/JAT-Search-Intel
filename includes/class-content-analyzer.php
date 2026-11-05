@@ -587,8 +587,8 @@ class Content_Analyzer {
         // Check URL slug
         $in_slug = false;
         if ( is_singular() ) {
-            $slug    = get_post_field( 'post_name', get_queried_object_id() );
-            $in_slug = $slug && stripos( $slug, sanitize_title( $keyword ) ) !== false;
+            $slug    = (string) get_post_field( 'post_name', get_queried_object_id() );
+            $in_slug = '' !== $slug && stripos( $slug, sanitize_title( $keyword ) ) !== false;
         }
 
         return [

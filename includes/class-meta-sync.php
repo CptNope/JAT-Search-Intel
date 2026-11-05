@@ -44,6 +44,7 @@ class Meta_Sync {
 		add_action( 'added_post_meta', [ $this, 'on_write' ], 10, 4 );
 		add_action( 'updated_post_meta', [ $this, 'on_write' ], 10, 4 );
 		add_action( 'deleted_post_meta', [ $this, 'on_delete' ], 10, 3 );
+		add_action( self::BACKFILL_HOOK, [ self::class, 'backfill' ] );
 	}
 
 	/**
@@ -99,7 +100,8 @@ class Meta_Sync {
 		if ( '' === $value || [] === $value ) {
 			delete_post_meta( (int) $post_id, $partner );
 		} else {
-			update_post_meta( (int) $post_id, $partner, $value );
+			// The hook passes an unslashed value; update_post_meta() unslashes again.
+			update_post_meta( (int) $post_id, $partner, wp_slash( $value ) );
 		}
 		self::$syncing = false;
 	}
@@ -122,32 +124,80 @@ class Meta_Sync {
 		self::$syncing = false;
 	}
 
+	/** Cron hook that continues a large backfill. */
+	public const BACKFILL_HOOK = 'jat_search_intel_meta_backfill';
+
+	/** Option holding the backfill cursor between runs. */
+	private const CURSOR_OPTION = 'jat_search_intel_meta_backfill_cursor';
+
+	private const BATCH = 500;
+
+	/** Batches per run (keeps an update request or cron tick short). */
+	private const BATCHES_PER_RUN = 20;
+
 	/**
-	 * One-off backfill: copy sidebar-only values to the front-end keys (and back) where
-	 * the other side is empty. Runs on plugin update.
+	 * Copy sidebar-only values to the front-end keys (and back) where the other side is
+	 * empty. Runs on plugin update; continues through cron on large sites.
 	 */
 	public static function backfill(): void {
 		global $wpdb;
 
+		$cursor  = get_option( self::CURSOR_OPTION, [] );
+		$cursor  = is_array( $cursor ) ? $cursor : [];
+		$batches = 0;
+
 		foreach ( self::PAIRS as $alias => $canonical ) {
 			foreach ( [ [ $alias, $canonical ], [ $canonical, $alias ] ] as list( $from, $to ) ) {
-				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- One-off upgrade routine.
-				$rows = $wpdb->get_results(
-					$wpdb->prepare(
-						"SELECT a.post_id, a.meta_value FROM {$wpdb->postmeta} a
-						LEFT JOIN {$wpdb->postmeta} b ON b.post_id = a.post_id AND b.meta_key = %s
-						WHERE a.meta_key = %s AND a.meta_value <> '' AND ( b.meta_id IS NULL OR b.meta_value = '' )
-						LIMIT 5000",
-						$to,
-						$from
-					)
-				);
-				self::$syncing = true;
-				foreach ( (array) $rows as $row ) {
-					update_post_meta( (int) $row->post_id, $to, self::convert( maybe_unserialize( $row->meta_value ), $to ) );
+				$key = $from . '>' . $to;
+				if ( 'done' === ( $cursor[ $key ] ?? 0 ) ) {
+					continue;
 				}
-				self::$syncing = false;
+				$last = (int) ( $cursor[ $key ] ?? 0 );
+
+				while ( true ) {
+					if ( $batches >= self::BATCHES_PER_RUN ) {
+						update_option( self::CURSOR_OPTION, $cursor, false );
+						if ( ! wp_next_scheduled( self::BACKFILL_HOOK ) ) {
+							wp_schedule_single_event( time() + MINUTE_IN_SECONDS, self::BACKFILL_HOOK );
+						}
+						return;
+					}
+					$batches++;
+
+					// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- One-off upgrade routine, batched by post ID.
+					$rows = $wpdb->get_results(
+						$wpdb->prepare(
+							"SELECT a.post_id, a.meta_value FROM {$wpdb->postmeta} a
+							LEFT JOIN {$wpdb->postmeta} b ON b.post_id = a.post_id AND b.meta_key = %s
+							WHERE a.meta_key = %s AND a.post_id > %d AND a.meta_value <> '' AND ( b.meta_id IS NULL OR b.meta_value = '' )
+							ORDER BY a.post_id ASC
+							LIMIT %d",
+							$to,
+							$from,
+							$last,
+							self::BATCH
+						)
+					);
+
+					self::$syncing = true;
+					foreach ( (array) $rows as $row ) {
+						$last  = max( $last, (int) $row->post_id );
+						$value = self::convert( maybe_unserialize( $row->meta_value ), $to );
+						if ( '' !== $value && [] !== $value ) {
+							update_post_meta( (int) $row->post_id, $to, wp_slash( $value ) );
+						}
+					}
+					self::$syncing = false;
+
+					$cursor[ $key ] = $last;
+					if ( count( (array) $rows ) < self::BATCH ) {
+						$cursor[ $key ] = 'done';
+						break;
+					}
+				}
 			}
 		}
+
+		delete_option( self::CURSOR_OPTION );
 	}
 }

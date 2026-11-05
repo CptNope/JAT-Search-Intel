@@ -106,23 +106,12 @@ class Title_Engine {
      */
     public function resolve_variables( string $template ): string {
         // Only resolve variables the template uses (several need extra queries).
-        $resolvers = [
-            '%title%'        => 'get_var_title',
-            '%sitename%'     => 'get_var_sitename',
-            '%sep%'          => 'get_var_sep',
-            '%category%'     => 'get_var_category',
-            '%tag%'          => 'get_var_tag',
-            '%date%'         => 'get_var_date',
-            '%author%'       => 'get_var_author',
-            '%page%'         => 'get_var_page',
-            '%excerpt%'      => 'get_var_excerpt',
-            '%search_query%' => 'get_var_search_query',
-        ];
+        $tokens = [ '%title%', '%sitename%', '%sep%', '%category%', '%tag%', '%date%', '%author%', '%page%', '%excerpt%', '%search_query%' ];
 
         $variables = [];
-        foreach ( $resolvers as $token => $method ) {
+        foreach ( $tokens as $token ) {
             if ( false !== strpos( $template, $token ) ) {
-                $variables[ $token ] = $this->$method();
+                $variables[ $token ] = $this->resolve_token( $token );
             }
         }
 
@@ -134,6 +123,38 @@ class Title_Engine {
         $resolved = trim( $resolved, " {$sep}" );
 
         return $resolved;
+    }
+
+    /**
+     * Value for one template token.
+     *
+     * @param string $token Token such as %title%.
+     * @return string
+     */
+    private function resolve_token( string $token ): string {
+        switch ( $token ) {
+            case '%title%':
+                return $this->get_var_title();
+            case '%sitename%':
+                return $this->get_var_sitename();
+            case '%sep%':
+                return $this->get_var_sep();
+            case '%category%':
+                return $this->get_var_category();
+            case '%tag%':
+                return $this->get_var_tag();
+            case '%date%':
+                return $this->get_var_date();
+            case '%author%':
+                return $this->get_var_author();
+            case '%page%':
+                return $this->get_var_page();
+            case '%excerpt%':
+                return $this->get_var_excerpt();
+            case '%search_query%':
+                return $this->get_var_search_query();
+        }
+        return '';
     }
 
     /**
@@ -182,7 +203,7 @@ class Title_Engine {
         }
         if ( is_singular() ) {
             $tags = get_the_tags( get_queried_object_id() );
-            return ! empty( $tags ) ? $tags[0]->name : '';
+            return is_array( $tags ) && $tags ? $tags[0]->name : ''; // Can be a WP_Error.
         }
 
         return '';
@@ -190,10 +211,10 @@ class Title_Engine {
 
     private function get_var_date(): string {
         if ( is_singular() ) {
-            return get_the_date( '', get_queried_object_id() ) ?: '';
+            return (string) get_the_date( '', get_queried_object_id() );
         }
         if ( is_date() ) {
-            return get_the_date() ?: '';
+            return (string) get_the_date();
         }
 
         return '';

@@ -88,7 +88,7 @@ class Readiness {
 				? sprintf( __( 'robots.txt blocks %s', 'jat-search-intel' ), implode( ', ', $blocked ) )
 				: __( 'Google, Bing and AI search crawlers can read the site', 'jat-search-intel' ),
 			$blocked ? __( 'Blocking these crawlers removes you from their search results and from the AI answers built on them (ChatGPT search and Copilot use Bing).', 'jat-search-intel' ) : '',
-			$this->rules_block_search_bots() ? 'allow-ai-search' : '',
+			$blocked && $this->rules_block_search_bots() ? 'allow-ai-search' : '',
 			$blocked && ! $this->rules_block_search_bots() ? admin_url( 'admin.php?page=jat-search-intel-robots' ) : ''
 		);
 
@@ -428,6 +428,12 @@ class Readiness {
 	public function content_stats(): array {
 		global $wpdb;
 
+		$cache_key = 'jat_search_intel_readiness_stats';
+		$cached    = get_transient( $cache_key );
+		if ( is_array( $cached ) ) {
+			return $cached;
+		}
+
 		$types = array_values( array_filter( (array) ( $this->settings['enabled_post_types'] ?? [ 'post', 'page' ] ), 'post_type_exists' ) );
 		if ( ! $types ) {
 			return [ 'total' => 0, 'stale' => 0, 'no_description' => 0, 'analyzed' => 0, 'low_geo' => 0 ];
@@ -454,13 +460,16 @@ class Readiness {
 		);
 		// phpcs:enable
 
-		return [
+		$stats = [
 			'total'          => (int) ( $row['total'] ?? 0 ),
 			'stale'          => (int) ( $row['stale'] ?? 0 ),
 			'no_description' => (int) ( $row['no_description'] ?? 0 ),
 			'analyzed'       => (int) ( $row['analyzed'] ?? 0 ),
 			'low_geo'        => (int) ( $row['low_geo'] ?? 0 ),
 		];
+		// Whole-site aggregate: cache briefly so repeated views and agent calls stay cheap.
+		set_transient( $cache_key, $stats, 10 * MINUTE_IN_SECONDS );
+		return $stats;
 	}
 
 	// ── Refresh queue ───────────────────────────────────────────────────
@@ -481,40 +490,61 @@ class Readiness {
 		}
 		$in = implode( ',', array_fill( 0, count( $types ), '%s' ) );
 
+		$stale_before = gmdate( 'Y-m-d H:i:s', time() - 90 * DAY_IN_SECONDS );
+
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Admin report; $in is a list of %s placeholders.
-		$posts = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT ID, post_title, post_modified_gmt FROM {$wpdb->posts}
-				WHERE post_status = 'publish' AND post_password = '' AND post_type IN ({$in})
-				ORDER BY post_modified_gmt ASC LIMIT 300",
-				$types
+		// Candidates 1: the oldest pages not touched this quarter.
+		$ids = array_map(
+			'intval',
+			(array) $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT ID FROM {$wpdb->posts}
+					WHERE post_status = 'publish' AND post_password = '' AND post_type IN ({$in}) AND post_modified_gmt < %s
+					ORDER BY post_modified_gmt ASC LIMIT 200",
+					array_merge( $types, [ $stale_before ] )
+				)
 			)
 		);
 
-		// Search Console clicks per URL over the last 28 days, if the rank tracker has data.
+		// Candidates 2: the pages earning the most Search Console clicks, however old.
 		$traffic = [];
 		$table   = $wpdb->prefix . Rank_Tracker::TABLE;
-		$exists  = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table ) ) );
-		if ( $exists ) {
+		if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table ) ) ) ) {
 			$rows = $wpdb->get_results(
-				$wpdb->prepare( 'SELECT url, SUM(clicks) AS clicks, SUM(impressions) AS impressions FROM %i WHERE day >= %s GROUP BY url', $table, gmdate( 'Y-m-d', time() - 31 * DAY_IN_SECONDS ) )
+				$wpdb->prepare( 'SELECT url, SUM(clicks) AS clicks, SUM(impressions) AS impressions FROM %i WHERE day >= %s AND url <> %s GROUP BY url ORDER BY clicks DESC LIMIT 100', $table, gmdate( 'Y-m-d', time() - 31 * DAY_IN_SECONDS ), '' )
 			);
 			foreach ( (array) $rows as $row ) {
 				$traffic[ untrailingslashit( (string) $row->url ) ] = [ (int) $row->clicks, (int) $row->impressions ];
+				$post_id = (int) url_to_postid( (string) $row->url );
+				if ( $post_id ) {
+					$ids[] = $post_id;
+				}
 			}
 		}
 		// phpcs:enable
 
+		$ids = array_values( array_unique( array_filter( $ids ) ) );
+		if ( ! $ids ) {
+			return [];
+		}
+		if ( function_exists( '_prime_post_caches' ) ) {
+			_prime_post_caches( $ids, false, false );
+		}
+
 		$now   = time();
 		$queue = [];
-		foreach ( (array) $posts as $post ) {
-			$url         = (string) get_permalink( (int) $post->ID );
-			$days        = (int) floor( ( $now - (int) strtotime( $post->post_modified_gmt . ' UTC' ) ) / DAY_IN_SECONDS );
-			list( $clicks, $impressions ) = $traffic[ untrailingslashit( $url ) ] ?? [ 0, 0 ];
+		foreach ( $ids as $id ) {
+			$post = get_post( $id );
+			if ( ! $post || 'publish' !== $post->post_status || '' !== $post->post_password || ! in_array( $post->post_type, $types, true ) ) {
+				continue;
+			}
+			$days = (int) floor( ( $now - (int) strtotime( $post->post_modified_gmt . ' UTC' ) ) / DAY_IN_SECONDS );
 			if ( $days < 90 ) {
 				continue; // Refreshed this quarter.
 			}
-			$queue[] = [
+			$url                          = (string) get_permalink( $post );
+			list( $clicks, $impressions ) = $traffic[ untrailingslashit( $url ) ] ?? [ 0, 0 ];
+			$queue[]                      = [
 				'post_id'     => (int) $post->ID,
 				'title'       => (string) $post->post_title,
 				'url'         => $url,
@@ -568,7 +598,7 @@ class Readiness {
 				$settings['enable_schema'] = true;
 				break;
 			case 'allow-ai-search':
-				foreach ( (array) ( $settings['ai_crawler_rules'] ?? [] ) as $bot => $rule ) {
+				foreach ( array_keys( (array) ( $settings['ai_crawler_rules'] ?? [] ) ) as $bot ) {
 					if ( in_array( AI_Search::BOTS[ $bot ][1] ?? '', [ 'search', 'user' ], true ) ) {
 						$settings['ai_crawler_rules'][ $bot ] = 'allow';
 					}
@@ -578,8 +608,6 @@ class Readiness {
 				return false;
 		}
 
-		// Write directly: these are known-safe values, and the settings sanitizer is page-scoped.
-		remove_all_filters( 'sanitize_option_jat_search_intel_settings' );
 		update_option( 'jat_search_intel_settings', $settings );
 		Upgrade::request_rewrite_flush();
 		return true;
@@ -683,7 +711,7 @@ class Readiness {
 					echo '<br><span style="color:#50575e">' . esc_html( $c['detail'] ) . '</span>';
 				}
 				echo '</td><td style="width:170px;text-align:right">';
-				if ( '' !== $c['fix'] ) {
+				if ( '' !== $c['fix'] && 'pass' !== $c['status'] ) {
 					echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="display:inline">';
 					wp_nonce_field( 'jat_search_intel_readiness_fix' );
 					echo '<input type="hidden" name="action" value="jat_search_intel_readiness_fix" /><input type="hidden" name="fix" value="' . esc_attr( $c['fix'] ) . '" />';

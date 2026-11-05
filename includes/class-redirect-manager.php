@@ -341,8 +341,15 @@ class Redirect_Manager {
 	 */
 	public function get_index(): array {
 		$index = get_option( self::INDEX_OPTION, null );
-		if ( is_array( $index ) && isset( $index['exact'], $index['prefix'], $index['regex'] ) ) {
-			return $index;
+		if ( is_array( $index ) && isset( $index['exact'], $index['prefix'], $index['regex'] )
+			&& is_array( $index['exact'] ) && is_array( $index['prefix'] ) && is_array( $index['regex'] ) ) {
+			/** @var array{exact: array<string,int>, exact_in_db?: mixed, prefix: array<int,array{0:string,1:int}>, regex: array<int,array{0:string,1:int}>} $index */
+			return [
+				'exact'       => $index['exact'],
+				'exact_in_db' => ! empty( $index['exact_in_db'] ),
+				'prefix'      => $index['prefix'],
+				'regex'       => $index['regex'],
+			];
 		}
 		return $this->rebuild_index();
 	}
@@ -1012,7 +1019,9 @@ class Redirect_Manager {
 		}
 
 		// tmp_name is a server-generated path; it must not be unslashed (Windows paths).
-		$tmp = isset( $_FILES['csv_file']['tmp_name'] ) ? (string) $_FILES['csv_file']['tmp_name'] : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+		// PHP gives an array instead of a string when the field is posted as csv_file[].
+		/** @psalm-suppress RedundantCondition, TypeDoesNotContainType */
+		$tmp = isset( $_FILES['csv_file']['tmp_name'] ) && is_string( $_FILES['csv_file']['tmp_name'] ) ? $_FILES['csv_file']['tmp_name'] : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 		if ( '' === $tmp || ! is_uploaded_file( $tmp ) ) {
 			wp_send_json_error( 'Invalid upload.' );
 		}

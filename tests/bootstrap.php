@@ -386,7 +386,8 @@ function is_single(): bool {
 // ── Capabilities ─────────────────────────────────────────────────────────────
 
 function current_user_can( string $capability, ...$args ): bool {
-    return true;
+    global $si_test_state;
+    return ! in_array( $capability, (array) ( $si_test_state['denied_caps'] ?? [] ), true );
 }
 
 function get_current_user_id(): int {
@@ -1619,5 +1620,18 @@ if ( ! function_exists( 'trailingslashit' ) ) {
 	}
 	function untrailingslashit( $value ): string {
 		return rtrim( (string) $value, '/\\' );
+	}
+}
+
+if ( ! function_exists( 'wp_slash' ) ) {
+	function wp_slash( $value ) {
+		return is_array( $value ) ? array_map( 'wp_slash', $value ) : ( is_string( $value ) ? addslashes( $value ) : $value );
+	}
+}
+
+if ( ! function_exists( 'wp_schedule_single_event' ) ) {
+	function wp_schedule_single_event( int $timestamp, string $hook, array $args = [] ): bool {
+		$GLOBALS['si_test_state']['single_events'][ $hook ] = $timestamp;
+		return true;
 	}
 }

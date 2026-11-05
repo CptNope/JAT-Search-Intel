@@ -16,17 +16,12 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class Media_SEO {
 
-	/** @var array<string,mixed> */
-	private $settings;
-
 	/**
 	 * Constructor.
 	 *
 	 * @param array<string,mixed> $settings Plugin settings.
 	 */
 	public function __construct( array $settings ) {
-		$this->settings = $settings;
-
 		if ( ! empty( $settings['enable_image_alt'] ) ) {
 			add_action( 'add_attachment', [ $this, 'fill_alt_on_upload' ] );
 			add_filter( 'wp_get_attachment_image_attributes', [ $this, 'filter_image_attributes' ], 10, 2 );

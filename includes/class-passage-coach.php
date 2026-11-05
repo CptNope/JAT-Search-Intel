@@ -33,7 +33,7 @@ class Passage_Coach {
 	/** Openings that delay the answer. */
 	private const SLOW_OPENINGS = [
 		'in this article', 'in this post', 'in this guide', 'in this blog', 'welcome to', 'have you ever',
-		'are you looking', 'if you are looking', "if you're looking", 'today we', "today, we", 'let\'s dive', 'let us dive',
+		'are you looking', 'if you are looking', "if you're looking", 'today we', 'today, we', 'let\'s dive', 'let us dive',
 		'when it comes to', 'in today\'s', 'in the world of', 'it\'s no secret', 'we all know',
 	];
 
@@ -226,6 +226,8 @@ class Passage_Coach {
 			}
 		}
 
+		$prev_level  = 0;
+		$alt_found   = 0;
 		$has_table   = false;
 		$has_list    = false;
 		$ext_links   = 0;
@@ -252,6 +254,34 @@ class Passage_Coach {
 				if ( '' !== $link_host && $link_host !== $host ) {
 					$ext_links++;
 				}
+			}
+
+			// Skipped heading levels (H2 straight to H4) break the outline AI and screen readers rely on.
+			if ( 'heading' === $b['kind'] && $b['level'] >= 2 ) {
+				if ( $prev_level && $b['level'] > $prev_level + 1 ) {
+					$add(
+						'heading-skip',
+						'low',
+						/* translators: 1: heading level used, 2: expected level. */
+						sprintf( __( 'Heading jumps to H%1$d; use H%2$d', 'jat-search-intel' ), $b['level'], $prev_level + 1 ),
+						__( 'Headings should step down one level at a time. A clean outline helps search engines, AI assistants and screen readers understand how sections relate.', 'jat-search-intel' ),
+						$i,
+						self::excerpt( $b['text'] )
+					);
+				}
+				$prev_level = $b['level'];
+			}
+
+			// Images without alt text.
+			if ( ( $b['no_alt'] ?? 0 ) > 0 && $alt_found < 3 ) {
+				$alt_found++;
+				$add(
+					'image-alt',
+					'low',
+					__( 'Describe this image in its alt text', 'jat-search-intel' ),
+					__( 'Alt text is how search engines, AI assistants and screen-reader users understand an image. Say what it shows in a short phrase.', 'jat-search-intel' ),
+					$i
+				);
 			}
 
 			// 2. Question headings should be answered in the next block's first sentence.
@@ -406,10 +436,11 @@ class Passage_Coach {
 	 * Top-level blocks as the editor sees them (whitespace-only freeform blocks dropped).
 	 *
 	 * @param string $content Content.
-	 * @return array<int,array{kind:string,level:int,text:string,words:int,links:string[]}>
+	 * @return list<array{kind:string,level:int,text:string,words:int,links:string[],no_alt:int}>
 	 */
 	public static function top_level_blocks( string $content ): array {
-		$parsed = function_exists( 'parse_blocks' ) && false !== strpos( $content, '<!-- wp:' )
+		$is_blocks = false !== strpos( $content, '<!-- wp:' );
+		$parsed    = function_exists( 'parse_blocks' ) && $is_blocks
 			? parse_blocks( $content )
 			: [ [ 'blockName' => null, 'innerHTML' => $content, 'attrs' => [] ] ];
 
@@ -422,6 +453,12 @@ class Passage_Coach {
 			}
 
 			if ( '' === $name ) {
+				if ( $is_blocks ) {
+					// Loose HTML inside a block post is one Classic block in the editor; keep it as one
+					// so block positions line up with what the editor shows.
+					$out[] = self::describe( 'core/freeform', $html, [] );
+					continue;
+				}
 				// Classic content: one block per top-level element.
 				foreach ( self::split_classic( $html ) as $piece ) {
 					$out[] = $piece;
@@ -454,7 +491,7 @@ class Passage_Coach {
 	 * @param string $name  Block name.
 	 * @param string $html  HTML.
 	 * @param array  $attrs Attributes.
-	 * @return array{kind:string,level:int,text:string,words:int,links:string[]}
+	 * @return array{kind:string,level:int,text:string,words:int,links:string[],no_alt:int}
 	 */
 	private static function describe( string $name, string $html, array $attrs ): array {
 		$map  = [
@@ -481,6 +518,13 @@ class Passage_Coach {
 
 		$text = trim( (string) preg_replace( '/\s+/', ' ', html_entity_decode( wp_strip_all_tags( $html ), ENT_QUOTES, 'UTF-8' ) ) );
 		preg_match_all( '/<a\s[^>]*href=["\']([^"\']+)["\']/i', $html, $links );
+		preg_match_all( '/<img\b[^>]*>/i', $html, $imgs );
+		$no_alt = 0;
+		foreach ( $imgs[0] as $img ) {
+			if ( ! preg_match( '/\balt=["\']\s*[^"\'\s][^"\']*["\']/i', $img ) ) {
+				$no_alt++;
+			}
+		}
 
 		return [
 			'kind'  => $kind,
@@ -488,6 +532,7 @@ class Passage_Coach {
 			'text'  => $text,
 			'words' => '' === $text ? 0 : count( preg_split( '/\s+/u', $text ) ?: [] ),
 			'links' => array_values( array_filter( $links[1] ) ),
+			'no_alt' => $no_alt,
 		];
 	}
 
@@ -495,7 +540,7 @@ class Passage_Coach {
 	 * Split classic (non-block) HTML into block-like pieces.
 	 *
 	 * @param string $html HTML.
-	 * @return array
+	 * @return list<array{kind:string,level:int,text:string,words:int,links:string[],no_alt:int}>
 	 */
 	private static function split_classic( string $html ): array {
 		$html = function_exists( 'wpautop' ) ? wpautop( $html ) : $html;

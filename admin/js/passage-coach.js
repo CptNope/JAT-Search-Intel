@@ -15,6 +15,7 @@
 	var el = wp.element.createElement;
 	var useState = wp.element.useState;
 	var useEffect = wp.element.useEffect;
+	var useRef = wp.element.useRef;
 	var __ = wp.i18n.__;
 	var sprintf = wp.i18n.sprintf;
 	var useSelect = wp.data.useSelect;
@@ -27,6 +28,7 @@
 	}
 
 	var SUMMARY_KEY = '_jat_search_intel_ai_summary';
+	var NO_META = {};
 	var COLORS = { high: '#d63638', medium: '#dba617', low: '#2271b1' };
 
 	function scrollToBlock( clientId ) {
@@ -44,14 +46,14 @@
 	}
 
 	function PassageCoach() {
-		var state = useSelect( function ( select ) {
-			var editor = select( 'core/editor' );
-			return {
-				postId: editor.getCurrentPostId(),
-				blocks: select( 'core/block-editor' ).getBlocks(),
-				meta: editor.getEditedPostAttribute( 'meta' ) || {},
-			};
+		// Subscribe only to what the panel renders, so typing in the post does not re-render it.
+		var postId = useSelect( function ( select ) {
+			return select( 'core/editor' ).getCurrentPostId();
 		}, [] );
+		var meta = useSelect( function ( select ) {
+			return select( 'core/editor' ).getEditedPostAttribute( 'meta' );
+		}, [] ) || NO_META;
+		var state = { postId: postId, meta: meta };
 
 		var blockEditor = useDispatch( 'core/block-editor' );
 		var editorDispatch = useDispatch( 'core/editor' );
@@ -65,9 +67,20 @@
 		var errorState = useState( '' );
 		var error = errorState[ 0 ];
 		var setError = errorState[ 1 ];
+		var insertedState = useState( {} );
+		var inserted = insertedState[ 0 ];
+		var setInserted = insertedState[ 1 ];
+		var requestId = useRef( 0 );
+
+		function markInserted( item ) {
+			var next = Object.assign( {}, inserted );
+			next[ item.type ] = true;
+			setInserted( next );
+		}
 
 		function run() {
 			var editor = wp.data.select( 'core/editor' );
+			var id = ++requestId.current;
 			setBusy( true );
 			setError( '' );
 			wp.apiFetch( {
@@ -78,11 +91,18 @@
 					title: editor.getEditedPostAttribute( 'title' ) || '',
 				},
 			} ).then( function ( response ) {
-				setResults( response.suggestions || [] );
+				// Ignore answers to older requests that arrive late.
+				if ( id === requestId.current ) {
+					setResults( response.suggestions || [] );
+				}
 			} ).catch( function ( e ) {
-				setError( ( e && e.message ) || __( 'Could not check this post.', 'jat-search-intel' ) );
+				if ( id === requestId.current ) {
+					setError( ( e && e.message ) || __( 'Could not check this post.', 'jat-search-intel' ) );
+				}
 			} ).finally( function () {
-				setBusy( false );
+				if ( id === requestId.current ) {
+					setBusy( false );
+				}
 			} );
 		}
 
@@ -141,9 +161,11 @@
 
 		function act( item ) {
 			if ( 'insert-intro' === item.action ) {
+				markInserted( item );
 				return insertIntro();
 			}
 			if ( 'insert-table' === item.action ) {
+				markInserted( item );
 				return insertTable( item );
 			}
 			return show( item );
@@ -163,10 +185,10 @@
 			if ( 'select' === item.action ) {
 				buttons.push( el( components.Button, { key: 'go', variant: 'secondary', size: 'small', onClick: function () { show( item ); } }, __( 'Show passage', 'jat-search-intel' ) ) );
 			}
-			if ( 'insert-intro' === item.action ) {
+			if ( 'insert-intro' === item.action && ! inserted[ item.type ] ) {
 				buttons.push( el( components.Button, { key: 'intro', variant: 'secondary', size: 'small', onClick: function () { act( item ); } }, __( 'Insert answer paragraph', 'jat-search-intel' ) ) );
 			}
-			if ( 'insert-table' === item.action ) {
+			if ( 'insert-table' === item.action && ! inserted[ item.type ] ) {
 				buttons.push( el( components.Button, { key: 'table', variant: 'secondary', size: 'small', onClick: function () { act( item ); } }, __( 'Insert comparison table', 'jat-search-intel' ) ) );
 			}
 

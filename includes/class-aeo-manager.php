@@ -44,6 +44,9 @@ class AEO_Manager {
      * Render direct-answer meta tag for featured snippet targeting.
      */
     public function render_direct_answer_meta(): void {
+        if ( is_singular() && Content_Guard::is_protected( get_queried_object_id() ) ) {
+            return;
+        }
         if ( ! is_singular() ) {
             return;
         }
@@ -266,6 +269,9 @@ class AEO_Manager {
      * Meta format: array of [ 'question' => '...', 'answer' => '...' ]
      */
     public function get_faq_schema( int $post_id ): ?array {
+        if ( Content_Guard::is_protected( $post_id ) ) {
+            return null;
+        }
         $faqs = get_post_meta( $post_id, '_jat_search_intel_faqs', true );
 
         if ( empty( $faqs ) || ! is_array( $faqs ) ) {
@@ -318,6 +324,9 @@ class AEO_Manager {
      * ]
      */
     public function get_howto_schema( int $post_id ): ?array {
+        if ( Content_Guard::is_protected( $post_id ) ) {
+            return null;
+        }
         $howto = get_post_meta( $post_id, '_jat_search_intel_howto', true );
 
         if ( empty( $howto ) || empty( $howto['steps'] ) ) {
@@ -397,7 +406,7 @@ class AEO_Manager {
             return [];
         }
 
-        $content = $post->post_content;
+        $content = Content_Guard::content( $post );
         $faqs    = [];
 
         // Match headings ending with ? followed by content
@@ -444,6 +453,9 @@ class AEO_Manager {
      * @return array<string,mixed>|null
      */
     public function get_speakable_node(): ?array {
+        if ( is_singular() && Content_Guard::is_protected( get_queried_object_id() ) ) {
+            return null;
+        }
         if ( empty( $this->settings['enable_speakable'] ) || ! is_singular() ) {
             return null;
         }

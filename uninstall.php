@@ -41,6 +41,7 @@ function jat_search_intel_uninstall_site() {
 		'jat_search_intel_daily_aggregate',
 		'jat_search_intel_decay_check',
 		'jat_search_intel_ga4_fetch',
+		'jat_search_intel_meta_backfill',
 		'jat_search_intel_process_queue',
 		'jat_search_intel_rank_tracking',
 		'jat_search_intel_score_drop_check',

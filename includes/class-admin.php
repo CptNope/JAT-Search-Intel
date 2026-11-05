@@ -531,6 +531,60 @@ class Admin {
         ];
 
         include JAT_SEARCH_INTEL_DIR . 'admin/views/metabox.php';
+
+        // What the form holds right now, so saving can skip fields nobody touched here.
+        // Under the block editor the sidebar may have changed them via REST in the same save.
+        echo '<input type="hidden" name="si_snapshot" value="' . esc_attr( (string) wp_json_encode( $this->metabox_snapshot( (int) $post->ID ) ) ) . '" />';
+    }
+
+    /** Meta box fields saved as text. */
+    private const METABOX_TEXT_FIELDS = [
+        '_jat_search_intel_title', '_jat_search_intel_description', '_jat_search_intel_focus_keyword',
+        '_jat_search_intel_canonical', '_jat_search_intel_schema_type', '_jat_search_intel_ai_summary',
+        '_jat_search_intel_expertise_level', '_jat_search_intel_content_type', '_jat_search_intel_fact_checked',
+        '_jat_search_intel_social_title', '_jat_search_intel_social_description', '_jat_search_intel_social_image',
+        '_jat_search_intel_secondary_keywords', '_jat_search_intel_direct_answer',
+        '_jat_search_intel_author_expertise_notes', '_jat_search_intel_content_intent',
+        '_jat_search_intel_audience', '_jat_search_intel_local_location',
+    ];
+
+    /** Meta box checkboxes. */
+    private const METABOX_CHECKBOXES = [ '_jat_search_intel_noindex', '_jat_search_intel_nofollow', '_jat_search_intel_ai_noindex', '_jat_search_intel_local_relevance' ];
+
+    /**
+     * Normalise a meta box text value the way saving does.
+     *
+     * @param string $field Meta key.
+     * @param mixed  $value Value.
+     * @return string
+     */
+    private static function metabox_text( string $field, $value ): string {
+        $value = is_scalar( $value ) ? (string) $value : '';
+        if ( in_array( $field, [ '_jat_search_intel_canonical', '_jat_search_intel_social_image' ], true ) ) {
+            $value = esc_url_raw( $value );
+        }
+        return sanitize_text_field( $value );
+    }
+
+    /**
+     * Normalised values of every meta box field for a post, keyed by form field name.
+     *
+     * @param int $post_id Post ID.
+     * @return array<string,string>
+     */
+    public function metabox_snapshot( int $post_id ): array {
+        $snap = [];
+        foreach ( self::METABOX_TEXT_FIELDS as $field ) {
+            $snap[ str_replace( '_jat_search_intel_', 'si_', $field ) ] = self::metabox_text( $field, get_post_meta( $post_id, $field, true ) );
+        }
+        foreach ( self::METABOX_CHECKBOXES as $field ) {
+            $snap[ str_replace( '_jat_search_intel_', 'si_', $field ) ] = get_post_meta( $post_id, $field, true ) ? '1' : '';
+        }
+        foreach ( [ 'faqs', 'topics', 'entities', 'citations' ] as $list ) {
+            $value                  = get_post_meta( $post_id, '_jat_search_intel_' . $list, true );
+            $snap[ 'si_' . $list ] = (string) wp_json_encode( is_array( $value ) ? array_values( $value ) : [] );
+        }
+        return $snap;
     }
 
     /**
@@ -553,29 +607,34 @@ class Admin {
             return;
         }
 
-        // Text fields
-        $text_fields = [
-            '_jat_search_intel_title', '_jat_search_intel_description', '_jat_search_intel_focus_keyword',
-            '_jat_search_intel_canonical', '_jat_search_intel_schema_type', '_jat_search_intel_ai_summary',
-            '_jat_search_intel_expertise_level', '_jat_search_intel_content_type', '_jat_search_intel_fact_checked',
-            '_jat_search_intel_social_title', '_jat_search_intel_social_description', '_jat_search_intel_social_image',
-            '_jat_search_intel_secondary_keywords', '_jat_search_intel_direct_answer',
-            '_jat_search_intel_author_expertise_notes', '_jat_search_intel_content_intent',
-            '_jat_search_intel_audience', '_jat_search_intel_local_location',
-        ];
+        // Values the form was rendered with. A field whose posted value still matches was not
+        // touched in the meta box, so it is skipped: under the block editor the sidebar may have
+        // just saved a newer value through REST, and re-saving the stale one would undo it.
+        $snapshot  = isset( $_POST['si_snapshot'] ) ? json_decode( wp_unslash( $_POST['si_snapshot'] ), true ) : null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Only compared, never stored.
+        $unchanged = static function ( string $key, string $value ) use ( $snapshot ): bool {
+            return is_array( $snapshot ) && array_key_exists( $key, $snapshot ) && $snapshot[ $key ] === $value;
+        };
 
-        foreach ( $text_fields as $field ) {
+        // Text fields
+        foreach ( self::METABOX_TEXT_FIELDS as $field ) {
             $key = str_replace( '_jat_search_intel_', 'si_', $field );
             if ( isset( $_POST[ $key ] ) ) {
-                update_post_meta( $post_id, $field, sanitize_text_field( wp_unslash( $_POST[ $key ] ) ) );
+                $value = sanitize_text_field( wp_unslash( $_POST[ $key ] ) );
+                if ( $unchanged( $key, self::metabox_text( $field, $value ) ) ) {
+                    continue;
+                }
+                update_post_meta( $post_id, $field, $value );
             }
         }
 
         // Checkboxes
-        $checkboxes = [ '_jat_search_intel_noindex', '_jat_search_intel_nofollow', '_jat_search_intel_ai_noindex', '_jat_search_intel_local_relevance' ];
-        foreach ( $checkboxes as $field ) {
-            $key = str_replace( '_jat_search_intel_', 'si_', $field );
-            update_post_meta( $post_id, $field, ! empty( $_POST[ $key ] ) ? '1' : '' );
+        foreach ( self::METABOX_CHECKBOXES as $field ) {
+            $key   = str_replace( '_jat_search_intel_', 'si_', $field );
+            $value = ! empty( $_POST[ $key ] ) ? '1' : '';
+            if ( $unchanged( $key, $value ) ) {
+                continue;
+            }
+            update_post_meta( $post_id, $field, $value );
         }
 
         // FAQs (JSON from repeater)
@@ -588,14 +647,18 @@ class Admin {
                         'answer'   => wp_kses_post( $faq['answer'] ?? '' ),
                     ];
                 }, $faqs );
-                update_post_meta( $post_id, '_jat_search_intel_faqs', $sanitized_faqs );
+                if ( ! $unchanged( 'si_faqs', (string) wp_json_encode( array_values( $sanitized_faqs ) ) ) ) {
+                    update_post_meta( $post_id, '_jat_search_intel_faqs', $sanitized_faqs );
+                }
             }
         }
 
         // Topics (comma-separated)
         if ( isset( $_POST['si_topics'] ) ) {
             $topics = array_filter( array_map( 'sanitize_text_field', explode( ',', wp_unslash( $_POST['si_topics'] ) ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Decoded/split, then every element is sanitized.
-            update_post_meta( $post_id, '_jat_search_intel_topics', $topics );
+            if ( ! $unchanged( 'si_topics', (string) wp_json_encode( array_values( $topics ) ) ) ) {
+                update_post_meta( $post_id, '_jat_search_intel_topics', $topics );
+            }
         }
 
         // Entities (JSON)
@@ -609,7 +672,9 @@ class Admin {
                         'url'  => esc_url_raw( $entity['url'] ?? '' ),
                     ];
                 }, $entities );
-                update_post_meta( $post_id, '_jat_search_intel_entities', $sanitized );
+                if ( ! $unchanged( 'si_entities', (string) wp_json_encode( array_values( $sanitized ) ) ) ) {
+                    update_post_meta( $post_id, '_jat_search_intel_entities', $sanitized );
+                }
             }
         }
 
@@ -625,7 +690,9 @@ class Admin {
                         'quote'  => sanitize_text_field( $cite['quote'] ?? '' ),
                     ];
                 }, $citations );
-                update_post_meta( $post_id, '_jat_search_intel_citations', $sanitized_citations );
+                if ( ! $unchanged( 'si_citations', (string) wp_json_encode( array_values( $sanitized_citations ) ) ) ) {
+                    update_post_meta( $post_id, '_jat_search_intel_citations', $sanitized_citations );
+                }
             }
         }
     }

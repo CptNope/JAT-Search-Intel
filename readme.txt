@@ -25,7 +25,7 @@ One screen that answers "can Google, Bing and AI assistants find, read, trust an
 The Refresh Queue beside it lists the pages that have gone longest without an update, weighted by real Search Console clicks when connected, so you know what to refresh first.
 
 **Passage Coach in the editor**
-Search results and AI answers quote single passages, not whole pages. Passage Coach checks each block of the post you are writing and points to the exact passage to improve: an intro that warms up instead of answering, a question heading with no direct answer under it, a statistic with no source, a paragraph too long to quote, a comparison with no table, or a reference to an out-of-date year. "Show passage" jumps to the block; for a missing answer or comparison table it inserts a starter block for you. It runs instantly on your own server, with no AI service needed.
+Search results and AI answers quote single passages, not whole pages. Passage Coach checks each block of the post you are writing and points to the exact passage to improve: an intro that warms up instead of answering, a question heading with no direct answer under it, a statistic with no source, a paragraph too long to quote, a comparison with no table, a reference to an out-of-date year, an image with no alt text, or a heading that skips a level. "Show passage" jumps to the block; for a missing answer or comparison table it inserts a starter block for you. It runs instantly on your own server, with no AI service needed.
 
 **Page Performance**
 One report puts Search Console clicks and impressions, visits from AI assistants, AI crawler activity, GEO score and freshness side by side for every page, with the next step for each: refresh it, rewrite its title, or make it easier for AI to cite.
@@ -86,9 +86,9 @@ Real-time scoring dashboard in the post editor with separate SEO, AEO, and GEO s
 **REST API**
 Full REST API under the `jat-search-intel/v1` namespace with toggleable endpoints:
 
-* `GET /scores/{id}` — SEO, AEO, GEO, readability scores
+* `GET /scores/{id}` — SEO, AEO, GEO, readability scores (users who can edit the post)
 * `GET /geo/{id}` — full GEO metadata
-* `GET/PUT /meta/{id}` — read/write SEO meta fields
+* `GET/PUT /meta/{id}` — read/write SEO meta fields (public fields only for visitors; editing requires edit access)
 * `POST /analyze/{id}` — trigger content analysis
 * `POST /bulk/rescore` — batch rescore with pagination
 * `GET/PUT /settings` — read/write plugin settings (admin only)
@@ -232,12 +232,19 @@ Sends an HTTP HEAD request to each external URL linked from your content to chec
 * Changed: the admin menu is now six entries (Readiness, Settings, Redirects, AI Search, Reports, Tools) with tabs; every page keeps its address.
 * Fixed: canonical URL, social title/description/image, audience, key topics and fact-check date set in the block-editor sidebar were saved under keys the front end never read. They are now kept in sync both ways and existing values are copied over on update. X (Twitter) title, description and image overrides are now used.
 * Removed: CSP headers, Subresource Integrity, white-label branding and the MainWP reporter (outside the scope of an SEO plugin).
+* Security: password-protected posts no longer leak their text through auto-generated descriptions, Open Graph/X tags, schema descriptions, FAQ/HowTo/speakable schema, the direct-answer tag or the ai-summary tag. An explicitly written meta description is still used.
+* Fixed: under the block editor, the classic meta box re-saved every field with its page-load values after the sidebar saved, undoing sidebar changes (for example canonical URL and noindex). It now saves only fields changed in the meta box.
+* Fixed: the setup wizard no longer replaces individually set crawler rules, and recommends blocking AI training only on a fresh install.
+* Fixed: Readiness no longer offers a fix on a passing check; the Refresh Queue now also considers high-traffic pages beyond the 300 oldest; Readiness and Page Performance stay fast on large sites.
+* Security: REST SEO data is only public for published, non-password-protected posts; focus keywords and scores now require edit access; duplicate /scores and /meta route registrations from the headless module were removed.
 * Fixed: settings pages no longer round-trip every option through hidden fields, which could flatten nested settings and stop some checkboxes from being turned off.
 * Fixed: title templates using %category%, %search_query% or %sep% were mangled when saved.
 * Fixed: saving the SEO page switched off breadcrumb and site-search schema (they now have their own controls).
 * Fixed: /sitemap.xml could be redirected to /sitemap.xml/; robots.txt now lists your sitemaps.
 * Fixed: a second robots meta tag was printed next to WordPress's own; directives are now merged into one.
 * Performance: home, post, page and archive views run no extra database queries with the plugin active (measured on WordPress 7.1).
+* Performance: page views now load 18 plugin files instead of 25 (about 250 KB instead of 405 KB) and register 72 hook callbacks instead of 163; the REST API, Passage Coach, abilities, content analyzer and AI Optimizer are built only when a REST request, save or admin screen needs them, and editor meta fields are registered for REST requests only. Extra memory per page view fell from about 0.37 MB to 0.12 MB.
+* Security: editor meta fields can only be changed by users who can edit that particular post.
 * Changed: llms.txt now lists articles as well as pages, skips noindex content and is cached; llms-full.txt includes the full Markdown of each item.
 * Removed the GitHub self-updater; updates now come from WordPress.org.
 * Performance: disabled modules are no longer loaded on each request.

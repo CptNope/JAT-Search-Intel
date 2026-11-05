@@ -110,6 +110,15 @@ class OnboardingTest extends TestCase {
 		$this->assertFalse( $s['enable_markdown_endpoints'] );
 	}
 
+	public function test_wizard_keeps_custom_rules(): void {
+		$custom = [ 'ai_crawler_rules' => [ 'ChatGPT-User' => 'block' ] ];
+		$s      = ( new Setup_Wizard( [] ) )->apply_step( 3, [ 'ai_preset' => 'keep' ], $custom );
+		$this->assertSame( [ 'ChatGPT-User' => 'block' ], $s['ai_crawler_rules'] );
+
+		$s = ( new Setup_Wizard( [] ) )->apply_step( 3, [], $custom );
+		$this->assertSame( [ 'ChatGPT-User' => 'block' ], $s['ai_crawler_rules'], 'No preset posted means no change' );
+	}
+
 	public function test_activation_marks_wizard_pending_once(): void {
 		global $si_test_state;
 		Setup_Wizard::on_activation();
@@ -145,6 +154,13 @@ class OnboardingTest extends TestCase {
 
 		$sync->on_write( 2, 6, '_jat_search_intel_topics', [ 'a', 'b' ] );
 		$this->assertSame( 'a, b', $si_test_state['post_meta'][6]['_jat_search_intel_key_topics'] );
+	}
+
+	public function test_backslashes_survive_sync(): void {
+		global $si_test_state;
+		( new Meta_Sync() )->on_write( 1, 8, '_jat_search_intel_og_title', 'C:\\Users\\path title' );
+		// The stub does not unslash, so the stored value is the slashed form update_post_meta() would unslash.
+		$this->assertSame( addslashes( 'C:\\Users\\path title' ), $si_test_state['post_meta'][8]['_jat_search_intel_social_title'] );
 	}
 
 	public function test_unrelated_keys_are_ignored(): void {

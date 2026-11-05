@@ -243,8 +243,9 @@ class Abilities {
 			],
 			// Every ability is listed for REST/MCP clients; permission callbacks decide who may run it.
 			'show_in_rest' => true,
-			'public'       => true,
-			'mcp'          => [ 'public' => true ],
+			// Anonymous clients may only discover and run the read-only public abilities.
+			'public'       => $public,
+			'mcp'          => [ 'public' => $public ],
 		];
 	}
 

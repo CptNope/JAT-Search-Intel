@@ -144,8 +144,9 @@ class Rank_Tracker {
 	 * @return array<string,array{day:string,keyword:string,position:float,clicks:int,impressions:int,url:string}>
 	 */
 	public static function aggregate( array $rows ): array {
-		$out  = [];
-		$best = [];
+		$out      = [];
+		$best     = [];
+		$weighted = [];
 
 		foreach ( $rows as $row ) {
 			$day     = (string) ( $row['keys'][0] ?? '' );
@@ -167,14 +168,14 @@ class Rank_Tracker {
 					'clicks'      => 0,
 					'impressions' => 0,
 					'url'         => $url,
-					'_weighted'   => 0.0,
 				];
-				$best[ $id ] = [ $clicks, $impressions ];
+				$best[ $id ]     = [ $clicks, $impressions ];
+				$weighted[ $id ] = 0.0;
 			}
 
 			$out[ $id ]['clicks']      += $clicks;
 			$out[ $id ]['impressions'] += $impressions;
-			$out[ $id ]['_weighted']   += $position * max( 1, $impressions );
+			$weighted[ $id ]           += $position * max( 1, $impressions );
 
 			if ( [ $clicks, $impressions ] > $best[ $id ] ) {
 				$best[ $id ]       = [ $clicks, $impressions ];
@@ -183,9 +184,7 @@ class Rank_Tracker {
 		}
 
 		foreach ( $out as $id => $row ) {
-			$weight                  = max( 1, $row['impressions'] );
-			$out[ $id ]['position']  = round( $row['_weighted'] / $weight, 2 );
-			unset( $out[ $id ]['_weighted'] );
+			$out[ $id ]['position'] = round( $weighted[ $id ] / max( 1, $row['impressions'] ), 2 );
 		}
 
 		return $out;

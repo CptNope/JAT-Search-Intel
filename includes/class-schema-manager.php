@@ -222,7 +222,7 @@ class Schema_Manager {
         $description = (string) get_post_meta( $post_id, '_jat_search_intel_description', true );
         if ( '' === $description ) {
             $post        = get_post( $post_id );
-            $description = $post ? ( $post->post_excerpt ?: wp_trim_words( wp_strip_all_tags( strip_shortcodes( $post->post_content ) ), 30, '...' ) ) : '';
+            $description = $post ? ( Content_Guard::excerpt( $post ) ?: wp_trim_words( wp_strip_all_tags( strip_shortcodes( Content_Guard::content( $post ) ) ), 30, '...' ) ) : '';
         }
         return wp_strip_all_tags( $description );
     }
@@ -307,7 +307,7 @@ class Schema_Manager {
         }
 
         $post = get_post();
-        if ( ! $post || empty( $post->post_content ) ) {
+        if ( ! $post || '' === Content_Guard::content( $post ) ) {
             return [];
         }
 
@@ -424,6 +424,9 @@ class Schema_Manager {
                     $ancestors = array_reverse( $ancestors );
                     foreach ( $ancestors as $ancestor_id ) {
                         $ancestor = get_term( $ancestor_id, 'category' );
+                        if ( ! $ancestor instanceof \WP_Term ) {
+                            continue;
+                        }
                         $crumbs[] = [
                             '@type'    => 'ListItem',
                             'position' => $position++,
@@ -461,12 +464,14 @@ class Schema_Manager {
                 'name'     => get_the_title( $post_id ),
             ];
         } elseif ( is_category() || is_tag() || is_tax() ) {
-            $term     = get_queried_object();
-            $crumbs[] = [
-                '@type'    => 'ListItem',
-                'position' => $position,
-                'name'     => $term->name,
-            ];
+            $term = get_queried_object();
+            if ( $term instanceof \WP_Term ) {
+                $crumbs[] = [
+                    '@type'    => 'ListItem',
+                    'position' => $position,
+                    'name'     => $term->name,
+                ];
+            }
         }
 
         if ( count( $crumbs ) < 2 ) {
@@ -501,7 +506,7 @@ class Schema_Manager {
             '@type'            => $type,
             '@id'              => get_permalink( $post_id ) . '#' . strtolower( $type ),
             'headline'         => get_the_title( $post_id ),
-            'description'      => wp_trim_words( wp_strip_all_tags( $post->post_content ), 30, '...' ),
+            'description'      => wp_trim_words( wp_strip_all_tags( Content_Guard::content( $post ) ), 30, '...' ),
             'url'              => get_permalink( $post_id ),
             'mainEntityOfPage' => [
                 '@type' => 'WebPage',
@@ -570,7 +575,7 @@ class Schema_Manager {
 
         // v1.1: Direct answer as abstract
         $direct_answer = get_post_meta( $post_id, '_jat_search_intel_direct_answer', true );
-        if ( $direct_answer ) {
+        if ( $direct_answer && ! Content_Guard::is_protected( $post ) ) {
             $schema['abstract'] = sanitize_text_field( $direct_answer );
         }
 

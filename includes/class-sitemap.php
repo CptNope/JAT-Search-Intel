@@ -128,8 +128,7 @@ class Sitemap {
         // News / video sitemaps only exist when switched on.
         if ( ( '_news' === $type && empty( $this->settings['enable_news_sitemap'] ) )
             || ( '_video' === $type && empty( $this->settings['enable_video_sitemap'] ) ) ) {
-            global $wp_query;
-            $wp_query->set_404();
+            $GLOBALS['wp_query']->set_404();
             status_header( 404 );
             nocache_headers();
             return;
@@ -397,7 +396,7 @@ class Sitemap {
         ] );
 
         if ( $latest ) {
-            return get_the_modified_date( 'c', $latest[0]->ID );
+            return (string) get_the_modified_date( 'c', $latest[0]->ID );
         }
 
         return gmdate( 'c' );
@@ -545,12 +544,10 @@ class Sitemap {
      */
     public static function extract_videos( string $content ): array {
         $videos = [];
-        $seen   = [];
 
         if ( preg_match_all( '~(?:youtube\.com/(?:watch\?v=|embed/|shorts/|live/)|youtu\.be/)([A-Za-z0-9_-]{11})~', $content, $m ) ) {
             foreach ( array_unique( $m[1] ) as $id ) {
-                $seen[ 'yt' . $id ] = true;
-                $videos[]           = [
+                $videos[] = [
                     'player_loc'  => 'https://www.youtube.com/embed/' . $id,
                     'content_loc' => '',
                     'thumbnail'   => 'https://i.ytimg.com/vi/' . $id . '/hqdefault.jpg',

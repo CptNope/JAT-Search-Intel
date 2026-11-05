@@ -84,7 +84,7 @@ class Markdown {
 	 */
 	private static function node( \DOMNode $node, int $depth ): string {
 		if ( XML_TEXT_NODE === $node->nodeType ) {
-			return preg_replace( '/\s+/', ' ', $node->textContent );
+			return (string) preg_replace( '/\s+/', ' ', $node->textContent );
 		}
 		if ( ! $node instanceof \DOMElement ) {
 			return '';
@@ -191,7 +191,7 @@ class Markdown {
 	 * @return string
 	 */
 	private static function inline( \DOMNode $node ): string {
-		return preg_replace( '/\s+/', ' ', self::children( $node ) );
+		return (string) preg_replace( '/\s+/', ' ', self::children( $node ) );
 	}
 
 	/**

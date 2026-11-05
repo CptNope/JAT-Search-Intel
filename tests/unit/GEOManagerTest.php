@@ -165,6 +165,22 @@ class GEOManagerTest extends TestCase {
         $this->assertStringContainsString( 'schema.org/Organization', $result );
     }
 
+    public function test_enhance_content_entities_keeps_text_intact(): void {
+        global $si_test_state;
+        $si_test_state['post_meta'][1]['_jat_search_intel_entities'] = [
+            [ 'name' => 'Google', 'type' => 'Organization', 'url' => '' ],
+        ];
+
+        $mgr    = $this->make_manager();
+        $result = $mgr->enhance_content_entities( '<p>Try Googleplex. Google is a search engine.</p>' );
+
+        $this->assertSame(
+            '<p>Try Googleplex. <span itemscope itemtype="https://schema.org/Organization"><span itemprop="name">Google</span></span> is a search engine.</p>',
+            $result
+        );
+        $this->assertSame( 'Try Googleplex. Google is a search engine.', strip_tags( $result ) );
+    }
+
     public function test_enhance_content_entities_uses_link_for_url(): void {
         global $si_test_state;
         $si_test_state['post_meta'][1]['_jat_search_intel_entities'] = [

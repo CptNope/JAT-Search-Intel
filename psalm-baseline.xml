@@ -1,58 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <files psalm-version="6.5.0@38fc8444edf0cebc9205296ee6e30e906ade783b">
   <file src="includes/class-admin.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[sanitize_settings]]></code>
-      <code><![CDATA[sanitize_social_profiles]]></code>
-    </PossiblyUnusedMethod>
-    <PossiblyUnusedParam>
-      <code><![CDATA[$post]]></code>
-    </PossiblyUnusedParam>
-    <PossiblyUnusedReturnValue>
-      <code><![CDATA[array]]></code>
-      <code><![CDATA[array]]></code>
-    </PossiblyUnusedReturnValue>
-    <UndefinedConstant>
-      <code><![CDATA[JAT_SEARCH_INTEL_BASENAME]]></code>
-      <code><![CDATA[JAT_SEARCH_INTEL_DIR]]></code>
-      <code><![CDATA[JAT_SEARCH_INTEL_DIR]]></code>
-      <code><![CDATA[JAT_SEARCH_INTEL_DIR]]></code>
-      <code><![CDATA[JAT_SEARCH_INTEL_DIR]]></code>
-      <code><![CDATA[JAT_SEARCH_INTEL_DIR]]></code>
-      <code><![CDATA[JAT_SEARCH_INTEL_DIR]]></code>
-      <code><![CDATA[JAT_SEARCH_INTEL_DIR]]></code>
-      <code><![CDATA[JAT_SEARCH_INTEL_DIR]]></code>
-      <code><![CDATA[JAT_SEARCH_INTEL_DIR]]></code>
-      <code><![CDATA[JAT_SEARCH_INTEL_URL]]></code>
-      <code><![CDATA[JAT_SEARCH_INTEL_URL]]></code>
-      <code><![CDATA[JAT_SEARCH_INTEL_URL]]></code>
-      <code><![CDATA[JAT_SEARCH_INTEL_VERSION]]></code>
-      <code><![CDATA[JAT_SEARCH_INTEL_VERSION]]></code>
-      <code><![CDATA[JAT_SEARCH_INTEL_VERSION]]></code>
-      <code><![CDATA[JAT_SEARCH_INTEL_VERSION]]></code>
-      <code><![CDATA[JAT_SEARCH_INTEL_VERSION]]></code>
-    </UndefinedConstant>
     <UnusedVariable>
       <code><![CDATA[$meta]]></code>
       <code><![CDATA[$title]]></code>
     </UnusedVariable>
   </file>
-  <file src="includes/class-aeo-manager.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[detect_qa_patterns]]></code>
-      <code><![CDATA[get_aeo_score]]></code>
-      <code><![CDATA[get_snippet_score]]></code>
-    </PossiblyUnusedMethod>
-    <PossiblyUnusedReturnValue>
-      <code><![CDATA[string]]></code>
-      <code><![CDATA[string]]></code>
-      <code><![CDATA[string]]></code>
-    </PossiblyUnusedReturnValue>
+  <file src="includes/class-advanced-linking.php">
+    <UnusedProperty>
+      <code><![CDATA[$settings]]></code>
+    </UnusedProperty>
+  </file>
+  <file src="includes/class-ai-optimizer.php">
+    <UnusedParam>
+      <code><![CDATA[$issues]]></code>
+    </UnusedParam>
   </file>
   <file src="includes/class-audit-log.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[clear_log]]></code>
-    </PossiblyUnusedMethod>
     <UnusedProperty>
       <code><![CDATA[$settings]]></code>
     </UnusedProperty>
@@ -66,53 +30,15 @@
       <code><![CDATA[$settings]]></code>
     </UnusedProperty>
   </file>
-  <file src="includes/class-blocks.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[render_breadcrumbs]]></code>
-      <code><![CDATA[render_toc]]></code>
-    </PossiblyUnusedMethod>
-    <PossiblyUnusedParam>
-      <code><![CDATA[$content]]></code>
-      <code><![CDATA[$content]]></code>
-    </PossiblyUnusedParam>
-    <UndefinedConstant>
-      <code><![CDATA[JAT_SEARCH_INTEL_DIR]]></code>
-      <code><![CDATA[JAT_SEARCH_INTEL_DIR]]></code>
-      <code><![CDATA[JAT_SEARCH_INTEL_DIR]]></code>
-      <code><![CDATA[JAT_SEARCH_INTEL_URL]]></code>
-      <code><![CDATA[JAT_SEARCH_INTEL_URL]]></code>
-      <code><![CDATA[JAT_SEARCH_INTEL_URL]]></code>
-      <code><![CDATA[JAT_SEARCH_INTEL_URL]]></code>
-    </UndefinedConstant>
-  </file>
-  <file src="includes/class-bulk-tools.php">
-    <UndefinedConstant>
-      <code><![CDATA[JAT_SEARCH_INTEL_URL]]></code>
-      <code><![CDATA[JAT_SEARCH_INTEL_VERSION]]></code>
-      <code><![CDATA[JAT_SEARCH_INTEL_VERSION]]></code>
-    </UndefinedConstant>
-  </file>
   <file src="includes/class-citation-graph.php">
     <InvalidArgument>
       <code><![CDATA[[ 'hide_empty' => true ]]]></code>
     </InvalidArgument>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[detect_missing_links]]></code>
-      <code><![CDATA[get_citation_data]]></code>
-    </PossiblyUnusedMethod>
     <UnusedProperty>
       <code><![CDATA[$settings]]></code>
     </UnusedProperty>
   </file>
   <file src="includes/class-cli.php">
-    <PossiblyUnusedParam>
-      <code><![CDATA[$args]]></code>
-      <code><![CDATA[$args]]></code>
-      <code><![CDATA[$args]]></code>
-    </PossiblyUnusedParam>
-    <UndefinedConstant>
-      <code><![CDATA[JAT_SEARCH_INTEL_VERSION]]></code>
-    </UndefinedConstant>
     <UnusedClass>
       <code><![CDATA[CLI]]></code>
     </UnusedClass>
@@ -121,66 +47,12 @@
     <InvalidOperand>
       <code><![CDATA[$modified]]></code>
     </InvalidOperand>
-    <InvalidScalarArgument>
-      <code><![CDATA[$slug]]></code>
-    </InvalidScalarArgument>
-    <UndefinedConstant>
-      <code><![CDATA[DAY_IN_SECONDS]]></code>
-      <code><![CDATA[MINUTE_IN_SECONDS]]></code>
-    </UndefinedConstant>
     <UnusedParam>
       <code><![CDATA[$text]]></code>
       <code><![CDATA[$word_count]]></code>
     </UnusedParam>
   </file>
-  <file src="includes/class-core.php">
-    <PossiblyUnusedProperty>
-      <code><![CDATA[$admin]]></code>
-      <code><![CDATA[$aeo]]></code>
-      <code><![CDATA[$audit_log]]></code>
-      <code><![CDATA[$authority_map]]></code>
-      <code><![CDATA[$blocks]]></code>
-      <code><![CDATA[$csp_headers]]></code>
-      <code><![CDATA[$faq_generator]]></code>
-      <code><![CDATA[$geo]]></code>
-      <code><![CDATA[$indexnow]]></code>
-      <code><![CDATA[$internal_linker]]></code>
-      <code><![CDATA[$link_checker]]></code>
-      <code><![CDATA[$local_business]]></code>
-      <code><![CDATA[$mainwp_reporter]]></code>
-      <code><![CDATA[$multilang]]></code>
-      <code><![CDATA[$notifications]]></code>
-      <code><![CDATA[$privacy]]></code>
-      <code><![CDATA[$rest_api]]></code>
-      <code><![CDATA[$robots_txt]]></code>
-      <code><![CDATA[$schema]]></code>
-      <code><![CDATA[$schema_types]]></code>
-      <code><![CDATA[$sri]]></code>
-      <code><![CDATA[$title_engine]]></code>
-      <code><![CDATA[$visibility_dashboard]]></code>
-      <code><![CDATA[$woocommerce]]></code>
-      <code><![CDATA[$content_decay]]></code>
-      <code><![CDATA[$keyword_cannibalization]]></code>
-      <code><![CDATA[$advanced_linking]]></code>
-      <code><![CDATA[$historical_analytics]]></code>
-      <code><![CDATA[$ga4_integration]]></code>
-      <code><![CDATA[$core_web_vitals]]></code>
-      <code><![CDATA[$custom_reports]]></code>
-      <code><![CDATA[$ai_optimizer]]></code>
-      <code><![CDATA[$plugin_updater]]></code>
-    </PossiblyUnusedProperty>
-    <UndefinedConstant>
-      <code><![CDATA[JAT_SEARCH_INTEL_BASENAME]]></code>
-    </UndefinedConstant>
-  </file>
-  <file src="includes/class-csp-headers.php">
-    <PossiblyUnusedParam>
-      <code><![CDATA[$result]]></code>
-      <code><![CDATA[$server]]></code>
-    </PossiblyUnusedParam>
-    <PossiblyUnusedReturnValue>
-      <code><![CDATA[bool]]></code>
-    </PossiblyUnusedReturnValue>
+  <file src="includes/class-custom-reports.php">
     <UnusedProperty>
       <code><![CDATA[$settings]]></code>
     </UnusedProperty>
@@ -189,77 +61,23 @@
     <InvalidArgument>
       <code><![CDATA[[ 'hide_empty' => true, 'number' => 20 ]]]></code>
     </InvalidArgument>
-    <InvalidNullableReturnType>
-      <code><![CDATA[string]]></code>
-    </InvalidNullableReturnType>
     <InvalidOperand>
       <code><![CDATA[$modified]]></code>
       <code><![CDATA[$modified]]></code>
     </InvalidOperand>
-    <NullableReturnStatement>
-      <code><![CDATA[$content]]></code>
-    </NullableReturnStatement>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[get_geo_score]]></code>
-    </PossiblyUnusedMethod>
-    <PossiblyUnusedReturnValue>
-      <code><![CDATA[string]]></code>
-    </PossiblyUnusedReturnValue>
+  </file>
+  <file src="includes/class-historical-analytics.php">
     <UndefinedConstant>
-      <code><![CDATA[DAY_IN_SECONDS]]></code>
-      <code><![CDATA[DAY_IN_SECONDS]]></code>
+      <code><![CDATA[DOING_CRON]]></code>
     </UndefinedConstant>
-    <UnusedVariable>
-      <code><![CDATA[$modified]]></code>
-      <code><![CDATA[$modified]]></code>
-      <code><![CDATA[$now]]></code>
-    </UnusedVariable>
+    <UnusedProperty>
+      <code><![CDATA[$settings]]></code>
+    </UnusedProperty>
   </file>
-  <file src="includes/class-indexnow.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[clear_log]]></code>
-    </PossiblyUnusedMethod>
-    <PossiblyUnusedReturnValue>
-      <code><![CDATA[array]]></code>
-    </PossiblyUnusedReturnValue>
-  </file>
-  <file src="includes/class-internal-linker.php">
-    <UndefinedConstant>
-      <code><![CDATA[DAY_IN_SECONDS]]></code>
-    </UndefinedConstant>
-  </file>
-  <file src="includes/class-link-checker.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[clear_results]]></code>
-      <code><![CDATA[schedule]]></code>
-      <code><![CDATA[unschedule]]></code>
-    </PossiblyUnusedMethod>
-  </file>
-  <file src="includes/class-local-business.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[get_location]]></code>
-    </PossiblyUnusedMethod>
-  </file>
-  <file src="includes/class-mainwp-reporter.php">
-    <FalsableReturnStatement>
-      <code><![CDATA[get_post_modified_time( 'c', true, $posts[0] )]]></code>
-    </FalsableReturnStatement>
-    <InvalidReturnStatement>
-      <code><![CDATA[get_post_modified_time( 'c', true, $posts[0] )]]></code>
-    </InvalidReturnStatement>
-    <InvalidReturnType>
-      <code><![CDATA[string]]></code>
-    </InvalidReturnType>
-    <PossiblyUnusedParam>
-      <code><![CDATA[$options]]></code>
-    </PossiblyUnusedParam>
-    <PossiblyUnusedReturnValue>
-      <code><![CDATA[array]]></code>
-      <code><![CDATA[array]]></code>
-    </PossiblyUnusedReturnValue>
-    <UnusedVariable>
-      <code><![CDATA[$core]]></code>
-    </UnusedVariable>
+  <file src="includes/class-keyword-cannibalization.php">
+    <UnusedProperty>
+      <code><![CDATA[$settings]]></code>
+    </UnusedProperty>
   </file>
   <file src="includes/class-migration.php">
     <UnusedProperty>
@@ -267,32 +85,11 @@
     </UnusedProperty>
   </file>
   <file src="includes/class-multilang.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[get_lang_meta]]></code>
-      <code><![CDATA[get_language_llms_txt]]></code>
-      <code><![CDATA[get_language_sitemap_urls]]></code>
-      <code><![CDATA[get_languages]]></code>
-      <code><![CDATA[save_lang_meta]]></code>
-    </PossiblyUnusedMethod>
-    <PossiblyUnusedReturnValue>
-      <code><![CDATA[array]]></code>
-    </PossiblyUnusedReturnValue>
     <UnusedProperty>
       <code><![CDATA[$settings]]></code>
     </UnusedProperty>
   </file>
   <file src="includes/class-multisite.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[get_effective_settings]]></code>
-      <code><![CDATA[remove_site_override]]></code>
-      <code><![CDATA[set_site_override]]></code>
-    </PossiblyUnusedMethod>
-    <PossiblyUnusedParam>
-      <code><![CDATA[$args]]></code>
-    </PossiblyUnusedParam>
-    <PossiblyUnusedReturnValue>
-      <code><![CDATA[bool]]></code>
-    </PossiblyUnusedReturnValue>
     <UnusedProperty>
       <code><![CDATA[$settings]]></code>
     </UnusedProperty>
@@ -305,354 +102,52 @@
 			'timeout' => 10,
 		]]]></code>
     </InvalidArgument>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[unschedule_events]]></code>
-    </PossiblyUnusedMethod>
-    <PossiblyUnusedReturnValue>
-      <code><![CDATA[bool]]></code>
-    </PossiblyUnusedReturnValue>
-  </file>
-  <file src="includes/class-privacy.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[erase_personal_data]]></code>
-      <code><![CDATA[export_personal_data]]></code>
-    </PossiblyUnusedMethod>
-    <PossiblyUnusedParam>
-      <code><![CDATA[$page]]></code>
-      <code><![CDATA[$page]]></code>
-    </PossiblyUnusedParam>
-    <PossiblyUnusedReturnValue>
-      <code><![CDATA[array]]></code>
-      <code><![CDATA[array]]></code>
-    </PossiblyUnusedReturnValue>
   </file>
   <file src="includes/class-qa-detector.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[classify]]></code>
-    </PossiblyUnusedMethod>
-    <PossiblyUnusedReturnValue>
-      <code><![CDATA[array]]></code>
-    </PossiblyUnusedReturnValue>
-    <UndefinedConstant>
-      <code><![CDATA[DAY_IN_SECONDS]]></code>
-    </UndefinedConstant>
     <UnusedProperty>
       <code><![CDATA[$settings]]></code>
     </UnusedProperty>
   </file>
-  <file src="includes/class-rbac.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[grant_view_only]]></code>
-      <code><![CDATA[is_settings_locked]]></code>
-      <code><![CDATA[remove_role]]></code>
-    </PossiblyUnusedMethod>
-    <PossiblyUnusedParam>
-      <code><![CDATA[$can]]></code>
-      <code><![CDATA[$can]]></code>
-    </PossiblyUnusedParam>
-    <PossiblyUnusedReturnValue>
-      <code><![CDATA[bool]]></code>
-      <code><![CDATA[bool]]></code>
-    </PossiblyUnusedReturnValue>
-  </file>
-  <file src="includes/class-redirect-manager.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[create_tables]]></code>
-      <code><![CDATA[get_redirect]]></code>
-    </PossiblyUnusedMethod>
+  <file src="includes/class-rank-tracker.php">
     <UndefinedConstant>
       <code><![CDATA[ABSPATH]]></code>
-      <code><![CDATA[ARRAY_A]]></code>
+    </UndefinedConstant>
+  </file>
+  <file src="includes/class-readiness.php">
+    <UndefinedConstant>
+      <code><![CDATA[ABSPATH]]></code>
+      <code><![CDATA[ABSPATH]]></code>
+    </UndefinedConstant>
+  </file>
+  <file src="includes/class-redirect-manager.php">
+    <UndefinedConstant>
+      <code><![CDATA[ABSPATH]]></code>
     </UndefinedConstant>
     <UnusedProperty>
       <code><![CDATA[$settings]]></code>
     </UnusedProperty>
   </file>
-  <file src="includes/class-rest-api.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[analyze_post]]></code>
-      <code><![CDATA[bulk_rescore]]></code>
-      <code><![CDATA[can_edit_post]]></code>
-      <code><![CDATA[can_manage_options]]></code>
-      <code><![CDATA[can_read_post]]></code>
-      <code><![CDATA[get_geo]]></code>
-      <code><![CDATA[get_meta]]></code>
-      <code><![CDATA[get_scores]]></code>
-      <code><![CDATA[get_settings]]></code>
-      <code><![CDATA[invalidate_sitemap]]></code>
-      <code><![CDATA[update_meta]]></code>
-      <code><![CDATA[update_settings]]></code>
-    </PossiblyUnusedMethod>
-  </file>
   <file src="includes/class-robots-txt.php">
-    <PossiblyUnusedParam>
-      <code><![CDATA[$public]]></code>
-    </PossiblyUnusedParam>
-    <PossiblyUnusedReturnValue>
-      <code><![CDATA[bool]]></code>
-      <code><![CDATA[string]]></code>
-    </PossiblyUnusedReturnValue>
     <UnusedProperty>
       <code><![CDATA[$settings]]></code>
     </UnusedProperty>
   </file>
   <file src="includes/class-scale.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[cache_delete]]></code>
-      <code><![CDATA[cache_get]]></code>
-      <code><![CDATA[cache_set]]></code>
-      <code><![CDATA[get_asset_url]]></code>
-      <code><![CDATA[rest_get_all_meta]]></code>
-    </PossiblyUnusedMethod>
-    <PossiblyUnusedReturnValue>
-      <code><![CDATA[string]]></code>
-    </PossiblyUnusedReturnValue>
-    <UnusedProperty>
-      <code><![CDATA[$settings]]></code>
-    </UnusedProperty>
-  </file>
-  <file src="includes/class-schema-manager.php">
-    <UndefinedMagicPropertyFetch>
-      <code><![CDATA[$term->name]]></code>
-      <code><![CDATA[$term->name]]></code>
-    </UndefinedMagicPropertyFetch>
-    <UndefinedPropertyFetch>
-      <code><![CDATA[$ancestor->name]]></code>
-    </UndefinedPropertyFetch>
-  </file>
-  <file src="includes/class-schema-types.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[get_course_schema]]></code>
-      <code><![CDATA[get_event_schema]]></code>
-      <code><![CDATA[get_job_posting_schema]]></code>
-      <code><![CDATA[get_recipe_schema]]></code>
-      <code><![CDATA[get_review_schema]]></code>
-      <code><![CDATA[get_software_schema]]></code>
-      <code><![CDATA[get_types]]></code>
-    </PossiblyUnusedMethod>
-    <PossiblyUnusedReturnValue>
-      <code><![CDATA[array]]></code>
-    </PossiblyUnusedReturnValue>
     <UnusedProperty>
       <code><![CDATA[$settings]]></code>
     </UnusedProperty>
   </file>
   <file src="includes/class-seo-manager.php">
-    <PossiblyUnusedReturnValue>
-      <code><![CDATA[string]]></code>
-      <code><![CDATA[string]]></code>
-    </PossiblyUnusedReturnValue>
-    <UndefinedConstant>
-      <code><![CDATA[JAT_SEARCH_INTEL_VERSION]]></code>
-    </UndefinedConstant>
     <UnusedVariable>
       <code><![CDATA[$robots]]></code>
     </UnusedVariable>
-  </file>
-  <file src="includes/class-sitemap.php">
-    <FalsableReturnStatement>
-      <code><![CDATA[get_the_modified_date( 'c', $latest[0]->ID )]]></code>
-    </FalsableReturnStatement>
-    <InvalidReturnStatement>
-      <code><![CDATA[get_the_modified_date( 'c', $latest[0]->ID )]]></code>
-    </InvalidReturnStatement>
-    <InvalidReturnType>
-      <code><![CDATA[string]]></code>
-    </InvalidReturnType>
-    <UndefinedConstant>
-      <code><![CDATA[DAY_IN_SECONDS]]></code>
-    </UndefinedConstant>
-    <UnusedVariable>
-      <code><![CDATA[$modified]]></code>
-    </UnusedVariable>
-  </file>
-  <file src="includes/class-sri.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[regenerate_hashes]]></code>
-    </PossiblyUnusedMethod>
-    <PossiblyUnusedParam>
-      <code><![CDATA[$media]]></code>
-    </PossiblyUnusedParam>
-    <PossiblyUnusedReturnValue>
-      <code><![CDATA[string]]></code>
-      <code><![CDATA[string]]></code>
-    </PossiblyUnusedReturnValue>
-    <UnusedProperty>
-      <code><![CDATA[$settings]]></code>
-    </UnusedProperty>
-  </file>
-  <file src="includes/class-title-engine.php">
-    <InvalidReturnStatement>
-      <code><![CDATA[get_the_date( '', get_queried_object_id() ) ?: '']]></code>
-      <code><![CDATA[get_the_date() ?: '']]></code>
-    </InvalidReturnStatement>
-    <InvalidReturnType>
-      <code><![CDATA[string]]></code>
-    </InvalidReturnType>
-    <PossiblyUnusedParam>
-      <code><![CDATA[$title]]></code>
-    </PossiblyUnusedParam>
-    <PossiblyUnusedReturnValue>
-      <code><![CDATA[string]]></code>
-    </PossiblyUnusedReturnValue>
-    <UndefinedMethod>
-      <code><![CDATA[$tags]]></code>
-    </UndefinedMethod>
   </file>
   <file src="includes/class-visibility-dashboard.php">
     <InvalidArgument>
       <code><![CDATA[[ 'hide_empty' => false ]]]></code>
     </InvalidArgument>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[fetch_bing_data]]></code>
-      <code><![CDATA[fetch_gsc_data]]></code>
-      <code><![CDATA[identify_ai_referral]]></code>
-    </PossiblyUnusedMethod>
-  </file>
-  <file src="includes/class-white-label.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[save_config]]></code>
-    </PossiblyUnusedMethod>
-    <PossiblyUnusedReturnValue>
-      <code><![CDATA[array]]></code>
-      <code><![CDATA[string]]></code>
-      <code><![CDATA[string]]></code>
-      <code><![CDATA[string]]></code>
-    </PossiblyUnusedReturnValue>
-    <UndefinedConstant>
-      <code><![CDATA[JAT_SEARCH_INTEL_VERSION]]></code>
-    </UndefinedConstant>
-  </file>
-  <file src="includes/class-ai-engine.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[get_providers]]></code>
-      <code><![CDATA[generate_link_recommendations]]></code>
-      <code><![CDATA[generate_content_brief]]></code>
-    </PossiblyUnusedMethod>
-  </file>
-  <file src="includes/class-ai-optimizer.php">
-    <PossiblyUnusedParam>
-      <code><![CDATA[$new_scores]]></code>
-      <code><![CDATA[$old_scores]]></code>
-    </PossiblyUnusedParam>
-    <UnusedParam>
-      <code><![CDATA[$issues]]></code>
-    </UnusedParam>
-    <UndefinedConstant>
-      <code><![CDATA[JAT_SEARCH_INTEL_URL]]></code>
-      <code><![CDATA[JAT_SEARCH_INTEL_VERSION]]></code>
-    </UndefinedConstant>
-  </file>
-  <file src="includes/class-plugin-updater.php">
-    <InvalidReturnStatement>
-      <code><![CDATA[$result]]></code>
-      <code><![CDATA[$result]]></code>
-      <code><![CDATA[$result]]></code>
-    </InvalidReturnStatement>
-    <InvalidReturnType>
-      <code><![CDATA[false|object]]></code>
-    </InvalidReturnType>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[get_force_check_url]]></code>
-    </PossiblyUnusedMethod>
-    <PossiblyUnusedParam>
-      <code><![CDATA[$response]]></code>
-    </PossiblyUnusedParam>
-    <PossiblyUnusedReturnValue>
-      <code><![CDATA[object]]></code>
-      <code><![CDATA[false|object]]></code>
-      <code><![CDATA[array]]></code>
-      <code><![CDATA[array]]></code>
-    </PossiblyUnusedReturnValue>
-    <UndefinedConstant>
-      <code><![CDATA[HOUR_IN_SECONDS]]></code>
-      <code><![CDATA[JAT_SEARCH_INTEL_BASENAME]]></code>
-      <code><![CDATA[JAT_SEARCH_INTEL_VERSION]]></code>
-      <code><![CDATA[WP_PLUGIN_DIR]]></code>
-      <code><![CDATA[MINUTE_IN_SECONDS]]></code>
-    </UndefinedConstant>
-  </file>
-  <file src="includes/class-content-decay.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[get_refresh_suggestions]]></code>
-      <code><![CDATA[get_trend_data]]></code>
-      <code><![CDATA[get_score_change]]></code>
-    </PossiblyUnusedMethod>
-    <PossiblyUnusedReturnValue>
-      <code><![CDATA[array]]></code>
-    </PossiblyUnusedReturnValue>
-  </file>
-  <file src="includes/class-keyword-cannibalization.php">
-    <UnusedProperty>
-      <code><![CDATA[$settings]]></code>
-    </UnusedProperty>
-  </file>
-  <file src="includes/class-advanced-linking.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[rest_get_suggestions]]></code>
-      <code><![CDATA[rest_orphan_check]]></code>
-    </PossiblyUnusedMethod>
-    <PossiblyUnusedReturnValue>
-      <code><![CDATA[array]]></code>
-    </PossiblyUnusedReturnValue>
-    <UnusedProperty>
-      <code><![CDATA[$settings]]></code>
-    </UnusedProperty>
-  </file>
-  <file src="includes/class-historical-analytics.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[get_chart_data]]></code>
-      <code><![CDATA[get_before_after]]></code>
-      <code><![CDATA[get_change_log]]></code>
-    </PossiblyUnusedMethod>
-    <PossiblyUnusedParam>
-      <code><![CDATA[$days]]></code>
-      <code><![CDATA[$results]]></code>
-    </PossiblyUnusedParam>
-    <UndefinedConstant>
-      <code><![CDATA[DAY_IN_SECONDS]]></code>
-      <code><![CDATA[DAY_IN_SECONDS]]></code>
-      <code><![CDATA[DAY_IN_SECONDS]]></code>
-      <code><![CDATA[DOING_CRON]]></code>
-    </UndefinedConstant>
-    <UnusedProperty>
-      <code><![CDATA[$settings]]></code>
-    </UnusedProperty>
-  </file>
-  <file src="includes/class-ga4-integration.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[save_tokens]]></code>
-    </PossiblyUnusedMethod>
-  </file>
-  <file src="includes/class-core-web-vitals.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[get_cwv_trends]]></code>
-    </PossiblyUnusedMethod>
-    <UndefinedConstant>
-      <code><![CDATA[DAY_IN_SECONDS]]></code>
-    </UndefinedConstant>
-  </file>
-  <file src="includes/class-custom-reports.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[save_schedule]]></code>
-      <code><![CDATA[delete_schedule]]></code>
-    </PossiblyUnusedMethod>
-    <UndefinedConstant>
-      <code><![CDATA[DAY_IN_SECONDS]]></code>
-      <code><![CDATA[WEEK_IN_SECONDS]]></code>
-      <code><![CDATA[DAY_IN_SECONDS]]></code>
-      <code><![CDATA[WEEK_IN_SECONDS]]></code>
-    </UndefinedConstant>
-    <UnusedProperty>
-      <code><![CDATA[$settings]]></code>
-    </UnusedProperty>
   </file>
   <file src="includes/class-woocommerce.php">
-    <PossiblyUnusedReturnValue>
-      <code><![CDATA[array]]></code>
-      <code><![CDATA[array]]></code>
-      <code><![CDATA[array]]></code>
-    </PossiblyUnusedReturnValue>
     <UndefinedFunction>
       <code><![CDATA[get_woocommerce_currency()]]></code>
     </UndefinedFunction>
