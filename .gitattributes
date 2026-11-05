@@ -21,6 +21,7 @@
 /.editorconfig export-ignore
 /.eslintrc.js export-ignore
 /.eslintrc.json export-ignore
+/eslint.config.js export-ignore
 /phpstan.neon export-ignore
 /phpstan.neon.dist export-ignore
 /phpstan-constants.php export-ignore

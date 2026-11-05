@@ -141,7 +141,7 @@ jobs:
         run: npm ci
 
       - name: Run ESLint
-        run: npx eslint admin/js/ --ext .js
+        run: npx eslint admin/js/
 
   stylelint:
     name: Stylelint
@@ -161,6 +161,35 @@ jobs:
 
       - name: Run Stylelint
         run: npx stylelint "admin/css/**/*.css"
+
+  build:
+    # Compiles the block-editor sources in src/ with @wordpress/scripts, so a
+    # toolchain update that breaks the build is caught before it is merged.
+    # (The committed build/ files are what ship; this only proves they can be rebuilt.)
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Every built entry point exists
+        run: |
+          for f in build/sidebar.js build/sidebar.asset.php build/blocks/toc/index.js build/blocks/faq/index.js build/blocks/howto/index.js; do
+            [ -s "$f" ] || { echo "::error::Build did not produce $f"; exit 1; }
+          done
+          git status --short build/ | head -20
 
   package:
     # Builds the exact zip that ships, checks it is complete and contains no dev
