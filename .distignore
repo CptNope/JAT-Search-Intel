@@ -47,6 +47,7 @@ phpstan-baseline.neon
 
 # ── Documentation (dev-only) ─────────────────────────────────────────────
 CONTRIBUTING.md
+SECURITY.md
 CHANGELOG.md
 README.md
 ROADMAP.md

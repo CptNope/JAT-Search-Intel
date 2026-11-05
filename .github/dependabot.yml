@@ -1,0 +1,41 @@
+# Weekly dependency updates. Minor and patch bumps are grouped into one PR per
+# ecosystem so CI runs once; major versions arrive as their own PRs.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      actions:
+        patterns: ['*']
+    labels: [dependencies, github-actions]
+
+  - package-ecosystem: composer
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      dev-tools:
+        dependency-type: development
+        update-types: [minor, patch]
+    labels: [dependencies, php]
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      wordpress-packages:
+        patterns: ['@wordpress/*']
+        update-types: [minor, patch]
+      other:
+        patterns: ['*']
+        exclude-patterns: ['@wordpress/*']
+        update-types: [minor, patch]
+    labels: [dependencies, javascript]

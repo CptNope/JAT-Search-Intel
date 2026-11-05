@@ -84,32 +84,51 @@ Use **Conventional Commits**:
 - `test(integration): add compatibility tests for CPTs and unicode`
 - `chore(ci): add GitHub Actions workflow`
 
-### Tags
+### Releases
 
-Every merge to `main` gets a semver tag:
+`main` is protected: changes land through pull requests, and every required CI
+check must pass first. To release:
 
-```bash
-git tag -a v1.3.0 -m "v1.3.0 — Bulk Tools & REST API"
-git push origin v1.3.0
-```
+1. Bump the version in `jat-search-intel.php` (header and `JAT_SEARCH_INTEL_VERSION`),
+   `readme.txt` (`Stable tag` and a new `= x.y.z =` changelog entry) and `package.json`.
+   `bin/check-version.sh` confirms they all agree; CI runs it on every PR.
+2. Merge the release PR into `main`.
+3. Tag the merge commit and push the tag:
+
+   ```bash
+   git tag -a v3.5.1 -m "v3.5.1"
+   git push origin v3.5.1
+   ```
+
+   The **Release** workflow checks the tag matches the plugin version, builds
+   `jat-search-intel.zip` from the tag, and attaches it (with a SHA-256 checksum)
+   to the GitHub release, using the readme changelog entry as the notes.
 
 ### Code Quality Gates
 
-Before merging any PR, ensure:
+Every pull request runs `.github/workflows/ci.yml`, and `main` will not accept a
+merge until these pass:
 
-1. **All PHPUnit tests pass** — `vendor/bin/phpunit --no-coverage`
-2. **PHPCS clean** — `vendor/bin/phpcs --standard=WordPress-Core includes/`
-3. **PHPStan level 6** — `vendor/bin/phpstan analyse includes/ --level=6`
-4. **No regressions** — test count should not decrease
+| Check | Command to run locally |
+|---|---|
+| PHPUnit on PHP 8.1–8.4 | `vendor/bin/phpunit --no-coverage` |
+| PHP 7.4 and 8.4 syntax | `php -l` on every shipped file |
+| PHP_CodeSniffer (WordPress standards) | `vendor/bin/phpcs` |
+| PHPStan level 6 | `vendor/bin/phpstan analyse` |
+| Psalm level 4 | `vendor/bin/psalm` |
+| ESLint and Stylelint | `npx eslint admin/js/` · `npx stylelint "admin/css/**/*.css"` |
+| Package (versions agree, zip has no dev files) | `bin/check-version.sh && bin/build-zip.sh` |
+| WordPress.org Plugin Check on the built zip | `wp plugin check jat-search-intel` |
 
-These are enforced automatically by the CI pipeline (`.github/workflows/ci.yml`).
+Dependabot opens weekly PRs for Composer, npm and GitHub Actions updates. Report
+security problems privately; see [SECURITY.md](SECURITY.md).
 
 ## Local Development Setup
 
 ```bash
 # Clone and install
 git clone <repo-url>
-cd Search-Intel
+cd JAT-Search-Intel
 composer install
 npm install          # For Playwright E2E tests
 

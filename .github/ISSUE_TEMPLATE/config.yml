@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/CptNope/JAT-Search-Intel/security/advisories/new
+    about: Please report security problems privately, not as a public issue.
+  - name: Documentation
+    url: https://github.com/CptNope/JAT-Search-Intel/wiki
+    about: Setup, features, settings, REST API and developer hooks.

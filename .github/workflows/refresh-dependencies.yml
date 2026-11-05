@@ -1,0 +1,58 @@
+name: Refresh dependencies
+
+# Run by hand (Actions → Refresh dependencies → Run workflow) to update the
+# Composer and npm lock files within the version ranges in composer.json and
+# package.json, apply npm security fixes, and push the result to a branch.
+# Open a pull request from that branch so CI checks the update.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-dependencies
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    name: Update lock files
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Update Composer packages
+        run: composer update --no-interaction --no-progress --with-all-dependencies
+
+      - name: Update npm packages and apply security fixes
+        run: |
+          npm update --no-fund
+          npm audit fix --no-fund || true
+          echo '### npm audit after update' >> "$GITHUB_STEP_SUMMARY"
+          npm audit --omit=optional --audit-level=none | tail -5 >> "$GITHUB_STEP_SUMMARY" || true
+
+      - name: Push to chore/refresh-dependencies
+        run: |
+          if git diff --quiet -- composer.lock package-lock.json; then
+            echo "Lock files are already up to date." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B chore/refresh-dependencies
+          git add composer.lock package-lock.json
+          git commit -m "chore(deps): refresh Composer and npm lock files"
+          git push --force origin chore/refresh-dependencies
+          echo "Pushed chore/refresh-dependencies — open a pull request from it." >> "$GITHUB_STEP_SUMMARY"
