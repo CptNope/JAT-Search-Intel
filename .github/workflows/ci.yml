@@ -141,7 +141,7 @@ jobs:
         run: npm ci
 
       - name: Run ESLint
-        run: npx eslint admin/js/ --ext .js
+        run: npx eslint admin/js/
 
   stylelint:
     name: Stylelint

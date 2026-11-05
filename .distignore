@@ -32,6 +32,7 @@ vendor
 .editorconfig
 .eslintrc.js
 .eslintrc.json
+eslint.config.js
 phpstan.neon
 phpstan.neon.dist
 phpstan-constants.php
