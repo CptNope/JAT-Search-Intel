@@ -30,10 +30,10 @@
     "@wordpress/icons": "^10.0.0"
   },
   "devDependencies": {
-    "@playwright/test": "^1.42.0",
+    "@playwright/test": "^1.64.1",
     "@wordpress/env": "^10.0.0",
     "@wordpress/scripts": "^30.0.0",
-    "stylelint": "^17.4.0",
+    "stylelint": "^17.16.0",
     "stylelint-config-standard": "^40.0.0"
   },
   "overrides": {
