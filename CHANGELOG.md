@@ -1,8 +1,32 @@
 # Changelog
 
-All notable changes to Search Intel will be documented in this file.
+All notable changes to JAT Search Intel will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/) and follows the [Keep a Changelog](https://keepachangelog.com/) format.
+
+---
+
+## [3.5.0] — 2026-11-05
+
+First WordPress.org release. The full list is in the `== Changelog ==` section of `readme.txt`; the highlights:
+
+### Changed
+- **Renamed to JAT Search Intel**: every identifier now uses `jat-search-intel` / `jat_search_intel`, with an automatic one-time migration of settings, post meta, tables, roles and block markup.
+- **Six-entry admin menu** (Readiness, Settings, Redirects, AI Search, Reports, Tools) with tabs.
+- **Lighter page views**: no extra database queries on content pages; REST, save-time and admin-only modules load only when needed.
+
+### Added
+- **Setup wizard**, **AI Search Readiness** audit with one-click fixes and a Refresh Queue, **Passage Coach** in the block editor and a **Page Performance** report.
+- **WordPress Abilities API / MCP** abilities, **Content Signals**, crawler presets, Markdown copies of posts and zero-setup IndexNow.
+- Connected JSON-LD graph, custom JSON-LD per post, news, video and HTML sitemaps.
+
+### Fixed
+- Password-protected content no longer leaks through meta tags, schema, llms.txt, Markdown or REST; public REST responses drop editor-only fields.
+- Block-editor sidebar values are saved and used by the front end; the classic meta box no longer overwrites them.
+- Entity markup no longer repeats text; the `%tag%` title variable and breadcrumbs no longer fail on errors; the Table of Contents block handles rich-text headings.
+
+### Removed
+- White-label, CSP headers, SRI and MainWP reporter modules (outside the plugin's scope).
 
 ---
 

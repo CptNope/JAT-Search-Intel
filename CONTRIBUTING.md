@@ -93,16 +93,13 @@ check must pass first. To release:
    `readme.txt` (`Stable tag` and a new `= x.y.z =` changelog entry) and `package.json`.
    `bin/check-version.sh` confirms they all agree; CI runs it on every PR.
 2. Merge the release PR into `main`.
-3. Tag the merge commit and push the tag:
+3. Open **Actions → Release → Run workflow** on `main`. It creates the
+   `vX.Y.Z` tag from the plugin header, builds `jat-search-intel.zip` from that
+   commit and publishes the release with the zip, a SHA-256 checksum and the
+   readme changelog entry as notes. (Pushing a `vX.Y.Z` tag does the same.)
 
-   ```bash
-   git tag -a v3.5.1 -m "v3.5.1"
-   git push origin v3.5.1
-   ```
-
-   The **Release** workflow checks the tag matches the plugin version, builds
-   `jat-search-intel.zip` from the tag, and attaches it (with a SHA-256 checksum)
-   to the GitHub release, using the readme changelog entry as the notes.
+Releases are immutable once published: the tag and the zip can't be changed
+afterwards, so a fix always ships as a new version.
 
 ### Code Quality Gates
 

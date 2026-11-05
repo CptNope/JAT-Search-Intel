@@ -65,3 +65,6 @@ Thumbs.db
 docker-compose.yml
 
 .gitattributes
+
+# ── Documentation source (published to the GitHub wiki) ─────────────────
+docs/
