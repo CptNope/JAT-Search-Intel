@@ -239,6 +239,9 @@ Sends an HTTP HEAD request to each external URL linked from your content to chec
 * Security: REST SEO data is only public for published, non-password-protected posts; focus keywords and scores now require edit access; duplicate /scores and /meta route registrations from the headless module were removed.
 * Fixed: settings pages no longer round-trip every option through hidden fields, which could flatten nested settings and stop some checkboxes from being turned off.
 * Fixed: title templates using %category%, %search_query% or %sep% were mangled when saved.
+* Fixed: entity markup repeated the rest of the sentence after each marked entity, and matched names inside longer words.
+* Fixed: the %tag% title variable and breadcrumbs could cause a fatal error when WordPress returned an error instead of terms.
+* Fixed: the Table of Contents block preview could fail on WordPress 6.5+ where heading text is stored as rich text.
 * Fixed: saving the SEO page switched off breadcrumb and site-search schema (they now have their own controls).
 * Fixed: /sitemap.xml could be redirected to /sitemap.xml/; robots.txt now lists your sitemaps.
 * Fixed: a second robots meta tag was printed next to WordPress's own; directives are now merged into one.
