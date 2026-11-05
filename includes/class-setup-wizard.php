@@ -207,7 +207,8 @@ class Setup_Wizard {
 			return;
 		}
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Step number for display only.
-		$step  = isset( $_GET['step'] ) ? max( 1, min( 3, absint( $_GET['step'] ) ) ) : 1;
+		$step  = isset( $_GET['step'] ) ? (int) $_GET['step'] : 1;
+		$step  = max( 1, min( 3, $step ) );
 		$s     = array_merge( Core::get_default_settings(), $this->settings, (array) get_option( 'jat_search_intel_settings', [] ) );
 		$steps = [
 			1 => __( 'Who you are', 'jat-search-intel' ),

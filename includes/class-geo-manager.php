@@ -595,7 +595,7 @@ class GEO_Manager {
         }
 
         $post_id   = get_queried_object_id();
-        $author_id = get_post_field( 'post_author', $post_id );
+        $author_id = (int) get_post_field( 'post_author', $post_id );
 
         // Respect E-E-A-T consent — skip if author has not opted in.
         $consent = get_user_meta( $author_id, 'jat_search_intel_eeat_consent', true );

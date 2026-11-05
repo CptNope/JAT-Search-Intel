@@ -472,7 +472,7 @@ class Content_Analyzer {
         }
 
         // 4. Author bio (10 pts)
-        $author_id  = get_post_field( 'post_author', $post_id );
+        $author_id  = (int) get_post_field( 'post_author', $post_id );
         $author_bio = get_the_author_meta( 'description', $author_id );
         if ( $author_bio && strlen( $author_bio ) > 50 ) {
             $score += 10;

@@ -147,7 +147,7 @@ class SEO_Manager {
 
         // Author meta for single posts
         if ( is_singular( 'post' ) ) {
-            $author = get_the_author_meta( 'display_name', get_post_field( 'post_author', get_queried_object_id() ) );
+            $author = get_the_author_meta( 'display_name', (int) get_post_field( 'post_author', get_queried_object_id() ) );
             if ( $author ) {
                 printf( '<meta name="author" content="%s" />' . "\n", esc_attr( $author ) );
             }
@@ -369,7 +369,7 @@ class SEO_Manager {
             }
 
             // Per-post Twitter creator
-            $author_id = get_post_field( 'post_author', $post_id );
+            $author_id = (int) get_post_field( 'post_author', $post_id );
             $twitter   = get_the_author_meta( 'twitter', $author_id );
             if ( $twitter ) {
                 $tags['twitter:creator'] = '@' . ltrim( $twitter, '@' );

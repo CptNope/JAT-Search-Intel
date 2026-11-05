@@ -22,18 +22,11 @@
     </UnusedProperty>
   </file>
   <file src="includes/class-authority-map.php">
-    <InvalidArgument>
-      <code><![CDATA[[ 'hide_empty' => false ]]]></code>
-      <code><![CDATA[[ 'hide_empty' => true ]]]></code>
-    </InvalidArgument>
     <UnusedProperty>
       <code><![CDATA[$settings]]></code>
     </UnusedProperty>
   </file>
   <file src="includes/class-citation-graph.php">
-    <InvalidArgument>
-      <code><![CDATA[[ 'hide_empty' => true ]]]></code>
-    </InvalidArgument>
     <UnusedProperty>
       <code><![CDATA[$settings]]></code>
     </UnusedProperty>
@@ -58,9 +51,6 @@
     </UnusedProperty>
   </file>
   <file src="includes/class-geo-manager.php">
-    <InvalidArgument>
-      <code><![CDATA[[ 'hide_empty' => true, 'number' => 20 ]]]></code>
-    </InvalidArgument>
     <InvalidOperand>
       <code><![CDATA[$modified]]></code>
       <code><![CDATA[$modified]]></code>

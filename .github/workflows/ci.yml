@@ -104,7 +104,7 @@ jobs:
         run: composer install --no-interaction --prefer-dist --ignore-platform-req=php
 
       - name: Run PHPStan
-        run: vendor/bin/phpstan analyse --configuration=phpstan.neon --no-progress --memory-limit=2G
+        run: vendor/bin/phpstan analyse --configuration=phpstan.neon --no-progress --memory-limit=4G
 
   psalm:
     name: Psalm (Level 4)

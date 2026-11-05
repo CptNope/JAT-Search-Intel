@@ -225,7 +225,7 @@ class Title_Engine {
             return get_the_author() ?: '';
         }
         if ( is_singular() ) {
-            $author_id = get_post_field( 'post_author', get_queried_object_id() );
+            $author_id = (int) get_post_field( 'post_author', get_queried_object_id() );
             return get_the_author_meta( 'display_name', $author_id ) ?: '';
         }
 
