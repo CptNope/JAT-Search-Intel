@@ -52,7 +52,8 @@ registerBlockType( 'jat-search-intel/toc', {
 						if ( level <= maxDepth + 1 ) {
 							found.push( {
 								level,
-								content: ( block.attributes.content || '' ).replace( /<[^>]+>/g, '' ),
+								// Content can be a string or RichTextData; parse it as HTML and keep the text only.
+								content: new window.DOMParser().parseFromString( String( block.attributes.content || '' ), 'text/html' ).body.textContent || '',
 								clientId: block.clientId,
 							} );
 						}
