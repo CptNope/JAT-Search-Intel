@@ -1,0 +1,53 @@
+name: Release
+
+# Pushing a tag such as v3.5.0 builds the plugin zip from that tag and attaches it
+# to the GitHub release (creating the release if it does not exist yet).
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build and publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Tag matches the plugin version
+        run: bin/check-version.sh "${GITHUB_REF_NAME}"
+
+      - name: Build zip
+        run: bin/build-zip.sh "${GITHUB_REF_NAME}"
+
+      - name: Checksum
+        run: cd dist && sha256sum jat-search-intel.zip > jat-search-intel.zip.sha256 && cat jat-search-intel.zip.sha256
+
+      - name: Release notes from readme.txt
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          awk -v v="= ${version} =" '
+            $0 == v { found = 1; next }
+            found && /^= [0-9]/ { exit }
+            found && /^== / { exit }
+            found { print }
+          ' readme.txt > notes.md
+          [ -s notes.md ] || echo "See readme.txt for details." > notes.md
+
+      - name: Create or update the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
+            gh release upload "${GITHUB_REF_NAME}" dist/jat-search-intel.zip dist/jat-search-intel.zip.sha256 --clobber
+          else
+            gh release create "${GITHUB_REF_NAME}" dist/jat-search-intel.zip dist/jat-search-intel.zip.sha256 \
+              --title "${GITHUB_REF_NAME}" --notes-file notes.md --verify-tag
+          fi

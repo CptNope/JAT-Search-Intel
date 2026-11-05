@@ -1,0 +1,54 @@
+name: Bug report
+description: Something in JAT Search Intel does not work as expected.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for the report. For security problems, use the private "Report a vulnerability" link instead.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Go to JAT Search Intel → …
+        2. Click …
+        3. See …
+    validations:
+      required: true
+  - type: input
+    id: plugin-version
+    attributes:
+      label: Plugin version
+      placeholder: "3.5.0"
+    validations:
+      required: true
+  - type: input
+    id: wp-version
+    attributes:
+      label: WordPress version
+      placeholder: "6.9"
+    validations:
+      required: true
+  - type: input
+    id: php-version
+    attributes:
+      label: PHP version
+      placeholder: "8.2"
+  - type: textarea
+    id: logs
+    attributes:
+      label: Errors or logs
+      description: PHP errors (debug.log), browser console errors, or the Site Health info for the plugin.
+      render: shell
+  - type: textarea
+    id: plugins
+    attributes:
+      label: Other active plugins and theme
+      description: Especially other SEO, caching or security plugins.

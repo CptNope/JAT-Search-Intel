@@ -4,15 +4,27 @@ on:
   push:
     branches: [main, develop]
   pull_request:
-    branches: [main]
+    branches: [main, develop]
+  workflow_dispatch:
+
+# Read-only token for every job; nothing in CI needs to write to the repo.
+permissions:
+  contents: read
+
+# A new push to the same branch or PR cancels the run it replaces.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   phpunit:
     name: PHPUnit Tests (PHP ${{ matrix.php }})
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     strategy:
+      fail-fast: false
       matrix:
-        php: ['8.1', '8.2', '8.3']
+        php: ['8.1', '8.2', '8.3', '8.4']
     steps:
       - uses: actions/checkout@v5
 
@@ -32,9 +44,35 @@ jobs:
       - name: Run integration tests
         run: vendor/bin/phpunit --testsuite integration --no-coverage
 
+  php-syntax:
+    # The plugin supports PHP 7.4+, older than the dev tools can run on, so every
+    # shipped PHP file is syntax-checked on the oldest and newest supported versions.
+    name: PHP Syntax (PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['7.4', '8.4']
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+
+      - name: Lint shipped PHP files
+        run: |
+          git ls-files -z '*.php' ':!:tests/**' ':!:stubs/**' ':!:phpstan-constants.php' \
+            | xargs -0 -n1 -P4 php -l -d display_errors=1 > lint.log || { grep -v "^No syntax errors" lint.log; exit 1; }
+          echo "$(wc -l < lint.log) files OK"
+
   phpcs:
     name: PHP_CodeSniffer
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
 
@@ -53,6 +91,7 @@ jobs:
   phpstan:
     name: PHPStan (Level 6)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
 
@@ -65,29 +104,12 @@ jobs:
         run: composer install --no-interaction --prefer-dist --ignore-platform-req=php
 
       - name: Run PHPStan
-        run: vendor/bin/phpstan analyse --configuration=phpstan.neon --no-progress
-
-  eslint:
-    name: ESLint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v5
-        with:
-          node-version: '22'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run ESLint
-        run: npx eslint admin/js/ --ext .js
-        continue-on-error: true
+        run: vendor/bin/phpstan analyse --configuration=phpstan.neon --no-progress --memory-limit=2G
 
   psalm:
     name: Psalm (Level 4)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
 
@@ -102,9 +124,10 @@ jobs:
       - name: Run Psalm
         run: vendor/bin/psalm --no-cache --php-version=8.2
 
-  stylelint:
-    name: Stylelint
+  eslint:
+    name: ESLint
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
 
@@ -112,6 +135,26 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npx eslint admin/js/ --ext .js
+
+  stylelint:
+    name: Stylelint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
 
       - name: Install dependencies
         run: npm ci
@@ -119,9 +162,66 @@ jobs:
       - name: Run Stylelint
         run: npx stylelint "admin/css/**/*.css"
 
+  package:
+    # Builds the exact zip that ships, checks it is complete and contains no dev
+    # files, and keeps it as a downloadable artifact for every run.
+    name: Package
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Version numbers agree
+        run: bin/check-version.sh
+
+      - name: Composer files are valid
+        run: composer validate --no-check-publish --no-check-all
+
+      - name: Build zip
+        run: bin/build-zip.sh
+
+      - name: Zip contents
+        run: |
+          unzip -Z1 dist/jat-search-intel.zip > files.txt
+          for required in jat-search-intel/jat-search-intel.php jat-search-intel/readme.txt jat-search-intel/uninstall.php jat-search-intel/LICENSE.md; do
+            grep -qx "$required" files.txt || { echo "::error::Missing from zip: $required"; exit 1; }
+          done
+          if grep -E '^jat-search-intel/(tests|vendor|node_modules|\.github|stubs|bin|dist)/|/\.(git|env)|phpunit|psalm|phpstan|composer\.(json|lock)$' files.txt; then
+            echo "::error::Dev files found in the zip (listed above)"; exit 1
+          fi
+          echo "$(wc -l < files.txt) files, $(du -h dist/jat-search-intel.zip | cut -f1)"
+
+      - name: Upload zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: jat-search-intel
+          path: dist/jat-search-intel.zip
+          retention-days: 14
+
+  plugin-check:
+    # The official WordPress.org Plugin Check, run against the built zip.
+    name: Plugin Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [package]
+    steps:
+      - name: Download zip
+        uses: actions/download-artifact@v4
+        with:
+          name: jat-search-intel
+
+      - name: Unzip
+        run: unzip -q jat-search-intel.zip
+
+      - name: Run Plugin Check
+        uses: wordpress/plugin-check-action@v1
+        with:
+          build-dir: './jat-search-intel'
+
   performance:
     name: Performance Regression Check
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: [phpunit]
     steps:
       - uses: actions/checkout@v5
@@ -138,5 +238,5 @@ jobs:
       - name: Run performance tests
         run: vendor/bin/phpunit --testsuite integration --filter Performance --no-coverage
 
-  # Playwright E2E tests removed from CI to save Actions minutes.
+  # Playwright E2E tests are not run in CI to save Actions minutes.
   # Run locally: npx playwright test

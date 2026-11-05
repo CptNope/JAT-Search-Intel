@@ -34,6 +34,7 @@
 /phpstan-baseline.neon export-ignore
 /.php-cs-fixer.dist.php export-ignore
 /CONTRIBUTING.md export-ignore
+/SECURITY.md export-ignore
 /CHANGELOG.md export-ignore
 /README.md export-ignore
 /ROADMAP.md export-ignore
