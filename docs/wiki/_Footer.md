@@ -1,0 +1,1 @@
+JAT Search Intel · [Releases](https://github.com/CptNope/JAT-Search-Intel/releases) · [Report a bug](https://github.com/CptNope/JAT-Search-Intel/issues/new/choose) · [Report a vulnerability](https://github.com/CptNope/JAT-Search-Intel/security/advisories/new) · Edit these pages in [`docs/wiki/`](https://github.com/CptNope/JAT-Search-Intel/tree/main/docs/wiki)

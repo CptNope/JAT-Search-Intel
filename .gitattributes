@@ -47,3 +47,4 @@
 /.docker export-ignore
 /docker-compose.yml export-ignore
 /.gitattributes export-ignore
+/docs export-ignore
