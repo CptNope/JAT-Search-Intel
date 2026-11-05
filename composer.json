@@ -9,7 +9,7 @@
     "require-dev": {
         "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
         "php-stubs/wordpress-stubs": "^6.9",
-        "phpstan/phpstan": "^1.10",
+        "phpstan/phpstan": "^2.3",
         "phpunit/phpunit": "^9.6",
         "vimeo/psalm": "^6.0",
         "wp-coding-standards/wpcs": "^3.0"
