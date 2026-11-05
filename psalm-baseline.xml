@@ -132,11 +132,6 @@
       <code><![CDATA[$robots]]></code>
     </UnusedVariable>
   </file>
-  <file src="includes/class-visibility-dashboard.php">
-    <InvalidArgument>
-      <code><![CDATA[[ 'hide_empty' => false ]]]></code>
-    </InvalidArgument>
-  </file>
   <file src="includes/class-woocommerce.php">
     <UndefinedFunction>
       <code><![CDATA[get_woocommerce_currency()]]></code>
