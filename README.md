@@ -49,6 +49,8 @@ JAT Search Intel optimizes WordPress content across three dimensions:
 | **AEO** | Featured snippets, voice assistants, PAA | FAQ/HowTo schema, Speakable, concise answer formatting |
 | **GEO** | ChatGPT, Perplexity, Google AI Overviews | AI summaries, llms.txt, entity markup, E-E-A-T, freshness |
 
+There is no paid tier. Since 3.6.0 the free plugin also covers what other SEO plugins sell in premium plans: SEO for categories, tags and other taxonomies, a primary category, site verification, crawl cleanup, Google index status (URL Inspection API), SEO change history with restore, a frozen last-modified date, reading time, a site-wide schema map for AI agents, a Google Preferred Sources button, social previews in the editor and eight AI providers with your own key. See the [wiki](docs/wiki/Features.md) for details.
+
 ```mermaid
 graph LR
     subgraph "JAT Search Intel Plugin"

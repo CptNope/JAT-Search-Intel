@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| **Current version** | 3.5.0 ([download](https://github.com/CptNope/JAT-Search-Intel/releases/latest)) |
+| **Current version** | 3.6.0 ([download](https://github.com/CptNope/JAT-Search-Intel/releases/latest)) |
 | **Requires** | WordPress 6.6+, PHP 7.4+ |
 | **Tested up to** | WordPress 7.1 |
 | **License** | GPLv2 or later |
@@ -14,7 +14,7 @@
 1. **[Installation and Setup](Installation-and-Setup)**: install, run the three-step wizard and check your Readiness score.
 2. **[Features](Features)**: everything the plugin does for SEO, AEO and GEO.
 3. **[AI Search](AI-Search)**: Readiness audit, AI crawler rules, llms.txt, Markdown copies, IndexNow and AI agents.
-4. **[Editor Tools](Editor-Tools)**: the block-editor sidebar, Passage Coach and the six blocks.
+4. **[Editor Tools](Editor-Tools)**: the block-editor sidebar, Passage Coach, the editor panels and the seven blocks.
 
 ## For developers
 

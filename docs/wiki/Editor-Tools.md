@@ -11,6 +11,15 @@ In the block editor, open the **JAT Search Intel** panel from the toolbar. It ha
 | **GEO** | AI summary, key topics, content type, intent, audience, expertise and fact-check date |
 | **Analysis** | SEO, AEO and GEO score rings with recommendations, and a button to re-run the analysis |
 
+The **Post** tab of the editor's settings sidebar also has these panels:
+
+| Panel | What it does |
+|---|---|
+| **Primary category** | Choose the main category when a post has more than one (shown only then) |
+| **Reading time & last modified** | Estimated reading time, and **Don't update the last-modified date** for small fixes |
+| **Social preview** | How the post looks when shared on Facebook, LinkedIn and X |
+| **SEO change history** | Recent changes to the SEO fields, who made them, and **Restore previous values** |
+
 The classic editor gets the same fields in a meta box below the content. Both write to the same post meta, so a value set in one place is used everywhere. When you save from the block editor, the meta box only writes the fields you actually changed in it.
 
 ## Passage Coach
@@ -41,8 +50,11 @@ Search results and AI answers quote single passages, not whole pages. **Passage 
 | **Breadcrumbs** | Theme-aware trail with BreadcrumbList schema |
 | **Answer Box** | A short, highlighted direct answer for featured snippets |
 | **Citation** | An inline source with CreativeWork schema |
+| **Preferred Source on Google** | A button that lets readers add the site as a preferred source in Google, with an optional custom label |
 
 ## Shortcodes
 
 - `[jat_search_intel_html_sitemap post_types="page,post" limit="500"]`: an HTML sitemap for visitors.
+- `[jat_search_intel_reading_time before="" after="read"]`: estimated reading time of the current post, for example "4 min read".
+- `[jat_search_intel_preferred_source label=""]`: the Preferred Source on Google button.
 - `[jat_search_intel_faq]` and `[jat_search_intel_howto]` produce the same markup and schema as the FAQ and How To blocks, for the classic editor. The pre-3.5 names `[search_intel_faq]` and `[search_intel_howto]` still work.

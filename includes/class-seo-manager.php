@@ -25,6 +25,21 @@ class SEO_Manager {
         'seznam'    => 'seznam-wmt',
     ];
 
+    /**
+     * A verification code from what the user pasted: the code itself or the whole
+     * <meta> tag the service shows.
+     *
+     * @param string $raw Pasted text.
+     * @return string
+     */
+    public static function verification_code( string $raw ): string {
+        $raw = trim( $raw );
+        if ( preg_match( '/content\s*=\s*["\']([^"\']+)["\']/i', $raw, $m ) ) {
+            $raw = $m[1];
+        }
+        return (string) preg_replace( '/[^A-Za-z0-9_\-=.:+\/]/', '', $raw );
+    }
+
     public function __construct( array $settings ) {
         $this->settings = $settings;
 
@@ -157,7 +172,8 @@ class SEO_Manager {
         // Search engine and social network ownership verification (they only look at the home page).
         if ( is_front_page() ) {
             foreach ( self::VERIFICATION_TAGS as $service => $tag_name ) {
-                $code = (string) ( $this->settings[ 'verify_' . $service ] ?? '' );
+                // Codes saved by other tools or imports may still be the whole <meta> tag.
+                $code = self::verification_code( (string) ( $this->settings[ 'verify_' . $service ] ?? '' ) );
                 if ( '' !== $code ) {
                     printf( '<meta name="%s" content="%s" />' . "\n", esc_attr( $tag_name ), esc_attr( $code ) );
                 }

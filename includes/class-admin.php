@@ -431,11 +431,7 @@ class Admin {
      * @return string
      */
     public static function sanitize_verification_code( string $raw ): string {
-        $raw = trim( $raw );
-        if ( preg_match( '/content\s*=\s*["\']([^"\']+)["\']/i', $raw, $m ) ) {
-            $raw = $m[1];
-        }
-        return (string) preg_replace( '/[^A-Za-z0-9_\-=.:+\/]/', '', $raw );
+        return SEO_Manager::verification_code( $raw );
     }
 
     /**

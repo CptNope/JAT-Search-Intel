@@ -6,6 +6,30 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.6.0] — 2026-11-07
+
+Everything other SEO plugins keep for their premium plans, free.
+
+### Added
+- **Taxonomy SEO**: title, description, focus keyword, canonical, robots and social fields for every public taxonomy term; noindex whole taxonomies or empty terms (empty terms on by default); noindexed terms leave the sitemap; title templates for taxonomy and other archives.
+- **Primary category** for posts and WooCommerce products, used in permalinks, breadcrumbs, `articleSection` and `%category%`.
+- **Site verification** for Google, Bing, Yandex, Baidu, Pinterest, Facebook, Naver and Seznam.
+- **Crawl cleanup**: twelve switches for head links, headers, feeds and spam searches.
+- **Index Status** from the Search Console URL Inspection API (daily check, manual batches, `wp jat-search-intel index-status`).
+- **SEO change history** with one-click restore (block editor, classic meta box and REST); **robots.txt history** (10 versions).
+- **Freeze last-modified date**, **reading time** (schema, X cards, shortcode) and X card author labels.
+- **Schema map** for AI agents (`/wp-json/jat-search-intel/v1/schema-map`, listed in robots.txt).
+- **Google Preferred Sources** button: block, shortcode or automatic.
+- **Social preview** panel in the block editor.
+- **AI providers**: Google Gemini, Mistral, DeepSeek, OpenRouter and any OpenAI-compatible endpoint. OpenAI defaults to `gpt-5-mini` (sent with `max_completion_tokens`), Anthropic to Claude Haiku 5.5.
+- **Abilities**: `get-term-seo`, `update-term-seo`, `posts-needing-attention`, `get-index-status`, `list-redirects`, `create-redirect` (twelve in total).
+- Filters `jat_search_intel_term_seo_taxonomies` and `jat_search_intel_schema_map_post_types`.
+
+### Fixed
+- The AI settings page wrote a provider's status message as HTML.
+
+---
+
 ## [3.5.0] — 2026-11-05
 
 First WordPress.org release. The full list is in the `== Changelog ==` section of `readme.txt`; the highlights:

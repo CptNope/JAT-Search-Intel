@@ -8,7 +8,7 @@
  * @phpstan-ignore-next-line
  */
 
-define( 'JAT_SEARCH_INTEL_VERSION', '3.5.0' );
+define( 'JAT_SEARCH_INTEL_VERSION', '3.6.0' );
 define( 'JAT_SEARCH_INTEL_FILE', __FILE__ );
 define( 'JAT_SEARCH_INTEL_DIR', __DIR__ . '/' );
 define( 'JAT_SEARCH_INTEL_URL', 'https://example.com/wp-content/plugins/jat-search-intel/' );

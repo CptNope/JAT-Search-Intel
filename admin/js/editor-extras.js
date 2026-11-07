@@ -216,7 +216,7 @@
 		var domain = '';
 		try {
 			domain = new window.URL( post.link || window.location.href ).host;
-		} catch ( e ) {
+		} catch {
 			domain = window.location.host;
 		}
 

@@ -21,6 +21,10 @@ All routes are under the `jat-search-intel/v1` namespace, for example `https://e
 | `GET` | `/aeo/{id}` | public | FAQ, HowTo and direct-answer data for headless front ends |
 | `GET` | `/link-suggestions/{id}` | users who can edit posts | internal link suggestions (Internal linking module) |
 | `GET` | `/orphan-check/{id}` | users who can edit posts | whether the post has incoming internal links |
+| `GET` | `/history/{id}` | users who can edit the post | the post's SEO change history |
+| `POST` | `/history/{id}/restore` | users who can edit the post | put back the values an `entry` changed |
+| `GET` | `/schema-map` | public | XML list of schema feeds (see [Features](Features#geo)) |
+| `GET` | `/schema/{type}/{page}` | public | one feed: the site's Organization/Person and WebSite nodes plus the schema of up to 200 public, indexable posts |
 
 ### Example
 
@@ -37,7 +41,7 @@ The plugin's post meta fields are also registered with `show_in_rest`, so the bl
 
 ## Abilities
 
-On WordPress 6.9 and later, the plugin registers six abilities in the `jat-search-intel` category with the WordPress Abilities API. Any client that speaks the Abilities API can call them, including AI agents connected through the [MCP Adapter](https://github.com/WordPress/mcp-adapter).
+On WordPress 6.9 and later, the plugin registers twelve abilities in the `jat-search-intel` category with the WordPress Abilities API. Any client that speaks the Abilities API can call them, including AI agents connected through the [MCP Adapter](https://github.com/WordPress/mcp-adapter).
 
 | Ability | Who can run it | Type | What it does |
 |---|---|---|---|
@@ -47,6 +51,12 @@ On WordPress 6.9 and later, the plugin registers six abilities in the `jat-searc
 | `jat-search-intel/update-seo-meta` | users who can edit the post | writes | update the SEO title, description and related fields |
 | `jat-search-intel/site-readiness` | administrators | read-only | the AI Search Readiness audit and score |
 | `jat-search-intel/refresh-queue` | editors (`edit_others_posts`) | read-only | pages most in need of a refresh |
+| `jat-search-intel/get-term-seo` | anyone | read-only | SEO fields of a public category, tag or other taxonomy term (the focus keyword only for users who can edit it) |
+| `jat-search-intel/update-term-seo` | users who can edit the term | writes | update a term's SEO fields; fields you leave out are not changed |
+| `jat-search-intel/posts-needing-attention` | editors (`edit_others_posts`) | read-only | published posts with the lowest SEO, AEO or GEO score, or no meta description |
+| `jat-search-intel/get-index-status` | users who can edit the post | reads, or refreshes with `refresh` | Google index status of a post from Search Console |
+| `jat-search-intel/list-redirects` | administrators | read-only | redirect rules, optionally filtered by a search term |
+| `jat-search-intel/create-redirect` | administrators | writes | add a 301, 302, 307 or 410 redirect (exact, prefix or regex) |
 
 Content marked `noindex` or "hide from AI" is never returned by the public abilities. Read-only abilities are called with `GET`, and the others with `POST`:
 
