@@ -102,6 +102,96 @@ $settings = wp_parse_args( $settings, \JAT_Search_Intel\Core::get_default_settin
         </div>
 
         <div class="si-settings-card">
+            <h2><?php esc_html_e( 'Category, Tag and Taxonomy Archives', 'jat-search-intel' ); ?></h2>
+            <p class="description"><?php esc_html_e( 'Each term also has its own SEO title, description, robots and social fields on its edit screen (Posts → Categories → Edit).', 'jat-search-intel' ); ?></p>
+            <table class="form-table">
+                <tr>
+                    <th><?php esc_html_e( 'Empty archives', 'jat-search-intel' ); ?></th>
+                    <td>
+                        <label>
+                            <input type="checkbox" name="jat_search_intel_settings[noindex_empty_terms]" value="1" <?php checked( $settings['noindex_empty_terms'] ); ?> />
+                            <?php esc_html_e( 'Hide categories, tags and terms with no posts from search results', 'jat-search-intel' ); ?>
+                        </label>
+                    </td>
+                </tr>
+                <tr>
+                    <th><?php esc_html_e( 'Hide whole taxonomies', 'jat-search-intel' ); ?></th>
+                    <td>
+                        <input type="hidden" name="jat_search_intel_settings[noindex_taxonomies][]" value="" />
+                        <?php foreach ( \JAT_Search_Intel\Term_SEO::taxonomies() as $si_taxonomy ) : ?>
+                            <?php $si_tax_object = get_taxonomy( $si_taxonomy ); ?>
+                            <label style="display:block;margin-bottom:4px;">
+                                <input type="checkbox" name="jat_search_intel_settings[noindex_taxonomies][]" value="<?php echo esc_attr( $si_taxonomy ); ?>" <?php checked( in_array( $si_taxonomy, (array) $settings['noindex_taxonomies'], true ) ); ?> />
+                                <?php echo esc_html( $si_tax_object ? $si_tax_object->labels->name : $si_taxonomy ); ?> <code><?php echo esc_html( $si_taxonomy ); ?></code>
+                            </label>
+                        <?php endforeach; ?>
+                        <p class="description"><?php esc_html_e( 'Ticked taxonomies get noindex on every archive and are left out of the XML sitemap. Tags are a common choice on sites that use many of them.', 'jat-search-intel' ); ?></p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="si-settings-card">
+            <h2><?php esc_html_e( 'Site Verification', 'jat-search-intel' ); ?></h2>
+            <p class="description"><?php esc_html_e( 'Paste the verification code (or the whole meta tag) each service gives you. The tags are added to your home page.', 'jat-search-intel' ); ?></p>
+            <table class="form-table">
+                <?php
+                $si_verify_labels = [
+                    'google'    => __( 'Google Search Console', 'jat-search-intel' ),
+                    'bing'      => __( 'Bing Webmaster Tools', 'jat-search-intel' ),
+                    'yandex'    => __( 'Yandex Webmaster', 'jat-search-intel' ),
+                    'baidu'     => __( 'Baidu Webmaster', 'jat-search-intel' ),
+                    'naver'     => __( 'Naver Search Advisor', 'jat-search-intel' ),
+                    'seznam'    => __( 'Seznam Webmaster', 'jat-search-intel' ),
+                    'pinterest' => __( 'Pinterest', 'jat-search-intel' ),
+                    'facebook'  => __( 'Facebook (Meta) domain', 'jat-search-intel' ),
+                ];
+                foreach ( $si_verify_labels as $si_service => $si_label ) :
+                    $si_key = 'verify_' . $si_service;
+                    ?>
+                    <tr>
+                        <th><label for="si_<?php echo esc_attr( $si_key ); ?>"><?php echo esc_html( $si_label ); ?></label></th>
+                        <td><input type="text" id="si_<?php echo esc_attr( $si_key ); ?>" name="jat_search_intel_settings[<?php echo esc_attr( $si_key ); ?>]" value="<?php echo esc_attr( (string) $settings[ $si_key ] ); ?>" class="regular-text code" autocomplete="off" /></td>
+                    </tr>
+                <?php endforeach; ?>
+            </table>
+        </div>
+
+        <div class="si-settings-card">
+            <h2><?php esc_html_e( 'Crawl Cleanup', 'jat-search-intel' ); ?></h2>
+            <p class="description"><?php esc_html_e( 'WordPress adds links and headers to every page that most sites never use. Removing them saves crawl budget and tidies your HTML. Feeds keep working; only the links to them are removed.', 'jat-search-intel' ); ?></p>
+            <table class="form-table">
+                <?php
+                $si_cleanup_labels = [
+                    'cleanup_shortlink'          => __( 'Shortlink tag and HTTP header', 'jat-search-intel' ),
+                    'cleanup_rsd'                => __( 'Really Simple Discovery (RSD) link', 'jat-search-intel' ),
+                    'cleanup_wlwmanifest'        => __( 'Windows Live Writer manifest link', 'jat-search-intel' ),
+                    'cleanup_generator'          => __( 'WordPress version (generator tag)', 'jat-search-intel' ),
+                    'cleanup_emoji'              => __( 'Emoji script and styles', 'jat-search-intel' ),
+                    'cleanup_oembed_links'       => __( 'oEmbed discovery links', 'jat-search-intel' ),
+                    'cleanup_rest_link'          => __( 'REST API link and HTTP header', 'jat-search-intel' ),
+                    'cleanup_pingback_header'    => __( 'X-Pingback HTTP header', 'jat-search-intel' ),
+                    'cleanup_feed_comments'      => __( 'Site-wide comments feed link', 'jat-search-intel' ),
+                    'cleanup_feed_post_comments' => __( 'Comments feed links on posts', 'jat-search-intel' ),
+                    'cleanup_feed_extra'         => __( 'Category, tag, author, search and post type feed links', 'jat-search-intel' ),
+                    'cleanup_search_spam'        => __( 'Spam searches (with links, or over 100 characters) return a 404', 'jat-search-intel' ),
+                ];
+                ?>
+                <tr>
+                    <th><?php esc_html_e( 'Remove', 'jat-search-intel' ); ?></th>
+                    <td>
+                        <?php foreach ( $si_cleanup_labels as $si_key => $si_label ) : ?>
+                            <label style="display:block;margin-bottom:4px;">
+                                <input type="checkbox" name="jat_search_intel_settings[<?php echo esc_attr( $si_key ); ?>]" value="1" <?php checked( ! empty( $settings[ $si_key ] ) ); ?> />
+                                <?php echo esc_html( $si_label ); ?>
+                            </label>
+                        <?php endforeach; ?>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="si-settings-card">
             <h2><?php esc_html_e( 'Default Open Graph Image', 'jat-search-intel' ); ?></h2>
             <table class="form-table">
                 <tr>
@@ -251,6 +341,8 @@ $settings = wp_parse_args( $settings, \JAT_Search_Intel\Core::get_default_settin
                 'page'     => __( 'Pages', 'jat-search-intel' ),
                 'category' => __( 'Category Archives', 'jat-search-intel' ),
                 'tag'      => __( 'Tag Archives', 'jat-search-intel' ),
+                'taxonomy' => __( 'Other Taxonomy Archives', 'jat-search-intel' ),
+                'archive'  => __( 'Date and Post Type Archives', 'jat-search-intel' ),
                 'author'   => __( 'Author Archives', 'jat-search-intel' ),
                 'search'   => __( 'Search Results', 'jat-search-intel' ),
                 '404'      => __( '404 Page', 'jat-search-intel' ),

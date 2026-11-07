@@ -182,14 +182,15 @@ class Admin {
                 'enable_ai_engine', 'enable_content_decay', 'enable_cannibalization',
                 'enable_advanced_linking',
                 'enable_historical_analytics', 'enable_ga4', 'enable_cwv',
-                'enable_custom_reports', 'enable_notifications',
+                'enable_custom_reports', 'enable_notifications', 'enable_index_status',
                 'enable_rbac', 'enable_multilang', 'enable_scale',
             ],
             'seo' => [
                 'enable_og', 'enable_twitter', 'enable_canonical', 'enable_robots_meta',
-                'noindex_archives', 'noindex_search', 'noindex_404',
+                'noindex_archives', 'noindex_search', 'noindex_404', 'noindex_empty_terms',
                 'enable_breadcrumbs', 'enable_sitelinks',
                 'enable_image_alt', 'redirect_attachments', 'enable_rss_footer',
+                'cleanup_shortlink', 'cleanup_rsd', 'cleanup_wlwmanifest', 'cleanup_generator', 'cleanup_emoji', 'cleanup_oembed_links', 'cleanup_rest_link', 'cleanup_pingback_header', 'cleanup_feed_comments', 'cleanup_feed_post_comments', 'cleanup_feed_extra', 'cleanup_search_spam',
             ],
             'aeo' => [
                 'enable_faq_schema', 'enable_howto_schema', 'enable_speakable',
@@ -198,6 +199,7 @@ class Admin {
                 'enable_llms_txt', 'enable_ai_meta', 'enable_entity_markup',
                 'content_freshness', 'enable_rest_api',
                 'enable_markdown_endpoints', 'enable_ai_crawler_log',
+                'preferred_source_auto', 'enable_schema_map',
             ],
             'sitemap' => [
                 'enable_news_sitemap', 'enable_video_sitemap',
@@ -219,7 +221,7 @@ class Admin {
         $bool_keys = [
             // Core
             'enable_seo', 'enable_og', 'enable_twitter', 'enable_canonical',
-            'enable_robots_meta', 'noindex_archives', 'noindex_search', 'noindex_404',
+            'enable_robots_meta', 'noindex_archives', 'noindex_search', 'noindex_404', 'noindex_empty_terms',
             'enable_schema', 'enable_breadcrumbs', 'enable_sitelinks',
             'enable_aeo', 'enable_faq_schema', 'enable_howto_schema', 'enable_speakable',
             'enable_geo', 'enable_llms_txt', 'enable_ai_meta', 'enable_entity_markup',
@@ -246,6 +248,9 @@ class Admin {
             'enable_news_sitemap', 'enable_video_sitemap', 'enable_image_alt',
             'redirect_attachments', 'enable_rss_footer', 'enable_markdown_endpoints',
             'enable_ai_crawler_log', 'enable_rank_tracking',
+            // v3.6
+            'preferred_source_auto', 'enable_index_status', 'enable_schema_map',
+            'cleanup_shortlink', 'cleanup_rsd', 'cleanup_wlwmanifest', 'cleanup_generator', 'cleanup_emoji', 'cleanup_oembed_links', 'cleanup_rest_link', 'cleanup_pingback_header', 'cleanup_feed_comments', 'cleanup_feed_post_comments', 'cleanup_feed_extra', 'cleanup_search_spam',
         ];
 
         foreach ( $bool_keys as $key ) {
@@ -287,7 +292,7 @@ class Admin {
         $array_keys = [
             'enabled_post_types', 'sitemap_post_types', 'sitemap_taxonomies',
             'indexnow_providers', 'local_business_locations',
-            'news_post_types',
+            'news_post_types', 'noindex_taxonomies',
         ];
         foreach ( $array_keys as $key ) {
             if ( isset( $input[ $key ] ) && is_array( $input[ $key ] ) ) {
@@ -300,6 +305,17 @@ class Admin {
                 $sanitized[ $key ] = $existing[ $key ] ?? $defaults[ $key ];
             }
         }
+
+        // Site verification codes: keep just the token, even when a whole meta tag is pasted.
+        foreach ( array_keys( SEO_Manager::VERIFICATION_TAGS ) as $service ) {
+            $key = 'verify_' . $service;
+            $sanitized[ $key ] = isset( $input[ $key ] )
+                ? self::sanitize_verification_code( (string) wp_unslash( $input[ $key ] ) )
+                : (string) ( $existing[ $key ] ?? '' );
+        }
+
+        // A hidden empty entry lets "none selected" be saved; drop it.
+        $sanitized['noindex_taxonomies'] = array_values( array_filter( (array) $sanitized['noindex_taxonomies'] ) );
 
         // Numeric (int) — use submitted value if present, otherwise preserve existing.
         $int_keys = [
@@ -406,6 +422,20 @@ class Admin {
         }
 
         return $sanitized;
+    }
+
+    /**
+     * The verification token from a pasted code or full meta tag.
+     *
+     * @param string $raw Raw input.
+     * @return string
+     */
+    public static function sanitize_verification_code( string $raw ): string {
+        $raw = trim( $raw );
+        if ( preg_match( '/content\s*=\s*["\']([^"\']+)["\']/i', $raw, $m ) ) {
+            $raw = $m[1];
+        }
+        return (string) preg_replace( '/[^A-Za-z0-9_\-=.:+\/]/', '', $raw );
     }
 
     /**
@@ -528,9 +558,16 @@ class Admin {
             'audience'              => get_post_meta( $post->ID, '_jat_search_intel_audience', true ),
             'local_relevance'       => get_post_meta( $post->ID, '_jat_search_intel_local_relevance', true ),
             'local_location'        => get_post_meta( $post->ID, '_jat_search_intel_local_location', true ),
+            'primary_category'      => get_post_meta( $post->ID, '_jat_search_intel_primary_category', true ),
+            'freeze_modified'       => get_post_meta( $post->ID, '_jat_search_intel_freeze_modified', true ),
         ];
 
         include JAT_SEARCH_INTEL_DIR . 'admin/views/metabox.php';
+
+        // The block editor shows history in its own panel.
+        if ( ! ( function_exists( 'use_block_editor_for_post' ) && use_block_editor_for_post( $post ) ) ) {
+            SEO_History::render_list( (int) $post->ID );
+        }
 
         // What the form holds right now, so saving can skip fields nobody touched here.
         // Under the block editor the sidebar may have changed them via REST in the same save.
@@ -546,10 +583,11 @@ class Admin {
         '_jat_search_intel_secondary_keywords', '_jat_search_intel_direct_answer',
         '_jat_search_intel_author_expertise_notes', '_jat_search_intel_content_intent',
         '_jat_search_intel_audience', '_jat_search_intel_local_location',
+        '_jat_search_intel_primary_category',
     ];
 
     /** Meta box checkboxes. */
-    private const METABOX_CHECKBOXES = [ '_jat_search_intel_noindex', '_jat_search_intel_nofollow', '_jat_search_intel_ai_noindex', '_jat_search_intel_local_relevance' ];
+    private const METABOX_CHECKBOXES = [ '_jat_search_intel_noindex', '_jat_search_intel_nofollow', '_jat_search_intel_ai_noindex', '_jat_search_intel_local_relevance', '_jat_search_intel_freeze_modified' ];
 
     /**
      * Normalise a meta box text value the way saving does.
@@ -897,8 +935,7 @@ class Admin {
         $provider = sanitize_text_field( wp_unslash( $_POST['provider'] ?? '' ) );
         $api_key  = sanitize_text_field( wp_unslash( $_POST['api_key'] ?? '' ) );
 
-        $valid_providers = [ 'openai', 'anthropic', 'ollama' ];
-        if ( ! in_array( $provider, $valid_providers, true ) ) {
+        if ( ! AI_Engine::is_provider( $provider ) ) {
             wp_send_json_error( [ 'message' => 'Invalid provider.' ] );
         }
 
@@ -922,13 +959,16 @@ class Admin {
         }
 
         $provider = sanitize_text_field( wp_unslash( $_POST['provider'] ?? '' ) );
+        if ( ! AI_Engine::is_provider( $provider ) ) {
+            wp_send_json_error( [ 'message' => 'Invalid provider.' ] );
+        }
 
         // Temporarily override the active provider for this test.
         $settings                = $this->settings;
         $settings['ai_provider'] = $provider;
         $test_engine             = new AI_Engine( $settings );
 
-        if ( 'ollama' !== $provider && $test_engine->get_api_key( $provider ) === '' ) {
+        if ( AI_Engine::provider_details()[ $provider ]['needs_key'] && $test_engine->get_api_key( $provider ) === '' ) {
             wp_send_json_error( [ 'message' => 'No API key saved for this provider. Save a key first.' ] );
         }
 

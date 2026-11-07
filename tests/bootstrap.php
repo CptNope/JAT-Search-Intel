@@ -66,6 +66,17 @@ function remove_action( string $tag, $callback, int $priority = 10 ): bool {
     return true;
 }
 
+function remove_filter( string $tag, $callback, int $priority = 10 ): bool {
+    global $si_test_state;
+    foreach ( $si_test_state['filters'][ $tag ] ?? [] as $i => $filter ) {
+        if ( $filter['callback'] === $callback ) {
+            unset( $si_test_state['filters'][ $tag ][ $i ] );
+            return true;
+        }
+    }
+    return false;
+}
+
 function apply_filters( string $tag, $value, ...$args ) {
     global $si_test_state;
     if ( ! empty( $si_test_state['filters'][ $tag ] ) ) {
@@ -176,6 +187,9 @@ function get_post( $post_id = null ) {
         $post_id = $post_id->ID ?? 0;
     }
     $post_id = (int) $post_id;
+    if ( isset( $si_test_state['wp_posts'][ $post_id ] ) ) {
+        return $si_test_state['wp_posts'][ $post_id ];
+    }
     if ( isset( $si_test_state['posts'][ $post_id ] ) ) {
         return (object) $si_test_state['posts'][ $post_id ];
     }
@@ -199,6 +213,10 @@ function get_queried_object_id(): int {
 }
 
 function get_queried_object() {
+    global $si_test_state;
+    if ( array_key_exists( 'queried_object', $si_test_state ) ) {
+        return $si_test_state['queried_object'];
+    }
     return get_post( 1 );
 }
 
@@ -324,7 +342,8 @@ function get_bloginfo( string $show ): string {
 }
 
 function is_singular( $post_types = '' ): bool {
-    return true;
+    global $si_test_state;
+    return (bool) ( $si_test_state['conditionals']['is_singular'] ?? true );
 }
 
 function is_admin(): bool {
@@ -348,15 +367,18 @@ if ( ! function_exists( 'strip_shortcodes' ) ) {
 }
 
 function is_home(): bool {
-    return false;
+    global $si_test_state;
+    return (bool) ( $si_test_state['conditionals']['is_home'] ?? false );
 }
 
 function is_archive(): bool {
-    return false;
+    global $si_test_state;
+    return (bool) ( $si_test_state['conditionals']['is_archive'] ?? false );
 }
 
 function is_search(): bool {
-    return false;
+    global $si_test_state;
+    return (bool) ( $si_test_state['conditionals']['is_search'] ?? false );
 }
 
 function is_404(): bool {
@@ -364,11 +386,13 @@ function is_404(): bool {
 }
 
 function is_category(): bool {
-    return false;
+    global $si_test_state;
+    return (bool) ( $si_test_state['conditionals']['is_category'] ?? false );
 }
 
 function is_tag(): bool {
-    return false;
+    global $si_test_state;
+    return (bool) ( $si_test_state['conditionals']['is_tag'] ?? false );
 }
 
 function is_author(): bool {
@@ -432,11 +456,16 @@ function get_query_var( string $var, $default = '' ) {
 }
 
 function wp_nonce_field( string $action, string $name = '_wpnonce', bool $referer = true, bool $echo = true ): string {
-    return '<input type="hidden" name="' . esc_attr( $name ) . '" value="test_nonce" />';
+    $field = '<input type="hidden" name="' . esc_attr( $name ) . '" value="test_nonce" />';
+    if ( $echo ) {
+        echo $field;
+    }
+    return $field;
 }
 
 function wp_verify_nonce( string $nonce, string $action ): bool {
-    return true;
+    global $si_test_state;
+    return (bool) ( $si_test_state['nonce_valid'] ?? true );
 }
 
 function check_ajax_referer( string $action, string $query_arg = '' ): bool {
@@ -562,6 +591,10 @@ function get_ancestors( int $object_id, string $object_type = '' ): array {
 }
 
 function get_term( $term, string $taxonomy = '' ) {
+    global $si_test_state;
+    if ( is_scalar( $term ) && isset( $si_test_state['terms'][ (int) $term ] ) ) {
+        return $si_test_state['terms'][ (int) $term ];
+    }
     return (object) [ 'term_id' => $term, 'name' => 'Test Term', 'description' => '' ];
 }
 
@@ -598,7 +631,8 @@ function add_query_arg( ...$args ): string {
     if ( count( $args ) === 2 ) {
         return $args[1] . '?' . http_build_query( $args[0] );
     }
-    return $args[2] ?? '' . '?' . $args[0] . '=' . $args[1];
+    $base = (string) ( $args[2] ?? '' );
+    return $base . ( false === strpos( $base, '?' ) ? '?' : '&' ) . $args[0] . '=' . $args[1];
 }
 
 function get_author_posts_url( int $author_id ): string {
@@ -614,7 +648,8 @@ function wp_list_pluck( array $list, string $field ): array {
 }
 
 function is_tax(): bool {
-    return false;
+    global $si_test_state;
+    return (bool) ( $si_test_state['conditionals']['is_tax'] ?? false );
 }
 
 function is_date(): bool {
@@ -637,8 +672,33 @@ function post_type_archive_title( string $prefix = '', bool $display = true ): s
     return 'Archive';
 }
 
+if ( ! class_exists( 'WP_Term' ) ) {
+    /**
+     * Minimal WP_Term for tests.
+     */
+    class WP_Term {
+        public $term_id = 0;
+        public $name = '';
+        public $slug = '';
+        public $taxonomy = 'category';
+        public $description = '';
+        public $parent = 0;
+        public $count = 0;
+
+        public function __construct( $term = null ) {
+            foreach ( (array) $term as $key => $value ) {
+                $this->$key = $value;
+            }
+        }
+    }
+}
+
 function get_the_category( int $post_id = 0 ): array {
-    return [ (object) [ 'name' => 'Uncategorized', 'term_id' => 1 ] ];
+    global $si_test_state;
+    if ( isset( $si_test_state['post_terms'][ $post_id ]['category'] ) ) {
+        return (array) $si_test_state['post_terms'][ $post_id ]['category'];
+    }
+    return [ new WP_Term( [ 'name' => 'Uncategorized', 'term_id' => 1, 'slug' => 'uncategorized' ] ) ];
 }
 
 function get_the_tags( int $post_id = 0 ) {
@@ -674,7 +734,8 @@ function wp_count_terms( array $args = [] ) {
 }
 
 function get_taxonomies( array $args = [], string $output = 'names' ) {
-    return [];
+    global $si_test_state;
+    return $si_test_state['taxonomies'] ?? [];
 }
 
 function taxonomy_exists( string $taxonomy ): bool {
@@ -686,7 +747,7 @@ function get_terms( array $args = [] ): array {
 }
 
 function is_wp_error( $thing ): bool {
-    return false;
+    return $thing instanceof WP_Error;
 }
 
 function selected( $selected, $current = true, bool $echo = true ): string {
@@ -754,8 +815,19 @@ if ( ! class_exists( 'WP_REST_Request' ) ) {
         private $json_params = [];
         private $method = 'GET';
 
+        private $route = '';
+
         public function __construct( string $method = 'GET', string $route = '' ) {
             $this->method = $method;
+            $this->route  = $route;
+        }
+
+        public function get_route(): string {
+            return $this->route;
+        }
+
+        public function get_method(): string {
+            return $this->method;
         }
 
         public function set_param( string $key, $value ): void {
@@ -809,6 +881,16 @@ if ( ! class_exists( 'WP_REST_Response' ) ) {
 
         public function get_status(): int {
             return $this->status;
+        }
+
+        public $headers = [];
+
+        public function header( string $key, string $value, bool $replace = true ): void {
+            $this->headers[ $key ] = $value;
+        }
+
+        public function get_headers(): array {
+            return $this->headers;
         }
     }
 }
@@ -1534,9 +1616,14 @@ if ( ! class_exists( 'WP_Error' ) ) {
 	class WP_Error {
 		private $code;
 		private $message;
+		private $data;
 		public function __construct( $code = '', $message = '', $data = '' ) {
 			$this->code    = $code;
 			$this->message = $message;
+			$this->data    = $data;
+		}
+		public function get_error_data() {
+			return $this->data;
 		}
 		public function get_error_message() {
 			return $this->message;
@@ -1635,3 +1722,93 @@ if ( ! function_exists( 'wp_schedule_single_event' ) ) {
 		return true;
 	}
 }
+
+// ── Term meta, URLs and misc stubs used by the 3.6 features ─────────────────
+
+if ( ! function_exists( 'get_term_meta' ) ) {
+	function get_term_meta( int $term_id, string $key = '', bool $single = false ) {
+		global $si_test_state;
+		if ( '' === $key ) {
+			return $si_test_state['term_meta'][ $term_id ] ?? [];
+		}
+		$value = $si_test_state['term_meta'][ $term_id ][ $key ] ?? '';
+		return $single ? $value : ( '' === $value ? [] : [ $value ] );
+	}
+	function update_term_meta( int $term_id, string $key, $value ) {
+		$GLOBALS['si_test_state']['term_meta'][ $term_id ][ $key ] = $value;
+		return true;
+	}
+	function delete_term_meta( int $term_id, string $key ): bool {
+		unset( $GLOBALS['si_test_state']['term_meta'][ $term_id ][ $key ] );
+		return true;
+	}
+}
+
+if ( ! function_exists( 'rest_url' ) ) {
+	function rest_url( string $path = '' ): string {
+		return 'https://example.com/wp-json/' . ltrim( $path, '/' );
+	}
+}
+
+if ( ! function_exists( 'get_pagenum_link' ) ) {
+	function get_pagenum_link( int $pagenum = 1 ): string {
+		return 'https://example.com/category/news/' . ( $pagenum > 1 ? 'page/' . $pagenum . '/' : '' );
+	}
+}
+
+if ( ! function_exists( 'wp_date' ) ) {
+	function wp_date( string $format, ?int $timestamp = null ) {
+		return gmdate( $format, $timestamp ?? time() );
+	}
+}
+
+if ( ! function_exists( 'is_main_query' ) ) {
+	function is_main_query(): bool {
+		return (bool) ( $GLOBALS['si_test_state']['conditionals']['is_main_query'] ?? true );
+	}
+	function in_the_loop(): bool {
+		return (bool) ( $GLOBALS['si_test_state']['conditionals']['in_the_loop'] ?? true );
+	}
+}
+
+if ( ! function_exists( '_n' ) ) {
+	function _n( string $single, string $plural, int $number, string $domain = 'default' ): string {
+		return 1 === $number ? $single : $plural;
+	}
+}
+
+if ( ! function_exists( 'check_admin_referer' ) ) {
+	function check_admin_referer( $action = -1, string $query_arg = '_wpnonce' ) {
+		return 1;
+	}
+}
+
+if ( ! function_exists( 'is_ssl' ) ) {
+	function is_ssl(): bool {
+		return true;
+	}
+}
+
+if ( ! class_exists( 'WP_Post' ) ) {
+	/**
+	 * Minimal WP_Post for tests. get_post() still returns plain objects unless
+	 * a test stores a WP_Post in $si_test_state['wp_posts'].
+	 */
+	final class WP_Post {
+		public $ID = 0;
+		public $post_status = 'publish';
+		public $post_type = 'post';
+		public $post_content = '';
+		public $post_title = '';
+		public $post_modified = '';
+		public $post_modified_gmt = '';
+
+		public function __construct( $post = null ) {
+			foreach ( (array) $post as $key => $value ) {
+				$this->$key = $value;
+			}
+		}
+	}
+}
+
+require_once __DIR__ . '/support/ParityTestCase.php';

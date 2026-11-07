@@ -58,9 +58,15 @@ $usage     = $ai_engine->get_token_usage();
                         <input type="text" id="si_ai_model" name="jat_search_intel_settings[ai_model]" value="<?php echo esc_attr( $settings['ai_model'] ); ?>" class="regular-text" placeholder="<?php esc_attr_e( 'Leave blank for default', 'jat-search-intel' ); ?>" />
                         <p class="description">
                             <?php esc_html_e( 'Defaults:', 'jat-search-intel' ); ?>
-                            <strong>OpenAI:</strong> gpt-4o-mini &nbsp;|&nbsp;
-                            <strong>Anthropic:</strong> claude-3-5-haiku-20241022 &nbsp;|&nbsp;
-                            <strong>Ollama:</strong> llama3.2
+                            <?php
+                            $si_defaults = [];
+                            foreach ( \JAT_Search_Intel\AI_Engine::provider_details() as $si_details ) {
+                                if ( '' !== $si_details['model'] ) {
+                                    $si_defaults[] = '<strong>' . esc_html( $si_details['label'] ) . ':</strong> <code>' . esc_html( $si_details['model'] ) . '</code>';
+                                }
+                            }
+                            echo wp_kses_post( implode( ' &nbsp;|&nbsp; ', $si_defaults ) );
+                            ?>
                         </p>
                     </td>
                 </tr>
@@ -68,7 +74,7 @@ $usage     = $ai_engine->get_token_usage();
                     <th><label for="si_ai_endpoint"><?php esc_html_e( 'Custom Endpoint', 'jat-search-intel' ); ?></label></th>
                     <td>
                         <input type="url" id="si_ai_endpoint" name="jat_search_intel_settings[ai_endpoint]" value="<?php echo esc_url( $settings['ai_endpoint'] ); ?>" class="regular-text" placeholder="<?php esc_attr_e( 'Leave blank for default', 'jat-search-intel' ); ?>" />
-                        <p class="description"><?php esc_html_e( 'For Ollama: your local server URL (e.g. http://localhost:11434). For OpenAI/Anthropic: use a proxy or compatible endpoint.', 'jat-search-intel' ); ?></p>
+                        <p class="description"><?php esc_html_e( 'For Ollama: your local server URL (e.g. http://localhost:11434). For "Other OpenAI-compatible API": its base URL (e.g. https://api.groq.com/openai/v1), and set the model above. Otherwise leave blank.', 'jat-search-intel' ); ?></p>
                     </td>
                 </tr>
             </table>
@@ -79,46 +85,56 @@ $usage     = $ai_engine->get_token_usage();
             <h2><?php esc_html_e( 'API Keys', 'jat-search-intel' ); ?></h2>
             <p class="description" style="margin-bottom: 12px;"><?php esc_html_e( 'API keys are encrypted before storage. They are never exposed in page source or exports.', 'jat-search-intel' ); ?></p>
             <table class="form-table">
-                <tr class="si-api-key-row" data-provider="openai">
-                    <th><label for="si_api_key_openai"><?php esc_html_e( 'OpenAI API Key', 'jat-search-intel' ); ?></label></th>
-                    <td>
-                        <div style="display:flex; gap:8px; align-items:center;">
-                            <input type="password" id="si_api_key_openai" class="regular-text si-api-key-input" data-provider="openai" placeholder="sk-..." value="<?php echo $ai_engine->get_api_key( 'openai' ) !== '' ? '••••••••••••••••' : ''; ?>" autocomplete="off" />
-                            <button type="button" class="button si-save-api-key" data-provider="openai"><?php esc_html_e( 'Save Key', 'jat-search-intel' ); ?></button>
-                            <button type="button" class="button si-test-api-key" data-provider="openai"><?php esc_html_e( 'Test', 'jat-search-intel' ); ?></button>
-                            <span class="si-api-key-status" data-provider="openai">
-                                <?php if ( $ai_engine->get_api_key( 'openai' ) !== '' ) : ?>
-                                    <span class="si-status-saved">&#10003; <?php esc_html_e( 'Saved', 'jat-search-intel' ); ?></span>
+                <?php foreach ( \JAT_Search_Intel\AI_Engine::provider_details() as $si_provider => $si_details ) : ?>
+                    <?php if ( ! $si_details['needs_key'] ) : ?>
+                        <tr class="si-api-key-row" data-provider="<?php echo esc_attr( $si_provider ); ?>">
+                            <th><?php echo esc_html( $si_details['label'] ); ?></th>
+                            <td>
+                                <p class="description">
+                                    <?php
+                                    echo 'ollama' === $si_provider
+                                        ? esc_html__( 'Ollama runs locally, so no API key is needed. Make sure it is running and reachable from your server.', 'jat-search-intel' )
+                                        : esc_html__( 'Set the endpoint and model above. Add a key below only if your server needs one.', 'jat-search-intel' );
+                                    ?>
+                                </p>
+                                <?php if ( 'openai_compatible' === $si_provider ) : ?>
+                                    <div style="display:flex; gap:8px; align-items:center; margin:6px 0;">
+                                        <input type="password" id="si_api_key_<?php echo esc_attr( $si_provider ); ?>" class="regular-text si-api-key-input" data-provider="<?php echo esc_attr( $si_provider ); ?>" value="<?php echo $ai_engine->get_api_key( $si_provider ) !== '' ? '••••••••••••••••' : ''; ?>" autocomplete="off" />
+                                        <button type="button" class="button si-save-api-key" data-provider="<?php echo esc_attr( $si_provider ); ?>"><?php esc_html_e( 'Save Key', 'jat-search-intel' ); ?></button>
+                                    </div>
                                 <?php endif; ?>
-                            </span>
-                        </div>
-                        <p class="description"><a href="https://platform.openai.com/api-keys" target="_blank"><?php esc_html_e( 'Get your OpenAI API key →', 'jat-search-intel' ); ?></a></p>
-                    </td>
-                </tr>
-                <tr class="si-api-key-row" data-provider="anthropic">
-                    <th><label for="si_api_key_anthropic"><?php esc_html_e( 'Anthropic API Key', 'jat-search-intel' ); ?></label></th>
-                    <td>
-                        <div style="display:flex; gap:8px; align-items:center;">
-                            <input type="password" id="si_api_key_anthropic" class="regular-text si-api-key-input" data-provider="anthropic" placeholder="sk-ant-..." value="<?php echo $ai_engine->get_api_key( 'anthropic' ) !== '' ? '••••••••••••••••' : ''; ?>" autocomplete="off" />
-                            <button type="button" class="button si-save-api-key" data-provider="anthropic"><?php esc_html_e( 'Save Key', 'jat-search-intel' ); ?></button>
-                            <button type="button" class="button si-test-api-key" data-provider="anthropic"><?php esc_html_e( 'Test', 'jat-search-intel' ); ?></button>
-                            <span class="si-api-key-status" data-provider="anthropic">
-                                <?php if ( $ai_engine->get_api_key( 'anthropic' ) !== '' ) : ?>
-                                    <span class="si-status-saved">&#10003; <?php esc_html_e( 'Saved', 'jat-search-intel' ); ?></span>
-                                <?php endif; ?>
-                            </span>
-                        </div>
-                        <p class="description"><a href="https://console.anthropic.com/settings/keys" target="_blank"><?php esc_html_e( 'Get your Anthropic API key →', 'jat-search-intel' ); ?></a></p>
-                    </td>
-                </tr>
-                <tr class="si-api-key-row" data-provider="ollama">
-                    <th><?php esc_html_e( 'Ollama (Local)', 'jat-search-intel' ); ?></th>
-                    <td>
-                        <p class="description"><?php esc_html_e( 'Ollama runs locally — no API key required. Ensure Ollama is running on your server.', 'jat-search-intel' ); ?></p>
-                        <button type="button" class="button si-test-api-key" data-provider="ollama"><?php esc_html_e( 'Test Connection', 'jat-search-intel' ); ?></button>
-                        <span class="si-api-key-status" data-provider="ollama"></span>
-                    </td>
-                </tr>
+                                <button type="button" class="button si-test-api-key" data-provider="<?php echo esc_attr( $si_provider ); ?>"><?php esc_html_e( 'Test Connection', 'jat-search-intel' ); ?></button>
+                                <span class="si-api-key-status" data-provider="<?php echo esc_attr( $si_provider ); ?>"></span>
+                            </td>
+                        </tr>
+                        <?php continue; ?>
+                    <?php endif; ?>
+                    <tr class="si-api-key-row" data-provider="<?php echo esc_attr( $si_provider ); ?>">
+                        <th>
+                            <label for="si_api_key_<?php echo esc_attr( $si_provider ); ?>">
+                                <?php
+                                /* translators: %s: AI provider name. */
+                                echo esc_html( sprintf( __( '%s API Key', 'jat-search-intel' ), $si_details['label'] ) );
+                                ?>
+                            </label>
+                        </th>
+                        <td>
+                            <div style="display:flex; gap:8px; align-items:center;">
+                                <input type="password" id="si_api_key_<?php echo esc_attr( $si_provider ); ?>" class="regular-text si-api-key-input" data-provider="<?php echo esc_attr( $si_provider ); ?>" value="<?php echo $ai_engine->get_api_key( $si_provider ) !== '' ? '••••••••••••••••' : ''; ?>" autocomplete="off" />
+                                <button type="button" class="button si-save-api-key" data-provider="<?php echo esc_attr( $si_provider ); ?>"><?php esc_html_e( 'Save Key', 'jat-search-intel' ); ?></button>
+                                <button type="button" class="button si-test-api-key" data-provider="<?php echo esc_attr( $si_provider ); ?>"><?php esc_html_e( 'Test', 'jat-search-intel' ); ?></button>
+                                <span class="si-api-key-status" data-provider="<?php echo esc_attr( $si_provider ); ?>">
+                                    <?php if ( $ai_engine->get_api_key( $si_provider ) !== '' ) : ?>
+                                        <span class="si-status-saved">&#10003; <?php esc_html_e( 'Saved', 'jat-search-intel' ); ?></span>
+                                    <?php endif; ?>
+                                </span>
+                            </div>
+                            <?php if ( '' !== $si_details['key_url'] ) : ?>
+                                <p class="description"><a href="<?php echo esc_url( $si_details['key_url'] ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Get an API key →', 'jat-search-intel' ); ?></a></p>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
             </table>
         </div>
 
@@ -181,6 +197,11 @@ jQuery(function ($) {
     var ajaxUrl = '<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>';
     var nonce   = '<?php echo esc_js( wp_create_nonce( 'si_ai_settings' ) ); ?>';
 
+    // Messages can come from a remote AI server, so they are always inserted as text.
+    function setStatus(el, cls, text) {
+        el.empty().append($('<span>').addClass(cls).text(text));
+    }
+
     // Save API key via AJAX (encrypted storage).
     $('.si-save-api-key').on('click', function () {
         var btn      = $(this);
@@ -190,12 +211,12 @@ jQuery(function ($) {
         var status   = $('.si-api-key-status[data-provider="' + provider + '"]');
 
         if (!apiKey || apiKey === '••••••••••••••••') {
-            status.html('<span class="si-status-error">Enter a new key first.</span>');
+            setStatus(status, 'si-status-error', 'Enter a new key first.');
             return;
         }
 
         btn.prop('disabled', true);
-        status.html('<span class="si-status-testing">Saving...</span>');
+        setStatus(status, 'si-status-testing', 'Saving...');
 
         $.post(ajaxUrl, {
             action: 'jat_search_intel_save_ai_api_key',
@@ -205,14 +226,14 @@ jQuery(function ($) {
         }, function (response) {
             btn.prop('disabled', false);
             if (response.success) {
-                status.html('<span class="si-status-saved">&#10003; Saved</span>');
+                setStatus(status, 'si-status-saved', '\u2713 Saved');
                 input.val('••••••••••••••••');
             } else {
-                status.html('<span class="si-status-error">' + (response.data.message || 'Error') + '</span>');
+                setStatus(status, 'si-status-error', (response.data && response.data.message) || 'Error');
             }
         }).fail(function () {
             btn.prop('disabled', false);
-            status.html('<span class="si-status-error">Request failed.</span>');
+            setStatus(status, 'si-status-error', 'Request failed.');
         });
     });
 
@@ -223,7 +244,7 @@ jQuery(function ($) {
         var status   = $('.si-api-key-status[data-provider="' + provider + '"]');
 
         btn.prop('disabled', true);
-        status.html('<span class="si-status-testing">Testing...</span>');
+        setStatus(status, 'si-status-testing', 'Testing...');
 
         $.post(ajaxUrl, {
             action: 'jat_search_intel_test_ai_connection',
@@ -232,13 +253,13 @@ jQuery(function ($) {
         }, function (response) {
             btn.prop('disabled', false);
             if (response.success) {
-                status.html('<span class="si-status-saved">&#10003; ' + response.data.message + '</span>');
+                setStatus(status, 'si-status-saved', '\u2713 ' + response.data.message);
             } else {
-                status.html('<span class="si-status-error">&#10007; ' + (response.data.message || 'Connection failed') + '</span>');
+                setStatus(status, 'si-status-error', '\u2717 ' + ((response.data && response.data.message) || 'Connection failed'));
             }
         }).fail(function () {
             btn.prop('disabled', false);
-            status.html('<span class="si-status-error">Request failed.</span>');
+            setStatus(status, 'si-status-error', 'Request failed.');
         });
     });
 

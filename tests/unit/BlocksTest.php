@@ -78,14 +78,14 @@ class BlocksTest extends TestCase {
 
 	// ── register_meta() ─────────────────────────────────────────────────────
 
-	public function test_register_meta_registers_all_28_keys(): void {
+	public function test_register_meta_registers_all_31_keys(): void {
 		global $si_registered_meta;
 
 		$this->blocks->register_meta();
 
 		// get_post_types stub returns ['post' => ...], so we check 'post'.
 		$this->assertArrayHasKey( 'post', $si_registered_meta );
-		$this->assertCount( 28, $si_registered_meta['post'] );
+		$this->assertCount( 31, $si_registered_meta['post'] );
 	}
 
 	public function test_register_meta_keys_start_with_prefix(): void {
@@ -422,7 +422,7 @@ class BlocksTest extends TestCase {
 
 		( new \JAT_Search_Intel\Blocks() )->register_blocks();
 
-		$this->assertSame( [ 'jat-search-intel/toc', 'jat-search-intel/breadcrumbs' ], array_keys( $si_registered_blocks ) );
+		$this->assertSame( [ 'jat-search-intel/toc', 'jat-search-intel/breadcrumbs', 'jat-search-intel/preferred-source' ], array_keys( $si_registered_blocks ) );
 		$this->assertSame( [], $si_registered_scripts );
 	}
 }

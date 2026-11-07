@@ -30,6 +30,9 @@ class Blocks {
 		'_jat_search_intel_twitter_title'      => [ 'type' => 'string', 'default' => '' ],
 		'_jat_search_intel_twitter_description'=> [ 'type' => 'string', 'default' => '' ],
 		'_jat_search_intel_twitter_image'      => [ 'type' => 'string', 'default' => '' ],
+		'_jat_search_intel_primary_category'   => [ 'type' => 'string', 'default' => '' ],
+		'_jat_search_intel_primary_product_cat'=> [ 'type' => 'string', 'default' => '' ],
+		'_jat_search_intel_freeze_modified'    => [ 'type' => 'string', 'default' => '' ],
 		'_jat_search_intel_secondary_keywords' => [ 'type' => 'string', 'default' => '' ],
 		'_jat_search_intel_direct_answer'      => [ 'type' => 'string', 'default' => '' ],
 		'_jat_search_intel_schema_type'        => [ 'type' => 'string', 'default' => '' ],
@@ -94,6 +97,8 @@ class Blocks {
 	 * Enqueue sidebar panel script in the block editor.
 	 */
 	public function enqueue_sidebar(): void {
+		wp_enqueue_script( 'jat-search-intel-editor-extras' );
+
 		$asset_file = JAT_SEARCH_INTEL_DIR . 'build/sidebar.asset.php';
 
 		if ( ! file_exists( $asset_file ) ) {
@@ -182,8 +187,24 @@ class Blocks {
 					register_block_type( "jat-search-intel/{$slug}", [ 'render_callback' => $args['render_callback'] ] );
 				}
 			}
+			register_block_type( 'jat-search-intel/preferred-source', self::preferred_source_args() );
 			return;
 		}
+
+		// Plain editor script (no build step): the Preferred Source block and the
+		// Primary category, Social preview and Modified date panels.
+		wp_register_script(
+			'jat-search-intel-editor-extras',
+			JAT_SEARCH_INTEL_URL . 'admin/js/editor-extras.js',
+			[ 'wp-plugins', 'wp-editor', 'wp-element', 'wp-components', 'wp-data', 'wp-core-data', 'wp-blocks', 'wp-block-editor', 'wp-server-side-render', 'wp-i18n', 'wp-api-fetch' ],
+			JAT_SEARCH_INTEL_VERSION,
+			true
+		);
+		wp_set_script_translations( 'jat-search-intel-editor-extras', 'jat-search-intel' );
+		register_block_type(
+			'jat-search-intel/preferred-source',
+			self::preferred_source_args() + [ 'editor_script_handles' => [ 'jat-search-intel-editor-extras' ] ]
+		);
 
 		foreach ( $blocks as $slug => $args ) {
 			$script_asset = JAT_SEARCH_INTEL_DIR . "build/blocks/{$slug}/index.asset.php";
@@ -232,6 +253,21 @@ class Blocks {
 
 			register_block_type( "jat-search-intel/{$slug}", $block_args );
 		}
+	}
+
+	/**
+	 * Server-side registration of the Preferred Source block.
+	 *
+	 * @return array<string,mixed>
+	 */
+	private static function preferred_source_args(): array {
+		return [
+			'api_version'     => 3,
+			'title'           => __( 'Preferred Source on Google', 'jat-search-intel' ),
+			'category'        => 'widgets',
+			'attributes'      => [ 'label' => [ 'type' => 'string', 'default' => '' ] ],
+			'render_callback' => [ Preferred_Source::class, 'render_block' ],
+		];
 	}
 
 	/**
@@ -313,10 +349,9 @@ class Blocks {
 		];
 
 		if ( is_singular() && $post ) {
-			// Category (first one).
-			$categories = get_the_category( $post->ID );
-			if ( ! empty( $categories ) ) {
-				$cat      = $categories[0];
+			// Primary category.
+			$cat = Primary_Term::get_term( (int) $post->ID, 'category' );
+			if ( $cat ) {
 				$items[] = [
 					'name' => esc_html( $cat->name ),
 					'url'  => esc_url( get_category_link( $cat->term_id ) ),

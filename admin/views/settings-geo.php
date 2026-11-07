@@ -163,6 +163,21 @@ $settings = wp_parse_args( $settings, \JAT_Search_Intel\Core::get_default_settin
                     </td>
                 </tr>
                 <tr>
+                    <th><?php esc_html_e( 'Schema Map', 'jat-search-intel' ); ?></th>
+                    <td>
+                        <label>
+                            <input type="checkbox" name="jat_search_intel_settings[enable_schema_map]" value="1" <?php checked( ! empty( $settings['enable_schema_map'] ) ); ?> />
+                            <?php esc_html_e( 'Publish all your structured data in one feed for AI agents, listed in robots.txt', 'jat-search-intel' ); ?>
+                        </label>
+                        <p class="description">
+                            <?php esc_html_e( 'Agents read your organization, site and every public post\'s schema without crawling each page. Posts set to noindex or hidden from AI are left out.', 'jat-search-intel' ); ?>
+                            <?php if ( ! empty( $settings['enable_schema_map'] ) && ! empty( $settings['enable_schema'] ) ) : ?>
+                                <a href="<?php echo esc_url( \JAT_Search_Intel\Schema_Map::map_url() ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'View schema map', 'jat-search-intel' ); ?></a>
+                            <?php endif; ?>
+                        </p>
+                    </td>
+                </tr>
+                <tr>
                     <th><?php esc_html_e( 'AI Traffic Analytics', 'jat-search-intel' ); ?></th>
                     <td>
                         <label>
@@ -233,6 +248,36 @@ $settings = wp_parse_args( $settings, \JAT_Search_Intel\Core::get_default_settin
                             </tbody>
                         </table>
                         <p class="description"><?php esc_html_e( 'Blocked crawlers get a "Disallow: /" group in your robots.txt. Blocking "AI search" crawlers removes you from that assistant\'s answers; most sites block training only. "Live fetch" agents act for a person and may not obey robots.txt.', 'jat-search-intel' ); ?></p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="si-settings-card">
+            <h2><?php esc_html_e( 'Preferred Source on Google', 'jat-search-intel' ); ?></h2>
+            <p class="description"><?php esc_html_e( 'Readers can choose your site as a preferred source on Google, so your stories appear more often for them in Top Stories and AI Mode. This button takes them straight to that setting.', 'jat-search-intel' ); ?></p>
+            <table class="form-table">
+                <tr>
+                    <th><?php esc_html_e( 'Button', 'jat-search-intel' ); ?></th>
+                    <td>
+                        <label>
+                            <input type="checkbox" name="jat_search_intel_settings[preferred_source_auto]" value="1" <?php checked( ! empty( $settings['preferred_source_auto'] ) ); ?> />
+                            <?php esc_html_e( 'Add the button at the end of every post', 'jat-search-intel' ); ?>
+                        </label>
+                        <p class="description">
+                            <?php
+                            printf(
+                                /* translators: 1: shortcode, 2: block name. */
+                                esc_html__( 'Or place it yourself with the %1$s shortcode or the %2$s block.', 'jat-search-intel' ),
+                                '<code>[jat_search_intel_preferred_source]</code>',
+                                '<strong>' . esc_html__( 'Preferred Source on Google', 'jat-search-intel' ) . '</strong>'
+                            );
+                            ?>
+                        </p>
+                        <?php if ( ! \JAT_Search_Intel\Preferred_Source::is_eligible() ) : ?>
+                            <p class="description" style="color:#b32d2e;"><?php esc_html_e( 'Google only accepts whole domains or subdomains as preferred sources, and this site is in a subdirectory, so the button won\'t work here.', 'jat-search-intel' ); ?></p>
+                        <?php endif; ?>
+                        <p><a href="<?php echo esc_url( \JAT_Search_Intel\Preferred_Source::url() ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Check that your site appears in Google\'s source preferences', 'jat-search-intel' ); ?></a></p>
                     </td>
                 </tr>
             </table>

@@ -46,7 +46,7 @@ class AIEngineTest extends TestCase {
 
     public function test_get_model_returns_default_for_openai(): void {
         $ai = $this->make();
-        $this->assertSame( 'gpt-4o-mini', $ai->get_model() );
+        $this->assertSame( 'gpt-5-mini', $ai->get_model() );
     }
 
     public function test_get_model_uses_custom_when_set(): void {

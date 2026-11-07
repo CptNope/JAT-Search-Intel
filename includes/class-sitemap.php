@@ -189,7 +189,7 @@ class Sitemap {
         // Taxonomy sitemaps (v1.1: configurable via settings)
         $sitemap_taxonomies = $this->settings['sitemap_taxonomies'] ?? [ 'category' ];
         foreach ( $sitemap_taxonomies as $tax ) {
-            if ( ! taxonomy_exists( $tax ) ) {
+            if ( ! taxonomy_exists( $tax ) || in_array( $tax, (array) ( $this->settings['noindex_taxonomies'] ?? [] ), true ) ) {
                 continue;
             }
             $terms = get_terms( [ 'taxonomy' => $tax, 'hide_empty' => true, 'number' => 1 ] );
@@ -314,6 +314,10 @@ class Sitemap {
         }
 
         foreach ( $terms as $term ) {
+            // Archives kept out of search, or canonicalised to another URL, don't belong here.
+            if ( Term_SEO::is_noindex( $term, $this->settings ) || '' !== Term_SEO::get( (int) $term->term_id, 'canonical' ) ) {
+                continue;
+            }
             $link = get_term_link( $term );
             if ( is_wp_error( $link ) ) {
                 continue;

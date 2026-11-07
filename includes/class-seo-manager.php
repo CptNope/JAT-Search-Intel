@@ -13,6 +13,18 @@ class SEO_Manager {
     /** @var array */
     private $settings;
 
+    /** Verification service => meta tag name, printed on the home page. */
+    public const VERIFICATION_TAGS = [
+        'google'    => 'google-site-verification',
+        'bing'      => 'msvalidate.01',
+        'yandex'    => 'yandex-verification',
+        'baidu'     => 'baidu-site-verification',
+        'pinterest' => 'p:domain_verify',
+        'facebook'  => 'facebook-domain-verification',
+        'naver'     => 'naver-site-verification',
+        'seznam'    => 'seznam-wmt',
+    ];
+
     public function __construct( array $settings ) {
         $this->settings = $settings;
 
@@ -131,11 +143,8 @@ class SEO_Manager {
             $description = $this->get_description( $post_id );
         } elseif ( is_front_page() ) {
             $description = get_bloginfo( 'description' );
-        } elseif ( is_category() || is_tag() || is_tax() ) {
-            $term = get_queried_object();
-            if ( $term && ! empty( $term->description ) ) {
-                $description = wp_trim_words( $term->description, 30, '...' );
-            }
+        } elseif ( $this->current_term() ) {
+            $description = $this->get_term_description( $this->current_term() );
         }
 
         if ( $description ) {
@@ -143,6 +152,16 @@ class SEO_Manager {
                 '<meta name="description" content="%s" />' . "\n",
                 esc_attr( wp_strip_all_tags( $description ) )
             );
+        }
+
+        // Search engine and social network ownership verification (they only look at the home page).
+        if ( is_front_page() ) {
+            foreach ( self::VERIFICATION_TAGS as $service => $tag_name ) {
+                $code = (string) ( $this->settings[ 'verify_' . $service ] ?? '' );
+                if ( '' !== $code ) {
+                    printf( '<meta name="%s" content="%s" />' . "\n", esc_attr( $tag_name ), esc_attr( $code ) );
+                }
+            }
         }
 
         // Author meta for single posts
@@ -170,8 +189,12 @@ class SEO_Manager {
             $canonical = $custom ?: get_permalink( $post_id );
         } elseif ( is_front_page() ) {
             $canonical = home_url( '/' );
-        } elseif ( is_category() || is_tag() || is_tax() ) {
-            $canonical = get_term_link( get_queried_object() );
+        } elseif ( $this->current_term() ) {
+            $term      = $this->current_term();
+            $custom    = Term_SEO::get( (int) $term->term_id, 'canonical' );
+            $paged     = max( 1, (int) get_query_var( 'paged' ) );
+            // Each page of an archive is its own canonical URL; page 2 is not a duplicate of page 1.
+            $canonical = $custom ?: ( $paged > 1 ? get_pagenum_link( $paged, false ) : get_term_link( $term ) );
         }
 
         if ( $canonical && ! is_wp_error( $canonical ) ) {
@@ -248,6 +271,16 @@ class SEO_Manager {
             }
         }
 
+        $term = $this->current_term();
+        if ( $term ) {
+            if ( Term_SEO::is_noindex( $term, $this->settings ) ) {
+                $directives[] = 'noindex';
+            }
+            if ( '1' === Term_SEO::get( (int) $term->term_id, 'nofollow' ) ) {
+                $directives[] = 'nofollow';
+            }
+        }
+
         if ( is_search() && ! empty( $this->settings['noindex_search'] ) ) {
             $directives[] = 'noindex';
         }
@@ -302,9 +335,9 @@ class SEO_Manager {
                 $tags['article:modified_time']  = get_the_modified_date( 'c', $post_id );
                 $tags['article:author']         = get_author_posts_url( (int) $post->post_author );
 
-                $categories = get_the_category( $post_id );
-                if ( $categories ) {
-                    $tags['article:section'] = $categories[0]->name;
+                $section = Primary_Term::get_term( $post_id, 'category' );
+                if ( $section ) {
+                    $tags['article:section'] = $section->name;
                 }
 
                 $post_tags = get_the_tags( $post_id );
@@ -319,6 +352,26 @@ class SEO_Manager {
             $tags['og:title']       = get_bloginfo( 'name' );
             $tags['og:description'] = get_bloginfo( 'description' );
             $tags['og:url']         = home_url( '/' );
+        } elseif ( $this->current_term() ) {
+            $term                   = $this->current_term();
+            $term_id                = (int) $term->term_id;
+            $tags['og:type']        = 'website';
+            $tags['og:title']       = Term_SEO::get( $term_id, 'social_title' ) ?: wp_get_document_title();
+            $tags['og:description'] = Term_SEO::get( $term_id, 'social_description' ) ?: $this->get_term_description( $term );
+            $link                   = get_term_link( $term );
+            $tags['og:url']         = is_wp_error( $link ) ? '' : $link;
+            $image                  = $this->get_term_image( $term );
+            if ( $image ) {
+                $tags['og:image'] = $image;
+            }
+        } elseif ( is_archive() || is_home() ) {
+            $tags['og:type']  = 'website';
+            $tags['og:title'] = wp_get_document_title();
+            if ( is_home() && get_option( 'page_for_posts' ) ) {
+                $tags['og:url'] = get_permalink( (int) get_option( 'page_for_posts' ) );
+            } elseif ( is_post_type_archive() ) {
+                $tags['og:url'] = get_post_type_archive_link( (string) get_query_var( 'post_type' ) );
+            }
         }
 
         foreach ( $tags as $property => $content ) {
@@ -374,6 +427,29 @@ class SEO_Manager {
             if ( $twitter ) {
                 $tags['twitter:creator'] = '@' . ltrim( $twitter, '@' );
             }
+
+            // Slack, X, Discord and others show these two labels in link previews.
+            if ( is_singular( 'post' ) ) {
+                $author_name = get_the_author_meta( 'display_name', $author_id );
+                if ( $author_name ) {
+                    $tags['twitter:label1'] = __( 'Written by', 'jat-search-intel' );
+                    $tags['twitter:data1']  = $author_name;
+                }
+                $minutes = Reading_Time::minutes( $post_id );
+                if ( $minutes > 0 ) {
+                    $tags['twitter:label2'] = __( 'Est. reading time', 'jat-search-intel' );
+                    $tags['twitter:data2']  = Reading_Time::label( $minutes );
+                }
+            }
+        } elseif ( $this->current_term() ) {
+            $term                        = $this->current_term();
+            $term_id                     = (int) $term->term_id;
+            $tags['twitter:title']       = Term_SEO::get( $term_id, 'social_title' ) ?: wp_get_document_title();
+            $tags['twitter:description'] = Term_SEO::get( $term_id, 'social_description' ) ?: $this->get_term_description( $term );
+            $image                       = $this->get_term_image( $term );
+            if ( $image ) {
+                $tags['twitter:image'] = $image;
+            }
         }
 
         foreach ( $tags as $name => $content ) {
@@ -385,6 +461,50 @@ class SEO_Manager {
                 );
             }
         }
+    }
+
+    /**
+     * The term being viewed on a category, tag or custom taxonomy archive.
+     *
+     * @return \WP_Term|null
+     */
+    private function current_term(): ?\WP_Term {
+        if ( ! ( is_category() || is_tag() || is_tax() ) ) {
+            return null;
+        }
+        $term = get_queried_object();
+        return $term instanceof \WP_Term ? $term : null;
+    }
+
+    /**
+     * Meta description for a term: its SEO description, else its own description.
+     *
+     * @param \WP_Term $term Term.
+     * @return string
+     */
+    public function get_term_description( \WP_Term $term ): string {
+        $custom = Term_SEO::get( (int) $term->term_id, 'description' );
+        if ( '' !== $custom ) {
+            return $this->truncate_description( $custom );
+        }
+        if ( '' === trim( (string) $term->description ) ) {
+            return '';
+        }
+        return $this->truncate_description( wp_trim_words( wp_strip_all_tags( (string) $term->description ), 30, '...' ) );
+    }
+
+    /**
+     * Social image for a term: its own, else the site default.
+     *
+     * @param \WP_Term $term Term.
+     * @return string
+     */
+    private function get_term_image( \WP_Term $term ): string {
+        $image = Term_SEO::get( (int) $term->term_id, 'social_image' );
+        if ( '' !== $image ) {
+            return $image;
+        }
+        return (string) ( $this->settings['default_og_image'] ?? '' );
     }
 
     /**
