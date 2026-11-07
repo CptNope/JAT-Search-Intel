@@ -73,7 +73,7 @@ class Schema_Map {
 	 * Invalidate cached feeds when content changes.
 	 */
 	public static function bump_version(): void {
-		update_option( self::VERSION_OPTION, (string) microtime( true ), true );
+		update_option( self::VERSION_OPTION, uniqid( '', true ), true );
 	}
 
 	/**

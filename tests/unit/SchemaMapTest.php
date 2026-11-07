@@ -16,7 +16,6 @@ class SchemaMapTest extends ParityTestCase {
 	public function test_bump_version_changes_option(): void {
 		Schema_Map::bump_version();
 		$first = get_option( 'jat_search_intel_schema_map_version' );
-		usleep( 10 );
 		Schema_Map::bump_version();
 		$this->assertNotSame( $first, get_option( 'jat_search_intel_schema_map_version' ) );
 	}
