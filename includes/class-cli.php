@@ -189,6 +189,61 @@ class CLI extends \WP_CLI_Command {
     }
 
     /**
+     * Check whether pages are indexed by Google (Search Console URL Inspection).
+     *
+     * Needs the Search Console connection from Reports → Rank Tracker. Without
+     * --post, checks the pages that were never checked or were checked longest ago.
+     *
+     * ## OPTIONS
+     *
+     * [--post=<id>]
+     * : Check one post.
+     *
+     * [--limit=<number>]
+     * : How many pages to check.
+     * ---
+     * default: 25
+     * ---
+     *
+     * ## EXAMPLES
+     *
+     *     wp jat-search-intel index-status
+     *     wp jat-search-intel index-status --limit=100
+     *     wp jat-search-intel index-status --post=42
+     *
+     * @subcommand index-status
+     *
+     * @param array $args       Positional arguments.
+     * @param array $assoc_args Associative arguments.
+     */
+    public function index_status( $args, $assoc_args ) {
+        unset( $args );
+        $settings = Core::get_instance()->get_settings();
+        if ( ! Index_Status::is_connected( $settings ) ) {
+            \WP_CLI::error( 'Connect Search Console first (Reports → Rank Tracker).' );
+        }
+        $checker = new Index_Status( $settings );
+
+        $post_id = absint( $assoc_args['post'] ?? 0 );
+        if ( $post_id ) {
+            $result = $checker->check_post( $post_id );
+            if ( is_wp_error( $result ) ) {
+                \WP_CLI::error( $result->get_error_message() );
+            }
+            list( $state, $label ) = Index_Status::describe( $result );
+            \WP_CLI::success( sprintf( '%s: %s (%s)', get_permalink( $post_id ), $label, $state ) );
+            return;
+        }
+
+        $limit = max( 1, min( 2000, absint( $assoc_args['limit'] ?? 25 ) ) );
+        $run   = $checker->run( $limit );
+        if ( $run['errors'] && ! $run['checked'] ) {
+            \WP_CLI::error( $run['message'] );
+        }
+        \WP_CLI::success( sprintf( 'Checked %d pages (%d errors).', $run['checked'], $run['errors'] ) );
+    }
+
+    /**
      * Regenerate metadata for all published posts.
      *
      * Fills in empty descriptions, AI summaries, and content types.

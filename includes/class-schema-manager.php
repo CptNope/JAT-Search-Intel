@@ -367,6 +367,15 @@ class Schema_Manager {
     }
 
     /**
+     * The site-wide nodes every page links to: the Organization or Person, and the WebSite.
+     *
+     * @return array<int,array<string,mixed>>
+     */
+    public function get_site_nodes(): array {
+        return [ $this->get_knowledge_graph(), $this->get_website_schema() ];
+    }
+
+    /**
      * WebSite schema with SearchAction for sitelinks searchbox.
      */
     private function get_website_schema(): array {
@@ -416,9 +425,8 @@ class Schema_Manager {
 
             // Category breadcrumb for posts
             if ( 'post' === $post_type ) {
-                $categories = get_the_category( $post_id );
-                if ( $categories ) {
-                    $primary = $categories[0];
+                $primary = Primary_Term::get_term( $post_id, 'category' );
+                if ( $primary ) {
                     // Walk up parent categories
                     $ancestors = get_ancestors( $primary->term_id, 'category' );
                     $ancestors = array_reverse( $ancestors );
@@ -562,6 +570,11 @@ class Schema_Manager {
 
         // Article-specific properties
         if ( in_array( $type, [ 'Article', 'NewsArticle', 'BlogPosting', 'TechArticle', 'ScholarlyArticle' ], true ) ) {
+            $minutes = Reading_Time::minutes( $post_id );
+            if ( $minutes > 0 ) {
+                $schema['timeRequired'] = 'PT' . $minutes . 'M';
+            }
+
             $categories = get_the_category( $post_id );
             if ( $categories ) {
                 $schema['articleSection'] = wp_list_pluck( $categories, 'name' );

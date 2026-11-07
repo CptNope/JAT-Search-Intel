@@ -32,22 +32,58 @@ class AI_Engine {
 
     /** @var array Supported providers and their default endpoints. */
     private const PROVIDERS = [
-        'openai'    => [
+        'openai'            => [
             'label'    => 'OpenAI',
             'endpoint' => 'https://api.openai.com/v1/chat/completions',
-            'model'    => 'gpt-4o-mini',
+            'model'    => 'gpt-5-mini',
+            'key_url'  => 'https://platform.openai.com/api-keys',
         ],
-        'anthropic' => [
-            'label'    => 'Anthropic',
+        'anthropic'         => [
+            'label'    => 'Anthropic Claude',
             'endpoint' => 'https://api.anthropic.com/v1/messages',
             'model'    => 'claude-haiku-5-5',
+            'key_url'  => 'https://console.anthropic.com/settings/keys',
         ],
-        'ollama'    => [
+        'gemini'            => [
+            'label'    => 'Google Gemini',
+            'endpoint' => 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
+            'model'    => 'gemini-2.5-flash',
+            'key_url'  => 'https://aistudio.google.com/apikey',
+        ],
+        'mistral'           => [
+            'label'    => 'Mistral',
+            'endpoint' => 'https://api.mistral.ai/v1/chat/completions',
+            'model'    => 'mistral-small-latest',
+            'key_url'  => 'https://console.mistral.ai/api-keys',
+        ],
+        'deepseek'          => [
+            'label'    => 'DeepSeek',
+            'endpoint' => 'https://api.deepseek.com/chat/completions',
+            'model'    => 'deepseek-chat',
+            'key_url'  => 'https://platform.deepseek.com/api_keys',
+        ],
+        'openrouter'        => [
+            'label'    => 'OpenRouter (hundreds of models)',
+            'endpoint' => 'https://openrouter.ai/api/v1/chat/completions',
+            'model'    => 'openrouter/auto',
+            'key_url'  => 'https://openrouter.ai/keys',
+        ],
+        'openai_compatible' => [
+            'label'    => 'Other OpenAI-compatible API (Groq, LM Studio, vLLM…)',
+            'endpoint' => '',
+            'model'    => '',
+            'key_url'  => '',
+        ],
+        'ollama'            => [
             'label'    => 'Ollama (Local)',
             'endpoint' => 'http://localhost:11434/api/chat',
             'model'    => 'llama3.2',
+            'key_url'  => '',
         ],
     ];
+
+    /** Providers that work without an API key. */
+    private const KEYLESS = [ 'ollama', 'openai_compatible' ];
 
     /**
      * Constructor.
@@ -76,9 +112,37 @@ class AI_Engine {
     }
 
     /**
+     * Details of every provider, for the settings screen.
+     *
+     * @return array<string,array{label:string,model:string,key_url:string,needs_key:bool}>
+     */
+    public static function provider_details(): array {
+        $out = [];
+        foreach ( self::PROVIDERS as $id => $meta ) {
+            $out[ $id ] = [
+                'label'     => $meta['label'],
+                'model'     => $meta['model'],
+                'key_url'   => $meta['key_url'],
+                'needs_key' => ! in_array( $id, self::KEYLESS, true ),
+            ];
+        }
+        return $out;
+    }
+
+    /**
+     * Whether a provider ID is supported.
+     *
+     * @param string $provider Provider ID.
+     * @return bool
+     */
+    public static function is_provider( string $provider ): bool {
+        return isset( self::PROVIDERS[ $provider ] );
+    }
+
+    /**
      * Get the currently active provider ID.
      *
-     * @return string 'openai', 'anthropic', or 'ollama'.
+     * @return string Provider ID.
      */
     public function get_active_provider(): string {
         $provider = $this->settings['ai_provider'] ?? 'openai';
@@ -110,6 +174,10 @@ class AI_Engine {
                 return rtrim( $custom, '/' );
             }
             return rtrim( $custom, '/' ) . '/api/chat';
+        }
+        if ( $custom !== '' && 'openai_compatible' === $provider && ! str_contains( $custom, '/chat/completions' ) ) {
+            // A base URL such as https://api.groq.com/openai/v1 gets the standard path.
+            return rtrim( $custom, '/' ) . '/chat/completions';
         }
         return $custom !== '' ? $custom : self::PROVIDERS[ $provider ]['endpoint'];
     }
@@ -209,6 +277,10 @@ class AI_Engine {
         $provider = $this->get_active_provider();
         if ( 'ollama' === $provider ) {
             return true; // No key needed for local Ollama.
+        }
+        if ( 'openai_compatible' === $provider ) {
+            // Local servers need no key, but the endpoint and model must be set.
+            return '' !== $this->get_endpoint() && '' !== $this->get_model();
         }
         return $this->get_api_key( $provider ) !== '';
     }
@@ -369,23 +441,23 @@ class AI_Engine {
      * @return array
      */
     private function request_openai( string $system, string $user, array $opts ): array {
-        $body = [
-            'model'       => $opts['model'] ?? $this->get_model(),
-            'messages'    => [
-                [ 'role' => 'system', 'content' => $system ],
-                [ 'role' => 'user', 'content' => $user ],
-            ],
-            'temperature' => (float) ( $opts['temperature'] ?? 0.3 ),
-            'max_tokens'  => (int) ( $opts['max_tokens'] ?? 500 ),
-        ];
+        $body = self::openai_body( $this->get_active_provider(), (string) ( $opts['model'] ?? $this->get_model() ), $system, $user, $opts );
+
+        $headers = [ 'Content-Type' => 'application/json' ];
+        $key     = $this->get_api_key();
+        if ( '' !== $key ) {
+            $headers['Authorization'] = 'Bearer ' . $key;
+        }
+        if ( 'openrouter' === $this->get_active_provider() ) {
+            // OpenRouter shows the calling app on its dashboard.
+            $headers['HTTP-Referer'] = home_url( '/' );
+            $headers['X-Title']      = 'JAT Search Intel';
+        }
 
         $response = wp_remote_post( $this->get_endpoint(), [
-            'timeout' => 30,
-            'headers' => [
-                'Content-Type'  => 'application/json',
-                'Authorization' => 'Bearer ' . $this->get_api_key(),
-            ],
-            'body' => (string) wp_json_encode( $body ),
+            'timeout' => 45,
+            'headers' => $headers,
+            'body'    => (string) wp_json_encode( $body ),
         ] );
 
         if ( is_wp_error( $response ) ) {
@@ -396,7 +468,8 @@ class AI_Engine {
         $json = json_decode( wp_remote_retrieve_body( $response ), true );
 
         if ( $code !== 200 || ! isset( $json['choices'][0]['message']['content'] ) ) {
-            $msg = $json['error']['message'] ?? "OpenAI API returned HTTP {$code}";
+            $label = self::PROVIDERS[ $this->get_active_provider() ]['label'];
+            $msg   = $json['error']['message'] ?? "{$label} API returned HTTP {$code}";
             return $this->error_response( $msg );
         }
 
@@ -410,6 +483,39 @@ class AI_Engine {
             'tokens_used' => $tokens,
             'error'       => '',
         ];
+    }
+
+    /**
+     * Request body for an OpenAI-style chat completions call.
+     *
+     * OpenAI's reasoning models (GPT-5, o-series) take max_completion_tokens and only
+     * the default temperature; other OpenAI-compatible APIs take max_tokens.
+     *
+     * @param string              $provider Provider ID.
+     * @param string              $model    Model.
+     * @param string              $system   System prompt.
+     * @param string              $user     User prompt.
+     * @param array<string,mixed> $opts     Options: temperature, max_tokens.
+     * @return array<string,mixed>
+     */
+    public static function openai_body( string $provider, string $model, string $system, string $user, array $opts ): array {
+        $body = [
+            'model'    => $model,
+            'messages' => [
+                [ 'role' => 'system', 'content' => $system ],
+                [ 'role' => 'user', 'content' => $user ],
+            ],
+        ];
+        $max_tokens = (int) ( $opts['max_tokens'] ?? 500 );
+        $reasoning  = 'openai' === $provider && (bool) preg_match( '/^(gpt-5|o\d)/', $model );
+        if ( $reasoning ) {
+            // Reasoning tokens count against the limit too, so allow room for them.
+            $body['max_completion_tokens'] = max( $max_tokens * 4, 2000 );
+        } else {
+            $body['max_tokens']  = $max_tokens;
+            $body['temperature'] = (float) ( $opts['temperature'] ?? 0.3 );
+        }
+        return $body;
     }
 
     /**

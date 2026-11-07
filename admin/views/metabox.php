@@ -63,6 +63,25 @@ if ( ! defined( 'ABSPATH' ) ) {
             <input type="url" id="si_canonical" name="si_canonical" value="<?php echo esc_url( $meta['canonical'] ); ?>" placeholder="<?php echo esc_url( get_permalink( $post->ID ) ); ?>" class="widefat" />
         </div>
 
+        <?php
+        // The block editor has its own Primary category panel; this one is for the classic editor.
+        $si_post_categories = ( is_object_in_taxonomy( $post->post_type, 'category' ) && ! ( function_exists( 'use_block_editor_for_post' ) && use_block_editor_for_post( $post ) ) )
+            ? get_the_category( $post->ID )
+            : [];
+        if ( count( $si_post_categories ) > 1 ) :
+            ?>
+        <div class="si-field">
+            <label for="si_primary_category"><?php esc_html_e( 'Primary category', 'jat-search-intel' ); ?></label>
+            <select id="si_primary_category" name="si_primary_category" class="widefat">
+                <option value=""><?php esc_html_e( 'Default (first category)', 'jat-search-intel' ); ?></option>
+                <?php foreach ( $si_post_categories as $si_category ) : ?>
+                    <option value="<?php echo esc_attr( (string) $si_category->term_id ); ?>" <?php selected( (string) $meta['primary_category'], (string) $si_category->term_id ); ?>><?php echo esc_html( $si_category->name ); ?></option>
+                <?php endforeach; ?>
+            </select>
+            <p class="description"><?php esc_html_e( 'Used in the permalink, breadcrumbs and schema. Save the post to update this list after changing categories.', 'jat-search-intel' ); ?></p>
+        </div>
+        <?php endif; ?>
+
         <div class="si-field si-field-inline">
             <label>
                 <input type="checkbox" name="si_noindex" value="1" <?php checked( $meta['noindex'], '1' ); ?> />
@@ -71,6 +90,10 @@ if ( ! defined( 'ABSPATH' ) ) {
             <label>
                 <input type="checkbox" name="si_nofollow" value="1" <?php checked( $meta['nofollow'], '1' ); ?> />
                 <?php esc_html_e( 'nofollow (don\'t follow links on this page)', 'jat-search-intel' ); ?>
+            </label>
+            <label>
+                <input type="checkbox" name="si_freeze_modified" value="1" <?php checked( $meta['freeze_modified'], '1' ); ?> />
+                <?php esc_html_e( 'Don\'t update the last-modified date when saving (for small fixes)', 'jat-search-intel' ); ?>
             </label>
         </div>
 

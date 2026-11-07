@@ -228,9 +228,8 @@ class WooCommerce {
 		}
 
 		// Product category (primary)
-		$terms = get_the_terms( $post_id, 'product_cat' );
-		if ( $terms && ! is_wp_error( $terms ) ) {
-			$primary = $terms[0];
+		$primary = Primary_Term::get_term( $post_id, 'product_cat' );
+		if ( $primary ) {
 			// Include ancestors
 			$ancestors = get_ancestors( $primary->term_id, 'product_cat', 'taxonomy' );
 			$ancestors = array_reverse( $ancestors );

@@ -25,6 +25,8 @@ class Title_Engine {
         'page'     => '%title% %sep% %sitename%',
         'category' => '%category% %sep% %sitename%',
         'tag'      => '%tag% %sep% %sitename%',
+        'taxonomy' => '%title% %sep% %sitename%',
+        'archive'  => '%title% %page% %sep% %sitename%',
         'author'   => '%author% %sep% %sitename%',
         'search'   => 'Search: %search_query% %sep% %sitename%',
         '404'      => 'Page Not Found %sep% %sitename%',
@@ -66,6 +68,14 @@ class Title_Engine {
             }
         }
 
+        // A category, tag or other term can set its own title (template variables allowed).
+        if ( is_category() || is_tag() || is_tax() ) {
+            $custom = Term_SEO::get( get_queried_object_id(), 'title' );
+            if ( '' !== $custom ) {
+                return trim( (string) preg_replace( '/\s+/', ' ', $this->resolve_variables( $custom ) ) );
+            }
+        }
+
         return $this->resolve_variables( $template );
     }
 
@@ -88,6 +98,9 @@ class Title_Engine {
         if ( is_tag() ) {
             return 'tag';
         }
+        if ( is_tax() ) {
+            return 'taxonomy';
+        }
         if ( is_author() ) {
             return 'author';
         }
@@ -96,6 +109,9 @@ class Title_Engine {
         }
         if ( is_404() ) {
             return '404';
+        }
+        if ( is_archive() ) {
+            return 'archive';
         }
 
         return 'single';
@@ -173,6 +189,9 @@ class Title_Engine {
         if ( is_post_type_archive() ) {
             return post_type_archive_title( '', false ) ?: '';
         }
+        if ( is_archive() ) {
+            return trim( wp_strip_all_tags( get_the_archive_title() ) );
+        }
 
         return '';
     }
@@ -190,8 +209,8 @@ class Title_Engine {
             return single_cat_title( '', false ) ?: '';
         }
         if ( is_singular() ) {
-            $cats = get_the_category( get_queried_object_id() );
-            return ! empty( $cats ) ? $cats[0]->name : '';
+            $primary = Primary_Term::get_term( get_queried_object_id(), 'category' );
+            return $primary ? $primary->name : '';
         }
 
         return '';

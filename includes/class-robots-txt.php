@@ -17,6 +17,12 @@ class Robots_Txt {
 	 */
 	private const OPTION_KEY = 'jat_search_intel_robots_txt';
 
+	/** Earlier versions, newest first. */
+	public const HISTORY_OPTION = 'jat_search_intel_robots_txt_history';
+
+	/** Versions kept. */
+	public const HISTORY_SIZE = 10;
+
 	/** @var array */
 	private $settings;
 
@@ -36,6 +42,7 @@ class Robots_Txt {
 			add_action( 'admin_menu', [ $this, 'register_admin_page' ] );
 			add_action( 'wp_ajax_jat_search_intel_save_robots_txt', [ $this, 'ajax_save' ] );
 			add_action( 'wp_ajax_jat_search_intel_validate_robots_txt', [ $this, 'ajax_validate' ] );
+			add_action( 'admin_post_jat_search_intel_robots_restore', [ $this, 'handle_restore' ] );
 		}
 	}
 
@@ -70,7 +77,49 @@ class Robots_Txt {
 	 * @return bool
 	 */
 	public function save_content( string $content ): bool {
+		$previous = $this->get_content();
+		if ( $previous === $content ) {
+			return false;
+		}
+		// Keep the version being replaced so it can be restored.
+		$history = self::get_history();
+		array_unshift(
+			$history,
+			[
+				'content' => $previous,
+				'time'    => time(),
+				'user'    => get_current_user_id(),
+			]
+		);
+		update_option( self::HISTORY_OPTION, array_slice( $history, 0, self::HISTORY_SIZE ), false );
 		return update_option( self::OPTION_KEY, $content );
+	}
+
+	/**
+	 * Earlier versions, newest first.
+	 *
+	 * @return array<int,array{content:string,time:int,user:int}>
+	 */
+	public static function get_history(): array {
+		$history = get_option( self::HISTORY_OPTION, [] );
+		return is_array( $history ) ? array_values( $history ) : [];
+	}
+
+	/**
+	 * Restore an earlier version.
+	 */
+	public function handle_restore(): void {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You do not have permission to do this.', 'jat-search-intel' ), 403 );
+		}
+		check_admin_referer( 'jat_search_intel_robots_restore' );
+		$index   = isset( $_POST['version'] ) ? absint( $_POST['version'] ) : -1;
+		$history = self::get_history();
+		if ( isset( $history[ $index ] ) ) {
+			$this->save_content( (string) $history[ $index ]['content'] );
+		}
+		wp_safe_redirect( admin_url( 'admin.php?page=jat-search-intel-robots&restored=1' ) );
+		exit;
 	}
 
 	/**
@@ -194,8 +243,33 @@ class Robots_Txt {
 			</p>
 
 			<?php wp_nonce_field( 'si_robots_nonce', 'si_robots_nonce_field' ); ?>
+
+			<?php $this->render_history(); ?>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Earlier versions with Restore buttons.
+	 */
+	private function render_history(): void {
+		$history = self::get_history();
+		if ( ! $history ) {
+			return;
+		}
+		echo '<h2 style="margin-top:2em">' . esc_html__( 'Earlier versions', 'jat-search-intel' ) . '</h2>';
+		echo '<table class="widefat striped" style="max-width:900px"><tbody>';
+		foreach ( $history as $index => $version ) {
+			$user = $version['user'] ? get_userdata( (int) $version['user'] ) : false;
+			echo '<tr><td style="width:40%"><strong>' . esc_html( (string) wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), (int) $version['time'] ) ) . '</strong>';
+			echo '<br /><small>' . esc_html( $user ? $user->display_name : '' ) . '</small></td>';
+			echo '<td><details><summary>' . esc_html__( 'Show this version', 'jat-search-intel' ) . '</summary><pre style="white-space:pre-wrap;max-height:240px;overflow:auto">' . esc_html( '' !== $version['content'] ? $version['content'] : __( '(empty: WordPress default)', 'jat-search-intel' ) ) . '</pre></details></td>';
+			echo '<td style="width:120px"><form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
+			wp_nonce_field( 'jat_search_intel_robots_restore' );
+			echo '<input type="hidden" name="action" value="jat_search_intel_robots_restore" /><input type="hidden" name="version" value="' . esc_attr( (string) $index ) . '" />';
+			echo '<button type="submit" class="button">' . esc_html__( 'Restore', 'jat-search-intel' ) . '</button></form></td></tr>';
+		}
+		echo '</tbody></table>';
 	}
 
 	/**

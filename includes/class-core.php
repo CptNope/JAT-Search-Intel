@@ -176,6 +176,27 @@ class Core {
     /** @var Abilities */
     public $abilities;
 
+    /** @var Term_SEO */
+    public $term_seo;
+
+    /** @var Crawl_Cleanup */
+    public $crawl_cleanup;
+
+    /** @var Modified_Date */
+    public $modified_date;
+
+    /** @var Preferred_Source */
+    public $preferred_source;
+
+    /** @var Index_Status */
+    public $index_status;
+
+    /** @var SEO_History */
+    public $seo_history;
+
+    /** @var Schema_Map */
+    public $schema_map;
+
     /**
      * Get singleton instance.
      */
@@ -239,6 +260,14 @@ class Core {
          * therefore never load admin-, REST- or save-only code.
          */
         $analyzer_on = $on( 'enable_analyzer' );
+        $schema_map_on = $on( 'enable_schema' ) && $on( 'enable_schema_map' );
+        $cleanup_on  = false;
+        foreach ( $settings as $key => $value ) {
+            if ( $value && 0 === strpos( (string) $key, 'cleanup_' ) ) {
+                $cleanup_on = true;
+                break;
+            }
+        }
         $modules     = [
             'analyzer'                => [ $is_admin, Content_Analyzer::class, $analyzer_on ? [ 'wp_after_insert_post' => 19 ] : [] ],
             'rest_api'                => [ $is_admin, Rest_Api::class, [ 'rest_api_init' => 9 ] ],
@@ -282,6 +311,13 @@ class Core {
             'admin_menu'              => [ $is_admin, Admin_Menu::class ],
             'setup_wizard'            => [ $is_admin, Setup_Wizard::class ],
             'performance_report'      => [ $is_admin, Performance_Report::class ],
+            'term_seo'                => [ $is_admin, Term_SEO::class ],
+            'crawl_cleanup'           => [ $cleanup_on, Crawl_Cleanup::class ],
+            'modified_date'           => [ $is_admin, Modified_Date::class, [ 'rest_api_init' => 9 ] ],
+            'preferred_source'        => [ $on( 'preferred_source_auto' ), Preferred_Source::class ],
+            'index_status'            => [ $is_admin || $on( 'enable_index_status' ), Index_Status::class ],
+            'seo_history'             => [ $is_admin, SEO_History::class, [ 'rest_api_init' => 9 ] ],
+            'schema_map'              => [ false, Schema_Map::class, $schema_map_on ? [ 'rest_api_init' => 9 ] : [] ],
             'abilities'               => [ false, Abilities::class, function_exists( 'wp_register_ability' ) ? [ 'wp_abilities_api_categories_init' => 9, 'wp_abilities_api_init' => 9 ] : [] ],
         ];
 
@@ -304,6 +340,21 @@ class Core {
                 );
             }
         }
+
+        // Shortcodes (class strings: their code loads only where a shortcode is used).
+        add_shortcode( 'jat_search_intel_reading_time', [ Reading_Time::class, 'shortcode' ] );
+        add_shortcode( 'jat_search_intel_preferred_source', [ Preferred_Source::class, 'shortcode' ] );
+
+        // Schema map: advertise it in robots.txt and refresh its cache when content changes.
+        if ( $schema_map_on ) {
+            add_filter( 'robots_txt', [ Schema_Map::class, 'robots_line' ], 950, 2 );
+            add_action( 'save_post', [ Schema_Map::class, 'bump_version' ] );
+            add_action( 'deleted_post', [ Schema_Map::class, 'bump_version' ] );
+        }
+
+        // Primary category in permalinks (class strings: nothing is loaded until a permalink needs it).
+        add_filter( 'post_link_category', [ Primary_Term::class, 'filter_post_link_category' ], 10, 3 );
+        add_filter( 'wc_product_post_type_link_product_cat', [ Primary_Term::class, 'filter_product_link_category' ], 10, 3 );
 
         // Auto-redirect on slug change.
         add_action( 'post_updated', [ $this->redirects, 'detect_slug_change' ], 10, 3 );
@@ -474,6 +525,34 @@ class Core {
             'noindex_archives'       => false,
             'noindex_search'         => true,
             'noindex_404'            => true,
+            'enable_index_status'    => false,
+            'enable_schema_map'      => true,
+            'preferred_source_auto'  => false,
+            'preferred_source_post_types' => [ 'post' ],
+            'noindex_empty_terms'    => true,
+            'noindex_taxonomies'     => [],
+
+            // v3.6 — site verification and crawl cleanup
+            'verify_google' => '',
+            'verify_bing' => '',
+            'verify_yandex' => '',
+            'verify_baidu' => '',
+            'verify_pinterest' => '',
+            'verify_facebook' => '',
+            'verify_naver' => '',
+            'verify_seznam' => '',
+            'cleanup_shortlink' => false,
+            'cleanup_rsd' => false,
+            'cleanup_wlwmanifest' => false,
+            'cleanup_generator' => false,
+            'cleanup_emoji' => false,
+            'cleanup_oembed_links' => false,
+            'cleanup_rest_link' => false,
+            'cleanup_pingback_header' => false,
+            'cleanup_feed_comments' => false,
+            'cleanup_feed_post_comments' => false,
+            'cleanup_feed_extra' => false,
+            'cleanup_search_spam' => false,
 
             // Schema
             'enable_schema'          => true,

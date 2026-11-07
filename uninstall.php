@@ -41,6 +41,7 @@ function jat_search_intel_uninstall_site() {
 		'jat_search_intel_daily_aggregate',
 		'jat_search_intel_decay_check',
 		'jat_search_intel_ga4_fetch',
+		'jat_search_intel_index_status',
 		'jat_search_intel_meta_backfill',
 		'jat_search_intel_process_queue',
 		'jat_search_intel_rank_tracking',
@@ -68,6 +69,12 @@ function jat_search_intel_uninstall_site() {
 	$wpdb->query(
 		$wpdb->prepare(
 			"DELETE FROM {$wpdb->postmeta} WHERE meta_key LIKE %s",
+			$wpdb->esc_like( '_jat_search_intel_' ) . '%'
+		)
+	);
+	$wpdb->query(
+		$wpdb->prepare(
+			"DELETE FROM {$wpdb->termmeta} WHERE meta_key LIKE %s",
 			$wpdb->esc_like( '_jat_search_intel_' ) . '%'
 		)
 	);

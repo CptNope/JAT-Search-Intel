@@ -44,7 +44,9 @@ class SettingsPagesTest extends TestCase {
 		foreach ( $this->managed_bools() as $page => $bools ) {
 			$view = (string) file_get_contents( JAT_SEARCH_INTEL_DIR . self::VIEWS[ $page ] );
 			foreach ( $bools as $key ) {
-				$this->assertStringContainsString( "jat_search_intel_settings[{$key}]", $view, "Saving the {$page} page would switch off {$key}: no checkbox for it." );
+				// Checkboxes are written out literally or rendered from a list of keys in the view.
+				$present = false !== strpos( $view, "jat_search_intel_settings[{$key}]" ) || 1 === preg_match( '/\'' . preg_quote( $key, '/' ) . '\'\s*=>/', $view );
+				$this->assertTrue( $present, "Saving the {$page} page would switch off {$key}: no checkbox for it." );
 			}
 		}
 	}

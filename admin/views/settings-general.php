@@ -223,6 +223,10 @@ $settings = wp_parse_args( $settings, \JAT_Search_Intel\Core::get_default_settin
                             <strong><?php esc_html_e( 'Core Web Vitals', 'jat-search-intel' ); ?></strong> — <?php esc_html_e( 'PageSpeed Insights API, LCP/INP/CLS tracking', 'jat-search-intel' ); ?>
                         </label>
                         <label style="display:block; margin-bottom:8px;">
+                            <input type="checkbox" name="jat_search_intel_settings[enable_index_status]" value="1" <?php checked( ! empty( $settings['enable_index_status'] ) ); ?> />
+                            <strong><?php esc_html_e( 'Daily Index Status Checks', 'jat-search-intel' ); ?></strong> — <?php esc_html_e( 'Ask Search Console every day whether your pages are indexed (Reports → Index Status)', 'jat-search-intel' ); ?>
+                        </label>
+                        <label style="display:block; margin-bottom:8px;">
                             <input type="checkbox" name="jat_search_intel_settings[enable_custom_reports]" value="1" <?php checked( $settings['enable_custom_reports'] ); ?> />
                             <strong><?php esc_html_e( 'Custom Reports & Export', 'jat-search-intel' ); ?></strong> — <?php esc_html_e( 'PDF reports, scheduled email, CSV/JSON export', 'jat-search-intel' ); ?>
                         </label>

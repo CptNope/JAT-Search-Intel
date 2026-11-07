@@ -28,6 +28,16 @@ All commands are under `wp jat-search-intel`. Run `wp help jat-search-intel <com
 | `wp jat-search-intel sitemap cache` | Build and cache all sitemaps |
 | `wp jat-search-intel sitemap clear` | Clear the sitemap caches |
 
+## Google index status
+
+Needs the Search Console connection (see [Features](Features#seo)).
+
+| Command | What it does |
+|---|---|
+| `wp jat-search-intel index-status` | Check the next 25 pages: never-checked pages first, then the oldest results |
+| `wp jat-search-intel index-status --limit=100` | Check more at once (Google allows about 2,000 inspections a day per property) |
+| `wp jat-search-intel index-status --post=42` | Check one post and print the result |
+
 ## Settings
 
 | Command | What it does |

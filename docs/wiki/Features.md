@@ -6,11 +6,21 @@ JAT Search Intel covers three kinds of search visibility in one plugin:
 - **AEO** (Answer Engine Optimization, for featured snippets, voice and People Also Ask)
 - **GEO** (Generative Engine Optimization, for AI answer engines such as ChatGPT, Perplexity and Google AI Overviews)
 
+There is no paid tier. Features that other SEO plugins keep for premium plans, such as category SEO, a primary category, crawl cleanup, index status, change history and many AI providers, are all in the free plugin.
+
 ## SEO
 
 - **Titles and descriptions**: custom meta title and description per post, with a live SERP preview and title templates (`%title%`, `%sitename%`, `%sep%`, `%category%`, `%tag%`, `%date%`, `%author%`, `%page%`, `%excerpt%`, `%search_query%`).
 - **Social**: Open Graph tags and Twitter Card tags, with per-post overrides for title, description and image.
 - **Indexing control**: canonical URLs, and per-post robots directives (`noindex`, `nofollow`).
+- **Categories, tags and other taxonomies**: every public taxonomy term gets its own SEO title (title variables allowed), meta description, focus keyword, canonical URL, `noindex`/`nofollow` and social title, description and image, on the term's edit screen. Under **Settings → SEO → Taxonomies** you can noindex whole taxonomies, and empty terms are noindexed by default. Noindexed terms, and terms with a canonical pointing elsewhere, are left out of the sitemap. Title templates exist for taxonomy archives and other archives.
+- **Primary category**: when a post has several categories (or a product several product categories), choose the main one in the editor's **Primary category** panel. It is used in the permalink (with `%category%` in the permalink structure), breadcrumbs, `articleSection` schema and the `%category%` title variable.
+- **Site verification**: codes for Google, Bing, Yandex, Baidu, Pinterest, Facebook, Naver and Seznam under **Settings → SEO → Site Verification**. Paste either the code or the whole `<meta>` tag; only the code is kept.
+- **Crawl cleanup**: under **Settings → SEO → Crawl Cleanup**, remove the shortlink, RSD, Windows Live Writer and generator tags, emoji scripts, oEmbed and REST API discovery links, the `X-Pingback` header, the comments feeds and the extra category/tag/author feeds, and answer spam searches (links, domains, HTML or over 100 characters) with a 404. All off by default.
+- **Index Status** (**Reports → Index Status**): Google's verdict, coverage state, last crawl and chosen canonical for every page, from the Search Console URL Inspection API. Checks run daily (up to 200 pages, switched on under **Settings → General**) or on demand, 25 at a time. Uses the Rank Tracker's Search Console connection.
+- **SEO change history**: every change to a post's SEO fields is recorded with the time and the user, and any change can be put back in one click from the editor's **SEO change history** panel (or the classic meta box). The last 30 changes are kept per post. The robots.txt editor keeps its last 10 versions the same way.
+- **Last-modified date**: for small fixes, turn on **Don't update the last-modified date** in the editor so search results, schema and the sitemap keep the real "last updated" date.
+- **Reading time**: added to Article schema as `timeRequired` and to X cards, and available as `[jat_search_intel_reading_time]`. X cards also show the author.
 - **XML sitemaps**: `/sitemap.xml` index with paginated per-type sitemaps and images, plus optional `/news-sitemap.xml` and `/video-sitemap.xml` (YouTube, Vimeo and self-hosted video). Sitemap URLs are added to robots.txt.
 - **HTML sitemap**: the `[jat_search_intel_html_sitemap post_types="page,post" limit="500"]` shortcode.
 - **Rank tracker**: daily positions and 7/28-day movement for your keywords, from your own Search Console data.
@@ -31,6 +41,8 @@ JAT Search Intel covers three kinds of search visibility in one plugin:
 - **AI Summary**: a short factual summary written for LLMs, used in meta tags, llms.txt and the Markdown copy.
 - **llms.txt and llms-full.txt**: generated from your content, following the llms.txt proposal.
 - **Markdown copies**: every public post at `/post-slug.md`, linked from the page and from llms.txt.
+- **Schema map**: `/wp-json/jat-search-intel/v1/schema-map` lists feeds of your site's structured data, one page of up to 200 posts per feed, and is advertised in robots.txt. An AI agent can read the schema of the whole site without crawling every page. Noindexed and "hide from AI" content is left out. Switch it off under **Settings → GEO**.
+- **Google Preferred Sources**: a button that lets readers add your site as a preferred source in Google's Top Stories, as a block, the `[jat_search_intel_preferred_source]` shortcode, or added automatically after posts (**Settings → GEO → Preferred Source**).
 - **Entity markup**: mark people, organizations, places and products with Schema.org microdata. The first whole-word mention in the post is wrapped.
 - **E-E-A-T author signals**: credentials, expertise areas and years of experience.
 - **Freshness**: content-freshness meta tags and fact-check dates.
@@ -56,7 +68,7 @@ Switch these on under **Settings → General → Module Toggles**. Modules you l
 | WooCommerce schema | Product markup with price, availability and reviews |
 | Multilingual | hreflang for WPML and Polylang |
 | Role-based access | Choose which roles can edit SEO, AEO or GEO fields |
-| AI Engine | Optional AI-written descriptions, summaries and FAQs (OpenAI, Anthropic or a local Ollama server) |
+| AI Engine | Optional AI-written descriptions, summaries and FAQs with your own key: OpenAI, Anthropic, Google Gemini, Mistral, DeepSeek, OpenRouter, any OpenAI-compatible endpoint, or a local Ollama server |
 | Reports | Content decay, keyword cannibalization, Core Web Vitals, GA4 insights and scheduled email reports |
 
 ## Bulk tools

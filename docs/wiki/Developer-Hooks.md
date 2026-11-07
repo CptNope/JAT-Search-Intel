@@ -46,6 +46,27 @@ add_filter( 'jat_search_intel_markdown', function ( string $markdown, WP_Post $p
 }, 10, 2 );
 ```
 
+### `jat_search_intel_term_seo_taxonomies`
+
+The taxonomies whose terms get SEO fields. By default every public taxonomy with archive pages, except post formats.
+
+```php
+add_filter( 'jat_search_intel_term_seo_taxonomies', function ( array $taxonomies ) {
+	return array_diff( $taxonomies, [ 'product_tag' ] );
+} );
+```
+
+### `jat_search_intel_schema_map_post_types`
+
+The post types included in the schema map. By default the post types in the XML sitemap.
+
+```php
+add_filter( 'jat_search_intel_schema_map_post_types', function ( array $types ) {
+	$types[] = 'recipe';
+	return $types;
+} );
+```
+
 ### `jat_search_intel_admin_menu_groups`
 
 The six admin menu groups, as `key => [ label, page slugs in tab order ]`. Add-on pages can join a group as an extra tab:

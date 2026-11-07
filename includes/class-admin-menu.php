@@ -66,7 +66,7 @@ class Admin_Menu {
 			],
 			'reports'   => [
 				__( 'Reports', 'jat-search-intel' ),
-				[ 'jat-search-intel-performance', 'jat-search-intel-rank-tracker', 'jat-search-intel-analytics', 'jat-search-intel-ga4', 'jat-search-intel-cwv', 'jat-search-intel-content-decay', 'jat-search-intel-cannibalization', 'jat-search-intel-reports' ],
+				[ 'jat-search-intel-performance', 'jat-search-intel-index-status', 'jat-search-intel-rank-tracker', 'jat-search-intel-analytics', 'jat-search-intel-ga4', 'jat-search-intel-cwv', 'jat-search-intel-content-decay', 'jat-search-intel-cannibalization', 'jat-search-intel-reports' ],
 			],
 			'tools'     => [
 				__( 'Tools', 'jat-search-intel' ),

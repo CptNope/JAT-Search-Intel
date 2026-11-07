@@ -70,6 +70,11 @@ class Abilities {
 			'description' => __( 'Post ID.', 'jat-search-intel' ),
 			'minimum'     => 1,
 		];
+		$term_id_schema = [
+			'type'        => 'integer',
+			'description' => __( 'Term ID (category, tag or other taxonomy term).', 'jat-search-intel' ),
+			'minimum'     => 1,
+		];
 		$page_schema    = [
 			'type'       => 'object',
 			'properties' => [
@@ -212,6 +217,116 @@ class Abilities {
 				'permission_callback' => [ $this, 'can_edit_others' ],
 				'meta'                => $this->meta( true, false, true, false ),
 			],
+			'jat-search-intel/get-term-seo'    => [
+				'label'               => __( 'Get category or tag SEO data', 'jat-search-intel' ),
+				'description'         => __( 'SEO title, meta description, canonical URL, robots settings and social fields of a category, tag or other public taxonomy term.', 'jat-search-intel' ),
+				'input_schema'        => [
+					'type'       => 'object',
+					'properties' => [ 'term_id' => $term_id_schema ],
+					'required'   => [ 'term_id' ],
+				],
+				'output_schema'       => [ 'type' => 'object' ],
+				'execute_callback'    => [ $this, 'get_term_seo' ],
+				'permission_callback' => '__return_true',
+				'meta'                => $this->meta( true, false, true, true ),
+			],
+			'jat-search-intel/update-term-seo' => [
+				'label'               => __( 'Update a category or tag\'s SEO data', 'jat-search-intel' ),
+				'description'         => __( 'Sets SEO fields of a taxonomy term. Omitted fields are left unchanged; an empty string clears a field.', 'jat-search-intel' ),
+				'input_schema'        => [
+					'type'       => 'object',
+					'properties' => [
+						'term_id'            => $term_id_schema,
+						'title'              => [ 'type' => 'string', 'maxLength' => 200 ],
+						'description'        => [ 'type' => 'string', 'maxLength' => 320 ],
+						'focus_keyword'      => [ 'type' => 'string', 'maxLength' => 100 ],
+						'canonical'          => [ 'type' => 'string', 'maxLength' => 2000 ],
+						'noindex'            => [ 'type' => 'boolean' ],
+						'nofollow'           => [ 'type' => 'boolean' ],
+						'social_title'       => [ 'type' => 'string', 'maxLength' => 200 ],
+						'social_description' => [ 'type' => 'string', 'maxLength' => 320 ],
+						'social_image'       => [ 'type' => 'string', 'maxLength' => 2000 ],
+					],
+					'required'   => [ 'term_id' ],
+				],
+				'output_schema'       => [
+					'type'       => 'object',
+					'properties' => [
+						'term_id' => [ 'type' => 'integer' ],
+						'updated' => [ 'type' => 'array', 'items' => [ 'type' => 'string' ] ],
+					],
+				],
+				'execute_callback'    => [ $this, 'update_term_seo' ],
+				'permission_callback' => [ $this, 'can_edit_term' ],
+				'meta'                => $this->meta( false, false, true, false ),
+			],
+			'jat-search-intel/posts-needing-attention' => [
+				'label'               => __( 'Posts needing SEO attention', 'jat-search-intel' ),
+				'description'         => __( 'Published posts with the lowest SEO, AEO or GEO scores, or with no meta description, so an agent can work through them.', 'jat-search-intel' ),
+				'input_schema'        => [
+					'type'       => 'object',
+					'properties' => [
+						'score' => [ 'type' => 'string', 'enum' => [ 'seo', 'aeo', 'geo' ], 'default' => 'seo' ],
+						'limit' => [ 'type' => 'integer', 'minimum' => 1, 'maximum' => 50, 'default' => 10 ],
+					],
+					'default'    => [],
+				],
+				'output_schema'       => [ 'type' => 'array' ],
+				'execute_callback'    => [ $this, 'posts_needing_attention' ],
+				'permission_callback' => [ $this, 'can_edit_others' ],
+				'meta'                => $this->meta( true, false, true, false ),
+			],
+			'jat-search-intel/get-index-status' => [
+				'label'               => __( 'Google index status of a post', 'jat-search-intel' ),
+				'description'         => __( 'Whether Google has indexed a post, its coverage state, last crawl and the canonical Google chose, from Search Console. Set refresh to inspect it again now (needs the Search Console connection).', 'jat-search-intel' ),
+				'input_schema'        => [
+					'type'       => 'object',
+					'properties' => [
+						'post_id' => $post_id_schema,
+						'refresh' => [ 'type' => 'boolean', 'default' => false ],
+					],
+					'required'   => [ 'post_id' ],
+				],
+				'output_schema'       => [ 'type' => 'object' ],
+				'execute_callback'    => [ $this, 'get_index_status' ],
+				'permission_callback' => [ $this, 'can_edit_post' ],
+				'meta'                => $this->meta( false, false, true, false ),
+			],
+			'jat-search-intel/list-redirects'  => [
+				'label'               => __( 'List redirects', 'jat-search-intel' ),
+				'description'         => __( 'Redirect rules with their source, target, type and hit count, optionally filtered by a search term.', 'jat-search-intel' ),
+				'input_schema'        => [
+					'type'       => 'object',
+					'properties' => [
+						'search' => [ 'type' => 'string' ],
+						'limit'  => [ 'type' => 'integer', 'minimum' => 1, 'maximum' => 100, 'default' => 25 ],
+					],
+					'default'    => [],
+				],
+				'output_schema'       => [ 'type' => 'object' ],
+				'execute_callback'    => [ $this, 'list_redirects' ],
+				'permission_callback' => [ $this, 'can_manage' ],
+				'meta'                => $this->meta( true, false, true, false ),
+			],
+			'jat-search-intel/create-redirect' => [
+				'label'               => __( 'Create a redirect', 'jat-search-intel' ),
+				'description'         => __( 'Adds a redirect rule, for example from a deleted page\'s path to its replacement. Exact, prefix or regex matching; 301, 302, 307 or 410.', 'jat-search-intel' ),
+				'input_schema'        => [
+					'type'       => 'object',
+					'properties' => [
+						'source'      => [ 'type' => 'string', 'description' => __( 'Path to redirect from, such as /old-page/.', 'jat-search-intel' ), 'minLength' => 1 ],
+						'target'      => [ 'type' => 'string', 'description' => __( 'URL or path to redirect to (empty for 410).', 'jat-search-intel' ) ],
+						'status_code' => [ 'type' => 'integer', 'enum' => [ 301, 302, 307, 410 ], 'default' => 301 ],
+						'match_type'  => [ 'type' => 'string', 'enum' => [ 'exact', 'prefix', 'regex' ], 'default' => 'exact' ],
+						'note'        => [ 'type' => 'string', 'maxLength' => 200 ],
+					],
+					'required'   => [ 'source' ],
+				],
+				'output_schema'       => [ 'type' => 'object' ],
+				'execute_callback'    => [ $this, 'create_redirect' ],
+				'permission_callback' => [ $this, 'can_manage' ],
+				'meta'                => $this->meta( false, false, false, false ),
+			],
 		];
 	}
 
@@ -269,6 +384,17 @@ class Abilities {
 	 */
 	public function can_manage(): bool {
 		return current_user_can( 'manage_options' );
+	}
+
+	/**
+	 * Current user can edit the requested term.
+	 *
+	 * @param mixed $input Input.
+	 * @return bool
+	 */
+	public function can_edit_term( $input = null ): bool {
+		$term_id = (int) ( is_array( $input ) ? ( $input['term_id'] ?? 0 ) : 0 );
+		return $term_id > 0 && current_user_can( 'edit_term', $term_id );
 	}
 
 	/**
@@ -493,6 +619,216 @@ class Abilities {
 	public function refresh_queue( $input = null ): array {
 		$limit = max( 1, min( 50, (int) ( is_array( $input ) ? ( $input['limit'] ?? 10 ) : 10 ) ) );
 		return ( new Readiness( $this->settings ) )->refresh_queue( $limit );
+	}
+
+	/**
+	 * A public term, or an error.
+	 *
+	 * @param int $term_id Term ID.
+	 * @return \WP_Term|\WP_Error
+	 */
+	private function public_term( int $term_id ) {
+		$term = get_term( $term_id );
+		if ( ! $term instanceof \WP_Term || ! in_array( $term->taxonomy, Term_SEO::taxonomies(), true ) ) {
+			return new \WP_Error( 'jat_search_intel_not_found', __( 'Term not found.', 'jat-search-intel' ), [ 'status' => 404 ] );
+		}
+		return $term;
+	}
+
+	/**
+	 * Term SEO data. The focus keyword is only shown to users who can edit the term.
+	 *
+	 * @param mixed $input Input.
+	 * @return array|\WP_Error
+	 */
+	public function get_term_seo( $input = null ) {
+		$term = $this->public_term( (int) ( is_array( $input ) ? ( $input['term_id'] ?? 0 ) : 0 ) );
+		if ( is_wp_error( $term ) ) {
+			return $term;
+		}
+		$fields = Term_SEO::get_all( (int) $term->term_id );
+		if ( ! current_user_can( 'edit_term', (int) $term->term_id ) ) {
+			unset( $fields['focus_keyword'] );
+		}
+		$link = get_term_link( $term );
+		return [
+			'term_id'  => (int) $term->term_id,
+			'taxonomy' => $term->taxonomy,
+			'name'     => $term->name,
+			'url'      => is_wp_error( $link ) ? '' : $link,
+			'count'    => (int) $term->count,
+			'noindex_effective' => Term_SEO::is_noindex( $term, $this->settings ),
+		] + $fields;
+	}
+
+	/**
+	 * Update term SEO fields.
+	 *
+	 * @param mixed $input Input.
+	 * @return array|\WP_Error
+	 */
+	public function update_term_seo( $input = null ) {
+		$input = is_array( $input ) ? $input : [];
+		$term  = $this->public_term( (int) ( $input['term_id'] ?? 0 ) );
+		if ( is_wp_error( $term ) ) {
+			return $term;
+		}
+		$values  = array_intersect_key( $input, Term_SEO::FIELDS );
+		$updated = Term_SEO::update( (int) $term->term_id, $values, true );
+		return [
+			'term_id' => (int) $term->term_id,
+			'updated' => $updated,
+		];
+	}
+
+	/**
+	 * Lowest-scoring published posts, and posts with no meta description.
+	 *
+	 * @param mixed $input Input.
+	 * @return array
+	 */
+	public function posts_needing_attention( $input = null ): array {
+		$input = is_array( $input ) ? $input : [];
+		$score = in_array( $input['score'] ?? 'seo', [ 'seo', 'aeo', 'geo' ], true ) ? (string) ( $input['score'] ?? 'seo' ) : 'seo';
+		$limit = max( 1, min( 50, (int) ( $input['limit'] ?? 10 ) ) );
+		$key   = '_jat_search_intel_' . $score . '_score';
+
+		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_key, WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Small, bounded admin query.
+		$ids = get_posts(
+			[
+				'post_type'      => $this->public_post_types(),
+				'post_status'    => 'publish',
+				'posts_per_page' => $limit,
+				'fields'         => 'ids',
+				'meta_key'       => $key,
+				'orderby'        => 'meta_value_num',
+				'order'          => 'ASC',
+				'no_found_rows'  => true,
+			]
+		);
+		$missing = get_posts(
+			[
+				'post_type'      => $this->public_post_types(),
+				'post_status'    => 'publish',
+				'posts_per_page' => $limit,
+				'fields'         => 'ids',
+				'no_found_rows'  => true,
+				'meta_query'     => [
+					'relation' => 'OR',
+					[ 'key' => '_jat_search_intel_description', 'compare' => 'NOT EXISTS' ],
+					[ 'key' => '_jat_search_intel_description', 'value' => '' ],
+				],
+			]
+		);
+		// phpcs:enable
+
+		$out = [];
+		foreach ( array_unique( array_merge( array_map( 'intval', $ids ), array_map( 'intval', $missing ) ) ) as $id ) {
+			$reasons = [];
+			if ( in_array( $id, array_map( 'intval', $ids ), true ) ) {
+				/* translators: 1: score name (SEO, AEO or GEO), 2: score. */
+				$reasons[] = sprintf( __( 'Low %1$s score (%2$d)', 'jat-search-intel' ), strtoupper( $score ), (int) get_post_meta( $id, $key, true ) );
+			}
+			if ( '' === (string) get_post_meta( $id, '_jat_search_intel_description', true ) ) {
+				$reasons[] = __( 'No meta description', 'jat-search-intel' );
+			}
+			$out[] = [
+				'post_id'   => $id,
+				'title'     => get_the_title( $id ),
+				'url'       => (string) get_permalink( $id ),
+				'seo_score' => (float) get_post_meta( $id, '_jat_search_intel_seo_score', true ),
+				'aeo_score' => (float) get_post_meta( $id, '_jat_search_intel_aeo_score', true ),
+				'geo_score' => (float) get_post_meta( $id, '_jat_search_intel_geo_score', true ),
+				'reasons'   => $reasons,
+			];
+		}
+		return array_slice( $out, 0, $limit );
+	}
+
+	/**
+	 * Stored (or fresh) Google index status.
+	 *
+	 * @param mixed $input Input.
+	 * @return array|\WP_Error
+	 */
+	public function get_index_status( $input = null ) {
+		$input   = is_array( $input ) ? $input : [];
+		$post_id = (int) ( $input['post_id'] ?? 0 );
+		if ( ! get_post( $post_id ) ) {
+			return new \WP_Error( 'jat_search_intel_not_found', __( 'Post not found.', 'jat-search-intel' ), [ 'status' => 404 ] );
+		}
+		$result = Index_Status::get( $post_id );
+		if ( ! empty( $input['refresh'] ) ) {
+			if ( ! Index_Status::is_connected( $this->settings ) ) {
+				return new \WP_Error( 'jat_search_intel_gsc', __( 'Search Console is not connected.', 'jat-search-intel' ), [ 'status' => 409 ] );
+			}
+			$result = ( new Index_Status( $this->settings ) )->check_post( $post_id );
+			if ( is_wp_error( $result ) ) {
+				return $result;
+			}
+		}
+		list( $state, $label ) = Index_Status::describe( $result );
+		return [
+			'post_id' => $post_id,
+			'url'     => (string) get_permalink( $post_id ),
+			'state'   => $state,
+			'summary' => $label,
+		] + $result;
+	}
+
+	/**
+	 * Redirect rules.
+	 *
+	 * @param mixed $input Input.
+	 * @return array
+	 */
+	public function list_redirects( $input = null ): array {
+		$input  = is_array( $input ) ? $input : [];
+		$limit  = max( 1, min( 100, (int) ( $input['limit'] ?? 25 ) ) );
+		$search = sanitize_text_field( (string) ( $input['search'] ?? '' ) );
+		$result = Core::get_instance()->redirects->get_redirects( 1, $limit, $search );
+		return [
+			'total'     => (int) $result['total'],
+			'redirects' => array_map(
+				static function ( $row ): array {
+					$row = (array) $row;
+					return [
+						'id'          => (int) $row['id'],
+						'source'      => (string) $row['source_url'],
+						'target'      => (string) $row['target_url'],
+						'status_code' => (int) $row['status_code'],
+						'match_type'  => (string) ( $row['match_type'] ?? 'exact' ),
+						'enabled'     => ! empty( $row['enabled'] ),
+						'hits'        => (int) ( $row['hit_count'] ?? 0 ),
+					];
+				},
+				(array) $result['items']
+			),
+		];
+	}
+
+	/**
+	 * Create a redirect rule.
+	 *
+	 * @param mixed $input Input.
+	 * @return array|\WP_Error
+	 */
+	public function create_redirect( $input = null ) {
+		$input = is_array( $input ) ? $input : [];
+		$id    = Core::get_instance()->redirects->save_redirect(
+			[
+				'source_url'  => sanitize_text_field( (string) ( $input['source'] ?? '' ) ),
+				'target_url'  => sanitize_text_field( (string) ( $input['target'] ?? '' ) ),
+				'status_code' => (int) ( $input['status_code'] ?? 301 ),
+				'match_type'  => sanitize_key( (string) ( $input['match_type'] ?? 'exact' ) ),
+				'enabled'     => true,
+				'note'        => sanitize_text_field( (string) ( $input['note'] ?? __( 'Added by an AI agent', 'jat-search-intel' ) ) ),
+			]
+		);
+		if ( ! $id ) {
+			return new \WP_Error( 'jat_search_intel_redirect', __( 'The redirect could not be saved. Check that the source is set, differs from the target, and is a valid pattern.', 'jat-search-intel' ), [ 'status' => 400 ] );
+		}
+		return [ 'id' => (int) $id ];
 	}
 
 	// ── Helpers ─────────────────────────────────────────────────────────

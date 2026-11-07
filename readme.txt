@@ -4,7 +4,7 @@ Tags: seo, schema, llms-txt, ai-search, redirects
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.5.0
+Stable tag: 3.6.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -33,6 +33,9 @@ One report puts Search Console clicks and impressions, visits from AI assistants
 **AI agents and MCP**
 On WordPress 6.9 and later the plugin registers abilities with the WordPress Abilities API, so AI agents connected through the REST API or the MCP Adapter can search your content and read a page's SEO data (both limited to published, indexable pages), and logged-in editors can have an agent analyse posts (including Passage Coach findings), update titles and descriptions, run the readiness audit and fetch the refresh queue. Every ability that reads scores or changes data checks WordPress capabilities.
 
+**No paid tier**
+Every feature is in the free plugin. Things other SEO plugins keep for their premium plans are included: SEO fields for categories, tags and product categories, a primary category, crawl cleanup, Search Console index status for every page, a change history with one-click restore for SEO fields and robots.txt, a site-wide schema map for AI agents, social previews in the editor, eight AI providers with your own key, and the same abilities for AI agents.
+
 **SEO — Search Engine Optimization**
 Traditional search optimization with a modern implementation.
 
@@ -41,6 +44,15 @@ Traditional search optimization with a modern implementation.
 * Twitter Card tags with per-post configuration
 * Canonical URL management
 * Robots meta directives (noindex, nofollow) per post
+* SEO for categories, tags and other taxonomies: title, meta description, canonical, noindex/nofollow and social title, description and image per term; noindex whole taxonomies or empty terms
+* Primary category for posts and WooCommerce products, used in permalinks, breadcrumbs, schema and the `%category%` title variable
+* Site verification for Google, Bing, Yandex, Baidu, Pinterest, Facebook, Naver and Seznam (paste the code or the whole meta tag)
+* Crawl cleanup: remove shortlinks, RSD, Windows Live Writer, generator tag, emoji scripts, oEmbed and REST links, the X-Pingback header and unneeded feeds, and turn away spam searches
+* Index Status: Google's verdict for each page from the Search Console URL Inspection API, checked daily or on demand
+* SEO change history: every change to a post's SEO fields is recorded with who made it, and any change can be put back in one click; robots.txt keeps its last 10 versions too
+* Freeze the last-modified date for small fixes, so search results and schema keep the real "last updated" date
+* Estimated reading time in schema, in X (Twitter) cards and as a `[jat_search_intel_reading_time]` shortcode
+* Facebook and X share previews in the block editor
 * XML Sitemaps with image support and automatic pagination
 * Google News sitemap and video sitemap (YouTube, Vimeo, self-hosted)
 * HTML sitemap shortcode for visitors
@@ -72,6 +84,8 @@ Optimize for AI-powered answer engines such as ChatGPT, Perplexity and Google AI
 * Content freshness meta tags — signal recency to AI crawlers
 * Content type detection — article, how-to, FAQ, comparison, review, guide
 * Markdown copy of every public post for AI agents (`/post-slug.md`), linked from the page and from llms.txt
+* Schema map: the structured data of every public page in a few feeds (advertised in robots.txt), so AI agents can read your whole site's schema without crawling it
+* Google Preferred Sources button (block, shortcode or added after posts) so readers can choose to see more of your site in Google's Top Stories
 * AI crawler access: allow or block 21 AI bots individually in robots.txt, grouped by purpose (training, AI search, live user fetch), with one-click presets
 * Content Signals in robots.txt: say yes or no to search, AI answers and AI training separately
 * One-click IndexNow: Bing (which powers ChatGPT search and Copilot) hears about new and updated pages within minutes, with no key to set up (opt-in, because it sends your URLs to Bing)
@@ -110,6 +124,7 @@ Admin page with batch operations and live progress bars:
 * `wp jat-search-intel sitemap cache|clear` — manage sitemap caches
 * `wp jat-search-intel export / import` — settings export/import
 * `wp jat-search-intel scores` — display score table (table, CSV, JSON, YAML)
+* `wp jat-search-intel index-status [--post=<id>] [--limit=<n>]` — check Google index status
 
 **Gutenberg Sidebar Panel**
 Native Block Editor integration with a tabbed sidebar panel:
@@ -127,6 +142,7 @@ Native Block Editor integration with a tabbed sidebar panel:
 * Breadcrumbs — theme-aware navigation with BreadcrumbList schema
 * Answer Box — featured snippet-optimized answer formatting
 * Citation — inline source citation with CreativeWork schema
+* Preferred Source on Google — a button that lets readers add your site as a preferred source
 
 **Optional modules**
 Turn on only what you need under Settings > General > Module Toggles: redirect manager with 404 log, IndexNow, robots.txt editor, broken link checker, internal linking suggestions, Local Business and WooCommerce schema, multilingual hreflang (WPML/Polylang), role-based access, AI writing assistance, content decay and keyword cannibalization reports, Core Web Vitals, GA4 insights and scheduled reports. Disabled modules are not loaded at all.
@@ -186,11 +202,23 @@ Used to generate meta descriptions, summaries, FAQs and content suggestions when
 = Anthropic Claude API (AI Engine, optional) =
 Same purpose and data as above when Anthropic is the selected provider. [Commercial terms](https://www.anthropic.com/legal/commercial-terms), [Privacy policy](https://www.anthropic.com/legal/privacy).
 
+= Google Gemini, Mistral, DeepSeek and OpenRouter APIs (AI Engine, optional) =
+Same purpose and data as above when one of these is the selected provider: Google Gemini ([Terms](https://ai.google.dev/gemini-api/terms), [Privacy](https://policies.google.com/privacy)), Mistral AI ([Terms](https://legal.mistral.ai/terms/commercial-terms-of-service), [Privacy](https://legal.mistral.ai/terms/privacy-policy)), DeepSeek ([Terms](https://platform.deepseek.com/downloads/DeepSeek%20Open%20Platform%20Terms%20of%20Service.html), [Privacy](https://chat.deepseek.com/downloads/DeepSeek%20Privacy%20Policy.html)) and OpenRouter, which forwards the request to the model you choose ([Terms](https://openrouter.ai/terms), [Privacy](https://openrouter.ai/privacy)).
+
+= OpenAI-compatible endpoint (AI Engine, optional) =
+If you choose a custom OpenAI-compatible endpoint, the same data goes to the URL you enter (for example your own LM Studio, vLLM or LiteLLM server). Which third party, if any, receives it depends on that endpoint.
+
 = Ollama (AI Engine, optional) =
 If you choose Ollama, requests go to the endpoint you configure (by default a server on your own machine at localhost). No third party is involved unless you point it at one.
 
 = Google OAuth and Search Console API (Rank Tracker, optional) =
 After you paste a Google service account key, the plugin requests an access token from Google's OAuth endpoint (oauth2.googleapis.com) once an hour at most, then fetches search performance for your tracked keywords from the Search Console API once a day or when you click Fetch now. Sends a token request signed with your key, your Search Console property and the keywords to look up. [Google APIs Terms](https://developers.google.com/terms), [Google Privacy Policy](https://policies.google.com/privacy).
+
+= Google Search Console URL Inspection API (Index Status, optional) =
+Uses the same service account connection as the Rank Tracker. When you turn on daily Index Status checks or click Check now, it sends the page URL and your Search Console property to Google and stores the returned index status. Up to 200 pages a day. [Google APIs Terms](https://developers.google.com/terms), [Google Privacy Policy](https://policies.google.com/privacy).
+
+= Google Preferred Sources link (optional) =
+The Preferred Source button is an ordinary link to google.com with your domain in it. Nothing is sent until a visitor clicks it.
 
 = Bing Webmaster Tools API (AI Visibility Dashboard, optional) =
 Fetches query statistics for your site. Sends your site URL and Bing API key. [Microsoft Services Agreement](https://www.microsoft.com/servicesagreement), [Microsoft Privacy Statement](https://privacy.microsoft.com/privacystatement).
@@ -211,6 +239,25 @@ Posts score-drop alerts and the weekly digest to the Slack webhook URL you enter
 Sends an HTTP HEAD request to each external URL linked from your content to check whether it still resolves. Only the linked URL is requested; no site data is sent.
 
 == Changelog ==
+
+= 3.6.0 =
+Every feature other SEO plugins sell in their premium plans, free.
+
+* New: SEO fields for categories, tags, product categories and any public taxonomy (title, description, canonical, robots, social), with noindex for whole taxonomies and for empty terms (on by default). Noindexed terms leave the sitemap.
+* New: primary category for posts and products, used in permalinks, breadcrumbs, Article schema and the %category% variable.
+* New: title templates for taxonomy archives and other archives.
+* New: site verification codes for Google, Bing, Yandex, Baidu, Pinterest, Facebook, Naver and Seznam.
+* New: crawl cleanup options (shortlinks, RSD, WLW manifest, generator, emoji, oEmbed and REST links, X-Pingback, comment and extra feeds, spam searches).
+* New: Index Status report from the Search Console URL Inspection API, with a daily check, a manual batch and `wp jat-search-intel index-status`.
+* New: SEO change history with one-click restore, in the block editor and the classic meta box; robots.txt keeps its last 10 versions.
+* New: freeze the last-modified date for small edits.
+* New: reading time in Article schema, X cards and a shortcode; X cards show the author too.
+* New: schema map for AI agents, listed in robots.txt.
+* New: Google Preferred Sources button as a block, a shortcode or after posts.
+* New: Facebook and X share previews in the block editor.
+* New: AI providers Google Gemini, Mistral, DeepSeek, OpenRouter and any OpenAI-compatible endpoint; OpenAI now defaults to gpt-5-mini and Anthropic to Claude Haiku 5.5.
+* New: abilities for AI agents to read and update term SEO, list posts that need attention, read index status and list or create redirects.
+* Fix: a provider's status message on the AI settings page could render HTML from the API response.
 
 = 3.5.0 =
 * First WordPress.org release, renamed JAT Search Intel. Every identifier now uses `jat-search-intel` / `jat_search_intel` (main file, text domain, options, post meta, tables, REST namespace `jat-search-intel/v1`, blocks, WP-CLI `wp jat-search-intel`).
@@ -276,6 +323,9 @@ Sends an HTTP HEAD request to each external URL linked from your content to chec
 Earlier releases are listed in CHANGELOG.md in the development repository.
 
 == Upgrade Notice ==
+
+= 3.6.0 =
+Adds category and tag SEO, primary category, crawl cleanup, Google index status, SEO change history, a schema map for AI agents and five more AI providers. Empty category and tag archives are now noindexed by default (Settings > SEO).
 
 = 3.5.0 =
 First WordPress.org release. Existing data from the GitHub edition (Search Intel) is migrated automatically. Adds an AI Search Readiness audit, rank tracking, AI agent abilities, news/video sitemaps, Markdown for AI agents and AI crawler controls.

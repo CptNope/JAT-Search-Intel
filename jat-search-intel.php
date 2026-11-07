@@ -3,7 +3,7 @@
  * Plugin Name:       JAT Search Intel
  * Plugin URI:        https://github.com/CptNope/JAT-Search-Intel
  * Description:       SEO, AEO (Answer Engine Optimization) and GEO (Generative Engine Optimization) for WordPress: meta tags, schema, sitemaps, llms.txt, redirects and real-time content scoring.
- * Version:           3.5.0
+ * Version:           3.6.0
  * Requires at least: 6.6
  * Requires PHP:      7.4
  * Author:            Jeremy Anderson Tech
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Plugin constants
-define( 'JAT_SEARCH_INTEL_VERSION', '3.5.0' );
+define( 'JAT_SEARCH_INTEL_VERSION', '3.6.0' );
 define( 'JAT_SEARCH_INTEL_FILE', __FILE__ );
 define( 'JAT_SEARCH_INTEL_DIR', plugin_dir_path( __FILE__ ) );
 define( 'JAT_SEARCH_INTEL_URL', plugin_dir_url( __FILE__ ) );
@@ -57,6 +57,7 @@ function jat_search_intel_cron_hooks() {
         'jat_search_intel_daily_aggregate',
         'jat_search_intel_decay_check',
         'jat_search_intel_ga4_fetch',
+        'jat_search_intel_index_status',
         'jat_search_intel_meta_backfill',
         'jat_search_intel_process_queue',
         'jat_search_intel_rank_tracking',
