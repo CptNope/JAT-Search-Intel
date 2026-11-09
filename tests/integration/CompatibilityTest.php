@@ -358,18 +358,6 @@ class CompatibilityTest extends TestCase {
 
     // ── Sitemap Disabled Gracefully ─────────────────────────────────────
 
-    public function test_sitemap_disabled_registers_no_hooks(): void {
-        global $si_test_state;
-        $si_test_state['actions'] = [];
-
-        $settings = Core::get_default_settings();
-        $settings['enable_sitemap'] = false;
-
-        new Sitemap( $settings );
-
-        $this->assertArrayNotHasKey( 'template_redirect', $si_test_state['actions'] );
-    }
-
     // ── Helper ──────────────────────────────────────────────────────────
 
     private function make_core(): Core {

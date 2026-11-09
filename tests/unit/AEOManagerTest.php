@@ -134,7 +134,7 @@ class AEOManagerTest extends TestCase {
         $mgr->render_direct_answer_meta();
         $output = ob_get_clean();
 
-        $this->assertStringContainsString( 'name="direct-answer"', $output );
+        $this->assertStringContainsString( '<meta name="direct-answer"', $output );
         $this->assertStringContainsString( 'SEO stands for Search Engine Optimization.', $output );
     }
 
@@ -183,7 +183,7 @@ class AEOManagerTest extends TestCase {
         $mgr     = $this->make_manager();
         $result  = $mgr->detect_qa_patterns( $content );
 
-        $this->assertNotEmpty( $result );
+        $this->assertCount( 1, $result );
         $this->assertEquals( 'qa_prefix', $result[0]['type'] );
     }
 

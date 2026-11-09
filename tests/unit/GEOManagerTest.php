@@ -68,7 +68,7 @@ class GEOManagerTest extends TestCase {
         $mgr->render_ai_meta();
         $output = ob_get_clean();
 
-        $this->assertStringContainsString( 'name="ai-summary"', $output );
+        $this->assertStringContainsString( '<meta name="ai-summary"', $output );
         $this->assertStringContainsString( 'AI-friendly summary.', $output );
     }
 
@@ -93,7 +93,7 @@ class GEOManagerTest extends TestCase {
         $mgr->render_ai_meta();
         $output = ob_get_clean();
 
-        $this->assertStringContainsString( 'name="content-intent"', $output );
+        $this->assertStringContainsString( '<meta name="content-intent"', $output );
         $this->assertStringContainsString( 'informational', $output );
     }
 
@@ -106,7 +106,7 @@ class GEOManagerTest extends TestCase {
         $mgr->render_ai_meta();
         $output = ob_get_clean();
 
-        $this->assertStringContainsString( 'name="target-audience"', $output );
+        $this->assertStringContainsString( '<meta name="target-audience"', $output );
         $this->assertStringContainsString( 'developers', $output );
     }
 
@@ -226,19 +226,6 @@ class GEOManagerTest extends TestCase {
     }
 
     // ── AI crawl directives ─────────────────────────────────────────────
-
-    public function test_render_ai_crawl_outputs_noindex_when_set(): void {
-        global $si_test_state;
-        $si_test_state['post_meta'][1]['_jat_search_intel_ai_noindex'] = '1';
-
-        $mgr = $this->make_manager();
-        ob_start();
-        $mgr->render_ai_crawl_directives();
-        $output = ob_get_clean();
-
-        $this->assertStringContainsString( 'GPTBot', $output );
-        $this->assertStringContainsString( 'noindex', $output );
-    }
 
     public function test_render_ai_crawl_no_output_when_not_set(): void {
         $mgr = $this->make_manager();

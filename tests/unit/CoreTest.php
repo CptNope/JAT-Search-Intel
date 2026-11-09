@@ -178,39 +178,23 @@ class CoreTest extends TestCase {
 
     // ── Module initialization ────────────────────────────────────────────
 
-    public function test_core_initializes_seo_manager(): void {
-        $core = Core::get_instance();
-        $this->assertInstanceOf( \JAT_Search_Intel\SEO_Manager::class, $core->seo );
+    /**
+     * @dataProvider core_modules
+     */
+    public function test_core_initializes_module( string $property, string $class ): void {
+        $this->assertInstanceOf( $class, Core::get_instance()->$property );
     }
 
-    public function test_core_initializes_schema_manager(): void {
-        $core = Core::get_instance();
-        $this->assertInstanceOf( \JAT_Search_Intel\Schema_Manager::class, $core->schema );
-    }
-
-    public function test_core_initializes_aeo_manager(): void {
-        $core = Core::get_instance();
-        $this->assertInstanceOf( \JAT_Search_Intel\AEO_Manager::class, $core->aeo );
-    }
-
-    public function test_core_initializes_geo_manager(): void {
-        $core = Core::get_instance();
-        $this->assertInstanceOf( \JAT_Search_Intel\GEO_Manager::class, $core->geo );
-    }
-
-    public function test_core_initializes_content_analyzer(): void {
-        $core = Core::get_instance();
-        $this->assertInstanceOf( \JAT_Search_Intel\Content_Analyzer::class, $core->analyzer );
-    }
-
-    public function test_core_initializes_sitemap(): void {
-        $core = Core::get_instance();
-        $this->assertInstanceOf( \JAT_Search_Intel\Sitemap::class, $core->sitemap );
-    }
-
-    public function test_core_initializes_title_engine(): void {
-        $core = Core::get_instance();
-        $this->assertInstanceOf( \JAT_Search_Intel\Title_Engine::class, $core->title_engine );
+    public static function core_modules(): array {
+        return [
+            'seo'          => [ 'seo', \JAT_Search_Intel\SEO_Manager::class ],
+            'schema'       => [ 'schema', \JAT_Search_Intel\Schema_Manager::class ],
+            'aeo'          => [ 'aeo', \JAT_Search_Intel\AEO_Manager::class ],
+            'geo'          => [ 'geo', \JAT_Search_Intel\GEO_Manager::class ],
+            'analyzer'     => [ 'analyzer', \JAT_Search_Intel\Content_Analyzer::class ],
+            'sitemap'      => [ 'sitemap', \JAT_Search_Intel\Sitemap::class ],
+            'title_engine' => [ 'title_engine', \JAT_Search_Intel\Title_Engine::class ],
+        ];
     }
 
     // ── Settings merge ──────────────────────────────────────────────────

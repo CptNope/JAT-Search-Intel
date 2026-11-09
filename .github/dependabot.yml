@@ -22,6 +22,15 @@ updates:
       dev-tools:
         dependency-type: development
         update-types: [minor, patch]
+    ignore:
+      # PHPUnit 10+ needs the tests rewritten, and 13 needs PHP 8.4, above the
+      # oldest PHP the tests run on (8.1).
+      - dependency-name: phpunit/phpunit
+        update-types: [version-update:semver-major]
+      # Psalm 7 needs PHP 8.2.27+ and reports working code as unused. Revisit when
+      # the tests no longer run on PHP 8.1.
+      - dependency-name: vimeo/psalm
+        update-types: [version-update:semver-major]
     labels: [dependencies, php]
 
   - package-ecosystem: npm
@@ -38,4 +47,11 @@ updates:
         patterns: ['*']
         exclude-patterns: ['@wordpress/*']
         update-types: [minor, patch]
+    ignore:
+      # Stylelint has to stay on the major version @wordpress/scripts supports
+      # (stylelint-config-standard 41 needs stylelint 18; WordPress is on 17).
+      - dependency-name: stylelint
+        update-types: [version-update:semver-major]
+      - dependency-name: stylelint-config-standard
+        update-types: [version-update:semver-major]
     labels: [dependencies, javascript]

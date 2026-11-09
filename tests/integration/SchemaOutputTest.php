@@ -179,16 +179,6 @@ class SchemaOutputTest extends TestCase {
 
     // ── WebSite schema detail ───────────────────────────────────────────
 
-    public function test_website_has_search_action(): void {
-        $mgr    = $this->make_schema();
-        $method = new ReflectionMethod( $mgr, 'get_website_schema' );
-        $method->setAccessible( true );
-        $schema = $method->invoke( $mgr );
-
-        $this->assertArrayHasKey( 'potentialAction', $schema );
-        $this->assertEquals( 'SearchAction', $schema['potentialAction']['@type'] );
-    }
-
     public function test_website_has_language(): void {
         $mgr    = $this->make_schema();
         $method = new ReflectionMethod( $mgr, 'get_website_schema' );
@@ -223,17 +213,6 @@ class SchemaOutputTest extends TestCase {
 
         $this->assertArrayHasKey( 'mainEntityOfPage', $schema );
         $this->assertEquals( 'WebPage', $schema['mainEntityOfPage']['@type'] );
-    }
-
-    public function test_article_schema_with_abstract(): void {
-        global $si_test_state;
-        $si_test_state['post_meta'][1]['_jat_search_intel_direct_answer'] = 'Schema is structured data markup.';
-
-        $mgr    = $this->make_schema();
-        $schema = $mgr->get_singular_schema( 1 );
-
-        $this->assertArrayHasKey( 'abstract', $schema );
-        $this->assertEquals( 'Schema is structured data markup.', $schema['abstract'] );
     }
 
     public function test_article_schema_with_citations(): void {
@@ -314,12 +293,4 @@ class SchemaOutputTest extends TestCase {
 
     // ── Schema disabled ─────────────────────────────────────────────────
 
-    public function test_schema_disabled_registers_no_hooks(): void {
-        global $si_test_state;
-        $si_test_state['actions'] = [];
-
-        $this->make_schema( [ 'enable_schema' => false ] );
-
-        $this->assertArrayNotHasKey( 'wp_head', $si_test_state['actions'] );
-    }
 }

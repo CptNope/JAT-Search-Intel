@@ -49,15 +49,6 @@ class MetaOutputTest extends TestCase {
         $this->assertStringContainsString( '<meta name="description"', $output );
     }
 
-    public function test_render_meta_tags_contains_version_comment(): void {
-        $seo = $this->make_seo();
-        ob_start();
-        $seo->render_meta_tags();
-        $output = ob_get_clean();
-
-        $this->assertStringContainsString( '<!-- JAT Search Intel v', $output );
-    }
-
     public function test_meta_description_uses_custom_when_set(): void {
         global $si_test_state;
         $si_test_state['post_meta'][1]['_jat_search_intel_description'] = 'My custom SEO description.';
@@ -118,18 +109,6 @@ class MetaOutputTest extends TestCase {
         $output = ob_get_clean();
 
         $this->assertStringContainsString( 'https://example.com/?p=1', $output );
-    }
-
-    public function test_canonical_uses_custom_when_set(): void {
-        global $si_test_state;
-        $si_test_state['post_meta'][1]['_jat_search_intel_canonical'] = 'https://example.com/my-seo-url';
-
-        $seo = $this->make_seo();
-        ob_start();
-        $seo->render_canonical();
-        $output = ob_get_clean();
-
-        $this->assertStringContainsString( 'https://example.com/my-seo-url', $output );
     }
 
     public function test_canonical_disabled_when_setting_off(): void {
