@@ -27,7 +27,7 @@
     "@wordpress/element": "^6.0.0",
     "@wordpress/i18n": "^7.1.0",
     "@wordpress/plugins": "^7.0.0",
-    "@wordpress/icons": "^10.0.0"
+    "@wordpress/icons": "^20.0.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.65.0",
