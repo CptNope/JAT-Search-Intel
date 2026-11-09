@@ -1333,10 +1333,15 @@ JAT Search Intel has a comprehensive automated test suite and CI pipeline.
 
 ### CI Pipeline (GitHub Actions)
 
-- PHPUnit on PHP 8.1, 8.2, 8.3
-- Psalm level 4, PHPStan level 6, PHPCS, ESLint, Stylelint
-- Performance regression checks
-- Playwright E2E via `wp-env` (Docker)
+Six checks on every pull request:
+
+- **PHPUnit (PHP 8.1)** and **PHPUnit (PHP 8.5)**: unit and integration tests (including the performance tests) on the oldest and newest PHP the test tools support
+- **PHP 7.4 Syntax**: every shipped file still parses on the plugin's minimum PHP
+- **Static Analysis**: PHP_CodeSniffer, PHPStan level 6, Psalm level 4
+- **JS & CSS**: ESLint, Stylelint and the block build
+- **Package** and **Plugin Check**: the release zip, then the official WordPress.org Plugin Check on it
+
+Playwright E2E tests via `wp-env` (Docker) run locally.
 
 ### Running Tests Locally
 

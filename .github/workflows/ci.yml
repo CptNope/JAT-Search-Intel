@@ -18,13 +18,16 @@ concurrency:
 
 jobs:
   phpunit:
-    name: PHPUnit Tests (PHP ${{ matrix.php }})
+    # The oldest and newest PHP versions the test tools run on. (The plugin itself
+    # supports PHP 7.4+; the php-74 job checks that every shipped file still parses there.)
+    # The performance tests are part of the integration suite, so they run here too.
+    name: PHPUnit (PHP ${{ matrix.php }})
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
-        php: ['8.1', '8.2', '8.3', '8.4']
+        php: ['8.1', '8.5']
     steps:
       - uses: actions/checkout@v7
 
@@ -38,78 +41,39 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --no-interaction --prefer-dist --ignore-platform-req=php
 
-      - name: Run unit tests
+      - name: Unit tests
         run: vendor/bin/phpunit --testsuite unit --no-coverage
 
-      - name: Run integration tests
+      - name: Integration tests
+        if: ${{ !cancelled() }}
         run: vendor/bin/phpunit --testsuite integration --no-coverage
 
-  php-syntax:
-    # The plugin supports PHP 7.4+, older than the dev tools can run on, so every
-    # shipped PHP file is syntax-checked on the oldest and newest supported versions.
-    name: PHP Syntax (PHP ${{ matrix.php }})
+      - name: Lint shipped PHP files
+        if: ${{ !cancelled() && matrix.php == '8.5' }}
+        run: bin/lint-php.sh
+
+  php-74:
+    name: PHP 7.4 Syntax
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    strategy:
-      fail-fast: false
-      matrix:
-        php: ['7.4', '8.4']
     steps:
       - uses: actions/checkout@v7
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ matrix.php }}
+          php-version: '7.4'
           coverage: none
 
       - name: Lint shipped PHP files
-        run: |
-          git ls-files -z '*.php' ':!:tests/**' ':!:stubs/**' ':!:phpstan-constants.php' \
-            | xargs -0 -n1 -P4 php -l -d display_errors=1 > lint.log || { grep -v "^No syntax errors" lint.log; exit 1; }
-          echo "$(wc -l < lint.log) files OK"
+        run: bin/lint-php.sh
 
-  phpcs:
-    name: PHP_CodeSniffer
+  static-analysis:
+    # One Composer install for all three tools. Each step still runs if an earlier
+    # one fails, so a single run reports every problem.
+    name: Static Analysis
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
-          tools: cs2pr
-
-      - name: Install Composer dependencies
-        run: composer install --no-interaction --prefer-dist --ignore-platform-req=php
-
-      - name: Run PHPCS
-        run: vendor/bin/phpcs -q --report=checkstyle | cs2pr
-
-  phpstan:
-    name: PHPStan (Level 6)
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
-
-      - name: Install Composer dependencies
-        run: composer install --no-interaction --prefer-dist --ignore-platform-req=php
-
-      - name: Run PHPStan
-        run: vendor/bin/phpstan analyse --configuration=phpstan.neon --no-progress --memory-limit=4G
-
-  psalm:
-    name: Psalm (Level 4)
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
 
@@ -117,15 +81,27 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
+          tools: cs2pr
+          coverage: none
 
       - name: Install Composer dependencies
         run: composer install --no-interaction --prefer-dist
 
-      - name: Run Psalm
+      - name: PHP_CodeSniffer
+        run: vendor/bin/phpcs -q --report=checkstyle | cs2pr
+
+      - name: PHPStan (level 6)
+        if: ${{ !cancelled() }}
+        run: vendor/bin/phpstan analyse --configuration=phpstan.neon --no-progress --memory-limit=4G
+
+      - name: Psalm (level 4)
+        if: ${{ !cancelled() }}
         run: vendor/bin/psalm --no-cache --php-version=8.2
 
-  eslint:
-    name: ESLint
+  assets:
+    # ESLint, Stylelint and the block build share one npm install.
+    # (The committed build/ files are what ship; the build step proves they can be rebuilt.)
+    name: JS & CSS
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -140,56 +116,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run ESLint
+      - name: ESLint
         run: npx eslint admin/js/
 
-  stylelint:
-    name: Stylelint
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: '22'
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run Stylelint
+      - name: Stylelint
+        if: ${{ !cancelled() }}
         run: npx stylelint "admin/css/**/*.css"
 
-  build:
-    # Compiles the block-editor sources in src/ with @wordpress/scripts, so a
-    # toolchain update that breaks the build is caught before it is merged.
-    # (The committed build/ files are what ship; this only proves they can be rebuilt.)
-    name: Build
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: '22'
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build
-        run: npm run build
-
-      - name: Every built entry point exists
+      - name: Build blocks
+        if: ${{ !cancelled() }}
         run: |
+          npm run build
           for f in build/sidebar.js build/sidebar.asset.php build/blocks/toc/index.js build/blocks/faq/index.js build/blocks/howto/index.js; do
             [ -s "$f" ] || { echo "::error::Build did not produce $f"; exit 1; }
           done
-          git status --short build/ | head -20
 
   package:
     # Builds the exact zip that ships, checks it is complete and contains no dev
@@ -246,26 +186,6 @@ jobs:
         uses: wordpress/plugin-check-action@v1
         with:
           build-dir: './jat-search-intel'
-
-  performance:
-    name: Performance Regression Check
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    needs: [phpunit]
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
-          extensions: mbstring, xml, json
-
-      - name: Install Composer dependencies
-        run: composer install --no-interaction --prefer-dist --ignore-platform-req=php
-
-      - name: Run performance tests
-        run: vendor/bin/phpunit --testsuite integration --filter Performance --no-coverage
 
   # Playwright E2E tests are not run in CI to save Actions minutes.
   # Run locally: npx playwright test

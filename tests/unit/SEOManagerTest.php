@@ -201,7 +201,7 @@ class SEOManagerTest extends TestCase {
         $mgr->render_meta_tags();
         $output = ob_get_clean();
 
-        $this->assertStringContainsString( 'JAT Search Intel v', $output );
+        $this->assertStringContainsString( '<!-- JAT Search Intel v', $output );
     }
 
     public function test_render_canonical_outputs_link(): void {

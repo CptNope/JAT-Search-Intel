@@ -49,17 +49,6 @@ class SitemapOutputTest extends TestCase {
 
     // ── Sitemap index ───────────────────────────────────────────────────
 
-    public function test_sitemap_index_is_valid_xml(): void {
-        $sitemap = $this->make_sitemap();
-        $method  = new ReflectionMethod( $sitemap, 'generate_sitemap_index' );
-        $method->setAccessible( true );
-        $xml = $method->invoke( $sitemap );
-
-        $this->assertStringStartsWith( '<?xml version="1.0"', $xml );
-        $this->assertStringContainsString( '<sitemapindex', $xml );
-        $this->assertStringContainsString( '</sitemapindex>', $xml );
-    }
-
     public function test_sitemap_index_has_post_sitemap(): void {
         $sitemap = $this->make_sitemap();
         $method  = new ReflectionMethod( $sitemap, 'generate_sitemap_index' );
@@ -88,17 +77,6 @@ class SitemapOutputTest extends TestCase {
     }
 
     // ── Post type sitemap ───────────────────────────────────────────────
-
-    public function test_post_sitemap_is_valid_xml(): void {
-        $sitemap = $this->make_sitemap();
-        $method  = new ReflectionMethod( $sitemap, 'generate_sitemap' );
-        $method->setAccessible( true );
-        $xml = $method->invoke( $sitemap, 'post', 1 );
-
-        $this->assertStringStartsWith( '<?xml version="1.0"', $xml );
-        $this->assertStringContainsString( '<urlset', $xml );
-        $this->assertStringContainsString( '</urlset>', $xml );
-    }
 
     public function test_post_sitemap_contains_urls(): void {
         $sitemap = $this->make_sitemap();
@@ -183,12 +161,4 @@ class SitemapOutputTest extends TestCase {
 
     // ── Sitemap disabled ────────────────────────────────────────────────
 
-    public function test_sitemap_disabled_registers_no_hooks(): void {
-        global $si_test_state;
-        $si_test_state['actions'] = [];
-
-        $this->make_sitemap( [ 'enable_sitemap' => false ] );
-
-        $this->assertArrayNotHasKey( 'init', $si_test_state['actions'] );
-    }
 }

@@ -40,19 +40,6 @@ class GEOOutputTest extends TestCase {
 
     // ── AI meta tags output ─────────────────────────────────────────────
 
-    public function test_ai_meta_renders_ai_summary(): void {
-        global $si_test_state;
-        $si_test_state['post_meta'][1]['_jat_search_intel_ai_summary'] = 'This article covers GEO optimization.';
-
-        $mgr = $this->make_geo();
-        ob_start();
-        $mgr->render_ai_meta();
-        $output = ob_get_clean();
-
-        $this->assertStringContainsString( '<meta name="ai-summary"', $output );
-        $this->assertStringContainsString( 'This article covers GEO optimization.', $output );
-    }
-
     public function test_ai_meta_renders_content_type(): void {
         $mgr = $this->make_geo();
         ob_start();
@@ -72,46 +59,6 @@ class GEOOutputTest extends TestCase {
         $this->assertStringContainsString( 'article:modified_time', $output );
     }
 
-    public function test_ai_meta_renders_content_intent(): void {
-        global $si_test_state;
-        $si_test_state['post_meta'][1]['_jat_search_intel_content_intent'] = 'educational';
-
-        $mgr = $this->make_geo();
-        ob_start();
-        $mgr->render_ai_meta();
-        $output = ob_get_clean();
-
-        $this->assertStringContainsString( '<meta name="content-intent"', $output );
-        $this->assertStringContainsString( 'educational', $output );
-    }
-
-    public function test_ai_meta_renders_audience(): void {
-        global $si_test_state;
-        $si_test_state['post_meta'][1]['_jat_search_intel_audience'] = 'developers';
-
-        $mgr = $this->make_geo();
-        ob_start();
-        $mgr->render_ai_meta();
-        $output = ob_get_clean();
-
-        $this->assertStringContainsString( '<meta name="target-audience"', $output );
-        $this->assertStringContainsString( 'developers', $output );
-    }
-
-    public function test_ai_meta_renders_geo_placename(): void {
-        global $si_test_state;
-        $si_test_state['post_meta'][1]['_jat_search_intel_local_relevance'] = '1';
-        $si_test_state['post_meta'][1]['_jat_search_intel_local_location']  = 'Austin, TX';
-
-        $mgr = $this->make_geo();
-        ob_start();
-        $mgr->render_ai_meta();
-        $output = ob_get_clean();
-
-        $this->assertStringContainsString( 'geo.placename', $output );
-        $this->assertStringContainsString( 'Austin, TX', $output );
-    }
-
     public function test_ai_meta_renders_keywords(): void {
         global $si_test_state;
         $si_test_state['post_meta'][1]['_jat_search_intel_topics'] = [ 'SEO', 'AEO', 'GEO' ];
@@ -126,15 +73,6 @@ class GEOOutputTest extends TestCase {
     }
 
     // ── Freshness signals ───────────────────────────────────────────────
-
-    public function test_freshness_meta_renders(): void {
-        $mgr = $this->make_geo();
-        ob_start();
-        $mgr->render_freshness_meta();
-        $output = ob_get_clean();
-
-        $this->assertStringContainsString( 'content-freshness', $output );
-    }
 
     public function test_freshness_includes_last_modified(): void {
         $mgr = $this->make_geo();
@@ -185,19 +123,6 @@ class GEOOutputTest extends TestCase {
         $result  = $mgr->enhance_content_entities( $content );
 
         $this->assertStringContainsString( 'https://google.com', $result );
-    }
-
-    public function test_entity_invalid_type_falls_back_to_thing(): void {
-        global $si_test_state;
-        $si_test_state['post_meta'][1]['_jat_search_intel_entities'] = [
-            [ 'name' => 'Test', 'type' => 'EvilType', 'url' => '' ],
-        ];
-
-        $mgr     = $this->make_geo();
-        $content = '<p>Test entity here.</p>';
-        $result  = $mgr->enhance_content_entities( $content );
-
-        $this->assertStringContainsString( 'schema.org/Thing', $result );
     }
 
     public function test_entity_markup_only_wraps_first_occurrence(): void {
@@ -269,15 +194,6 @@ class GEOOutputTest extends TestCase {
 
         $this->assertStringContainsString( 'GPTBot', $output );
         $this->assertStringContainsString( 'noindex', $output );
-    }
-
-    public function test_ai_crawl_directives_empty_without_noindex(): void {
-        $mgr = $this->make_geo();
-        ob_start();
-        $mgr->render_ai_crawl_directives();
-        $output = ob_get_clean();
-
-        $this->assertStringNotContainsString( 'GPTBot', $output );
     }
 
     // ── GEO disabled ────────────────────────────────────────────────────

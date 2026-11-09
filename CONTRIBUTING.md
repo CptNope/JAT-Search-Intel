@@ -108,14 +108,15 @@ merge until these pass:
 
 | Check | Command to run locally |
 |---|---|
-| PHPUnit on PHP 8.1–8.4 | `vendor/bin/phpunit --no-coverage` |
-| PHP 7.4 and 8.4 syntax | `php -l` on every shipped file |
-| PHP_CodeSniffer (WordPress standards) | `vendor/bin/phpcs` |
-| PHPStan level 6 | `vendor/bin/phpstan analyse` |
-| Psalm level 4 | `vendor/bin/psalm` |
-| ESLint and Stylelint | `npx eslint admin/js/` · `npx stylelint "admin/css/**/*.css"` |
-| Package (versions agree, zip has no dev files) | `bin/check-version.sh && bin/build-zip.sh` |
-| WordPress.org Plugin Check on the built zip | `wp plugin check jat-search-intel` |
+| **PHPUnit (PHP 8.1)** and **PHPUnit (PHP 8.5)**: unit and integration tests, including the performance tests | `vendor/bin/phpunit --no-coverage` |
+| **PHP 7.4 Syntax** of every shipped file (also checked on PHP 8.5) | `bin/lint-php.sh` |
+| **Static Analysis**: WordPress coding standards, PHPStan level 6, Psalm level 4 | `vendor/bin/phpcs`, `vendor/bin/phpstan analyse`, `vendor/bin/psalm` |
+| **JS & CSS**: ESLint, Stylelint and the block build | `npx eslint admin/js/`, `npx stylelint "admin/css/**/*.css"`, `npm run build` |
+| **Package**: version numbers agree and the zip has no dev files | `bin/check-version.sh && bin/build-zip.sh` |
+| **Plugin Check**: the official WordPress.org Plugin Check on the built zip | `wp plugin check jat-search-intel` |
+| CodeQL: no new high-severity alerts | runs automatically |
+
+PHP 8.2–8.4 are not tested separately: deprecations and removals carry forward, so the newest version catches what the ones in between would.
 
 Dependabot opens weekly PRs for Composer, npm and GitHub Actions updates. Report
 security problems privately; see [SECURITY.md](SECURITY.md).

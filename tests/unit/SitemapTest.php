@@ -41,6 +41,7 @@ class SitemapTest extends TestCase {
         $this->make_sitemap( [ 'enable_sitemap' => false ] );
 
         $this->assertArrayNotHasKey( 'init', $si_test_state['actions'] );
+        $this->assertArrayNotHasKey( 'template_redirect', $si_test_state['actions'] );
     }
 
     public function test_legacy_ping_setting_registers_no_hooks(): void {
@@ -70,7 +71,7 @@ class SitemapTest extends TestCase {
         $method->setAccessible( true );
         $xml = $method->invoke( $sitemap );
 
-        $this->assertStringContainsString( '<?xml version="1.0"', $xml );
+        $this->assertStringStartsWith( '<?xml version="1.0"', $xml );
         $this->assertStringContainsString( '<sitemapindex', $xml );
         $this->assertStringContainsString( '</sitemapindex>', $xml );
     }
@@ -103,7 +104,7 @@ class SitemapTest extends TestCase {
         $method->setAccessible( true );
         $xml = $method->invoke( $sitemap, 'post', 1 );
 
-        $this->assertStringContainsString( '<?xml version="1.0"', $xml );
+        $this->assertStringStartsWith( '<?xml version="1.0"', $xml );
         $this->assertStringContainsString( '<urlset', $xml );
         $this->assertStringContainsString( '</urlset>', $xml );
     }

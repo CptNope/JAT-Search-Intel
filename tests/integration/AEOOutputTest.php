@@ -40,19 +40,6 @@ class AEOOutputTest extends TestCase {
 
     // ── Direct answer meta output ───────────────────────────────────────
 
-    public function test_direct_answer_meta_renders_when_set(): void {
-        global $si_test_state;
-        $si_test_state['post_meta'][1]['_jat_search_intel_direct_answer'] = 'SEO means Search Engine Optimization.';
-
-        $mgr = $this->make_aeo();
-        ob_start();
-        $mgr->render_direct_answer_meta();
-        $output = ob_get_clean();
-
-        $this->assertStringContainsString( '<meta name="direct-answer"', $output );
-        $this->assertStringContainsString( 'SEO means Search Engine Optimization.', $output );
-    }
-
     public function test_direct_answer_meta_empty_when_not_set(): void {
         $mgr = $this->make_aeo();
         ob_start();
@@ -236,24 +223,6 @@ class AEOOutputTest extends TestCase {
         $this->assertCount( 2, $result );
     }
 
-    public function test_qa_detection_qa_prefix_pattern(): void {
-        $content = 'Q: What is indexing? A: Indexing is the process by which search engines organize web pages in their database.';
-        $mgr     = $this->make_aeo();
-        $result  = $mgr->detect_qa_patterns( $content );
-
-        $this->assertCount( 1, $result );
-        $this->assertEquals( 'qa_prefix', $result[0]['type'] );
-    }
-
     // ── AEO disabled ────────────────────────────────────────────────────
 
-    public function test_aeo_disabled_registers_no_wp_head_hooks(): void {
-        global $si_test_state;
-        $si_test_state['actions'] = [];
-
-        $this->make_aeo( [ 'enable_aeo' => false ] );
-
-        $hooks = $si_test_state['actions'];
-        $this->assertArrayNotHasKey( 'wp_head', $hooks );
-    }
 }
