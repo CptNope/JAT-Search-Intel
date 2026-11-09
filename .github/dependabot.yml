@@ -1,5 +1,6 @@
 # Weekly dependency updates. Minor and patch bumps are grouped into one PR per
-# ecosystem so CI runs once; major versions arrive as their own PRs.
+# ecosystem so CI runs once. Major versions arrive as their own PRs, except
+# WordPress packages, whose majors come together in one PR.
 version: 2
 updates:
   - package-ecosystem: github-actions
@@ -43,6 +44,11 @@ updates:
       wordpress-packages:
         patterns: ['@wordpress/*']
         update-types: [minor, patch]
+      # WordPress releases its packages together, so their major versions
+      # arrive as one PR instead of one per package.
+      wordpress-majors:
+        patterns: ['@wordpress/*']
+        update-types: [major]
       other:
         patterns: ['*']
         exclude-patterns: ['@wordpress/*']
