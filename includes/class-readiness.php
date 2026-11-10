@@ -475,11 +475,12 @@ class Readiness {
 	// ── Refresh queue ───────────────────────────────────────────────────
 
 	/**
-	 * Pages most in need of a refresh: the longest-unchanged pages, weighted
-	 * by real Search Console clicks when available.
+	 * Pages most in need of a refresh: pages that just lost an AI citation
+	 * first, then the longest-unchanged pages, weighted by real Search Console
+	 * clicks when available.
 	 *
 	 * @param int $limit Rows.
-	 * @return array<int,array{post_id:int,title:string,url:string,days:int,clicks:int,impressions:int,priority:float}>
+	 * @return array<int,array{post_id:int,title:string,url:string,days:int,clicks:int,impressions:int,priority:float,lost_citations:string[]}>
 	 */
 	public function refresh_queue( int $limit = 20 ): array {
 		global $wpdb;
@@ -523,6 +524,10 @@ class Readiness {
 		}
 		// phpcs:enable
 
+		// Candidates 3: pages an AI engine cited last time but not in the latest check.
+		$lost = Citation_Tracker::lost_citation_posts();
+		$ids  = array_merge( $ids, array_keys( $lost ) );
+
 		$ids = array_values( array_unique( array_filter( $ids ) ) );
 		if ( ! $ids ) {
 			return [];
@@ -539,8 +544,9 @@ class Readiness {
 				continue;
 			}
 			$days = (int) floor( ( $now - (int) strtotime( $post->post_modified_gmt . ' UTC' ) ) / DAY_IN_SECONDS );
-			if ( $days < 90 ) {
-				continue; // Refreshed this quarter.
+			$lost_for = $lost[ (int) $post->ID ] ?? [];
+			if ( $days < 90 && ! $lost_for ) {
+				continue; // Refreshed this quarter, and no citation lost.
 			}
 			$url                          = (string) get_permalink( $post );
 			list( $clicks, $impressions ) = $traffic[ untrailingslashit( $url ) ] ?? [ 0, 0 ];
@@ -551,7 +557,9 @@ class Readiness {
 				'days'        => $days,
 				'clicks'      => $clicks,
 				'impressions' => $impressions,
-				'priority'    => round( $days * ( 1 + log( 1 + $clicks * 10 + $impressions ) ), 1 ),
+				// A lost citation outranks age alone.
+				'priority'       => round( $days * ( 1 + log( 1 + $clicks * 10 + $impressions ) ) + 100000 * count( $lost_for ), 1 ),
+				'lost_citations' => $lost_for,
 			];
 		}
 
@@ -727,13 +735,18 @@ class Readiness {
 		// Refresh queue.
 		$queue = $this->refresh_queue();
 		echo '<h2 style="margin-top:32px">' . esc_html__( 'Refresh Queue', 'jat-search-intel' ) . '</h2>';
-		echo '<p style="max-width:800px">' . esc_html__( 'Pages that have gone longest without an update, weighted by Search Console clicks when connected. Review the facts, add anything new, refresh the date-sensitive parts, then save.', 'jat-search-intel' ) . '</p>';
+		echo '<p style="max-width:800px">' . esc_html__( 'Pages an AI assistant stopped citing come first, then the pages that have gone longest without an update, weighted by Search Console clicks when connected. Review the facts, add anything new, refresh the date-sensitive parts, then save.', 'jat-search-intel' ) . '</p>';
 		if ( $queue ) {
 			echo '<table class="widefat striped" style="max-width:1000px"><thead><tr><th>' . esc_html__( 'Page', 'jat-search-intel' ) . '</th><th>' . esc_html__( 'Last updated', 'jat-search-intel' ) . '</th><th>' . esc_html__( 'Clicks (28d)', 'jat-search-intel' ) . '</th><th></th></tr></thead><tbody>';
 			foreach ( $queue as $row ) {
 				/* translators: %s: number of days. */
 				$age = sprintf( _n( '%s day ago', '%s days ago', $row['days'], 'jat-search-intel' ), number_format_i18n( $row['days'] ) );
-				echo '<tr><td><a href="' . esc_url( $row['url'] ) . '" target="_blank" rel="noopener">' . esc_html( $row['title'] ?: __( '(no title)', 'jat-search-intel' ) ) . '</a></td><td>' . esc_html( $age ) . '</td><td>' . esc_html( $row['clicks'] ? number_format_i18n( $row['clicks'] ) : '—' ) . '</td>';
+				$why = '';
+				if ( $row['lost_citations'] ) {
+					/* translators: %s: question. */
+					$why = '<br /><small style="color:#d63638">' . esc_html( sprintf( __( 'No longer cited for: %s', 'jat-search-intel' ), implode( '; ', $row['lost_citations'] ) ) ) . '</small>';
+				}
+				echo '<tr><td><a href="' . esc_url( $row['url'] ) . '" target="_blank" rel="noopener">' . esc_html( $row['title'] ?: __( '(no title)', 'jat-search-intel' ) ) . '</a>' . $why . '</td><td>' . esc_html( $age ) . '</td><td>' . esc_html( $row['clicks'] ? number_format_i18n( $row['clicks'] ) : '—' ) . '</td>';
 				echo '<td style="text-align:right"><a class="button button-small" href="' . esc_url( (string) get_edit_post_link( $row['post_id'], 'raw' ) ) . '">' . esc_html__( 'Edit', 'jat-search-intel' ) . '</a></td></tr>';
 			}
 			echo '</tbody></table>';

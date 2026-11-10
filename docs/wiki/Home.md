@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| **Current version** | 3.6.0 ([download](https://github.com/CptNope/JAT-Search-Intel/releases/latest)) |
+| **Current version** | 3.7.0 ([download](https://github.com/CptNope/JAT-Search-Intel/releases/latest)) |
 | **Requires** | WordPress 6.6+, PHP 7.4+ |
 | **Tested up to** | WordPress 7.1 |
 | **License** | GPLv2 or later |

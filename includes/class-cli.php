@@ -244,6 +244,54 @@ class CLI extends \WP_CLI_Command {
     }
 
     /**
+     * Show AI citation results, or run the checks now.
+     *
+     * ## OPTIONS
+     *
+     * [--check]
+     * : Ask every engine every tracked question now (uses your API keys).
+     *
+     * [--format=<format>]
+     * : table, csv, json or yaml. Default: table.
+     *
+     * ## EXAMPLES
+     *
+     *     wp jat-search-intel citations
+     *     wp jat-search-intel citations --check
+     *
+     * @param array $args       Positional arguments.
+     * @param array $assoc_args Associative arguments.
+     */
+    public function citations( $args, $assoc_args ) {
+        unset( $args );
+        $tracker = new Citation_Tracker( Core::get_instance()->get_settings() );
+        if ( ! Citation_Tracker::questions() ) {
+            \WP_CLI::error( 'No questions to track yet. Add them under Reports → AI Citations.' );
+        }
+        if ( ! empty( $assoc_args['check'] ) ) {
+            $engines = $tracker->active_engines();
+            if ( ! $engines ) {
+                \WP_CLI::error( 'No engine has an API key. Add one under Settings → AI.' );
+            }
+            foreach ( array_keys( Citation_Tracker::questions() ) as $id ) {
+                foreach ( $engines as $engine ) {
+                    $tracker->check( $id, $engine );
+                }
+            }
+        }
+        $rows = [];
+        foreach ( Citation_Tracker::summary()['rows'] as $row ) {
+            $line = [ 'question' => $row['q'] ];
+            foreach ( Citation_Tracker::ENGINES as $engine => $info ) {
+                $entry = $row['engines'][ $engine ] ?? [];
+                $line[ $info['label'] ] = ! $entry ? '-' : ( isset( $entry['error'] ) ? 'error' : ( ! empty( $entry['cited'] ) ? 'cited' : ( ! empty( $entry['source'] ) ? 'read' : 'no' ) ) );
+            }
+            $rows[] = $line;
+        }
+        \WP_CLI\Utils\format_items( $assoc_args['format'] ?? 'table', $rows, array_keys( $rows[0] ) );
+    }
+
+    /**
      * Regenerate metadata for all published posts.
      *
      * Fills in empty descriptions, AI summaries, and content types.

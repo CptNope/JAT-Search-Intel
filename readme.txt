@@ -4,7 +4,7 @@ Tags: seo, schema, llms-txt, ai-search, redirects
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.6.0
+Stable tag: 3.7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -34,7 +34,7 @@ One report puts Search Console clicks and impressions, visits from AI assistants
 On WordPress 6.9 and later the plugin registers abilities with the WordPress Abilities API, so AI agents connected through the REST API or the MCP Adapter can search your content and read a page's SEO data (both limited to published, indexable pages), and logged-in editors can have an agent analyse posts (including Passage Coach findings), update titles and descriptions, run the readiness audit and fetch the refresh queue. Every ability that reads scores or changes data checks WordPress capabilities.
 
 **No paid tier**
-Every feature is in the free plugin. Things other SEO plugins keep for their premium plans are included: SEO fields for categories, tags and product categories, a primary category, crawl cleanup, Search Console index status for every page, a change history with one-click restore for SEO fields and robots.txt, a site-wide schema map for AI agents, social previews in the editor, eight AI providers with your own key, and the same abilities for AI agents.
+Every feature is in the free plugin. Things other SEO plugins keep for their premium plans are included: SEO fields for categories, tags and product categories, a primary category, crawl cleanup, Search Console index status for every page, a change history with one-click restore for SEO fields and robots.txt, a site-wide schema map for AI agents, AI citation tracking across ChatGPT, Claude, Gemini and Perplexity, social previews in the editor, eight AI providers with your own key, and the same abilities for AI agents.
 
 **SEO — Search Engine Optimization**
 Traditional search optimization with a modern implementation.
@@ -78,6 +78,9 @@ Optimize your content for featured snippets, voice assistants, and People Also A
 Optimize for AI-powered answer engines such as ChatGPT, Perplexity and Google AI Overviews.
 
 * AI Summary field — provide a concise, factual summary for LLM consumption
+* AI Citations report — list the questions your customers ask; each week ChatGPT, Claude, Gemini and Perplexity are asked them with web search on (using your own API keys), and the report shows whether they cited your site, read it without citing it, or named you, and which sites they cited instead
+* GEO health score based on what research shows AI engines reward: AI search crawler access, Google and Bing indexing, freshness, answer-ready content, entity and author details, and structured data
+* Pages that lose an AI citation go to the top of the Refresh Queue
 * llms.txt endpoint — machine-readable site summary following the llms.txt specification
 * Entity markup — define people, organizations, places, and products with Schema.org microdata
 * E-E-A-T author signals — credentials, expertise areas, years of experience
@@ -125,6 +128,7 @@ Admin page with batch operations and live progress bars:
 * `wp jat-search-intel export / import` — settings export/import
 * `wp jat-search-intel scores` — display score table (table, CSV, JSON, YAML)
 * `wp jat-search-intel index-status [--post=<id>] [--limit=<n>]` — check Google index status
+* `wp jat-search-intel citations [--check]` — show (or run) AI citation checks
 
 **Gutenberg Sidebar Panel**
 Native Block Editor integration with a tabbed sidebar panel:
@@ -205,6 +209,9 @@ Same purpose and data as above when Anthropic is the selected provider. [Commerc
 = Google Gemini, Mistral, DeepSeek and OpenRouter APIs (AI Engine, optional) =
 Same purpose and data as above when one of these is the selected provider: Google Gemini ([Terms](https://ai.google.dev/gemini-api/terms), [Privacy](https://policies.google.com/privacy)), Mistral AI ([Terms](https://legal.mistral.ai/terms/commercial-terms-of-service), [Privacy](https://legal.mistral.ai/terms/privacy-policy)), DeepSeek ([Terms](https://platform.deepseek.com/downloads/DeepSeek%20Open%20Platform%20Terms%20of%20Service.html), [Privacy](https://chat.deepseek.com/downloads/DeepSeek%20Privacy%20Policy.html)) and OpenRouter, which forwards the request to the model you choose ([Terms](https://openrouter.ai/terms), [Privacy](https://openrouter.ai/privacy)).
 
+= OpenAI, Anthropic, Google Gemini and Perplexity web search (AI Citations, optional) =
+When you click Check now in the AI Citations report, or turn on weekly checks, each question you track is sent to the engines you have an API key for, with their web search tool on: OpenAI (Responses API), Anthropic (Messages API), Google Gemini (Grounding with Google Search) and Perplexity (Sonar API). It sends only the question and your API key; nothing about your visitors. Each check is billed to your account by the provider. Perplexity: [API Terms](https://www.perplexity.ai/hub/legal/perplexity-api-terms-of-service), [Privacy policy](https://www.perplexity.ai/hub/legal/privacy-policy). The other providers' terms are linked above.
+
 = OpenAI-compatible endpoint (AI Engine, optional) =
 If you choose a custom OpenAI-compatible endpoint, the same data goes to the URL you enter (for example your own LM Studio, vLLM or LiteLLM server). Which third party, if any, receives it depends on that endpoint.
 
@@ -239,6 +246,14 @@ Posts score-drop alerts and the weekly digest to the Slack webhook URL you enter
 Sends an HTTP HEAD request to each external URL linked from your content to check whether it still resolves. Only the linked URL is requested; no site data is sent.
 
 == Changelog ==
+
+= 3.7.0 =
+Measure what works, and score what matters.
+
+* New: AI Citations report. Track up to 25 questions; ChatGPT, Claude, Gemini and Perplexity are asked them weekly (or on demand) with web search on, using your own API keys. See whether each one cited your site, read it without citing it or named you, which of your pages it cited, and which sites it cited instead. Also `wp jat-search-intel citations` and a get-ai-citations ability for AI agents.
+* New: pages that an AI engine stopped citing move to the top of the Refresh Queue, with the questions they lost.
+* Changed: the GEO health score now follows research on what AI engines cite. 100 points across AI search crawler access, Google and Bing indexing, freshness, answer-ready content, entity and author details, and structured data. llms.txt and the AI meta tags stay available but earn no points, because no major AI engine has said it uses them. Scores will change; the breakdown explains each factor.
+* Tests: a CI cleanup removed duplicate tests and runs the same checks in 6 jobs instead of 15.
 
 = 3.6.0 =
 Every feature other SEO plugins sell in their premium plans, free.
@@ -323,6 +338,9 @@ Every feature other SEO plugins sell in their premium plans, free.
 Earlier releases are listed in CHANGELOG.md in the development repository.
 
 == Upgrade Notice ==
+
+= 3.7.0 =
+Adds the AI Citations report and an evidence-based GEO health score. Your GEO score will change: llms.txt and AI meta tags no longer earn points.
 
 = 3.6.0 =
 Adds category and tag SEO, primary category, crawl cleanup, Google index status, SEO change history, a schema map for AI agents and five more AI providers. Empty category and tag archives are now noindexed by default (Settings > SEO).

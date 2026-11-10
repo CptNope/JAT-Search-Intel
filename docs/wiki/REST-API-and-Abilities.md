@@ -41,7 +41,7 @@ The plugin's post meta fields are also registered with `show_in_rest`, so the bl
 
 ## Abilities
 
-On WordPress 6.9 and later, the plugin registers twelve abilities in the `jat-search-intel` category with the WordPress Abilities API. Any client that speaks the Abilities API can call them, including AI agents connected through the [MCP Adapter](https://github.com/WordPress/mcp-adapter).
+On WordPress 6.9 and later, the plugin registers thirteen abilities in the `jat-search-intel` category with the WordPress Abilities API. Any client that speaks the Abilities API can call them, including AI agents connected through the [MCP Adapter](https://github.com/WordPress/mcp-adapter).
 
 | Ability | Who can run it | Type | What it does |
 |---|---|---|---|
@@ -55,6 +55,7 @@ On WordPress 6.9 and later, the plugin registers twelve abilities in the `jat-se
 | `jat-search-intel/update-term-seo` | users who can edit the term | writes | update a term's SEO fields; fields you leave out are not changed |
 | `jat-search-intel/posts-needing-attention` | editors (`edit_others_posts`) | read-only | published posts with the lowest SEO, AEO or GEO score, or no meta description |
 | `jat-search-intel/get-index-status` | users who can edit the post | reads, or refreshes with `refresh` | Google index status of a post from Search Console |
+| `jat-search-intel/get-ai-citations` | editors (`edit_others_posts`) | read-only | latest AI citation results per tracked question and engine, citations lost since the previous check, and the sites cited instead |
 | `jat-search-intel/list-redirects` | administrators | read-only | redirect rules, optionally filtered by a search term |
 | `jat-search-intel/create-redirect` | administrators | writes | add a 301, 302, 307 or 410 redirect (exact, prefix or regex) |
 

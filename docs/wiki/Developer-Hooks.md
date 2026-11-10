@@ -56,6 +56,17 @@ add_filter( 'jat_search_intel_term_seo_taxonomies', function ( array $taxonomies
 } );
 ```
 
+### `jat_search_intel_citation_models`
+
+The model each engine uses for AI citation checks. Defaults: `gpt-5-mini`, `claude-haiku-5-5`, `gemini-2.5-flash` and `sonar`.
+
+```php
+add_filter( 'jat_search_intel_citation_models', function ( array $models ) {
+	$models['perplexity'] = 'sonar-pro';
+	return $models;
+} );
+```
+
 ### `jat_search_intel_schema_map_post_types`
 
 The post types included in the schema map. By default the post types in the XML sitemap.

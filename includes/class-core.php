@@ -197,6 +197,9 @@ class Core {
     /** @var Schema_Map */
     public $schema_map;
 
+    /** @var Citation_Tracker */
+    public $citation_tracker;
+
     /**
      * Get singleton instance.
      */
@@ -317,6 +320,8 @@ class Core {
             'preferred_source'        => [ $on( 'preferred_source_auto' ), Preferred_Source::class ],
             'index_status'            => [ $is_admin || $on( 'enable_index_status' ), Index_Status::class ],
             'seo_history'             => [ $is_admin, SEO_History::class, [ 'rest_api_init' => 9 ] ],
+            // Booted for cron too, so a manual "Check now" works through its queue.
+            'citation_tracker'        => [ $is_admin || $on( 'enable_citation_tracking' ) || wp_doing_cron(), Citation_Tracker::class ],
             'schema_map'              => [ false, Schema_Map::class, $schema_map_on ? [ 'rest_api_init' => 9 ] : [] ],
             'abilities'               => [ false, Abilities::class, function_exists( 'wp_register_ability' ) ? [ 'wp_abilities_api_categories_init' => 9, 'wp_abilities_api_init' => 9 ] : [] ],
         ];
@@ -527,6 +532,7 @@ class Core {
             'noindex_404'            => true,
             'enable_index_status'    => false,
             'enable_schema_map'      => true,
+            'enable_citation_tracking' => false,
             'preferred_source_auto'  => false,
             'preferred_source_post_types' => [ 'post' ],
             'noindex_empty_terms'    => true,

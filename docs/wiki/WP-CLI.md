@@ -28,6 +28,14 @@ All commands are under `wp jat-search-intel`. Run `wp help jat-search-intel <com
 | `wp jat-search-intel sitemap cache` | Build and cache all sitemaps |
 | `wp jat-search-intel sitemap clear` | Clear the sitemap caches |
 
+## AI citations
+
+| Command | What it does |
+|---|---|
+| `wp jat-search-intel citations` | Show the latest result for each tracked question and engine: cited, read, no or error |
+| `wp jat-search-intel citations --check` | Ask every engine every question now (uses your API keys), then show the results |
+| `wp jat-search-intel citations --format=json` | Any of table, csv, json or yaml |
+
 ## Google index status
 
 Needs the Search Console connection (see [Features](Features#seo)).
