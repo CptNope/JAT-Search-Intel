@@ -6,6 +6,23 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.7.0] — 2026-11-09
+
+Measure what works, and score what matters.
+
+### Added
+- **AI Citations** report (Reports → AI Citations): up to 25 tracked questions, asked weekly or on demand of ChatGPT (Responses API web search), Claude (web search tool), Gemini (Grounding with Google Search) and Perplexity (Sonar), using your own keys. Records cited / read but not cited / named, the cited pages, and the sites cited instead; keeps 12 checks per question and engine. Runs in background batches of 6 and stops an engine whose key is rejected (401/403/429).
+- `jat-search-intel/get-ai-citations` ability, `wp jat-search-intel citations [--check]`, and the `jat_search_intel_citation_models` filter.
+- Refresh Queue: pages an AI engine stopped citing come first, with the questions they lost.
+
+### Changed
+- GEO health score rebuilt around evidence (new `GEO_Health` class): AI search crawler access 20, Google and Bing indexing 20, freshness 20, answer-ready content 15, entity and authors 15, structured data 10. llms.txt and AI meta tags become optional extras with no points.
+
+### Tests and CI
+- 20 duplicate tests removed and CI reduced from 15 checks to 6 (#31); Dependabot groups WordPress package majors (#39).
+
+---
+
 ## [3.6.0] — 2026-11-07
 
 Everything other SEO plugins keep for their premium plans, free.

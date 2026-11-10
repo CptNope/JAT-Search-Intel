@@ -12,6 +12,7 @@ Each service below is contacted only after you switch on the related module and 
 | OpenAI-compatible endpoint | AI Engine | the same, to the URL you enter | the same as above |
 | Ollama | AI Engine | the same, to the endpoint you configure (your own machine by default) | the same as above |
 | Google OAuth and Search Console API | Rank Tracker, Refresh Queue, Page Performance | a token request signed with your service-account key, your property and keywords | at most hourly for the token; daily or on "Fetch now" for data |
+| OpenAI, Anthropic, Google Gemini and Perplexity, with web search | AI Citations | each tracked question, with your API key | weekly if switched on, or when you click Check now |
 | Google Search Console URL Inspection API | Index Status | each page URL and your Search Console property | daily (up to 200 pages) if switched on, or when you click Check now |
 | Bing Webmaster Tools API | AI Visibility | your site URL and Bing API key | when the dashboard refreshes |
 | Google Analytics Data API | GA4 Insights | your GA4 property ID and access token | daily |

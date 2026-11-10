@@ -199,7 +199,7 @@ class Admin {
                 'enable_llms_txt', 'enable_ai_meta', 'enable_entity_markup',
                 'content_freshness', 'enable_rest_api',
                 'enable_markdown_endpoints', 'enable_ai_crawler_log',
-                'preferred_source_auto', 'enable_schema_map',
+                'preferred_source_auto', 'enable_schema_map', 'enable_citation_tracking',
             ],
             'sitemap' => [
                 'enable_news_sitemap', 'enable_video_sitemap',
@@ -249,7 +249,7 @@ class Admin {
             'redirect_attachments', 'enable_rss_footer', 'enable_markdown_endpoints',
             'enable_ai_crawler_log', 'enable_rank_tracking',
             // v3.6
-            'preferred_source_auto', 'enable_index_status', 'enable_schema_map',
+            'preferred_source_auto', 'enable_index_status', 'enable_schema_map', 'enable_citation_tracking',
             'cleanup_shortlink', 'cleanup_rsd', 'cleanup_wlwmanifest', 'cleanup_generator', 'cleanup_emoji', 'cleanup_oembed_links', 'cleanup_rest_link', 'cleanup_pingback_header', 'cleanup_feed_comments', 'cleanup_feed_post_comments', 'cleanup_feed_extra', 'cleanup_search_spam',
         ];
 

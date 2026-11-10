@@ -39,278 +39,12 @@ class Visibility_Dashboard {
 	// ── GEO Health Score ─────────────────────────────────────────────────────
 
 	/**
-	 * Calculate site-wide GEO health score (0–100).
+	 * Site-wide GEO health score (0–100). See GEO_Health for the factors and weights.
 	 *
-	 * Factors:
-	 * - AI meta coverage (ai-summary, topics, content-type on published posts)
-	 * - llms.txt enabled and serving
-	 * - Entity markup coverage
-	 * - Content freshness distribution
-	 * - E-E-A-T signals (author bios, expertise, citations)
-	 * - Schema coverage
-	 * - AI crawl directive configuration
-	 *
-	 * @return array{score: int, factors: array, grade: string}
+	 * @return array{score:int, grade:string, factors:array<string,array{label:string,score:int,max:int,detail:string}>}
 	 */
 	public function calculate_health_score(): array {
-		$factors = [];
-		$total   = 0;
-		$max     = 0;
-
-		// 1. AI Meta coverage (25 points).
-		$meta_score        = $this->score_ai_meta_coverage();
-		$factors['ai_meta'] = [
-			'label'  => 'AI Meta Tags',
-			'score'  => $meta_score,
-			'max'    => 25,
-			'detail' => sprintf( '%d%% of posts have AI summaries', $meta_score * 4 ),
-		];
-		$total += $meta_score;
-		$max   += 25;
-
-		// 2. llms.txt (15 points).
-		$llms_score          = $this->score_llms_txt();
-		$factors['llms_txt'] = [
-			'label'  => 'llms.txt Configuration',
-			'score'  => $llms_score,
-			'max'    => 15,
-			'detail' => $llms_score >= 10 ? 'Enabled and serving' : 'Not configured',
-		];
-		$total += $llms_score;
-		$max   += 15;
-
-		// 3. Entity markup (20 points).
-		$entity_score         = $this->score_entity_markup();
-		$factors['entity']    = [
-			'label'  => 'Entity Markup',
-			'score'  => $entity_score,
-			'max'    => 20,
-			'detail' => sprintf( '%d%% coverage', $entity_score * 5 ),
-		];
-		$total += $entity_score;
-		$max   += 20;
-
-		// 4. Content freshness (15 points).
-		$freshness_score        = $this->score_content_freshness();
-		$factors['freshness']   = [
-			'label'  => 'Content Freshness',
-			'score'  => $freshness_score,
-			'max'    => 15,
-			'detail' => $freshness_score >= 10 ? 'Mostly fresh' : 'Needs updating',
-		];
-		$total += $freshness_score;
-		$max   += 15;
-
-		// 5. E-E-A-T signals (15 points).
-		$eeat_score        = $this->score_eeat_signals();
-		$factors['eeat']   = [
-			'label'  => 'E-E-A-T Signals',
-			'score'  => $eeat_score,
-			'max'    => 15,
-			'detail' => sprintf( '%d of 15 signals configured', $eeat_score ),
-		];
-		$total += $eeat_score;
-		$max   += 15;
-
-		// 6. Schema coverage (10 points).
-		$schema_score         = $this->score_schema_coverage();
-		$factors['schema']    = [
-			'label'  => 'Schema Coverage',
-			'score'  => $schema_score,
-			'max'    => 10,
-			'detail' => sprintf( '%d%% of posts have enhanced schema', $schema_score * 10 ),
-		];
-		$total += $schema_score;
-		$max   += 10;
-
-		$pct   = (int) round( ( $total / $max ) * 100 );
-		$grade = $this->score_to_grade( $pct );
-
-		return [
-			'score'   => $pct,
-			'factors' => $factors,
-			'grade'   => $grade,
-		];
-	}
-
-	/**
-	 * Score AI meta coverage across published posts.
-	 *
-	 * @return int 0–25.
-	 */
-	private function score_ai_meta_coverage(): int {
-		$posts = get_posts( [
-			'numberposts' => 100,
-			'post_status' => 'publish',
-			'post_type'   => 'post',
-			'fields'      => 'ids',
-		] );
-
-		if ( empty( $posts ) ) {
-			return 0;
-		}
-
-		$with_meta = 0;
-		foreach ( $posts as $pid ) {
-			$summary = get_post_meta( $pid, '_jat_search_intel_ai_summary', true );
-			$topics  = get_post_meta( $pid, '_jat_search_intel_topics', true );
-			if ( $summary || $topics ) {
-				$with_meta++;
-			}
-		}
-
-		$ratio = $with_meta / count( $posts );
-		return (int) round( $ratio * 25 );
-	}
-
-	/**
-	 * Score llms.txt configuration.
-	 *
-	 * @return int 0–15.
-	 */
-	private function score_llms_txt(): int {
-		$score = 0;
-
-		if ( ! empty( $this->settings['enable_llms_txt'] ) ) {
-			$score += 10;
-		}
-
-		if ( ! empty( $this->settings['enable_geo'] ) ) {
-			$score += 5;
-		}
-
-		return min( $score, 15 );
-	}
-
-	/**
-	 * Score entity markup coverage.
-	 *
-	 * @return int 0–20.
-	 */
-	private function score_entity_markup(): int {
-		if ( empty( $this->settings['enable_entity_markup'] ) ) {
-			return 0;
-		}
-
-		$posts = get_posts( [
-			'numberposts' => 50,
-			'post_status' => 'publish',
-			'post_type'   => 'post',
-			'fields'      => 'ids',
-		] );
-
-		if ( empty( $posts ) ) {
-			return 0;
-		}
-
-		$with_entities = 0;
-		foreach ( $posts as $pid ) {
-			$topics = get_post_meta( $pid, '_jat_search_intel_topics', true );
-			if ( $topics && is_array( $topics ) && count( $topics ) > 0 ) {
-				$with_entities++;
-			}
-		}
-
-		$ratio = $with_entities / count( $posts );
-		return (int) round( $ratio * 20 );
-	}
-
-	/**
-	 * Score content freshness distribution.
-	 *
-	 * @return int 0–15.
-	 */
-	private function score_content_freshness(): int {
-		$posts = get_posts( [
-			'numberposts' => 100,
-			'post_status' => 'publish',
-			'post_type'   => 'post',
-			'fields'      => 'ids',
-		] );
-
-		if ( empty( $posts ) ) {
-			return 0;
-		}
-
-		$now       = time();
-		$fresh     = 0;
-		foreach ( $posts as $pid ) {
-			$modified = (int) get_the_modified_date( 'U', $pid );
-			$age_days = ( $now - $modified ) / 86400;
-			if ( $age_days <= 90 ) {
-				$fresh++;
-			}
-		}
-
-		$ratio = $fresh / count( $posts );
-		return (int) round( $ratio * 15 );
-	}
-
-	/**
-	 * Score E-E-A-T signals.
-	 *
-	 * @return int 0–15.
-	 */
-	private function score_eeat_signals(): int {
-		$score = 0;
-
-		// Author E-E-A-T structured data enabled.
-		if ( ! empty( $this->settings['enable_geo'] ) ) {
-			$score += 5;
-		}
-
-		// Content freshness enabled.
-		if ( ! empty( $this->settings['content_freshness'] ) ) {
-			$score += 5;
-		}
-
-		// AI meta enabled.
-		if ( ! empty( $this->settings['enable_ai_meta'] ) ) {
-			$score += 5;
-		}
-
-		return min( $score, 15 );
-	}
-
-	/**
-	 * Score schema coverage.
-	 *
-	 * @return int 0–10.
-	 */
-	private function score_schema_coverage(): int {
-		$score = 0;
-
-		if ( ! empty( $this->settings['enable_schema'] ) ) {
-			$score += 5;
-		}
-
-		if ( ! empty( $this->settings['enable_schema_types'] ) ) {
-			$score += 5;
-		}
-
-		return min( $score, 10 );
-	}
-
-	/**
-	 * Convert percentage score to letter grade.
-	 *
-	 * @param int $pct 0–100.
-	 * @return string Grade letter.
-	 */
-	private function score_to_grade( int $pct ): string {
-		if ( $pct >= 90 ) {
-			return 'A';
-		}
-		if ( $pct >= 80 ) {
-			return 'B';
-		}
-		if ( $pct >= 70 ) {
-			return 'C';
-		}
-		if ( $pct >= 60 ) {
-			return 'D';
-		}
-		return 'F';
+		return ( new GEO_Health( $this->settings ) )->calculate();
 	}
 
 	// ── API Integrations ─────────────────────────────────────────────────────
@@ -624,7 +358,10 @@ class Visibility_Dashboard {
 		$recs   = [];
 
 		foreach ( $health['factors'] as $key => $factor ) {
-			$ratio = $factor['max'] > 0 ? $factor['score'] / $factor['max'] : 0;
+			if ( $factor['max'] <= 0 ) {
+				continue; // Optional extras earn no points, so they never need fixing.
+			}
+			$ratio = $factor['score'] / $factor['max'];
 
 			if ( $ratio >= 0.8 ) {
 				continue;
@@ -659,16 +396,9 @@ class Visibility_Dashboard {
 	 * @return string Human-readable recommendation.
 	 */
 	private function recommendation_message( string $key, array $factor ): string {
-		$messages = [
-			'ai_meta'   => 'Add AI summaries and topic tags to your posts for better AI engine visibility.',
-			'llms_txt'  => 'Enable llms.txt in GEO settings to help AI crawlers understand your site.',
-			'entity'    => 'Enable entity markup and add topic tags to improve entity recognition.',
-			'freshness' => 'Update older content to improve freshness signals for AI engines.',
-			'eeat'      => 'Configure E-E-A-T signals: enable GEO features, content freshness, and AI meta.',
-			'schema'    => 'Enable schema markup and additional schema types for richer AI understanding.',
-		];
-
-		return $messages[ $key ] ?? sprintf( 'Improve %s (currently %d/%d).', $factor['label'], $factor['score'], $factor['max'] );
+		$message = GEO_Health::recommendation( $key );
+		/* translators: 1: factor name, 2: points, 3: maximum points. */
+		return '' !== $message ? $message : sprintf( __( 'Improve %1$s (currently %2$d/%3$d).', 'jat-search-intel' ), $factor['label'], $factor['score'], $factor['max'] );
 	}
 
 	// ── Content Gap Map ──────────────────────────────────────────────────────
@@ -815,10 +545,11 @@ class Visibility_Dashboard {
 		echo '<th>Factor</th><th>Score</th><th>Detail</th></tr></thead><tbody>';
 		foreach ( $health['factors'] as $factor ) {
 			printf(
-				'<tr><td>%s</td><td>%d / %d</td><td>%s</td></tr>',
+				'<tr><td>%s</td><td>%s</td><td>%s</td></tr>',
 				esc_html( $factor['label'] ),
-				absint( $factor['score'] ),
-				absint( $factor['max'] ),
+				$factor['max'] > 0
+					? esc_html( sprintf( '%d / %d', $factor['score'], $factor['max'] ) )
+					: esc_html__( 'Optional', 'jat-search-intel' ),
 				esc_html( $factor['detail'] )
 			);
 		}

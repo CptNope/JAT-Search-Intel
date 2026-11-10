@@ -48,10 +48,28 @@ There is no paid tier. Features that other SEO plugins keep for premium plans, s
 - **Freshness**: content-freshness meta tags and fact-check dates.
 - **Content understanding**: content type detection (article, how-to, FAQ, comparison, review, guide), key topics and semantic keyword signals.
 - **AI crawler control**: 21 AI bots, Content Signals and IndexNow. See [AI Search](AI-Search).
+- **AI Citations** (**Reports → AI Citations**): list up to 25 questions your customers ask. The plugin asks ChatGPT, Claude, Gemini and Perplexity each one with web search on, using your own API keys (OpenAI, Anthropic and Gemini keys from **Settings → AI**, and a Perplexity key on the report page). For every question and engine you see whether it cited your site (and which page), read your site without citing it, or named you, plus which sites it cited instead. Checks run weekly when **Settings → GEO → AI Citation Checks** is on, or when you click **Check now**. They run in the background, six at a time, and stop early for an engine whose key is rejected. Each check is one web-search request billed to your account.
 
 ## Scores
 
 Every post gets separate **SEO**, **AEO** and **GEO** scores (0–100) with recommendations. They are calculated when you save, from the editor's **Analysis** tab, with **Tools → Bulk Tools → Rescore**, or with `wp jat-search-intel rescore --all`.
+
+### GEO health score
+
+The **AI Visibility** dashboard scores the whole site out of 100, weighted by what research on AI citations shows matters:
+
+| Factor | Points | What it checks |
+|---|---|---|
+| AI search crawlers allowed | 20 | The site is public, AI search and user-request crawlers (OAI-SearchBot, Claude-SearchBot, PerplexityBot…) aren't blocked, and Content Signals don't say `ai-input=no`. Blocking training crawlers costs nothing. |
+| Indexed in Google and Bing | 20 | Sitemap (5), IndexNow (5), and the share of checked pages Google has indexed from [Index Status](Features#seo) (10; half credit until at least 5 pages are checked) |
+| Freshness | 20 | Share of the 100 most recent posts updated in the last 6 months (half credit within a year) |
+| Answer-ready content | 15 | Share of recent posts with a direct answer, FAQs or an AEO score of 70+ |
+| Entity and authors | 15 | Organization or person name (4), logo (3), social profiles (4), author biographies (4) |
+| Structured data | 10 | Schema output (7) and the extra content types (3) |
+
+llms.txt and the AI meta tags are listed as optional extras with no points: no major AI engine has said it uses them, and server-log studies found 97% of llms.txt files are never requested. They stay available because they cost almost nothing.
+
+The **Refresh Queue** on the Readiness page puts pages that an AI engine stopped citing at the top, with the questions they lost, followed by the pages that have gone longest without an update.
 
 ## Optional modules
 

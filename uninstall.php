@@ -37,6 +37,8 @@ function jat_search_intel_uninstall_site() {
 	$hooks = array(
 		'jat_search_intel_broken_link_check',
 		'jat_search_intel_check_links',
+		'jat_search_intel_citation_batch',
+		'jat_search_intel_citation_check',
 		'jat_search_intel_cwv_scan',
 		'jat_search_intel_daily_aggregate',
 		'jat_search_intel_decay_check',

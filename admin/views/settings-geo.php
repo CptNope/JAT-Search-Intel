@@ -178,6 +178,19 @@ $settings = wp_parse_args( $settings, \JAT_Search_Intel\Core::get_default_settin
                     </td>
                 </tr>
                 <tr>
+                    <th><?php esc_html_e( 'AI Citation Checks', 'jat-search-intel' ); ?></th>
+                    <td>
+                        <label>
+                            <input type="checkbox" name="jat_search_intel_settings[enable_citation_tracking]" value="1" <?php checked( ! empty( $settings['enable_citation_tracking'] ) ); ?> />
+                            <?php esc_html_e( 'Every week, ask ChatGPT, Claude, Gemini and Perplexity your tracked questions and record whether they cite this site', 'jat-search-intel' ); ?>
+                        </label>
+                        <p class="description">
+                            <?php esc_html_e( 'Uses your own API keys, with web search on. Each question costs one request per engine per week.', 'jat-search-intel' ); ?>
+                            <a href="<?php echo esc_url( admin_url( 'admin.php?page=' . \JAT_Search_Intel\Citation_Tracker::PAGE_SLUG ) ); ?>"><?php esc_html_e( 'Choose questions', 'jat-search-intel' ); ?></a>
+                        </p>
+                    </td>
+                </tr>
+                <tr>
                     <th><?php esc_html_e( 'AI Traffic Analytics', 'jat-search-intel' ); ?></th>
                     <td>
                         <label>

@@ -1208,6 +1208,10 @@ function get_object_taxonomies( $object_type, string $output = 'names' ): array 
 
 function wp_remote_post( string $url, array $args = [] ): array {
 	global $si_test_state;
+	$si_test_state['remote_posts'][] = [ 'url' => $url, 'args' => $args ];
+	if ( ! empty( $si_test_state['remote_post_responses'] ) ) {
+		return array_shift( $si_test_state['remote_post_responses'] );
+	}
 	return $si_test_state['remote_post_response'] ?? [
 		'response' => [ 'code' => 200, 'message' => 'OK' ],
 		'body'     => '',
@@ -1222,7 +1226,7 @@ function wp_remote_retrieve_body( $response ): string {
 }
 
 function url_to_postid( string $url ): int {
-	return 0;
+	return (int) ( $GLOBALS['si_test_state']['url_to_postid'][ $url ] ?? 0 );
 }
 
 function wp_get_post_categories( int $post_id, array $args = [] ): array {
@@ -1808,6 +1812,12 @@ if ( ! class_exists( 'WP_Post' ) ) {
 				$this->$key = $value;
 			}
 		}
+	}
+}
+
+if ( ! function_exists( 'wp_doing_cron' ) ) {
+	function wp_doing_cron(): bool {
+		return (bool) ( $GLOBALS['si_test_state']['doing_cron'] ?? false );
 	}
 }
 

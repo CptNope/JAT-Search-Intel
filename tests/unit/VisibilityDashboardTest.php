@@ -43,12 +43,9 @@ class VisibilityDashboardTest extends TestCase {
 	public function test_health_score_has_all_factors(): void {
 		$result = $this->dashboard->calculate_health_score();
 
-		$this->assertArrayHasKey( 'ai_meta', $result['factors'] );
-		$this->assertArrayHasKey( 'llms_txt', $result['factors'] );
-		$this->assertArrayHasKey( 'entity', $result['factors'] );
-		$this->assertArrayHasKey( 'freshness', $result['factors'] );
-		$this->assertArrayHasKey( 'eeat', $result['factors'] );
-		$this->assertArrayHasKey( 'schema', $result['factors'] );
+		foreach ( [ 'crawler_access', 'indexing', 'freshness', 'answers', 'entity', 'structured_data', 'llms_txt', 'ai_meta' ] as $key ) {
+			$this->assertArrayHasKey( $key, $result['factors'] );
+		}
 	}
 
 	public function test_health_score_factor_structure(): void {
@@ -67,7 +64,7 @@ class VisibilityDashboardTest extends TestCase {
 	public function test_health_score_with_full_settings(): void {
 		$result = $this->dashboard->calculate_health_score();
 
-		// With all settings enabled, llms_txt + eeat + schema should contribute points.
+		// Crawler access, the unmeasured index estimate and schema contribute even with no posts.
 		$this->assertGreaterThan( 0, $result['score'] );
 	}
 

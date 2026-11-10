@@ -292,6 +292,19 @@ class Abilities {
 				'permission_callback' => [ $this, 'can_edit_post' ],
 				'meta'                => $this->meta( false, false, true, false ),
 			],
+			'jat-search-intel/get-ai-citations' => [
+				'label'               => __( 'AI citations', 'jat-search-intel' ),
+				'description'         => __( 'For each tracked question, whether ChatGPT, Claude, Gemini and Perplexity cited this site in their latest check, which of its pages they cited, whether they named it, and which other sites they cited instead. Also lists citations lost since the previous check.', 'jat-search-intel' ),
+				'input_schema'        => [
+					'type'       => 'object',
+					'properties' => new \stdClass(),
+					'default'    => [],
+				],
+				'output_schema'       => [ 'type' => 'object' ],
+				'execute_callback'    => [ $this, 'get_ai_citations' ],
+				'permission_callback' => [ $this, 'can_edit_others' ],
+				'meta'                => $this->meta( true, false, true, false ),
+			],
 			'jat-search-intel/list-redirects'  => [
 				'label'               => __( 'List redirects', 'jat-search-intel' ),
 				'description'         => __( 'Redirect rules with their source, target, type and hit count, optionally filtered by a search term.', 'jat-search-intel' ),
@@ -619,6 +632,40 @@ class Abilities {
 	public function refresh_queue( $input = null ): array {
 		$limit = max( 1, min( 50, (int) ( is_array( $input ) ? ( $input['limit'] ?? 10 ) : 10 ) ) );
 		return ( new Readiness( $this->settings ) )->refresh_queue( $limit );
+	}
+
+	/**
+	 * Latest AI citation results.
+	 *
+	 * @param mixed $input Input (unused).
+	 * @return array<string,mixed>
+	 */
+	public function get_ai_citations( $input = null ): array {
+		unset( $input );
+		$summary   = Citation_Tracker::summary();
+		$questions = [];
+		foreach ( $summary['rows'] as $row ) {
+			$engines = [];
+			foreach ( $row['engines'] as $engine => $entry ) {
+				$engines[ $engine ] = isset( $entry['error'] )
+					? [ 'error' => (string) $entry['error'] ]
+					: [
+						'cited'      => ! empty( $entry['cited'] ),
+						'read'       => ! empty( $entry['source'] ),
+						'named'      => ! empty( $entry['mentioned'] ),
+						'pages'      => (array) ( $entry['urls'] ?? [] ),
+						'cited_else' => (array) ( $entry['top'] ?? [] ),
+						'checked'    => isset( $entry['t'] ) ? gmdate( 'c', (int) $entry['t'] ) : '',
+					];
+			}
+			$questions[] = [ 'question' => $row['q'], 'engines' => $engines ];
+		}
+		return [
+			'citation_share' => $summary['checked'] ? round( $summary['cited'] / $summary['checked'], 3 ) : null,
+			'questions'      => $questions,
+			'lost'           => $summary['lost'],
+			'top_competitors' => $summary['competitors'],
+		];
 	}
 
 	/**
