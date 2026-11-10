@@ -746,7 +746,7 @@ class Readiness {
 					/* translators: %s: question. */
 					$why = '<br /><small style="color:#d63638">' . esc_html( sprintf( __( 'No longer cited for: %s', 'jat-search-intel' ), implode( '; ', $row['lost_citations'] ) ) ) . '</small>';
 				}
-				echo '<tr><td><a href="' . esc_url( $row['url'] ) . '" target="_blank" rel="noopener">' . esc_html( $row['title'] ?: __( '(no title)', 'jat-search-intel' ) ) . '</a>' . $why . '</td><td>' . esc_html( $age ) . '</td><td>' . esc_html( $row['clicks'] ? number_format_i18n( $row['clicks'] ) : '—' ) . '</td>';
+				echo '<tr><td><a href="' . esc_url( $row['url'] ) . '" target="_blank" rel="noopener">' . esc_html( $row['title'] ?: __( '(no title)', 'jat-search-intel' ) ) . '</a>' . $why . '</td><td>' . esc_html( $age ) . '</td><td>' . esc_html( $row['clicks'] ? number_format_i18n( $row['clicks'] ) : '—' ) . '</td>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $why is built with esc_html() above.
 				echo '<td style="text-align:right"><a class="button button-small" href="' . esc_url( (string) get_edit_post_link( $row['post_id'], 'raw' ) ) . '">' . esc_html__( 'Edit', 'jat-search-intel' ) . '</a></td></tr>';
 			}
 			echo '</tbody></table>';

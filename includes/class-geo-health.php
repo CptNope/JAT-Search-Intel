@@ -384,7 +384,6 @@ class GEO_Health {
 				'order'            => 'DESC',
 				'has_password'     => false,
 				'no_found_rows'    => true,
-				'suppress_filters' => true,
 			]
 		);
 		$out = [];
