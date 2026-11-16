@@ -1847,3 +1847,47 @@ if ( ! function_exists( 'wp_check_invalid_utf8' ) ) {
 		return (string) $text;
 	}
 }
+
+if ( ! class_exists( 'WP_Block_Type_Registry' ) ) {
+	/** Minimal block type for tests. */
+	class WP_Block_Type {
+		public $name;
+		public $render_callback;
+		public function __construct( string $name, array $args = [] ) {
+			$this->name            = $name;
+			$this->render_callback = $args['render_callback'] ?? null;
+		}
+		public function is_dynamic(): bool {
+			return is_callable( $this->render_callback );
+		}
+	}
+	/** Minimal block registry for tests. */
+	class WP_Block_Type_Registry {
+		private static $instance;
+		private $types = [];
+		public static function get_instance(): self {
+			return self::$instance ?? ( self::$instance = new self() );
+		}
+		public function register( string $name, array $args = [] ): void {
+			$this->types[ $name ] = new WP_Block_Type( $name, $args );
+		}
+		public function unregister( string $name ): void {
+			unset( $this->types[ $name ] );
+		}
+		public function get_registered( string $name ) {
+			return $this->types[ $name ] ?? null;
+		}
+	}
+}
+
+if ( ! function_exists( 'do_blocks' ) ) {
+	/** Minimal do_blocks(): dynamic blocks render through their callback, others keep their HTML. */
+	function do_blocks( string $content ): string {
+		$out = '';
+		foreach ( parse_blocks( $content ) as $block ) {
+			$type = $block['blockName'] ? WP_Block_Type_Registry::get_instance()->get_registered( $block['blockName'] ) : null;
+			$out .= $type && $type->is_dynamic() ? (string) call_user_func( $type->render_callback, $block['attrs'], $block['innerHTML'] ) : $block['innerHTML'];
+		}
+		return $out;
+	}
+}

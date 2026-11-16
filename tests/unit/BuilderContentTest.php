@@ -16,6 +16,23 @@ class BuilderContentTest extends TestCase {
 		return (object) [ 'ID' => $id, 'post_content' => $content ];
 	}
 
+	public function test_dynamic_blocks_are_rendered_for_analysis(): void {
+		$registry = \WP_Block_Type_Registry::get_instance();
+		$registry->register( 'theme/hero', [ 'render_callback' => static function (): string {
+			return '<h2>Web design in Worcester</h2><p>Real copy from PHP.</p><script>var x = 1;</script>';
+		} ] );
+
+		$html = Builder_Content::get( $this->post( 7, '<!-- wp:theme/hero /-->' ) );
+		$registry->unregister( 'theme/hero' );
+
+		$this->assertStringContainsString( 'Web design in Worcester', $html );
+		$this->assertStringNotContainsString( '<script', $html );
+	}
+
+	public function test_static_blocks_are_not_rendered(): void {
+		$this->assertFalse( Builder_Content::has_dynamic_blocks( '<!-- wp:paragraph --><p>Hi</p><!-- /wp:paragraph -->' ) );
+	}
+
 	public function test_plain_posts_are_unchanged(): void {
 		$html = '<!-- wp:paragraph --><p>Hello</p><!-- /wp:paragraph -->';
 		$this->assertSame( $html, Builder_Content::get( $this->post( 1, $html ) ) );
