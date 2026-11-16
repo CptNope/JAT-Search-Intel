@@ -6,6 +6,16 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.8.6] — 2026-11-16
+
+### Fixed
+- `Link_Checker::schedule()` was never called, so the hourly `jat_search_intel_check_links` event was never scheduled and no scan ever ran. It is hooked to `init` when the module is on.
+
+### Added
+- "Check the next 25 posts now" on Broken Links (`admin_post_jat_search_intel_link_check_now`, nonce and `manage_options`).
+
+---
+
 ## [3.8.5] — 2026-11-16
 
 ### Fixed

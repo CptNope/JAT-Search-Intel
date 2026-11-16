@@ -4,7 +4,7 @@ Tags: seo, schema, llms-txt, ai-search, redirects
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.8.5
+Stable tag: 3.8.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -262,6 +262,9 @@ Sends an HTTP HEAD request to each external URL linked from your content to chec
 
 == Changelog ==
 
+= 3.8.6 =
+* Fixed: the Broken Link Checker never ran, because nothing scheduled its hourly scan. It now starts when the module is on, and has a "Check the next 25 posts now" button.
+
 = 3.8.5 =
 * Fixed: Rank Tracker keywords with capital letters ("WordPress developer") never matched, because Search Console reports queries in lower case.
 * Fixed: after changing the tracked keywords, Fetch now loads the last 28 days for them instead of only the last few days.
@@ -388,6 +391,9 @@ Every feature other SEO plugins sell in their premium plans, free.
 Earlier releases are listed in CHANGELOG.md in the development repository.
 
 == Upgrade Notice ==
+
+= 3.8.6 =
+The Broken Link Checker now actually runs.
 
 = 3.8.5 =
 Rank Tracker keywords now match regardless of capitals, and a changed keyword list loads 28 days of history.

@@ -53,9 +53,12 @@ class Link_Checker {
 
 		if ( ! empty( $settings['enable_link_checker'] ) ) {
 			add_action( self::CRON_HOOK, [ $this, 'run_batch_check' ] );
+			// Nothing scheduled the hourly event before, so turning the checker on never started a scan.
+			add_action( 'init', [ $this, 'schedule' ] );
 
 			if ( is_admin() ) {
 				add_action( 'admin_menu', [ $this, 'register_admin_page' ] );
+				add_action( 'admin_post_jat_search_intel_link_check_now', [ $this, 'handle_check_now' ] );
 			}
 		}
 	}
@@ -247,6 +250,19 @@ class Link_Checker {
 	}
 
 	/**
+	 * "Check the next batch now" button.
+	 */
+	public function handle_check_now(): void {
+		check_admin_referer( 'jat_search_intel_link_check_now' );
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You are not allowed to run the link checker.', 'jat-search-intel' ), '', [ 'response' => 403 ] );
+		}
+		$this->run_batch_check();
+		wp_safe_redirect( admin_url( 'admin.php?page=jat-search-intel-broken-links&jsi_checked=1' ) );
+		exit;
+	}
+
+	/**
 	 * Render the admin page.
 	 */
 	public function render_admin_page(): void {
@@ -269,6 +285,14 @@ class Link_Checker {
 				}
 				?>
 			</p>
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+				<input type="hidden" name="action" value="jat_search_intel_link_check_now" />
+				<?php wp_nonce_field( 'jat_search_intel_link_check_now' ); ?>
+				<?php
+				/* translators: %d: number of posts checked per batch. */
+				submit_button( sprintf( __( 'Check the next %d posts now', 'jat-search-intel' ), self::BATCH_SIZE ), 'secondary', 'submit', false );
+				?>
+			</form>
 			<table class="wp-list-table widefat fixed striped">
 				<thead>
 					<tr>
