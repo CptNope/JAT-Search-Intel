@@ -417,6 +417,22 @@ class RestApiTest extends TestCase {
         $this->assertIsInt( $data['processed'] );
     }
 
+    public function test_bulk_rescore_stores_scores(): void {
+        global $si_test_state;
+        $si_test_state['post_meta'][1]['_jat_search_intel_seo_score'] = -1;
+        $si_test_state['post_meta'][1]['_jat_search_intel_aeo_score'] = -1;
+
+        $request = new \WP_REST_Request( 'POST', '/jat-search-intel/v1/bulk/rescore' );
+        $request->set_param( 'post_type', 'post' );
+        $request->set_param( 'batch_size', 10 );
+        $request->set_param( 'offset', 0 );
+        $data = $this->rest_api->bulk_rescore( $request )->get_data();
+
+        $this->assertContains( 1, $data['post_ids'] );
+        $this->assertGreaterThanOrEqual( 0, $si_test_state['post_meta'][1]['_jat_search_intel_seo_score'] );
+        $this->assertGreaterThanOrEqual( 0, $si_test_state['post_meta'][1]['_jat_search_intel_aeo_score'] );
+    }
+
     // ── Route registration ──────────────────────────────────────────────────
 
     public function test_routes_registered_when_enabled(): void {

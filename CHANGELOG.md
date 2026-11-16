@@ -6,6 +6,12 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.8.15] — 2026-11-16
+
+### Fixed
+- `POST /bulk/rescore` and `wp jat-search-intel rescore` read `$results['seo']['score']`, but `analyze()` returns `seo_score`, `aeo_score` and `geo_score`, so they never stored anything. Both now call `analyze_and_store()`, as does the Tools page rescore, so every path uses `Builder_Content` (builders and dynamic blocks), the SEO title, and fires `jat_search_intel_post_analyzed` once.
+- `wp jat-search-intel analyze` printed 0 for SEO, AEO and GEO for the same reason.
+
 ## [3.8.14] — 2026-11-16
 
 ### Fixed

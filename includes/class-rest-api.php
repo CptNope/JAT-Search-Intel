@@ -357,32 +357,10 @@ class Rest_Api {
 
 		$scored = [];
 		foreach ( $posts as $post_id ) {
-			$post = get_post( $post_id );
-			if ( ! $post ) {
-				continue;
+			// Same path as saving a post: page-builder and dynamic-block content, the SEO title, and the stored scores.
+			if ( $this->core->analyzer->analyze_and_store( $post_id ) ) {
+				$scored[] = $post_id;
 			}
-
-			$content     = wp_strip_all_tags( $post->post_content );
-			$title       = $post->post_title;
-			$keyword     = get_post_meta( $post_id, '_jat_search_intel_focus_keyword', true ) ?: '';
-			$description = get_post_meta( $post_id, '_jat_search_intel_description', true ) ?: '';
-
-			$results = $this->core->analyzer->analyze( $post_id, $content, $title, $keyword, $description );
-
-			if ( isset( $results['seo']['score'] ) ) {
-				update_post_meta( $post_id, '_jat_search_intel_seo_score', (int) $results['seo']['score'] );
-			}
-			if ( isset( $results['aeo']['score'] ) ) {
-				update_post_meta( $post_id, '_jat_search_intel_aeo_score', (int) $results['aeo']['score'] );
-			}
-			if ( isset( $results['geo']['score'] ) ) {
-				update_post_meta( $post_id, '_jat_search_intel_geo_score', (int) $results['geo']['score'] );
-			}
-			if ( isset( $results['readability']['score'] ) ) {
-				update_post_meta( $post_id, '_jat_search_intel_readability_score', (int) $results['readability']['score'] );
-			}
-
-			$scored[] = $post_id;
 		}
 
 		$next_offset = $offset + $batch_size;
