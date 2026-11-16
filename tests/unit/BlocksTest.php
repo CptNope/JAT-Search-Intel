@@ -424,7 +424,7 @@ class BlocksTest extends TestCase {
 
 		( new \JAT_Search_Intel\Blocks() )->register_blocks();
 
-		$this->assertSame( [ 'jat-search-intel/toc', 'jat-search-intel/breadcrumbs', 'jat-search-intel/preferred-source' ], array_keys( $si_registered_blocks ) );
+		$this->assertSame( [ 'jat-search-intel/toc', 'jat-search-intel/breadcrumbs', 'jat-search-intel/local-business', 'jat-search-intel/preferred-source' ], array_keys( $si_registered_blocks ) );
 		$this->assertSame( [], $si_registered_scripts );
 	}
 }

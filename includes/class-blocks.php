@@ -190,6 +190,14 @@ class Blocks {
 			'citation'    => [],
 			'toc'         => [ 'render_callback' => [ $this, 'render_toc' ] ],
 			'breadcrumbs' => [ 'render_callback' => [ $this, 'render_breadcrumbs' ] ],
+			'local-business' => [
+				'render_callback' => [ Local_Blocks::class, 'render_block' ],
+				'attributes'      => [
+					'display'  => [ 'type' => 'string', 'default' => 'info' ],
+					'location' => [ 'type' => 'number', 'default' => 1 ],
+					'showName' => [ 'type' => 'boolean', 'default' => true ],
+				],
+			],
 		];
 
 		// Editor scripts and styles are only needed where the block editor runs.
@@ -198,7 +206,7 @@ class Blocks {
 		if ( ! is_admin() ) {
 			foreach ( $blocks as $slug => $args ) {
 				if ( ! empty( $args['render_callback'] ) ) {
-					register_block_type( "jat-search-intel/{$slug}", [ 'render_callback' => $args['render_callback'] ] );
+					register_block_type( "jat-search-intel/{$slug}", array_intersect_key( $args, [ 'render_callback' => 1, 'attributes' => 1 ] ) );
 				}
 			}
 			register_block_type( 'jat-search-intel/preferred-source', self::preferred_source_args() );
@@ -263,6 +271,9 @@ class Blocks {
 
 			if ( ! empty( $args['render_callback'] ) ) {
 				$block_args['render_callback'] = $args['render_callback'];
+			}
+			if ( ! empty( $args['attributes'] ) ) {
+				$block_args['attributes'] = $args['attributes'];
 			}
 
 			register_block_type( "jat-search-intel/{$slug}", $block_args );

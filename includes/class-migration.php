@@ -843,7 +843,8 @@ class Migration {
 		}
 
 		if ( in_array( $field, self::TEXT_WITH_VARIABLES, true ) ) {
-			$value = self::convert_variables( $value, $source );
+			// Not sanitize_text_field(): it would strip %category% and %date%.
+			return Title_Engine::sanitize_template( self::convert_variables( $value, $source ) );
 		}
 
 		return sanitize_text_field( $value );
@@ -912,7 +913,7 @@ class Migration {
 				} elseif ( 'bool' === $type ) {
 					$value = '1' === $raw ? '1' : '';
 				} else {
-					$value = sanitize_text_field( self::convert_variables( $raw, 'aioseo' ) );
+					$value = Title_Engine::sanitize_template( self::convert_variables( $raw, 'aioseo' ) );
 				}
 				if ( '' === $value ) {
 					continue;

@@ -330,6 +330,18 @@ class MigrationTest extends TestCase {
 		$this->assertSame( 1, $result['redirects'] );
 	}
 
+	public function test_variables_survive_sanitizing(): void {
+		global $si_test_state;
+		$si_test_state['posts'][6] = [ 'ID' => 6, 'post_title' => 'P', 'post_content' => '', 'post_status' => 'publish', 'post_type' => 'post', 'post_author' => 1 ];
+		$migration = new TestableMigration( [], new FakeRedirectStore(), [
+			'aioseo_posts' => [ [ 'id' => 1, 'post_id' => 6, 'title' => '#category_title #separator_sa #post_date #separator_sa #site_title' ] ],
+		] );
+
+		$migration->migrate( 'aioseo' );
+
+		$this->assertSame( '%category% %sep% %date% %sep% %sitename%', $si_test_state['post_meta'][6]['_jat_search_intel_title'] );
+	}
+
 	public function test_existing_values_kept_without_overwrite(): void {
 		global $si_test_state;
 		$si_test_state['posts'][5] = [ 'ID' => 5, 'post_title' => 'P', 'post_content' => '', 'post_status' => 'publish', 'post_type' => 'post', 'post_author' => 1 ];

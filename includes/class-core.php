@@ -353,6 +353,7 @@ class Core {
         // Shortcodes (class strings: their code loads only where a shortcode is used).
         add_shortcode( 'jat_search_intel_reading_time', [ Reading_Time::class, 'shortcode' ] );
         add_shortcode( 'jat_search_intel_preferred_source', [ Preferred_Source::class, 'shortcode' ] );
+        add_shortcode( 'jat_search_intel_local', [ Local_Blocks::class, 'shortcode' ] );
 
         // Schema map: advertise it in robots.txt and refresh its cache when content changes.
         if ( $schema_map_on ) {
@@ -730,6 +731,9 @@ class Core {
             'enable_video_sitemap'   => false,
             'enable_rss_sitemap'     => true,
             'enable_image_alt'       => true,
+            'image_case'             => 'sentence',
+            'image_strip_punctuation' => true,
+            'image_clean_title'      => false,
             'redirect_attachments'   => true,
             'enable_rss_footer'      => true,
             'rss_after_content'      => 'The post %%POSTLINK%% appeared first on %%BLOGLINK%%.',

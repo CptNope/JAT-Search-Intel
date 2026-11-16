@@ -191,15 +191,12 @@ class Editor_Tools {
 
 		// Quick Edit: one post, every field.
 		if ( ! empty( $_POST['jsi_quick_edit'] ) ) {
-			$text = [
-				'jsi_title'   => '_jat_search_intel_title',
-				'jsi_keyword' => '_jat_search_intel_focus_keyword',
-			];
-			foreach ( $text as $field => $meta ) {
-				$value = isset( $_POST[ $field ] ) ? sanitize_text_field( wp_unslash( $_POST[ $field ] ) ) : '';
-				self::put( (int) $post_id, $meta, $value );
-			}
-			$description = isset( $_POST['jsi_description'] ) ? sanitize_textarea_field( wp_unslash( $_POST['jsi_description'] ) ) : '';
+			// Titles and descriptions may use %variables%, which sanitize_text_field() would damage.
+			$title = isset( $_POST['jsi_title'] ) ? Title_Engine::sanitize_template( (string) wp_unslash( $_POST['jsi_title'] ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized by Title_Engine::sanitize_template().
+			self::put( (int) $post_id, '_jat_search_intel_title', $title );
+			$keyword = isset( $_POST['jsi_keyword'] ) ? sanitize_text_field( wp_unslash( $_POST['jsi_keyword'] ) ) : '';
+			self::put( (int) $post_id, '_jat_search_intel_focus_keyword', $keyword );
+			$description = isset( $_POST['jsi_description'] ) ? Title_Engine::sanitize_template( (string) wp_unslash( $_POST['jsi_description'] ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized by Title_Engine::sanitize_template().
 			self::put( (int) $post_id, '_jat_search_intel_description', $description );
 			self::put( (int) $post_id, '_jat_search_intel_noindex', ! empty( $_POST['jsi_noindex'] ) ? '1' : '' );
 			return;

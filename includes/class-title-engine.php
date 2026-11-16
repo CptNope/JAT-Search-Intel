@@ -63,6 +63,23 @@ class Title_Engine {
     }
 
     /**
+     * Sanitize a title or description that may contain %variables%.
+     *
+     * sanitize_text_field() strips anything that looks like a URL-encoded
+     * byte, which turns %category% and %date% into "tegory%" and "te%".
+     * This removes tags, line breaks and extra spaces but keeps variables.
+     *
+     * @param string $text Raw text.
+     * @return string
+     */
+    public static function sanitize_template( string $text ): string {
+        $text = wp_check_invalid_utf8( $text );
+        $text = wp_strip_all_tags( $text, true );
+        $text = (string) preg_replace( '/[\r\n\t ]+/', ' ', $text );
+        return trim( $text );
+    }
+
+    /**
      * Get the default templates.
      */
     public static function get_default_templates(): array {

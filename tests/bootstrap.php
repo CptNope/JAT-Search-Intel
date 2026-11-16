@@ -231,7 +231,17 @@ function wp_is_post_autosave( $post ): bool {
 // ── Sanitization ─────────────────────────────────────────────────────────────
 
 function sanitize_text_field( $str ): string {
-    return trim( strip_tags( (string) $str ) );
+    // Like WordPress: tags removed, and anything that looks like a URL-encoded octet stripped.
+    $filtered = strip_tags( (string) $str );
+    $found    = false;
+    while ( preg_match( '/%[a-f0-9]{2}/i', $filtered, $match ) ) {
+        $filtered = str_replace( $match[0], '', $filtered );
+        $found    = true;
+    }
+    if ( $found ) {
+        $filtered = trim( (string) preg_replace( '/ +/', ' ', $filtered ) );
+    }
+    return trim( (string) preg_replace( '/[\r\n\t ]+/', ' ', $filtered ) );
 }
 
 function wp_kses_post( string $data ): string {
@@ -1822,3 +1832,15 @@ if ( ! function_exists( 'wp_doing_cron' ) ) {
 }
 
 require_once __DIR__ . '/support/ParityTestCase.php';
+
+if ( ! function_exists( 'antispambot' ) ) {
+	function antispambot( string $email_address, int $hex_encoding = 0 ): string {
+		return $email_address;
+	}
+}
+
+if ( ! function_exists( 'wp_check_invalid_utf8' ) ) {
+	function wp_check_invalid_utf8( $text, $strip = false ): string {
+		return (string) $text;
+	}
+}

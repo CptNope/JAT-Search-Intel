@@ -153,4 +153,14 @@ class SeoExtrasTest extends TestCase {
 		$this->assertCount( 2, $nodes );
 		$this->assertSame( 'Event', $nodes[1]['@type'] );
 	}
+
+	public function test_image_format_rules(): void {
+		$raw = 'Red-bicycle_in-THE park!!-1024x768.jpg';
+		$this->assertSame( 'Red bicycle in the park', Media_SEO::format( $raw, [ 'image_case' => 'sentence', 'image_strip_punctuation' => true ] ) );
+		$this->assertSame( 'Red Bicycle in the Park', Media_SEO::format( $raw, [ 'image_case' => 'title', 'image_strip_punctuation' => true ] ) );
+		$this->assertSame( 'red bicycle in the park', Media_SEO::format( $raw, [ 'image_case' => 'lower', 'image_strip_punctuation' => true ] ) );
+		$this->assertSame( 'Red bicycle in THE park!!', Media_SEO::format( $raw, [ 'image_case' => 'none', 'image_strip_punctuation' => false ] ) );
+		$this->assertSame( "Tina's Café & Bar", Media_SEO::format( "tina's café & bar.jpg", [ 'image_case' => 'title', 'image_strip_punctuation' => true ] ) );
+		$this->assertSame( '', Media_SEO::format( 'IMG_.png', [] ) );
+	}
 }
