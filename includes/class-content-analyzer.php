@@ -326,6 +326,10 @@ class Content_Analyzer {
                 /* translators: %1$d: number, %2$d: number. */
                 $checks[] = [ 'pass' => false, 'label' => sprintf( __( '%1$d of %2$d images missing alt text', 'jat-search-intel' ), $total_imgs - $with_alt, $total_imgs ) ];
             }
+        } elseif ( $post_id && has_post_thumbnail( $post_id ) && '' !== trim( (string) get_post_meta( (int) get_post_thumbnail_id( $post_id ), '_wp_attachment_image_alt', true ) ) ) {
+            // The theme shows the featured image with the post, so it counts.
+            $score += 8;
+            $checks[] = [ 'pass' => true, 'label' => __( 'Featured image has alt text', 'jat-search-intel' ) ];
         } elseif ( $word_count > 300 ) {
             $checks[] = [ 'pass' => false, 'label' => __( 'Add images to make content more engaging', 'jat-search-intel' ) ];
         }

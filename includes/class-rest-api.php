@@ -290,7 +290,9 @@ class Rest_Api {
 			$meta_key = $fields[ $key ];
 
 			// Sanitize based on field type.
-			if ( is_array( $value ) ) {
+			if ( in_array( $key, [ 'faqs', 'entities', 'citations', 'topics' ], true ) ) {
+				$sanitized = self::sanitize_list( $key, $value );
+			} elseif ( is_array( $value ) ) {
 				$sanitized = array_map( 'sanitize_text_field', $value );
 			} elseif ( in_array( $key, [ 'canonical', 'social_image' ], true ) ) {
 				$sanitized = esc_url_raw( $value );
@@ -458,6 +460,76 @@ class Rest_Api {
 	}
 
 	// ── Helpers ─────────────────────────────────────────────────────────────
+
+	/**
+	 * Sanitize a structured list field the same way the editor metabox does.
+	 *
+	 * FAQs, entities and citations are lists of objects, so a flat
+	 * sanitize_text_field() pass would empty every item. A JSON string is
+	 * accepted too; topics may also be a comma-separated string.
+	 *
+	 * @param string $key   Field name: faqs, entities, citations or topics.
+	 * @param mixed  $value Value from the request.
+	 * @return array
+	 */
+	public static function sanitize_list( string $key, $value ): array {
+		if ( is_string( $value ) ) {
+			$decoded = json_decode( $value, true );
+			if ( is_array( $decoded ) ) {
+				$value = $decoded;
+			} elseif ( 'topics' === $key ) {
+				$value = explode( ',', $value );
+			} else {
+				return [];
+			}
+		}
+		if ( ! is_array( $value ) ) {
+			return [];
+		}
+
+		$items = [];
+		foreach ( $value as $item ) {
+			switch ( $key ) {
+				case 'topics':
+					$topic = is_scalar( $item ) ? sanitize_text_field( (string) $item ) : '';
+					if ( '' !== $topic ) {
+						$items[] = $topic;
+					}
+					break;
+				case 'faqs':
+					if ( is_array( $item ) && ! empty( $item['question'] ) && ! empty( $item['answer'] ) ) {
+						$items[] = [
+							'question' => sanitize_text_field( (string) $item['question'] ),
+							'answer'   => wp_kses_post( (string) $item['answer'] ),
+						];
+					}
+					break;
+				case 'entities':
+					if ( is_string( $item ) && '' !== trim( $item ) ) {
+						$item = [ 'name' => $item ];
+					}
+					if ( is_array( $item ) && ! empty( $item['name'] ) ) {
+						$items[] = [
+							'name' => sanitize_text_field( (string) $item['name'] ),
+							'type' => sanitize_text_field( (string) ( $item['type'] ?? 'Thing' ) ),
+							'url'  => esc_url_raw( (string) ( $item['url'] ?? '' ) ),
+						];
+					}
+					break;
+				case 'citations':
+					if ( is_array( $item ) && ( ! empty( $item['source'] ) || ! empty( $item['url'] ) ) ) {
+						$items[] = [
+							'source' => sanitize_text_field( (string) ( $item['source'] ?? '' ) ),
+							'url'    => esc_url_raw( (string) ( $item['url'] ?? '' ) ),
+							'date'   => sanitize_text_field( (string) ( $item['date'] ?? '' ) ),
+							'quote'  => sanitize_text_field( (string) ( $item['quote'] ?? '' ) ),
+						];
+					}
+					break;
+			}
+		}
+		return $items;
+	}
 
 	/**
 	 * Map of REST field names → post meta keys.

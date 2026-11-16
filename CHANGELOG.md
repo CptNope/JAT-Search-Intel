@@ -6,6 +6,14 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.8.11] — 2026-11-16
+
+### Fixed
+- `PUT /meta/{id}` ran every array value through `array_map( 'sanitize_text_field' )`, which turns each FAQ, entity or citation object into an empty string, so lists saved over REST (and by MCP or other API clients) were wiped. `Rest_Api::sanitize_list()` now sanitizes them per field, as the editor metabox does, and also accepts a JSON string (or a comma-separated string for topics).
+
+### Changed
+- The SEO image check counts a featured image that has alt text when the content itself has no images.
+
 ## [3.8.10] — 2026-11-16
 
 ### Fixed

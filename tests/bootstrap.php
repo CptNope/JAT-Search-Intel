@@ -620,7 +620,7 @@ function get_post_ancestors( int $post_id ): array {
 }
 
 function has_post_thumbnail( $post_id = null ): bool {
-    return false;
+    return get_post_thumbnail_id( $post_id ) > 0;
 }
 
 function get_the_post_thumbnail_url( $post_id = null, string $size = 'full' ): string {
@@ -632,7 +632,8 @@ function wp_get_attachment_image_src( int $attachment_id, $size = 'full' ) {
 }
 
 function get_post_thumbnail_id( $post_id = null ): int {
-    return 0;
+    global $si_test_state;
+    return (int) ( $si_test_state['post_meta'][ (int) $post_id ]['_thumbnail_id'] ?? 0 );
 }
 
 function get_attached_media( string $type, $post_id = 0 ): array {

@@ -44,6 +44,23 @@ class ContentAnalyzerTest extends TestCase {
         $this->assertArrayHasKey( 'content_checks', $result );
     }
 
+    public function test_featured_image_with_alt_counts_as_an_image(): void {
+        global $si_test_state;
+        $content = '<p>' . str_repeat( 'Plain words about a project. ', 80 ) . '</p>';
+        $labels  = static function ( array $result ): array {
+            return array_column( $result['seo_score']['checks'], 'label' );
+        };
+
+        $this->assertContains( 'Add images to make content more engaging', $labels( $this->analyzer->analyze( 1, $content, 'T', 'k', 'd' ) ) );
+
+        $si_test_state['post_meta'][1]['_thumbnail_id']             = 50;
+        $si_test_state['post_meta'][50]['_wp_attachment_image_alt'] = 'The dashboard';
+        $this->assertContains( 'Featured image has alt text', $labels( $this->analyzer->analyze( 1, $content, 'T', 'k', 'd' ) ) );
+
+        $si_test_state['post_meta'][50]['_wp_attachment_image_alt'] = '';
+        $this->assertContains( 'Add images to make content more engaging', $labels( $this->analyzer->analyze( 1, $content, 'T', 'k', 'd' ) ) );
+    }
+
     public function test_analyze_scores_are_integers(): void {
         $result = $this->analyzer->analyze( 1, '<p>Hello world</p>', 'Test', 'keyword', 'desc' );
 
