@@ -4,7 +4,7 @@ Tags: seo, schema, llms-txt, ai-search, redirects
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.8.4
+Stable tag: 3.8.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -262,6 +262,10 @@ Sends an HTTP HEAD request to each external URL linked from your content to chec
 
 == Changelog ==
 
+= 3.8.5 =
+* Fixed: Rank Tracker keywords with capital letters ("WordPress developer") never matched, because Search Console reports queries in lower case.
+* Fixed: after changing the tracked keywords, Fetch now loads the last 28 days for them instead of only the last few days.
+
 = 3.8.4 =
 * Fixed: changing which post types or taxonomies are in the sitemap shows at once, instead of after the 12-hour sitemap cache expires.
 * Fixed: saving settings through the REST API no longer breaks title templates (%category%, %date% and %search_query% lost characters) or nested settings such as Local Business locations.
@@ -384,6 +388,9 @@ Every feature other SEO plugins sell in their premium plans, free.
 Earlier releases are listed in CHANGELOG.md in the development repository.
 
 == Upgrade Notice ==
+
+= 3.8.5 =
+Rank Tracker keywords now match regardless of capitals, and a changed keyword list loads 28 days of history.
 
 = 3.8.4 =
 Sitemap setting changes now show at once.

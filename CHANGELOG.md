@@ -6,6 +6,14 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.8.5] — 2026-11-16
+
+### Fixed
+- Rank Tracker lower-cases and de-duplicates tracked keywords; the `includingRegex` filter is case-sensitive and Search Console queries are lower case.
+- A changed keyword list (hash in `jat_search_intel_rank_keywords_hash`) fetches the full 28-day window instead of the 3-day incremental one. Found connecting jeremyanderson.tech: 20 new keywords returned 0 rows.
+
+---
+
 ## [3.8.4] — 2026-11-16
 
 ### Fixed

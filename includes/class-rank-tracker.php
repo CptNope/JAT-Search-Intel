@@ -25,6 +25,9 @@ class Rank_Tracker {
 	public const AUTO_TRACK = 25;
 
 	private const LAST_RUN_OPTION = 'jat_search_intel_rank_last_run';
+
+	/** Hash of the keyword list fetched last, to backfill when it changes. */
+	private const KEYWORDS_OPTION = 'jat_search_intel_rank_keywords_hash';
 	private const REGEX_MAX       = 3500;
 
 	/** @var array<string,mixed> */
@@ -85,7 +88,10 @@ class Rank_Tracker {
 	 * @return string[]
 	 */
 	public function get_keywords( string $token = '', string $site = '' ): array {
-		$list = array_values( array_filter( array_map( 'strval', (array) ( $this->settings['tracked_keywords'] ?? [] ) ) ) );
+		// Search Console reports queries in lower case, and the regex filter is case-sensitive.
+		$list = array_values( array_unique( array_filter( array_map( static function ( $keyword ) {
+			return trim( mb_strtolower( (string) $keyword ) );
+		}, (array) ( $this->settings['tracked_keywords'] ?? [] ) ) ) ) );
 		if ( $list || '' === $token ) {
 			return $list;
 		}
@@ -248,8 +254,11 @@ class Rank_Tracker {
 		}
 
 		$last  = (string) get_option( self::LAST_RUN_OPTION, '' );
+		$set   = md5( implode( "\n", $keywords ) );
+		// A new or changed keyword list gets the full 28 days, not just the last few.
+		$fresh = '' === $last || get_option( self::KEYWORDS_OPTION, '' ) !== $set;
 		$end   = gmdate( 'Y-m-d', time() - 3 * DAY_IN_SECONDS );
-		$start = '' === $last ? gmdate( 'Y-m-d', time() - 31 * DAY_IN_SECONDS ) : gmdate( 'Y-m-d', time() - 6 * DAY_IN_SECONDS );
+		$start = $fresh ? gmdate( 'Y-m-d', time() - 31 * DAY_IN_SECONDS ) : gmdate( 'Y-m-d', time() - 6 * DAY_IN_SECONDS );
 
 		$rows = [];
 		foreach ( self::build_regex_chunks( $keywords ) as $pattern ) {
@@ -282,6 +291,7 @@ class Rank_Tracker {
 
 		$stored = $this->store( self::aggregate( $rows ) );
 		update_option( self::LAST_RUN_OPTION, gmdate( 'Y-m-d H:i:s' ), false );
+		update_option( self::KEYWORDS_OPTION, $set, false );
 		return $stored;
 	}
 
