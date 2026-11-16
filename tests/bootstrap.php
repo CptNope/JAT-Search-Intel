@@ -362,7 +362,8 @@ function is_admin(): bool {
 }
 
 function is_front_page(): bool {
-    return false;
+    global $si_test_state;
+    return (bool) ( $si_test_state['conditionals']['is_front_page'] ?? false );
 }
 
 function wp_get_document_title(): string {

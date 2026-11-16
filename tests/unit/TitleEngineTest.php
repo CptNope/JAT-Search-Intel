@@ -178,4 +178,28 @@ class TitleEngineTest extends TestCase {
 
         $this->assertArrayHasKey( 'pre_get_document_title', $si_test_state['filters'] );
     }
+
+    public function test_static_front_page_uses_its_own_seo_title(): void {
+        global $si_test_state;
+        $si_test_state['conditionals']['is_front_page'] = true;
+        $si_test_state['post_meta'][1]['_jat_search_intel_title'] = 'Front Page SEO Title';
+
+        $title = $this->make_engine()->resolve_title( 'ignored' );
+        unset( $si_test_state['conditionals']['is_front_page'] );
+
+        $this->assertSame( 'Front Page SEO Title', $title );
+    }
+
+    public function test_posts_page_uses_its_own_seo_title(): void {
+        global $si_test_state;
+        $si_test_state['conditionals']['is_home']     = true;
+        $si_test_state['conditionals']['is_singular'] = false;
+        $si_test_state['options']['page_for_posts']   = 1;
+        $si_test_state['post_meta'][1]['_jat_search_intel_title'] = 'Blog | My Site';
+
+        $title = $this->make_engine()->resolve_title( 'ignored' );
+        unset( $si_test_state['conditionals']['is_home'], $si_test_state['conditionals']['is_singular'], $si_test_state['options']['page_for_posts'] );
+
+        $this->assertSame( 'Blog | My Site', $title );
+    }
 }

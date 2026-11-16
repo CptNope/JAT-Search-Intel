@@ -94,9 +94,10 @@ class Title_Engine {
         $context   = $this->detect_context();
         $template  = $templates[ $context ] ?? self::$default_templates[ $context ] ?? '%title% %sep% %sitename%';
 
-        // For single posts/pages, check for a manual SEO title override first
-        if ( in_array( $context, [ 'single', 'page' ], true ) && is_singular() ) {
-            $post_id   = get_queried_object_id();
+        // For single posts and pages (a static front page or posts page too), a manual SEO title comes first.
+        $posts_page = self::posts_page_id();
+        if ( is_singular() || $posts_page ) {
+            $post_id   = $posts_page ?: get_queried_object_id();
             $seo_title = (string) get_post_meta( $post_id, '_jat_search_intel_title', true );
             if ( '' !== $seo_title ) {
                 // Variables are allowed here too (imported titles often use them).
@@ -113,6 +114,18 @@ class Title_Engine {
         }
 
         return $this->resolve_variables( $template );
+    }
+
+    /**
+     * The page chosen as "Posts page" when it is being viewed, else 0.
+     *
+     * @return int
+     */
+    public static function posts_page_id(): int {
+        if ( ! is_home() || is_front_page() ) {
+            return 0;
+        }
+        return (int) get_option( 'page_for_posts' );
     }
 
     /**
