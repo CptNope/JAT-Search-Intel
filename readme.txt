@@ -4,7 +4,7 @@ Tags: seo, schema, llms-txt, ai-search, redirects
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.8.17
+Stable tag: 3.8.18
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -262,6 +262,10 @@ Sends an HTTP HEAD request to each external URL linked from your content to chec
 
 == Changelog ==
 
+= 3.8.18 =
+* Fixed: saving a Search Console domain property (sc-domain:example.com) through the REST API no longer erases it.
+* Fixed: turning on IndexNow through the REST API now creates its key, as the settings page does.
+
 = 3.8.17 =
 * Fixed: the first-paragraph keyword check also skips short labels and taglines (under eight words) that block themes put above the opening paragraph.
 
@@ -427,6 +431,9 @@ Every feature other SEO plugins sell in their premium plans, free.
 Earlier releases are listed in CHANGELOG.md in the development repository.
 
 == Upgrade Notice ==
+
+= 3.8.18 =
+Search Console domain properties and IndexNow can now be set through the REST API.
 
 = 3.8.17 =
 The first-paragraph keyword check now skips short labels above the opening paragraph.

@@ -409,6 +409,9 @@ class Rest_Api {
 				$current[ $key ] = is_array( $value ) ? array_map( [ Title_Engine::class, 'sanitize_template' ], array_map( 'strval', $value ) ) : $default_val;
 			} elseif ( is_array( $default_val ) ) {
 				$current[ $key ] = is_array( $value ) ? map_deep( $value, 'sanitize_text_field' ) : $default_val;
+			} elseif ( 'gsc_site_url' === $key ) {
+				// A Search Console property is a URL or "sc-domain:example.com"; esc_url_raw() wipes the latter.
+				$current[ $key ] = self::sanitize_search_property( (string) $value );
 			} elseif ( preg_match( '/(_url|_image|_logo)$/', $key ) ) {
 				$current[ $key ] = esc_url_raw( (string) $value );
 			} else {
@@ -418,12 +421,31 @@ class Rest_Api {
 			$updated[ $key ] = $current[ $key ];
 		}
 
+		// Same as the settings page: IndexNow needs a key, so turning it on here creates one.
+		if ( ! empty( $current['enable_indexnow'] ) && empty( $current['indexnow_api_key'] ) ) {
+			$current['indexnow_api_key'] = IndexNow::generate_key();
+			$updated['indexnow_api_key'] = $current['indexnow_api_key'];
+		}
+
 		update_option( 'jat_search_intel_settings', $current );
 
 		return new \WP_REST_Response( [
 			'updated'  => $updated,
 			'settings' => $current,
 		], 200 );
+	}
+
+	/**
+	 * Clean a Search Console property: a URL-prefix property (https://example.com/) or a
+	 * domain property (sc-domain:example.com).
+	 */
+	public static function sanitize_search_property( string $value ): string {
+		$value = trim( $value );
+		if ( 0 === stripos( $value, 'sc-domain:' ) ) {
+			$host = strtolower( (string) preg_replace( '/[^A-Za-z0-9.\-]/', '', substr( $value, 10 ) ) );
+			return '' === $host ? '' : 'sc-domain:' . $host;
+		}
+		return esc_url_raw( $value );
 	}
 
 	/**
