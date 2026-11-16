@@ -38,7 +38,19 @@ class Link_Checker {
 	/**
 	 * HTTP status codes considered broken.
 	 */
-	private const BROKEN_CODES = [ 0, 400, 403, 404, 405, 408, 410, 500, 502, 503, 504 ];
+	private const BROKEN_CODES = [ 0, 400, 404, 405, 408, 410, 500, 502, 503, 504 ];
+
+	/**
+	 * Codes a site sends when it refuses automated requests. The page usually
+	 * works in a browser, so these are reported as blocked, never broken.
+	 */
+	private const BLOCKED_CODES = [ 401, 403, 429, 999 ];
+
+	/**
+	 * HEAD answers that are worth a second try with GET, because many servers
+	 * and firewalls refuse HEAD but serve GET.
+	 */
+	private const RETRY_WITH_GET = [ 0, 400, 403, 405, 429, 501 ];
 
 	/** @var array */
 	private $settings;
@@ -114,34 +126,36 @@ class Link_Checker {
 	}
 
 	/**
-	 * Check a single URL via HTTP HEAD request.
+	 * Check a single URL.
+	 *
+	 * Sends HEAD first. When the answer is one that servers often give to HEAD
+	 * or to automated clients, tries once more with GET. A site that refuses
+	 * automated requests (401, 403, 429) is reported as blocked, not broken.
 	 *
 	 * @param string $url URL to check.
-	 * @return array{url: string, status: int, broken: bool, error: string}
+	 * @return array{url: string, status: int, broken: bool, blocked: bool, error: string}
 	 */
 	public function check_url( string $url ): array {
-		$response = wp_remote_head( $url, [
+		$args = [
 			'timeout'     => 10,
 			'redirection' => 3,
-			'sslverify'   => false,
-		] );
+			'user-agent'  => 'Mozilla/5.0 (compatible; JAT-Search-Intel-Link-Checker/' . ( defined( 'JAT_SEARCH_INTEL_VERSION' ) ? JAT_SEARCH_INTEL_VERSION : '1' ) . '; +' . home_url( '/' ) . ')',
+		];
 
-		if ( is_wp_error( $response ) ) {
-			return [
-				'url'    => $url,
-				'status' => 0,
-				'broken' => true,
-				'error'  => $response->get_error_message(),
-			];
+		$response = wp_remote_head( $url, $args );
+		$status   = is_wp_error( $response ) ? 0 : (int) wp_remote_retrieve_response_code( $response );
+
+		if ( in_array( $status, self::RETRY_WITH_GET, true ) ) {
+			$response = wp_remote_get( $url, $args + [ 'limit_response_size' => 65536 ] );
+			$status   = is_wp_error( $response ) ? 0 : (int) wp_remote_retrieve_response_code( $response );
 		}
 
-		$status = wp_remote_retrieve_response_code( $response );
-
 		return [
-			'url'    => $url,
-			'status' => $status,
-			'broken' => in_array( $status, self::BROKEN_CODES, true ),
-			'error'  => '',
+			'url'     => $url,
+			'status'  => $status,
+			'broken'  => in_array( $status, self::BROKEN_CODES, true ),
+			'blocked' => in_array( $status, self::BLOCKED_CODES, true ),
+			'error'   => is_wp_error( $response ) ? $response->get_error_message() : '',
 		];
 	}
 
