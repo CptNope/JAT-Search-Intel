@@ -339,7 +339,8 @@ function get_permalink( $post_id = 0 ): string {
     if ( is_object( $post_id ) ) {
         $post_id = $post_id->ID ?? 0;
     }
-    return 'https://example.com/?p=' . (int) $post_id;
+    global $si_test_state;
+    return $si_test_state['permalinks'][ (int) $post_id ] ?? 'https://example.com/?p=' . (int) $post_id;
 }
 
 function get_bloginfo( string $show ): string {
