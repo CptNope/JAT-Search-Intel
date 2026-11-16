@@ -4,7 +4,7 @@ Tags: seo, schema, llms-txt, ai-search, redirects
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.8.11
+Stable tag: 3.8.12
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -262,6 +262,9 @@ Sends an HTTP HEAD request to each external URL linked from your content to chec
 
 == Changelog ==
 
+= 3.8.12 =
+* New: AI agents that ask for Markdown (an Accept header of text/markdown) get the Markdown version of a post or page at its normal address. Browsers still get HTML. If a CDN caches your HTML, have it skip the cache for those requests.
+
 = 3.8.11 =
 * Fixed: saving FAQs, entities, citations or topics through the REST API (and tools that use it) stored empty items. They are now kept and cleaned the same way as in the editor.
 * Improved: a featured image with alt text now counts toward the SEO image check, since the theme shows it with the post.
@@ -408,6 +411,9 @@ Every feature other SEO plugins sell in their premium plans, free.
 Earlier releases are listed in CHANGELOG.md in the development repository.
 
 == Upgrade Notice ==
+
+= 3.8.12 =
+Pages answer AI agents in Markdown when they ask for it.
 
 = 3.8.11 =
 FAQs, entities and citations can now be saved through the REST API.

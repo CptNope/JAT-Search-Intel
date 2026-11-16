@@ -315,6 +315,11 @@ class AI_Search {
 			return $post instanceof \WP_Post ? $post : null;
 		}
 
+		if ( is_singular() && self::accepts_markdown( isset( $_SERVER['HTTP_ACCEPT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_ACCEPT'] ) ) : '' ) ) {
+			$post = get_post( get_queried_object_id() );
+			return $post instanceof \WP_Post ? $post : null;
+		}
+
 		$path = self::request_path();
 		if ( is_404() && '.md' === substr( $path, -3 ) ) {
 			$home_path = (string) wp_parse_url( home_url( '/' ), PHP_URL_PATH );
@@ -329,11 +334,48 @@ class AI_Search {
 	}
 
 	/**
+	 * Whether an Accept header prefers Markdown over HTML.
+	 *
+	 * Agents ask for `text/markdown`; browsers never list it. Markdown wins
+	 * when its quality value is above HTML's (HTML counts as 0 when absent).
+	 *
+	 * @param string $accept Accept header.
+	 * @return bool
+	 */
+	public static function accepts_markdown( string $accept ): bool {
+		if ( '' === $accept || false === stripos( $accept, 'text/markdown' ) ) {
+			return false;
+		}
+		$markdown = 0.0;
+		$html     = 0.0;
+		foreach ( explode( ',', strtolower( $accept ) ) as $part ) {
+			$bits = array_map( 'trim', explode( ';', $part ) );
+			$type = array_shift( $bits );
+			$q    = 1.0;
+			foreach ( $bits as $param ) {
+				if ( 0 === strpos( $param, 'q=' ) ) {
+					$q = (float) substr( $param, 2 );
+				}
+			}
+			if ( 'text/markdown' === $type ) {
+				$markdown = max( $markdown, $q );
+			} elseif ( 'text/html' === $type || 'application/xhtml+xml' === $type ) {
+				$html = max( $html, $q );
+			}
+		}
+		return $markdown > 0 && $markdown > $html;
+	}
+
+	/**
 	 * Serve the Markdown representation and stop.
 	 */
 	public function maybe_serve_markdown(): void {
 		$post = $this->resolve_markdown_request();
 		if ( ! $post || ! $this->is_exposable( $post ) ) {
+			if ( is_singular() && ! headers_sent() ) {
+				// The same URL answers in HTML or Markdown depending on Accept.
+				header( 'Vary: Accept', false );
+			}
 			return;
 		}
 
@@ -341,6 +383,7 @@ class AI_Search {
 		nocache_headers();
 		header( 'Content-Type: text/markdown; charset=utf-8' );
 		header( 'X-Robots-Tag: noindex, follow' );
+		header( 'Vary: Accept', false );
 		header( 'Link: <' . esc_url_raw( (string) get_permalink( $post ) ) . '>; rel="canonical"' );
 
 		echo $this->render_markdown( $post ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- text/markdown response built from sanitized content.

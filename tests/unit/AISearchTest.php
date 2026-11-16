@@ -55,6 +55,16 @@ class AISearchTest extends TestCase {
 
 	// ── Crawler identification and rules ───────────────────────────────
 
+	public function test_accepts_markdown_only_when_markdown_is_preferred(): void {
+		$this->assertTrue( AI_Search::accepts_markdown( 'text/markdown' ) );
+		$this->assertTrue( AI_Search::accepts_markdown( 'text/markdown, text/html;q=0.8' ) );
+		$this->assertTrue( AI_Search::accepts_markdown( 'text/html;q=0.5, text/markdown;q=0.9' ) );
+		$this->assertFalse( AI_Search::accepts_markdown( 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' ) );
+		$this->assertFalse( AI_Search::accepts_markdown( 'text/html, text/markdown;q=0.5' ) );
+		$this->assertFalse( AI_Search::accepts_markdown( 'text/markdown;q=0' ) );
+		$this->assertFalse( AI_Search::accepts_markdown( '' ) );
+	}
+
 	public function test_match_bot_identifies_ai_crawlers_but_not_browsers(): void {
 		$this->assertSame( 'GPTBot', AI_Search::match_bot( 'Mozilla/5.0 AppleWebKit/537.36; compatible; GPTBot/1.2; +https://openai.com/gptbot' ) );
 		$this->assertSame( 'Claude-User', AI_Search::match_bot( 'Mozilla/5.0 (compatible; Claude-User/1.0)' ) );
