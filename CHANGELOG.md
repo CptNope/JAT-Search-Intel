@@ -6,6 +6,11 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.8.17] — 2026-11-16
+
+### Fixed
+- `Content_Analyzer::first_paragraph()` also skips paragraphs under eight words (labels and taglines such as "Security" or "Hardening + audits" above the opening paragraph), falling back to the first non-empty one when no longer paragraph exists.
+
 ## [3.8.16] — 2026-11-16
 
 ### Fixed

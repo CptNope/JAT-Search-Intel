@@ -357,24 +357,33 @@ class Content_Analyzer {
     }
 
     /**
-     * Text of the first paragraph that has words in it.
+     * Text of the opening paragraph: the first one that reads as prose.
      *
      * Block themes often open with an empty paragraph (a subtitle bound to a
-     * field, a spacer), which is not the paragraph a reader sees first.
+     * field, a spacer) or a short label or tagline ("Security", "Hardening +
+     * audits"), which is not the paragraph a reader takes as the opening.
+     * Paragraphs under eight words are skipped unless no longer one exists.
      *
      * @param string $content HTML.
      * @return string Plain text, or '' when there is no paragraph with text.
      */
     public static function first_paragraph( string $content ): string {
+        $fallback = '';
         if ( preg_match_all( '/<p[^>]*>(.*?)<\/p>/is', $content, $matches ) ) {
             foreach ( $matches[1] as $inner ) {
                 $text = trim( html_entity_decode( wp_strip_all_tags( $inner ), ENT_QUOTES, 'UTF-8' ) );
-                if ( '' !== $text ) {
+                if ( '' === $text ) {
+                    continue;
+                }
+                if ( str_word_count( $text ) >= 8 ) {
                     return $text;
+                }
+                if ( '' === $fallback ) {
+                    $fallback = $text;
                 }
             }
         }
-        return '';
+        return $fallback;
     }
 
     /**
