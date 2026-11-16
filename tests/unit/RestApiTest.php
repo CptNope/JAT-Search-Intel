@@ -208,6 +208,31 @@ class RestApiTest extends TestCase {
         $this->assertEquals( 'Valid Update', $data['updated']['title'] );
     }
 
+    public function test_update_meta_keeps_structured_lists(): void {
+        $request = new \WP_REST_Request( 'PUT', '/jat-search-intel/v1/meta/1' );
+        $request->set_param( 'id', 1 );
+        $request->set_json_params( [
+            'faqs'      => [
+                [ 'question' => 'Is it free?', 'answer' => '<strong>Yes.</strong>' ],
+                [ 'question' => 'No answer' ],
+            ],
+            'entities'  => [ [ 'name' => 'Ollama', 'type' => 'SoftwareApplication', 'url' => 'https://ollama.com' ], 'RetroArch' ],
+            'citations' => '[{"source":"Data Crystal","url":"https://datacrystal.tcrf.net/"}]',
+            'topics'    => 'RAG, game AI, ',
+        ] );
+
+        $this->rest_api->update_meta( $request );
+
+        global $si_test_state;
+        $meta = $si_test_state['post_meta'][1];
+        $this->assertSame( [ [ 'question' => 'Is it free?', 'answer' => '<strong>Yes.</strong>' ] ], $meta['_jat_search_intel_faqs'] );
+        $this->assertSame( 'Ollama', $meta['_jat_search_intel_entities'][0]['name'] );
+        $this->assertSame( 'SoftwareApplication', $meta['_jat_search_intel_entities'][0]['type'] );
+        $this->assertSame( [ 'name' => 'RetroArch', 'type' => 'Thing', 'url' => '' ], $meta['_jat_search_intel_entities'][1] );
+        $this->assertSame( 'Data Crystal', $meta['_jat_search_intel_citations'][0]['source'] );
+        $this->assertSame( [ 'RAG', 'game AI' ], $meta['_jat_search_intel_topics'] );
+    }
+
     public function test_update_meta_returns_404_for_missing_post(): void {
         $request = new \WP_REST_Request( 'PUT', '/jat-search-intel/v1/meta/999' );
         $request->set_param( 'id', 999 );

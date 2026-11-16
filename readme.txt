@@ -4,7 +4,7 @@ Tags: seo, schema, llms-txt, ai-search, redirects
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.8.10
+Stable tag: 3.8.11
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -262,6 +262,10 @@ Sends an HTTP HEAD request to each external URL linked from your content to chec
 
 == Changelog ==
 
+= 3.8.11 =
+* Fixed: saving FAQs, entities, citations or topics through the REST API (and tools that use it) stored empty items. They are now kept and cleaned the same way as in the editor.
+* Improved: a featured image with alt text now counts toward the SEO image check, since the theme shows it with the post.
+
 = 3.8.10 =
 * Fixed: redirects from addresses with emoji or other non-English characters (such as /%F0%9F%A7%A0-post/) never matched, because the request path was cleaned in a way that deleted the encoded characters. The 404 log now records those addresses correctly too.
 
@@ -404,6 +408,9 @@ Every feature other SEO plugins sell in their premium plans, free.
 Earlier releases are listed in CHANGELOG.md in the development repository.
 
 == Upgrade Notice ==
+
+= 3.8.11 =
+FAQs, entities and citations can now be saved through the REST API.
 
 = 3.8.10 =
 Redirects now work for addresses with emoji or accented characters.
