@@ -110,6 +110,9 @@ class Bulk_Tools {
             wp_send_json_error( [ 'message' => 'Unauthorized.' ], 403 );
         }
 
+        // Scores are about to change: the Readiness page must not keep showing the old count.
+        delete_transient( 'jat_search_intel_readiness_stats' );
+
         $batch_size  = 20;
         $offset      = absint( $_POST['offset'] ?? 0 );
         $post_type   = isset( $_POST['post_type'] ) ? sanitize_text_field( wp_unslash( $_POST['post_type'] ) ) : 'post';

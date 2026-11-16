@@ -6,6 +6,15 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.8.13] — 2026-11-16
+
+### Fixed
+- The child-sitemap rewrite rule was `^sitemap-([a-z]+)-?(\d*)\.xml$`, so any post type or taxonomy with an underscore, digit or hyphen in its name (`ltef_place`, `ltef_area`) was listed in the sitemap index but its sitemap 404'd. The rule is now `Sitemap::CHILD_RULE` (`^sitemap-([a-z0-9_-]+?)(?:-(\d+))?\.xml$`). Found on livetoeatfoodie.com, whose places, events and neighborhoods are custom types.
+- Later pages are now `sitemap-{type}-{n}.xml`, since a name may end in a digit. `Sitemap::LEGACY_PAGE_RULE` keeps the old `sitemap-post2.xml` addresses working.
+- Bulk rescore (Tools page and `POST /bulk/rescore`) clears the cached Readiness stats, so "0 of N pages have scores" updates right after a rescore instead of when the cache expires.
+
+---
+
 ## [3.8.12] — 2026-11-16
 
 ### Added

@@ -337,6 +337,7 @@ class Rest_Api {
 	 * POST /bulk/rescore — rescore a batch of posts.
 	 */
 	public function bulk_rescore( \WP_REST_Request $request ): \WP_REST_Response {
+		delete_transient( 'jat_search_intel_readiness_stats' );
 		$post_type  = $request['post_type'];
 		$batch_size = min( (int) $request['batch_size'], 100 ); // Cap at 100.
 		$offset     = (int) $request['offset'];

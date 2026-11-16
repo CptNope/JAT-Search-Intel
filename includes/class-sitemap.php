@@ -10,6 +10,17 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class Sitemap {
 
+    /**
+     * Rewrite pattern for one child sitemap: sitemap-{type}.xml or sitemap-{type}-{page}.xml.
+     * Post type and taxonomy names may contain digits, underscores and hyphens
+     * (ltef_place, my-type), so the name is matched lazily up to an optional -{page}.
+     */
+    public const CHILD_RULE = '^sitemap-([a-z0-9_-]+?)(?:-(\d+))?\.xml$';
+
+    /** Pre-3.8.5 page addresses: sitemap-post2.xml. */
+    public const LEGACY_PAGE_RULE = '^sitemap-([a-z_]+)(\d+)\.xml$';
+
+
     /** @var array */
     private $settings;
 
@@ -80,7 +91,9 @@ class Sitemap {
      */
     public function register_endpoints(): void {
         add_rewrite_rule( '^sitemap\.xml$', 'index.php?jat_search_intel_sitemap=index', 'top' );
-        add_rewrite_rule( '^sitemap-([a-z]+)-?(\d*)\.xml$', 'index.php?jat_search_intel_sitemap=$matches[1]&jat_search_intel_sitemap_page=$matches[2]', 'top' );
+        // Before 3.8.5 later pages were sitemap-post2.xml; keep those addresses working.
+        add_rewrite_rule( self::LEGACY_PAGE_RULE, 'index.php?jat_search_intel_sitemap=$matches[1]&jat_search_intel_sitemap_page=$matches[2]', 'top' );
+        add_rewrite_rule( self::CHILD_RULE, 'index.php?jat_search_intel_sitemap=$matches[1]&jat_search_intel_sitemap_page=$matches[2]', 'top' );
         add_rewrite_rule( '^news-sitemap\.xml$', 'index.php?jat_search_intel_sitemap=_news', 'top' );
         add_rewrite_rule( '^video-sitemap\.xml$', 'index.php?jat_search_intel_sitemap=_video', 'top' );
         add_rewrite_rule( '^sitemap\.rss$', 'index.php?jat_search_intel_sitemap=_rss', 'top' );
@@ -216,7 +229,7 @@ class Sitemap {
             $pages = max( 1, ceil( $total / $max_urls ) );
 
             for ( $i = 1; $i <= $pages; $i++ ) {
-                $suffix = $pages > 1 ? $i : '';
+                $suffix = $pages > 1 ? '-' . $i : '';
                 $xml .= '<sitemap>' . "\n";
                 $xml .= '  <loc>' . esc_url( home_url( "/sitemap-{$pt}{$suffix}.xml" ) ) . '</loc>' . "\n";
                 $xml .= '  <lastmod>' . $this->get_last_modified_for_type( $pt ) . '</lastmod>' . "\n";
