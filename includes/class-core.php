@@ -158,6 +158,9 @@ class Core {
     /** @var Passage_Coach */
     public $passage_coach;
 
+    /** @var Editor_Tools */
+    public $editor_tools;
+
     /** @var Meta_Sync */
     public $meta_sync;
 
@@ -278,6 +281,7 @@ class Core {
             'woocommerce'             => [ class_exists( 'WooCommerce' ), WooCommerce::class ],
             'privacy'                 => [ $is_admin, Privacy::class ],
             'migration'               => [ $is_admin, Migration::class ],
+            'editor_tools'            => [ $is_admin, Editor_Tools::class, [ 'rest_api_init' => 9, 'admin_bar_menu' => 9 ] ],
             'robots_txt'              => [ $is_admin || $on( 'enable_robots_editor' ), Robots_Txt::class ],
             'faq_generator'           => [ $is_admin, FAQ_Generator::class ],
             'multisite'               => [ is_multisite(), Multisite::class ],
@@ -721,6 +725,7 @@ class Core {
             'news_post_types'        => [ 'post' ],
             'news_publication_name'  => '',
             'enable_video_sitemap'   => false,
+            'enable_rss_sitemap'     => true,
             'enable_image_alt'       => true,
             'redirect_attachments'   => true,
             'enable_rss_footer'      => true,

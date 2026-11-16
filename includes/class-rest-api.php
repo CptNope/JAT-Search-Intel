@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Rest_Api {
 
 	/** @var string */
-	private const NAMESPACE = 'jat-search-intel/v1';
+	public const NAMESPACE = 'jat-search-intel/v1';
 
 	/** @var array Plugin settings. */
 	private $settings;

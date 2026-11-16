@@ -9,6 +9,7 @@ import { TextControl, TextareaControl, ToggleControl, PanelBody } from '@wordpre
 import { useSelect, useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { META_KEYS } from '../../store';
+import HeadlineScore from './headline-score';
 
 /**
  * Helper to read/write a single post meta key via core/editor.
@@ -81,6 +82,8 @@ export default function SeoPanel() {
 				description={ description }
 				url={ permalink }
 			/>
+
+			<HeadlineScore headline={ postTitle } />
 
 			<TextControl
 				label={ __( 'SEO Title', 'jat-search-intel' ) }

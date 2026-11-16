@@ -198,3 +198,13 @@
 .si-check-item--info .si-check-item__icon {
 	color: #757575;
 }
+
+/* Headline score */
+.si-headline--good .components-panel__body-toggle { color: #00a32a; }
+.si-headline--ok .components-panel__body-toggle { color: #996800; }
+.si-headline--improve .components-panel__body-toggle { color: #d63638; }
+.si-headline__checks { margin: 0; padding: 0; list-style: none; }
+.si-headline__check { margin: 0 0 8px; padding-left: 10px; border-left: 3px solid #dcdcde; font-size: 12px; line-height: 1.5; }
+.si-headline__check--good { border-left-color: #00a32a; }
+.si-headline__check--ok { border-left-color: #dba617; }
+.si-headline__check--improve { border-left-color: #d63638; }

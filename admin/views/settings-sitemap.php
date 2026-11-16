@@ -127,6 +127,16 @@ $settings = wp_parse_args( $settings, \JAT_Search_Intel\Core::get_default_settin
                     </td>
                 </tr>
                 <tr>
+                    <th><?php esc_html_e( 'RSS Sitemap', 'jat-search-intel' ); ?></th>
+                    <td>
+                        <label>
+                            <input type="checkbox" name="jat_search_intel_settings[enable_rss_sitemap]" value="1" <?php checked( ! empty( $settings['enable_rss_sitemap'] ) ); ?> />
+                            <?php esc_html_e( 'Publish /sitemap.rss with your 50 most recently updated pages', 'jat-search-intel' ); ?>
+                        </label>
+                        <p class="description"><?php esc_html_e( 'Search engines check this small feed often, so new and updated pages are found sooner. Submit it in Google Search Console and Bing Webmaster Tools alongside sitemap.xml.', 'jat-search-intel' ); ?></p>
+                    </td>
+                </tr>
+                <tr>
                     <th><?php esc_html_e( 'HTML Sitemap', 'jat-search-intel' ); ?></th>
                     <td>
                         <code>[jat_search_intel_html_sitemap]</code>

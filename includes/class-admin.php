@@ -202,7 +202,7 @@ class Admin {
                 'preferred_source_auto', 'enable_schema_map', 'enable_citation_tracking',
             ],
             'sitemap' => [
-                'enable_news_sitemap', 'enable_video_sitemap',
+                'enable_news_sitemap', 'enable_video_sitemap', 'enable_rss_sitemap',
             ],
             'ai' => [
                 'enable_ai_engine',
@@ -245,7 +245,7 @@ class Admin {
             'enable_historical_analytics', 'enable_ga4', 'enable_cwv',
             'enable_custom_reports', 'enable_notifications',
             // v3.5
-            'enable_news_sitemap', 'enable_video_sitemap', 'enable_image_alt',
+            'enable_news_sitemap', 'enable_video_sitemap', 'enable_rss_sitemap', 'enable_image_alt',
             'redirect_attachments', 'enable_rss_footer', 'enable_markdown_endpoints',
             'enable_ai_crawler_log', 'enable_rank_tracking',
             // v3.6
