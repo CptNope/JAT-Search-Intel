@@ -320,6 +320,32 @@ class RestApiTest extends TestCase {
         $this->assertSame( '%date% %sep% %search_query%', $data['updated']['title_templates']['archive'] );
     }
 
+    public function test_update_settings_keeps_search_console_domain_property(): void {
+        // Regression: keys ending in _url went through esc_url_raw(), which wipes "sc-domain:".
+        $request = new \WP_REST_Request( 'PUT', '/jat-search-intel/v1/settings' );
+        $request->set_json_params( [ 'gsc_site_url' => 'sc-domain:LiveToEatFoodie.com' ] );
+
+        $data = $this->rest_api->update_settings( $request )->get_data();
+
+        $this->assertSame( 'sc-domain:livetoeatfoodie.com', $data['updated']['gsc_site_url'] );
+    }
+
+    public function test_sanitize_search_property(): void {
+        $this->assertSame( 'sc-domain:example.com', \JAT_Search_Intel\Rest_Api::sanitize_search_property( ' sc-domain:example.com ' ) );
+        $this->assertSame( 'sc-domain:example.com', \JAT_Search_Intel\Rest_Api::sanitize_search_property( 'sc-domain:exa<b>mple.com' ) );
+        $this->assertSame( '', \JAT_Search_Intel\Rest_Api::sanitize_search_property( 'sc-domain:' ) );
+        $this->assertSame( 'https://www.example.com/', \JAT_Search_Intel\Rest_Api::sanitize_search_property( 'https://www.example.com/' ) );
+    }
+
+    public function test_enabling_indexnow_over_rest_creates_a_key(): void {
+        $request = new \WP_REST_Request( 'PUT', '/jat-search-intel/v1/settings' );
+        $request->set_json_params( [ 'enable_indexnow' => true ] );
+
+        $data = $this->rest_api->update_settings( $request )->get_data();
+
+        $this->assertMatchesRegularExpression( '/^[a-f0-9]{32}$/', $data['settings']['indexnow_api_key'] );
+    }
+
     public function test_update_settings_rejects_unknown_keys(): void {
         $request = new \WP_REST_Request( 'PUT', '/jat-search-intel/v1/settings' );
         $request->set_json_params( [

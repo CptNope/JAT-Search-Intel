@@ -6,6 +6,14 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.8.18] — 2026-11-16
+
+### Fixed
+- `PUT /settings` ran every `*_url` key through `esc_url_raw()`, which turns `sc-domain:example.com` (the Rank Tracker's own suggested format for a domain property) into an empty string. `gsc_site_url` now goes through `Rest_Api::sanitize_search_property()`, which keeps `sc-domain:` hosts and still cleans URL-prefix properties. Found while connecting livetoeatfoodie.com.
+- `PUT /settings` with `enable_indexnow: true` left the key empty, so Readiness still said "IndexNow is off" and no key file was served. It now creates the key like the settings page does.
+
+---
+
 ## [3.8.17] — 2026-11-16
 
 ### Fixed
