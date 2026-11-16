@@ -67,7 +67,12 @@ class Blocks {
 	public function register_meta(): void {
 		$post_types = get_post_types( [ 'public' => true ] );
 
-		foreach ( self::META_KEYS as $key => $config ) {
+		$keys = self::META_KEYS;
+		foreach ( Schema_Types::meta_keys() as $schema_key ) {
+			$keys[ $schema_key ] = [ 'type' => 'string', 'default' => '' ];
+		}
+
+		foreach ( $keys as $key => $config ) {
 			foreach ( $post_types as $post_type ) {
 				register_post_meta( $post_type, $key, [
 					'show_in_rest'  => true,
@@ -124,6 +129,15 @@ class Blocks {
 
 		wp_set_script_translations( 'jat-search-intel-sidebar', 'jat-search-intel' );
 
+		// Schema tab: the types, their fields and whether the module is on.
+		$settings = get_option( 'jat_search_intel_settings', [] );
+		wp_localize_script( 'jat-search-intel-sidebar', 'jatSearchIntelSchema', [
+			'enabled'     => ! empty( $settings['enable_schema_types'] ),
+			'settingsUrl' => admin_url( 'admin.php?page=jat-search-intel' ),
+			'types'       => Schema_Types::get_types(),
+			'fields'      => Schema_Types::get_fields(),
+		] );
+
 		// Pass theme.json color palette to JS for score ring theming.
 		wp_localize_script( 'jat-search-intel-sidebar', 'jatSearchIntelTheme', [
 			'colors' => $this->get_theme_json_colors(),
@@ -176,6 +190,14 @@ class Blocks {
 			'citation'    => [],
 			'toc'         => [ 'render_callback' => [ $this, 'render_toc' ] ],
 			'breadcrumbs' => [ 'render_callback' => [ $this, 'render_breadcrumbs' ] ],
+			'local-business' => [
+				'render_callback' => [ Local_Blocks::class, 'render_block' ],
+				'attributes'      => [
+					'display'  => [ 'type' => 'string', 'default' => 'info' ],
+					'location' => [ 'type' => 'number', 'default' => 1 ],
+					'showName' => [ 'type' => 'boolean', 'default' => true ],
+				],
+			],
 		];
 
 		// Editor scripts and styles are only needed where the block editor runs.
@@ -184,7 +206,11 @@ class Blocks {
 		if ( ! is_admin() ) {
 			foreach ( $blocks as $slug => $args ) {
 				if ( ! empty( $args['render_callback'] ) ) {
-					register_block_type( "jat-search-intel/{$slug}", [ 'render_callback' => $args['render_callback'] ] );
+					$front = [ 'render_callback' => $args['render_callback'] ];
+					if ( isset( $args['attributes'] ) ) {
+						$front['attributes'] = $args['attributes'];
+					}
+					register_block_type( "jat-search-intel/{$slug}", $front );
 				}
 			}
 			register_block_type( 'jat-search-intel/preferred-source', self::preferred_source_args() );
@@ -249,6 +275,9 @@ class Blocks {
 
 			if ( ! empty( $args['render_callback'] ) ) {
 				$block_args['render_callback'] = $args['render_callback'];
+			}
+			if ( ! empty( $args['attributes'] ) ) {
+				$block_args['attributes'] = $args['attributes'];
 			}
 
 			register_block_type( "jat-search-intel/{$slug}", $block_args );

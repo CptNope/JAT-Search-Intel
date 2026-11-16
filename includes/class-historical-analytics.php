@@ -473,6 +473,9 @@ class Historical_Analytics {
      * Render the analytics dashboard admin page.
      */
     public function render_admin_page(): void {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            return;
+        }
         $period  = isset( $_GET['period'] ) ? absint( $_GET['period'] ) : 30; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only view/pagination parameter.
         $trends  = $this->get_site_trends( $period );
         $changes = $this->get_recent_changes( 7, 20 );

@@ -158,6 +158,12 @@ class Core {
     /** @var Passage_Coach */
     public $passage_coach;
 
+    /** @var Editor_Tools */
+    public $editor_tools;
+
+    /** @var Head_Rest */
+    public $head_rest;
+
     /** @var Meta_Sync */
     public $meta_sync;
 
@@ -278,6 +284,8 @@ class Core {
             'woocommerce'             => [ class_exists( 'WooCommerce' ), WooCommerce::class ],
             'privacy'                 => [ $is_admin, Privacy::class ],
             'migration'               => [ $is_admin, Migration::class ],
+            'editor_tools'            => [ $is_admin, Editor_Tools::class, [ 'rest_api_init' => 9, 'admin_bar_menu' => 9 ] ],
+            'head_rest'               => [ false, Head_Rest::class, $on( 'enable_seo' ) ? [ 'rest_api_init' => 9 ] : [] ],
             'robots_txt'              => [ $is_admin || $on( 'enable_robots_editor' ), Robots_Txt::class ],
             'faq_generator'           => [ $is_admin, FAQ_Generator::class ],
             'multisite'               => [ is_multisite(), Multisite::class ],
@@ -349,6 +357,7 @@ class Core {
         // Shortcodes (class strings: their code loads only where a shortcode is used).
         add_shortcode( 'jat_search_intel_reading_time', [ Reading_Time::class, 'shortcode' ] );
         add_shortcode( 'jat_search_intel_preferred_source', [ Preferred_Source::class, 'shortcode' ] );
+        add_shortcode( 'jat_search_intel_local', [ Local_Blocks::class, 'shortcode' ] );
 
         // Schema map: advertise it in robots.txt and refresh its cache when content changes.
         if ( $schema_map_on ) {
@@ -360,6 +369,9 @@ class Core {
         // Primary category in permalinks (class strings: nothing is loaded until a permalink needs it).
         add_filter( 'post_link_category', [ Primary_Term::class, 'filter_post_link_category' ], 10, 3 );
         add_filter( 'wc_product_post_type_link_product_cat', [ Primary_Term::class, 'filter_product_link_category' ], 10, 3 );
+
+        // Page-builder content is cached per request; drop it when a post is saved.
+        add_action( 'save_post', [ Builder_Content::class, 'flush' ] );
 
         // Auto-redirect on slug change.
         add_action( 'post_updated', [ $this->redirects, 'detect_slug_change' ], 10, 3 );
@@ -381,6 +393,8 @@ class Core {
         switch ( $class ) {
             case Privacy::class:
                 return new Privacy();
+            case Editor_Tools::class:
+                return new Editor_Tools();
             case Rest_Api::class:
             case AI_Optimizer::class:
                 return new $class( $this->boot_settings, $this );
@@ -721,7 +735,11 @@ class Core {
             'news_post_types'        => [ 'post' ],
             'news_publication_name'  => '',
             'enable_video_sitemap'   => false,
+            'enable_rss_sitemap'     => true,
             'enable_image_alt'       => true,
+            'image_case'             => 'sentence',
+            'image_strip_punctuation' => true,
+            'image_clean_title'      => false,
             'redirect_attachments'   => true,
             'enable_rss_footer'      => true,
             'rss_after_content'      => 'The post %%POSTLINK%% appeared first on %%BLOGLINK%%.',

@@ -86,7 +86,7 @@ class Content_Analyzer {
         $keyword     = (string) get_post_meta( $post_id, '_jat_search_intel_focus_keyword', true );
         $description = (string) get_post_meta( $post_id, '_jat_search_intel_description', true );
 
-        $results = $this->analyze( $post_id, (string) $post->post_content, (string) $title, $keyword, $description );
+        $results = $this->analyze( $post_id, Builder_Content::get( $post ), (string) $title, $keyword, $description );
 
         $old_scores = [
             'seo'         => (float) get_post_meta( $post_id, '_jat_search_intel_seo_score', true ),

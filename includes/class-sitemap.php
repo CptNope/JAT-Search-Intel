@@ -69,6 +69,7 @@ class Sitemap {
         add_rewrite_rule( '^sitemap-([a-z]+)-?(\d*)\.xml$', 'index.php?jat_search_intel_sitemap=$matches[1]&jat_search_intel_sitemap_page=$matches[2]', 'top' );
         add_rewrite_rule( '^news-sitemap\.xml$', 'index.php?jat_search_intel_sitemap=_news', 'top' );
         add_rewrite_rule( '^video-sitemap\.xml$', 'index.php?jat_search_intel_sitemap=_video', 'top' );
+        add_rewrite_rule( '^sitemap\.rss$', 'index.php?jat_search_intel_sitemap=_rss', 'top' );
 
         add_filter( 'query_vars', function ( $vars ) {
             $vars[] = 'jat_search_intel_sitemap';
@@ -95,6 +96,9 @@ class Sitemap {
         }
         if ( ! empty( $this->settings['enable_video_sitemap'] ) ) {
             $lines[] = home_url( '/video-sitemap.xml' );
+        }
+        if ( ! empty( $this->settings['enable_rss_sitemap'] ) ) {
+            $lines[] = home_url( '/sitemap.rss' );
         }
         foreach ( $lines as $url ) {
             if ( false === stripos( $output, 'Sitemap: ' . $url ) ) {
@@ -127,14 +131,15 @@ class Sitemap {
 
         // News / video sitemaps only exist when switched on.
         if ( ( '_news' === $type && empty( $this->settings['enable_news_sitemap'] ) )
-            || ( '_video' === $type && empty( $this->settings['enable_video_sitemap'] ) ) ) {
+            || ( '_video' === $type && empty( $this->settings['enable_video_sitemap'] ) )
+            || ( '_rss' === $type && empty( $this->settings['enable_rss_sitemap'] ) ) ) {
             $GLOBALS['wp_query']->set_404();
             status_header( 404 );
             nocache_headers();
             return;
         }
 
-        header( 'Content-Type: application/xml; charset=utf-8' );
+        header( '_rss' === $type ? 'Content-Type: application/rss+xml; charset=utf-8' : 'Content-Type: application/xml; charset=utf-8' );
         header( 'X-Robots-Tag: noindex, follow' );
         header( 'Cache-Control: public, max-age=3600' );
 
@@ -150,6 +155,8 @@ class Sitemap {
                 $output = $this->generate_news_sitemap();
             } elseif ( '_video' === $type ) {
                 $output = $this->generate_video_sitemap();
+            } elseif ( '_rss' === $type ) {
+                $output = $this->generate_rss_sitemap();
             } else {
                 $output = $this->generate_sitemap( $type, $page );
             }
@@ -404,6 +411,66 @@ class Sitemap {
         }
 
         return gmdate( 'c' );
+    }
+
+    /**
+     * RSS sitemap: the most recently updated indexable URLs.
+     *
+     * Search engines poll this small feed often, so changes are found sooner
+     * than through the full XML sitemap.
+     *
+     * @param int $limit Number of items.
+     * @return string
+     */
+    public function generate_rss_sitemap( int $limit = 50 ): string {
+        $types = array_values( array_filter( (array) ( $this->settings['sitemap_post_types'] ?? [ 'post', 'page' ] ), 'post_type_exists' ) );
+        $posts = $types ? get_posts( [
+            'post_type'      => $types,
+            'post_status'    => 'publish',
+            'posts_per_page' => $limit,
+            'orderby'        => 'modified',
+            'order'          => 'DESC',
+            'has_password'   => false,
+            'meta_query'     => [
+                'relation' => 'OR',
+                [
+                    'key'     => '_jat_search_intel_noindex',
+                    'compare' => 'NOT EXISTS',
+                ],
+                [
+                    'key'     => '_jat_search_intel_noindex',
+                    'value'   => '1',
+                    'compare' => '!=',
+                ],
+            ],
+        ] ) : [];
+
+        $name = ( $this->settings['site_name'] ?? '' ) ?: get_bloginfo( 'name' );
+
+        $xml  = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+        $xml .= '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">' . "\n";
+        $xml .= '<channel>' . "\n";
+        $xml .= '  <title>' . esc_xml( $name ) . '</title>' . "\n";
+        $xml .= '  <link>' . esc_url( home_url( '/' ) ) . '</link>' . "\n";
+        $xml .= '  <description>' . esc_xml( (string) get_bloginfo( 'description' ) ) . '</description>' . "\n";
+        $xml .= '  <atom:link href="' . esc_url( home_url( '/sitemap.rss' ) ) . '" rel="self" type="application/rss+xml" />' . "\n";
+        $xml .= '  <lastBuildDate>' . gmdate( DATE_RSS ) . '</lastBuildDate>' . "\n";
+
+        foreach ( $posts as $post ) {
+            $url      = get_permalink( $post );
+            $modified = strtotime( (string) $post->post_modified_gmt . ' UTC' );
+            $xml     .= '  <item>' . "\n";
+            $xml     .= '    <title>' . esc_xml( get_the_title( $post ) ) . '</title>' . "\n";
+            $xml     .= '    <link>' . esc_url( $url ) . '</link>' . "\n";
+            $xml     .= '    <guid isPermaLink="true">' . esc_url( $url ) . '</guid>' . "\n";
+            $xml     .= '    <pubDate>' . gmdate( DATE_RSS, $modified ?: time() ) . '</pubDate>' . "\n";
+            $xml     .= '  </item>' . "\n";
+        }
+
+        $xml .= '</channel>' . "\n";
+        $xml .= '</rss>';
+
+        return $xml;
     }
 
     /**

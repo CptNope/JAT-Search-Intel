@@ -332,4 +332,44 @@ class SchemaTypesTest extends TestCase {
 
 		$this->assertArrayNotHasKey( 'wp_head', $si_test_state['actions'] ?? [] );
 	}
+
+	// ── Editor fields ────────────────────────────────────────────────────
+
+	public function test_lines_accepts_text_and_arrays(): void {
+		$this->assertSame( [ 'Flour', 'Eggs' ], Schema_Types::lines( "Flour\r\n\n Eggs \n" ) );
+		$this->assertSame( [ 'A', 'B' ], Schema_Types::lines( [ 'A', '', 'B' ] ) );
+		$this->assertSame( [], Schema_Types::lines( null ) );
+	}
+
+	public function test_duration_from_minutes(): void {
+		$this->assertSame( 'PT30M', Schema_Types::duration( '30' ) );
+		$this->assertSame( 'PT1H30M', Schema_Types::duration( 90 ) );
+		$this->assertSame( 'PT2H', Schema_Types::duration( '120' ) );
+		$this->assertSame( 'PT0M', Schema_Types::duration( '0' ) );
+		$this->assertSame( 'PT45M', Schema_Types::duration( 'PT45M' ) );
+	}
+
+	public function test_recipe_from_text_fields(): void {
+		global $si_test_state;
+		$si_test_state['posts'][20] = [ 'ID' => 20, 'post_title' => 'Pancakes', 'post_content' => 'x', 'post_status' => 'publish', 'post_type' => 'post', 'post_author' => 1 ];
+		$si_test_state['post_meta'][20]['_jat_search_intel_recipe_ingredients'] = "Flour\nMilk";
+		$si_test_state['post_meta'][20]['_jat_search_intel_recipe_steps']       = "Mix\nCook";
+		$si_test_state['post_meta'][20]['_jat_search_intel_recipe_prep_time']   = '10';
+
+		$schema = $this->types->get_recipe_schema( 20 );
+
+		$this->assertSame( [ 'Flour', 'Milk' ], $schema['recipeIngredient'] );
+		$this->assertCount( 2, $schema['recipeInstructions'] );
+		$this->assertSame( 'PT10M', $schema['prepTime'] );
+	}
+
+	public function test_every_type_has_fields_and_meta_keys(): void {
+		$fields = Schema_Types::get_fields();
+		foreach ( array_keys( Schema_Types::get_types() ) as $type ) {
+			$this->assertArrayHasKey( $type, $fields, $type );
+		}
+		$keys = Schema_Types::meta_keys();
+		$this->assertContains( '_jat_search_intel_schema_type_extra', $keys );
+		$this->assertContains( '_jat_search_intel_event_start_date', $keys );
+	}
 }

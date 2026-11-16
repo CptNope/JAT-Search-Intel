@@ -189,7 +189,7 @@ class Admin {
                 'enable_og', 'enable_twitter', 'enable_canonical', 'enable_robots_meta',
                 'noindex_archives', 'noindex_search', 'noindex_404', 'noindex_empty_terms',
                 'enable_breadcrumbs', 'enable_sitelinks',
-                'enable_image_alt', 'redirect_attachments', 'enable_rss_footer',
+                'enable_image_alt', 'image_strip_punctuation', 'image_clean_title', 'redirect_attachments', 'enable_rss_footer',
                 'cleanup_shortlink', 'cleanup_rsd', 'cleanup_wlwmanifest', 'cleanup_generator', 'cleanup_emoji', 'cleanup_oembed_links', 'cleanup_rest_link', 'cleanup_pingback_header', 'cleanup_feed_comments', 'cleanup_feed_post_comments', 'cleanup_feed_extra', 'cleanup_search_spam',
             ],
             'aeo' => [
@@ -202,7 +202,7 @@ class Admin {
                 'preferred_source_auto', 'enable_schema_map', 'enable_citation_tracking',
             ],
             'sitemap' => [
-                'enable_news_sitemap', 'enable_video_sitemap',
+                'enable_news_sitemap', 'enable_video_sitemap', 'enable_rss_sitemap',
             ],
             'ai' => [
                 'enable_ai_engine',
@@ -245,7 +245,8 @@ class Admin {
             'enable_historical_analytics', 'enable_ga4', 'enable_cwv',
             'enable_custom_reports', 'enable_notifications',
             // v3.5
-            'enable_news_sitemap', 'enable_video_sitemap', 'enable_image_alt',
+            'enable_news_sitemap', 'enable_video_sitemap', 'enable_rss_sitemap', 'enable_image_alt',
+            'image_strip_punctuation', 'image_clean_title',
             'redirect_attachments', 'enable_rss_footer', 'enable_markdown_endpoints',
             'enable_ai_crawler_log', 'enable_rank_tracking',
             // v3.6
@@ -313,6 +314,10 @@ class Admin {
                 ? self::sanitize_verification_code( (string) wp_unslash( $input[ $key ] ) )
                 : (string) ( $existing[ $key ] ?? '' );
         }
+
+        // Image alt text casing.
+        $case                    = isset( $input['image_case'] ) ? sanitize_key( $input['image_case'] ) : (string) ( $existing['image_case'] ?? 'sentence' );
+        $sanitized['image_case'] = in_array( $case, Media_SEO::CASES, true ) ? $case : 'sentence';
 
         // A hidden empty entry lets "none selected" be saved; drop it.
         $sanitized['noindex_taxonomies'] = array_values( array_filter( (array) $sanitized['noindex_taxonomies'] ) );
@@ -596,6 +601,10 @@ class Admin {
         $value = is_scalar( $value ) ? (string) $value : '';
         if ( in_array( $field, [ '_jat_search_intel_canonical', '_jat_search_intel_social_image' ], true ) ) {
             $value = esc_url_raw( $value );
+        }
+        // Titles and descriptions may use %variables%, which sanitize_text_field() would damage.
+        if ( in_array( $field, [ '_jat_search_intel_title', '_jat_search_intel_description', '_jat_search_intel_social_title', '_jat_search_intel_social_description' ], true ) ) {
+            return Title_Engine::sanitize_template( $value );
         }
         return sanitize_text_field( $value );
     }

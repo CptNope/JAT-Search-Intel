@@ -290,7 +290,37 @@ $settings = wp_parse_args( $settings, \JAT_Search_Intel\Core::get_default_settin
                             <input type="checkbox" name="jat_search_intel_settings[enable_image_alt]" value="1" <?php checked( ! empty( $settings['enable_image_alt'] ) ); ?> />
                             <?php esc_html_e( 'Fill missing image alt text from the image title or file name (on upload and on the front end)', 'jat-search-intel' ); ?>
                         </label>
-                        <p class="description"><?php esc_html_e( 'Alt text you write yourself is never changed.', 'jat-search-intel' ); ?></p>
+                        <p class="description"><?php esc_html_e( 'Alt text you write yourself is never changed.', 'jat-search-intel' ); ?>
+                            <a href="<?php echo esc_url( admin_url( 'upload.php?page=' . \JAT_Search_Intel\Media_SEO::PAGE_SLUG ) ); ?>"><?php esc_html_e( 'Review images without alt text', 'jat-search-intel' ); ?></a></p>
+                    </td>
+                </tr>
+                <tr>
+                    <th><?php esc_html_e( 'Image Text Format', 'jat-search-intel' ); ?></th>
+                    <td>
+                        <label for="jsi-image-case"><?php esc_html_e( 'Capitalization', 'jat-search-intel' ); ?></label>
+                        <select id="jsi-image-case" name="jat_search_intel_settings[image_case]">
+                            <?php
+                            $jsi_cases = [
+                                'sentence' => __( 'Sentence case', 'jat-search-intel' ),
+                                'title'    => __( 'Title Case', 'jat-search-intel' ),
+                                'lower'    => __( 'lower case', 'jat-search-intel' ),
+                                'none'     => __( 'Leave as is', 'jat-search-intel' ),
+                            ];
+                            foreach ( $jsi_cases as $jsi_value => $jsi_label ) {
+                                printf( '<option value="%s" %s>%s</option>', esc_attr( $jsi_value ), selected( $settings['image_case'] ?? 'sentence', $jsi_value, false ), esc_html( $jsi_label ) );
+                            }
+                            ?>
+                        </select>
+                        <br>
+                        <label>
+                            <input type="checkbox" name="jat_search_intel_settings[image_strip_punctuation]" value="1" <?php checked( ! empty( $settings['image_strip_punctuation'] ) ); ?> />
+                            <?php esc_html_e( 'Remove punctuation and symbols from generated alt text', 'jat-search-intel' ); ?>
+                        </label>
+                        <br>
+                        <label>
+                            <input type="checkbox" name="jat_search_intel_settings[image_clean_title]" value="1" <?php checked( ! empty( $settings['image_clean_title'] ) ); ?> />
+                            <?php esc_html_e( 'Also tidy the title of new uploads the same way (IMG_2041-final.jpg becomes "Final")', 'jat-search-intel' ); ?>
+                        </label>
                     </td>
                 </tr>
                 <tr>

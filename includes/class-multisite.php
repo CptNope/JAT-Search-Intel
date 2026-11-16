@@ -332,6 +332,9 @@ class Multisite {
 	 * Render the network admin page.
 	 */
 	public function render_network_page(): void {
+		if ( ! current_user_can( 'manage_network_options' ) ) {
+			return;
+		}
 		$defaults = $this->get_network_defaults();
 		$report   = $this->get_network_report();
 

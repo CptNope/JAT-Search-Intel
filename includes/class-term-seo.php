@@ -157,6 +157,10 @@ class Term_SEO {
 				default:
 					$value = sanitize_text_field( (string) $raw );
 			}
+			// Titles and descriptions may use %variables%, which sanitize_text_field() would damage.
+			if ( in_array( $field, [ 'title', 'description', 'social_title', 'social_description' ], true ) ) {
+				$value = Title_Engine::sanitize_template( (string) $raw );
+			}
 
 			$key = self::META_PREFIX . $field;
 			if ( (string) get_term_meta( $term_id, $key, true ) === $value ) {

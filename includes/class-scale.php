@@ -452,6 +452,9 @@ class Scale {
 	 * Render the bulk editor admin page.
 	 */
 	public function render_admin_page(): void {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
 		$data = $this->get_bulk_editor_data( [
 			'paged' => absint( $_GET['paged'] ?? 1 ), // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only view/pagination parameter.
 		] );

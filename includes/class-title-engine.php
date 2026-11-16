@@ -33,15 +33,50 @@ class Title_Engine {
         'homepage' => '%sitename%',
     ];
 
-    public function __construct( array $settings ) {
+    /**
+     * @param array $settings       Plugin settings.
+     * @param bool  $register_hooks False to use the resolver without hooking the title filter.
+     */
+    public function __construct( array $settings, bool $register_hooks = true ) {
         $this->settings = $settings;
 
-        if ( empty( $settings['enable_seo'] ) ) {
+        if ( ! $register_hooks || empty( $settings['enable_seo'] ) ) {
             return;
         }
 
         // Override the existing SEO Manager title filter at a later priority
         add_filter( 'pre_get_document_title', [ $this, 'resolve_title' ], 25 );
+    }
+
+    /**
+     * Expand variables in a saved title or description, if it has any.
+     *
+     * @param string $text     Text that may contain %variables%.
+     * @param array  $settings Plugin settings.
+     * @return string
+     */
+    public static function expand( string $text, array $settings ): string {
+        if ( false === strpos( $text, '%' ) ) {
+            return $text;
+        }
+        return ( new self( $settings, false ) )->resolve_variables( $text );
+    }
+
+    /**
+     * Sanitize a title or description that may contain %variables%.
+     *
+     * sanitize_text_field() strips anything that looks like a URL-encoded
+     * byte, which turns %category% and %date% into "tegory%" and "te%".
+     * This removes tags, line breaks and extra spaces but keeps variables.
+     *
+     * @param string $text Raw text.
+     * @return string
+     */
+    public static function sanitize_template( string $text ): string {
+        $text = wp_check_invalid_utf8( $text );
+        $text = wp_strip_all_tags( $text, true );
+        $text = (string) preg_replace( '/[\r\n\t ]+/', ' ', $text );
+        return trim( $text );
     }
 
     /**
@@ -62,9 +97,10 @@ class Title_Engine {
         // For single posts/pages, check for a manual SEO title override first
         if ( in_array( $context, [ 'single', 'page' ], true ) && is_singular() ) {
             $post_id   = get_queried_object_id();
-            $seo_title = get_post_meta( $post_id, '_jat_search_intel_title', true );
-            if ( $seo_title ) {
-                return $seo_title;
+            $seo_title = (string) get_post_meta( $post_id, '_jat_search_intel_title', true );
+            if ( '' !== $seo_title ) {
+                // Variables are allowed here too (imported titles often use them).
+                return false === strpos( $seo_title, '%' ) ? $seo_title : $this->resolve_variables( $seo_title );
             }
         }
 
@@ -122,7 +158,7 @@ class Title_Engine {
      */
     public function resolve_variables( string $template ): string {
         // Only resolve variables the template uses (several need extra queries).
-        $tokens = [ '%title%', '%sitename%', '%sep%', '%category%', '%tag%', '%date%', '%author%', '%page%', '%excerpt%', '%search_query%' ];
+        $tokens = [ '%title%', '%sitename%', '%tagline%', '%sep%', '%category%', '%tag%', '%date%', '%author%', '%page%', '%excerpt%', '%search_query%' ];
 
         $variables = [];
         foreach ( $tokens as $token ) {
@@ -153,6 +189,8 @@ class Title_Engine {
                 return $this->get_var_title();
             case '%sitename%':
                 return $this->get_var_sitename();
+            case '%tagline%':
+                return (string) get_bloginfo( 'description' );
             case '%sep%':
                 return $this->get_var_sep();
             case '%category%':

@@ -11,6 +11,7 @@ module.exports = {
 		'blocks/breadcrumbs/index': path.resolve( __dirname, 'src/blocks/breadcrumbs/index.js' ),
 		'blocks/answer-box/index': path.resolve( __dirname, 'src/blocks/answer-box/index.js' ),
 		'blocks/citation/index': path.resolve( __dirname, 'src/blocks/citation/index.js' ),
+		'blocks/local-business/index': path.resolve( __dirname, 'src/blocks/local-business/index.js' ),
 	},
 	output: {
 		...defaultConfig.output,

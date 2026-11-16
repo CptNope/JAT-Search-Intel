@@ -117,4 +117,28 @@ class SitemapTest extends TestCase {
 
         $this->assertEquals( 43200, $ttl ); // 12 hours
     }
+
+    // ── RSS sitemap ──────────────────────────────────────────────────────
+
+    public function test_rss_sitemap_lists_recent_posts(): void {
+        global $si_test_state;
+        $si_test_state['posts'] = [
+            3 => [ 'ID' => 3, 'post_title' => 'Scam guide', 'post_content' => '', 'post_status' => 'publish', 'post_type' => 'post', 'post_author' => 1, 'post_modified_gmt' => '2026-11-15 22:00:00' ],
+        ];
+
+        $xml = $this->make_sitemap( [ 'enable_rss_sitemap' => true ] )->generate_rss_sitemap();
+
+        $this->assertStringContainsString( '<rss version="2.0"', $xml );
+        $this->assertStringContainsString( '<title>Scam guide</title>', $xml );
+        $this->assertStringContainsString( 'sitemap.rss', $xml );
+        $this->assertNotFalse( simplexml_load_string( $xml ) );
+    }
+
+    public function test_robots_lists_rss_sitemap_when_enabled(): void {
+        $on  = $this->make_sitemap( [ 'enable_rss_sitemap' => true ] )->add_sitemap_to_robots( '', true );
+        $off = $this->make_sitemap( [ 'enable_rss_sitemap' => false ] )->add_sitemap_to_robots( '', true );
+
+        $this->assertStringContainsString( 'sitemap.rss', $on );
+        $this->assertStringNotContainsString( 'sitemap.rss', $off );
+    }
 }
