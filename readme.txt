@@ -4,7 +4,7 @@ Tags: seo, schema, llms-txt, ai-search, redirects
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.8.1
+Stable tag: 3.8.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -262,6 +262,11 @@ Sends an HTTP HEAD request to each external URL linked from your content to chec
 
 == Changelog ==
 
+= 3.8.2 =
+* Fixed: on Tools, Reports and other grouped pages the tab bar pushed the page down by the height of the admin menu, leaving a large blank space.
+* Fixed: when the site represents a person who also writes its posts, schema now describes one Person instead of two (author and publisher share an @id).
+* Fixed: migration adds the post types that had SEO data (for example Projects or Services) to the analysed post types and the XML sitemap, as the other plugin did.
+
 = 3.8.1 =
 * Fixed: a static front page uses its own SEO title (as All in One SEO does) instead of the homepage title template.
 * Fixed: the blog page chosen as "Posts page" uses its own SEO title, description and canonical URL.
@@ -371,6 +376,9 @@ Every feature other SEO plugins sell in their premium plans, free.
 Earlier releases are listed in CHANGELOG.md in the development repository.
 
 == Upgrade Notice ==
+
+= 3.8.2 =
+Fixes a blank gap on grouped admin pages, a duplicate Person in schema, and migrated post types missing from the sitemap.
 
 = 3.8.1 =
 A static front page now shows its own SEO title.

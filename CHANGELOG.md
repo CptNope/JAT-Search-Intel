@@ -6,6 +6,15 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.8.2] — 2026-11-16
+
+### Fixed
+- Group tab bar is printed inside `#wpbody-content` (`all_admin_notices`) instead of `in_admin_header`, where its clearfix cleared the floated admin menu and pushed the page down.
+- `Schema_Manager::author_node_id()`: when Knowledge Graph type is Person and the author's display name matches it, the author uses `/#person`, so the graph merges author and publisher into one Person.
+- Migration adds post types that had SEO data to `enabled_post_types` and `sitemap_post_types` (never removes any) and reports them as `post_types`.
+
+---
+
 ## [3.8.1] — 2026-11-15
 
 ### Fixed

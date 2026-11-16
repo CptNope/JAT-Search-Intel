@@ -758,6 +758,7 @@ class Migration {
 			'redirects' => 0,
 			'settings'  => [],
 		];
+		$types = [];
 
 		foreach ( $this->collect_posts( $source ) as $post_id => $fields ) {
 			$post_migrated = false;
@@ -787,8 +788,12 @@ class Migration {
 
 			if ( $post_migrated ) {
 				$result['migrated']++;
+				$types[ (string) get_post_type( $post_id ) ] = true;
 			}
 		}
+
+		// The other plugin covered these post types; keep them in the editor tools and the sitemap.
+		$result['post_types'] = $this->cover_post_types( array_keys( array_filter( $types ) ) );
 
 		if ( 'aioseo' === $source ) {
 			$result['terms']    = $this->migrate_aioseo_terms( $overwrite );
@@ -1072,6 +1077,40 @@ class Migration {
 		update_option( 'jat_search_intel_settings', $saved );
 
 		return $changed;
+	}
+
+	/**
+	 * Add post types to the analysed and sitemap post types (never removes any).
+	 *
+	 * @param string[] $types Post types that had SEO data.
+	 * @return string[] Post types that were added.
+	 */
+	private function cover_post_types( array $types ): array {
+		$types = array_values( array_filter( $types, static function ( $type ) {
+			return '' !== $type && 'attachment' !== $type && post_type_exists( $type ) && is_post_type_viewable( $type );
+		} ) );
+		if ( ! $types ) {
+			return [];
+		}
+
+		$saved    = get_option( 'jat_search_intel_settings', [] );
+		$saved    = is_array( $saved ) ? $saved : [];
+		$defaults = Core::get_default_settings();
+		$added    = [];
+
+		foreach ( [ 'enabled_post_types', 'sitemap_post_types' ] as $key ) {
+			$current = array_values( (array) ( $saved[ $key ] ?? ( $defaults[ $key ] ?? [ 'post', 'page' ] ) ) );
+			$merged  = array_values( array_unique( array_merge( $current, $types ) ) );
+			if ( $merged !== $current ) {
+				$added         = array_merge( $added, array_diff( $merged, $current ) );
+				$saved[ $key ] = $merged;
+			}
+		}
+
+		if ( $added ) {
+			update_option( 'jat_search_intel_settings', $saved );
+		}
+		return array_values( array_unique( $added ) );
 	}
 
 	// ── Redirects ────────────────────────────────────────────────────────────
