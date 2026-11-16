@@ -131,37 +131,10 @@ class Bulk_Tools {
 
         $processed = 0;
         foreach ( $posts as $post ) {
-            $content     = wp_strip_all_tags( $post->post_content );
-            $title       = $post->post_title;
-            $keyword     = get_post_meta( $post->ID, '_jat_search_intel_focus_keyword', true ) ?: '';
-            $description = get_post_meta( $post->ID, '_jat_search_intel_description', true ) ?: '';
-
-            // Capture old scores for change log.
-            $old_scores = [
-                'seo'         => (float) get_post_meta( $post->ID, '_jat_search_intel_seo_score', true ),
-                'aeo'         => (float) get_post_meta( $post->ID, '_jat_search_intel_aeo_score', true ),
-                'geo'         => (float) get_post_meta( $post->ID, '_jat_search_intel_geo_score', true ),
-                'readability' => (float) get_post_meta( $post->ID, '_jat_search_intel_readability_score', true ),
-            ];
-
-            $results = $this->core->analyzer->analyze( $post->ID, $content, $title, $keyword, $description );
-
-            $new_scores = [
-                'seo'         => (float) ( $results['seo_score']['score'] ?? 0 ),
-                'aeo'         => (float) ( $results['aeo_score']['score'] ?? 0 ),
-                'geo'         => (float) ( $results['geo_score']['score'] ?? 0 ),
-                'readability' => (float) ( $results['readability']['score'] ?? 0 ),
-            ];
-
-            update_post_meta( $post->ID, '_jat_search_intel_seo_score', $new_scores['seo'] );
-            update_post_meta( $post->ID, '_jat_search_intel_aeo_score', $new_scores['aeo'] );
-            update_post_meta( $post->ID, '_jat_search_intel_geo_score', $new_scores['geo'] );
-            update_post_meta( $post->ID, '_jat_search_intel_readability_score', $new_scores['readability'] );
-
-            /** This action is documented in class-content-analyzer.php */
-            do_action( 'jat_search_intel_post_analyzed', $post->ID, $new_scores, $old_scores, $results );
-
-            $processed++;
+            // analyze_and_store() reads builder and dynamic-block content, stores the scores and fires jat_search_intel_post_analyzed.
+            if ( $this->core->analyzer->analyze_and_store( $post ) ) {
+                $processed++;
+            }
         }
 
         $next_offset = $offset + $batch_size;

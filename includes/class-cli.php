@@ -58,28 +58,32 @@ class CLI extends \WP_CLI_Command {
             \WP_CLI::error( "Post {$post_id} not found." );
         }
 
-        $core        = Core::get_instance();
-        $content     = wp_strip_all_tags( $post->post_content );
-        $title       = $post->post_title;
-        $keyword     = get_post_meta( $post_id, '_jat_search_intel_focus_keyword', true ) ?: '';
-        $description = get_post_meta( $post_id, '_jat_search_intel_description', true ) ?: '';
+        $core  = Core::get_instance();
+        $title = $post->post_title;
 
         \WP_CLI::log( "Analyzing: \"{$title}\" (ID: {$post_id})..." );
 
-        $results = $core->analyzer->analyze( $post_id, $content, $title, $keyword, $description );
+        $save = (bool) \WP_CLI\Utils\get_flag_value( $assoc_args, 'save', false );
+        if ( $save ) {
+            $results = $core->analyzer->analyze_and_store( $post );
+        } else {
+            $results = $core->analyzer->analyze(
+                $post_id,
+                Builder_Content::get( $post ),
+                (string) ( get_post_meta( $post_id, '_jat_search_intel_title', true ) ?: $title ),
+                (string) get_post_meta( $post_id, '_jat_search_intel_focus_keyword', true ),
+                (string) get_post_meta( $post_id, '_jat_search_intel_description', true )
+            );
+        }
 
         $scores = [
-            'SEO'         => $results['seo']['score'] ?? 0,
-            'AEO'         => $results['aeo']['score'] ?? 0,
-            'GEO'         => $results['geo']['score'] ?? 0,
+            'SEO'         => $results['seo_score']['score'] ?? 0,
+            'AEO'         => $results['aeo_score']['score'] ?? 0,
+            'GEO'         => $results['geo_score']['score'] ?? 0,
             'Readability' => $results['readability']['score'] ?? 0,
         ];
 
-        if ( \WP_CLI\Utils\get_flag_value( $assoc_args, 'save', false ) ) {
-            update_post_meta( $post_id, '_jat_search_intel_seo_score', (int) $scores['SEO'] );
-            update_post_meta( $post_id, '_jat_search_intel_aeo_score', (int) $scores['AEO'] );
-            update_post_meta( $post_id, '_jat_search_intel_geo_score', (int) $scores['GEO'] );
-            update_post_meta( $post_id, '_jat_search_intel_readability_score', (int) $scores['Readability'] );
+        if ( $save ) {
             \WP_CLI::log( 'Scores saved to post meta.' );
         }
 
@@ -157,25 +161,7 @@ class CLI extends \WP_CLI_Command {
             ] );
 
             foreach ( $posts as $post ) {
-                $content     = wp_strip_all_tags( $post->post_content );
-                $title       = $post->post_title;
-                $keyword     = get_post_meta( $post->ID, '_jat_search_intel_focus_keyword', true ) ?: '';
-                $description = get_post_meta( $post->ID, '_jat_search_intel_description', true ) ?: '';
-
-                $results = $core->analyzer->analyze( $post->ID, $content, $title, $keyword, $description );
-
-                if ( isset( $results['seo']['score'] ) ) {
-                    update_post_meta( $post->ID, '_jat_search_intel_seo_score', (int) $results['seo']['score'] );
-                }
-                if ( isset( $results['aeo']['score'] ) ) {
-                    update_post_meta( $post->ID, '_jat_search_intel_aeo_score', (int) $results['aeo']['score'] );
-                }
-                if ( isset( $results['geo']['score'] ) ) {
-                    update_post_meta( $post->ID, '_jat_search_intel_geo_score', (int) $results['geo']['score'] );
-                }
-                if ( isset( $results['readability']['score'] ) ) {
-                    update_post_meta( $post->ID, '_jat_search_intel_readability_score', (int) $results['readability']['score'] );
-                }
+                $core->analyzer->analyze_and_store( $post );
 
                 $scored++;
                 $progress->tick();
