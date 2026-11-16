@@ -6,6 +6,13 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.8.7] — 2026-11-16
+
+### Fixed
+- Broken Link Checker: links to sites that refuse automated requests (OpenAI, npm, Mass.gov) were listed as broken with a 403. 401, 403, 429 and 999 are now "blocked", not broken.
+- A HEAD request answered with 0, 400, 403, 405, 429 or 501 is retried once with GET, since many servers and firewalls refuse HEAD.
+- Link checks send an identifying user agent and no longer turn off SSL verification.
+
 ## [3.8.6] — 2026-11-16
 
 ### Fixed

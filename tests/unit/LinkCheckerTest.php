@@ -124,6 +124,40 @@ class LinkCheckerTest extends TestCase {
 		$this->assertEquals( 500, $result['status'] );
 	}
 
+	public function test_check_url_reports_403_as_blocked_not_broken(): void {
+		global $si_test_state;
+		$si_test_state['remote_head_response'] = [ 'response' => [ 'code' => 403, 'message' => 'Forbidden' ] ];
+		$si_test_state['remote_response']      = [ 'response' => [ 'code' => 403, 'message' => 'Forbidden' ] ];
+
+		$result = $this->checker->check_url( 'https://example.com/bot-wall' );
+
+		$this->assertFalse( $result['broken'] );
+		$this->assertTrue( $result['blocked'] );
+		$this->assertEquals( 403, $result['status'] );
+	}
+
+	public function test_check_url_retries_refused_head_with_get(): void {
+		global $si_test_state;
+		$si_test_state['remote_head_response'] = [ 'response' => [ 'code' => 405, 'message' => 'Method Not Allowed' ] ];
+		$si_test_state['remote_response']      = [ 'response' => [ 'code' => 200, 'message' => 'OK' ] ];
+
+		$result = $this->checker->check_url( 'https://example.com/no-head' );
+
+		$this->assertFalse( $result['broken'] );
+		$this->assertEquals( 200, $result['status'] );
+	}
+
+	public function test_check_url_still_flags_404_after_get_retry(): void {
+		global $si_test_state;
+		$si_test_state['remote_head_response'] = [ 'response' => [ 'code' => 403, 'message' => 'Forbidden' ] ];
+		$si_test_state['remote_response']      = [ 'response' => [ 'code' => 404, 'message' => 'Not Found' ] ];
+
+		$result = $this->checker->check_url( 'https://example.com/gone' );
+
+		$this->assertTrue( $result['broken'] );
+		$this->assertFalse( $result['blocked'] );
+	}
+
 	public function test_check_url_passes_301_redirect(): void {
 		global $si_test_state;
 		$si_test_state['remote_head_response'] = [
