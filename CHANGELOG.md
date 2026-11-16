@@ -6,6 +6,13 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.8.3] — 2026-11-16
+
+### Fixed
+- `Sitemap::own_url()`: XML, news, video and RSS sitemaps skip posts whose permalink contains a fragment (themes that link child items to a section of their parent page). jeremyanderson.tech's service sitemap listed 22 such URLs.
+
+---
+
 ## [3.8.2] — 2026-11-16
 
 ### Fixed

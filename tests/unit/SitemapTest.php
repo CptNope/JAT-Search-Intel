@@ -141,4 +141,13 @@ class SitemapTest extends TestCase {
         $this->assertStringContainsString( 'sitemap.rss', $on );
         $this->assertStringNotContainsString( 'sitemap.rss', $off );
     }
+
+    public function test_own_url_skips_links_to_a_section_of_another_page(): void {
+        global $si_test_state;
+        $si_test_state['permalinks'][6] = 'https://example.com/services/#audit';
+
+        $this->assertSame( 'https://example.com/?p=5', \JAT_Search_Intel\Sitemap::own_url( 5 ) );
+        $this->assertSame( '', \JAT_Search_Intel\Sitemap::own_url( 6 ) );
+        unset( $si_test_state['permalinks'] );
+    }
 }

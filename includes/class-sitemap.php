@@ -170,6 +170,21 @@ class Sitemap {
     }
 
     /**
+     * A post's own URL for a sitemap, or '' when it has none.
+     *
+     * Some themes give child items a link to a section of their parent page
+     * (/services/security/#audit). That is not a page of its own, so it is
+     * left out of sitemaps instead of listing the parent page again.
+     *
+     * @param int|\WP_Post $post Post.
+     * @return string
+     */
+    public static function own_url( $post ): string {
+        $url = (string) get_permalink( $post );
+        return ( '' === $url || false !== strpos( $url, '#' ) ) ? '' : $url;
+    }
+
+    /**
      * Generate the sitemap index XML.
      */
     private function generate_sitemap_index(): string {
@@ -282,11 +297,15 @@ class Sitemap {
         ] );
 
         foreach ( $posts as $post ) {
+            $loc = self::own_url( $post );
+            if ( '' === $loc ) {
+                continue;
+            }
             $priority   = ( 'page' === $post_type ) ? '0.8' : '0.6';
             $changefreq = $this->get_changefreq( $post );
 
             $xml .= '<url>' . "\n";
-            $xml .= '  <loc>' . esc_url( get_permalink( $post->ID ) ) . '</loc>' . "\n";
+            $xml .= '  <loc>' . esc_url( $loc ) . '</loc>' . "\n";
             $xml .= '  <lastmod>' . get_the_modified_date( 'c', $post->ID ) . '</lastmod>' . "\n";
             $xml .= '  <changefreq>' . $changefreq . '</changefreq>' . "\n";
             $xml .= '  <priority>' . $priority . '</priority>' . "\n";
@@ -457,7 +476,10 @@ class Sitemap {
         $xml .= '  <lastBuildDate>' . gmdate( DATE_RSS ) . '</lastBuildDate>' . "\n";
 
         foreach ( $posts as $post ) {
-            $url      = get_permalink( $post );
+            $url = self::own_url( $post );
+            if ( '' === $url ) {
+                continue;
+            }
             $modified = strtotime( (string) $post->post_modified_gmt . ' UTC' );
             $xml     .= '  <item>' . "\n";
             $xml     .= '    <title>' . esc_xml( get_the_title( $post ) ) . '</title>' . "\n";
@@ -500,11 +522,11 @@ class Sitemap {
             ] );
 
             foreach ( $posts as $post ) {
-                if ( get_post_meta( $post->ID, '_jat_search_intel_noindex', true ) ) {
+                if ( get_post_meta( $post->ID, '_jat_search_intel_noindex', true ) || '' === self::own_url( $post ) ) {
                     continue;
                 }
                 $xml .= '<url>' . "\n";
-                $xml .= '  <loc>' . esc_url( get_permalink( $post->ID ) ) . '</loc>' . "\n";
+                $xml .= '  <loc>' . esc_url( self::own_url( $post ) ) . '</loc>' . "\n";
                 $xml .= '  <news:news>' . "\n";
                 $xml .= '    <news:publication>' . "\n";
                 $xml .= '      <news:name>' . esc_xml( $name ) . '</news:name>' . "\n";
@@ -599,8 +621,8 @@ class Sitemap {
                 $entries .= '  </video:video>' . "\n";
             }
 
-            if ( '' !== $entries ) {
-                $xml .= '<url>' . "\n" . '  <loc>' . esc_url( get_permalink( $post_id ) ) . '</loc>' . "\n" . $entries . '</url>' . "\n";
+            if ( '' !== $entries && '' !== self::own_url( $post_id ) ) {
+                $xml .= '<url>' . "\n" . '  <loc>' . esc_url( self::own_url( $post_id ) ) . '</loc>' . "\n" . $entries . '</url>' . "\n";
             }
         }
 
