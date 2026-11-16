@@ -6,6 +6,11 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.8.12] — 2026-11-16
+
+### Added
+- Markdown content negotiation: a singular request whose `Accept` header prefers `text/markdown` over HTML gets the same Markdown as the `.md` URL (`AI_Search::accepts_markdown()`). HTML responses on singular pages send `Vary: Accept`. Sites behind a CDN that caches HTML should bypass the cache when `Accept` contains `text/markdown`.
+
 ## [3.8.11] — 2026-11-16
 
 ### Fixed
