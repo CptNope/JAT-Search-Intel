@@ -67,6 +67,9 @@ class RankTrackerTest extends TestCase {
 	public function test_configured_keywords_win_over_auto_mode(): void {
 		$tracker = new Rank_Tracker( array_merge( Core::get_default_settings(), [ 'tracked_keywords' => [ 'a', 'b' ] ] ) );
 		$this->assertSame( [ 'a', 'b' ], $tracker->get_keywords() );
+
+		$tracker = new Rank_Tracker( array_merge( Core::get_default_settings(), [ 'tracked_keywords' => [ 'WordPress Developer Worcester', ' wordpress developer worcester ', '' ] ] ) );
+		$this->assertSame( [ 'wordpress developer worcester' ], $tracker->get_keywords() );
 	}
 
 	public function test_cron_only_when_enabled(): void {
