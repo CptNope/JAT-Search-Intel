@@ -74,9 +74,9 @@ class SEO_Manager {
      */
     public function get_title( $post_id = null ): string {
         if ( $post_id ) {
-            $custom = get_post_meta( $post_id, '_jat_search_intel_title', true );
-            if ( $custom ) {
-                return $custom;
+            $custom = (string) get_post_meta( $post_id, '_jat_search_intel_title', true );
+            if ( '' !== $custom ) {
+                return Title_Engine::expand( $custom, $this->settings );
             }
             return get_the_title( $post_id );
         }
@@ -88,9 +88,9 @@ class SEO_Manager {
      */
     public function get_description( $post_id = null ): string {
         if ( $post_id ) {
-            $custom = get_post_meta( $post_id, '_jat_search_intel_description', true );
-            if ( $custom ) {
-                return $this->truncate_description( $custom );
+            $custom = (string) get_post_meta( $post_id, '_jat_search_intel_description', true );
+            if ( '' !== $custom ) {
+                return $this->truncate_description( Title_Engine::expand( $custom, $this->settings ) );
             }
 
             $fallback = $this->settings['description_fallback'] ?? 'excerpt';
