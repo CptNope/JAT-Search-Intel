@@ -116,6 +116,20 @@ class IndexStatusTest extends ParityTestCase {
 		$this->assertSame( 2, $this->status()->run( 10 )['checked'] );
 	}
 
+	public function test_section_permalinks_are_not_inspected(): void {
+		foreach ( [ 1, 2 ] as $id ) {
+			$GLOBALS['si_test_state']['posts'][ $id ] = [ 'ID' => $id, 'post_type' => 'post', 'post_status' => 'publish' ];
+		}
+		$GLOBALS['si_test_state']['permalinks'][2] = 'https://example.com/service/care-plans/#guardian';
+		$this->respond( 200, self::API_BODY );
+
+		$this->assertTrue( Index_Status::inspectable( 1 ) );
+		$this->assertFalse( Index_Status::inspectable( 2 ) );
+		$this->assertSame( [ 1 ], $this->status()->next_batch( 10 ) );
+		$this->assertInstanceOf( \WP_Error::class, $this->status()->check_post( 2 ) );
+		$this->assertSame( [], Index_Status::get( 2 ) );
+	}
+
 	public function test_next_batch_is_empty_without_post_types_or_limit(): void {
 		$this->assertSame( [], $this->status( [ 'enabled_post_types' => [ 'nope' ] ] )->next_batch( 5 ) );
 		$this->assertSame( [], $this->status()->next_batch( 0 ) );
