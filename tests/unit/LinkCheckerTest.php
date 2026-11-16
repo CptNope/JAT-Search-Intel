@@ -203,4 +203,15 @@ class LinkCheckerTest extends TestCase {
 		// Should not register any cron hooks.
 		$this->assertArrayNotHasKey( 'jat_search_intel_check_links', $si_test_state['actions'] ?? [] );
 	}
+
+	public function test_enabled_checker_schedules_its_hourly_scan_on_init(): void {
+		global $si_test_state;
+		$si_test_state['actions'] = [];
+		new \JAT_Search_Intel\Link_Checker( [ 'enable_link_checker' => true ] );
+
+		$init = array_map( static function ( $hook ) {
+			return is_array( $hook['callback'] ) ? $hook['callback'][1] : '';
+		}, $si_test_state['actions']['init'] ?? [] );
+		$this->assertContains( 'schedule', $init );
+	}
 }
