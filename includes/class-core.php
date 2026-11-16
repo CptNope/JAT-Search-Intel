@@ -393,6 +393,8 @@ class Core {
         switch ( $class ) {
             case Privacy::class:
                 return new Privacy();
+            case Editor_Tools::class:
+                return new Editor_Tools();
             case Rest_Api::class:
             case AI_Optimizer::class:
                 return new $class( $this->boot_settings, $this );

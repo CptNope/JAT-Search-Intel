@@ -16,7 +16,7 @@ class EditorToolsTest extends TestCase {
 			'post_meta' => [],
 			'posts'     => [ 7 => [ 'ID' => 7, 'post_title' => 'P', 'post_content' => '', 'post_status' => 'publish', 'post_type' => 'post', 'post_author' => 1 ] ],
 		];
-		$this->tools = new Editor_Tools( [] );
+		$this->tools = new Editor_Tools();
 		$_POST       = [];
 		$_REQUEST    = [];
 	}

@@ -23,10 +23,9 @@ class Editor_Tools {
 	private const COLUMN       = 'si_scores';
 
 	/**
-	 * @param array<string,mixed> $settings Plugin settings.
+	 * Register hooks.
 	 */
-	public function __construct( array $settings ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Modules share one constructor signature.
-
+	public function __construct() {
 		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
 		add_action( 'admin_bar_menu', [ $this, 'admin_bar' ], 90 );
 

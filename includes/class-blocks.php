@@ -207,7 +207,7 @@ class Blocks {
 			foreach ( $blocks as $slug => $args ) {
 				if ( ! empty( $args['render_callback'] ) ) {
 					$front = [ 'render_callback' => $args['render_callback'] ];
-					if ( isset( $args['attributes'] ) && is_array( $args['attributes'] ) ) {
+					if ( isset( $args['attributes'] ) ) {
 						$front['attributes'] = $args['attributes'];
 					}
 					register_block_type( "jat-search-intel/{$slug}", $front );
