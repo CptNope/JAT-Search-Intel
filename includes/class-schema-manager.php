@@ -205,7 +205,7 @@ class Schema_Manager {
         if ( is_author() ) {
             $author = get_queried_object();
             if ( $author instanceof \WP_User ) {
-                $node['mainEntity'] = [ '@id' => get_author_posts_url( $author->ID ) . '#author' ];
+                $node['mainEntity'] = [ '@id' => self::author_node_id( (int) $author->ID, $this->settings ) ];
             }
         }
 
@@ -225,6 +225,29 @@ class Schema_Manager {
             $description = $post ? ( Content_Guard::excerpt( $post ) ?: wp_trim_words( wp_strip_all_tags( strip_shortcodes( Content_Guard::content( $post ) ) ), 30, '...' ) ) : '';
         }
         return wp_strip_all_tags( $description );
+    }
+
+    /**
+     * @id for an author's Person node.
+     *
+     * When the site represents a person and this author is that person, the
+     * author is the same entity as the publisher, so both share one @id and
+     * the graph holds one Person instead of two.
+     *
+     * @param int                 $author_id User ID.
+     * @param array<string,mixed> $settings  Plugin settings.
+     * @return string
+     */
+    public static function author_node_id( int $author_id, array $settings ): string {
+        $type = strtolower( (string) ( $settings['knowledge_type'] ?? '' ) );
+        $name = trim( (string) ( $settings['knowledge_name'] ?? '' ) );
+        if ( 'person' === $type && '' !== $name ) {
+            $display = trim( (string) get_the_author_meta( 'display_name', $author_id ) );
+            if ( '' !== $display && 0 === strcasecmp( $display, $name ) ) {
+                return home_url( '/#person' );
+            }
+        }
+        return get_author_posts_url( $author_id ) . '#author';
     }
 
     /**
@@ -532,7 +555,7 @@ class Schema_Manager {
         $author_id = (int) $post->post_author;
         $schema['author'] = [
             '@type' => 'Person',
-            '@id'   => get_author_posts_url( $author_id ) . '#author',
+            '@id'   => self::author_node_id( $author_id, $this->settings ),
             'name'  => get_the_author_meta( 'display_name', $author_id ),
             'url'   => get_author_posts_url( $author_id ),
         ];

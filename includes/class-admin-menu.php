@@ -36,7 +36,8 @@ class Admin_Menu {
 		add_action( 'admin_menu', [ $this, 'regroup' ], 999 );
 		add_filter( 'parent_file', [ $this, 'parent_file' ] );
 		add_filter( 'submenu_file', [ $this, 'submenu_file' ], 10, 2 );
-		add_action( 'in_admin_header', [ $this, 'render_tabs' ] );
+		// Inside #wpbody-content: in_admin_header sits beside the floated admin menu, where the tab bar's clearfix pushed the page down by the menu's height.
+		add_action( 'all_admin_notices', [ $this, 'render_tabs' ], 0 );
 		add_action( 'admin_head', [ $this, 'menu_css' ] );
 	}
 

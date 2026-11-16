@@ -114,6 +114,23 @@ class MigrationTest extends TestCase {
 		$this->assertEquals( 'Yoast description', $si_test_state['post_meta'][1]['_jat_search_intel_description'] );
 	}
 
+	public function test_migrate_covers_the_post_types_that_had_data(): void {
+		global $si_test_state;
+		$si_test_state['options']['jat_search_intel_settings'] = [ 'sitemap_post_types' => [ 'post' ], 'enabled_post_types' => [ 'post' ] ];
+		$si_test_state['posts'][3] = [
+			'ID' => 3, 'post_title' => 'About', 'post_content' => 'Content.',
+			'post_status' => 'publish', 'post_type' => 'page', 'post_author' => 1,
+		];
+		$si_test_state['post_meta'][3]['_yoast_wpseo_title'] = 'About title';
+
+		$result   = $this->migration->migrate( 'yoast' );
+		$settings = $si_test_state['options']['jat_search_intel_settings'];
+
+		$this->assertSame( [ 'page' ], $result['post_types'] );
+		$this->assertSame( [ 'post', 'page' ], $settings['sitemap_post_types'] );
+		$this->assertSame( [ 'post', 'page' ], $settings['enabled_post_types'] );
+	}
+
 	public function test_migrate_does_not_overwrite_by_default(): void {
 		global $si_test_state;
 		$si_test_state['posts'][1] = [
