@@ -161,6 +161,9 @@ class Core {
     /** @var Editor_Tools */
     public $editor_tools;
 
+    /** @var Head_Rest */
+    public $head_rest;
+
     /** @var Meta_Sync */
     public $meta_sync;
 
@@ -282,6 +285,7 @@ class Core {
             'privacy'                 => [ $is_admin, Privacy::class ],
             'migration'               => [ $is_admin, Migration::class ],
             'editor_tools'            => [ $is_admin, Editor_Tools::class, [ 'rest_api_init' => 9, 'admin_bar_menu' => 9 ] ],
+            'head_rest'               => [ false, Head_Rest::class, $on( 'enable_seo' ) ? [ 'rest_api_init' => 9 ] : [] ],
             'robots_txt'              => [ $is_admin || $on( 'enable_robots_editor' ), Robots_Txt::class ],
             'faq_generator'           => [ $is_admin, FAQ_Generator::class ],
             'multisite'               => [ is_multisite(), Multisite::class ],

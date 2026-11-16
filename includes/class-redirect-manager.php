@@ -84,6 +84,8 @@ class Redirect_Manager {
 			add_action( 'wp_ajax_jat_search_intel_export_redirects', [ $this, 'ajax_export_csv' ] );
 			add_action( 'wp_ajax_jat_search_intel_import_redirects', [ $this, 'ajax_import_csv' ] );
 			add_action( 'wp_ajax_jat_search_intel_clear_404_log', [ $this, 'ajax_clear_404_log' ] );
+			add_action( 'wp_ajax_jat_search_intel_export_server_rules', [ $this, 'ajax_export_server_rules' ] );
+			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 		}
 	}
 
@@ -513,9 +515,24 @@ class Redirect_Manager {
 			return false;
 		}
 
-		// Loop detection for non-regex.
-		if ( 'exact' === $match_type && $source === $target ) {
-			return false;
+		// Loop detection for non-regex: itself, or back to itself through other rules.
+		if ( 'exact' === $match_type ) {
+			if ( self::chain_key( self::internal_path( $source ) ) === self::chain_key( self::internal_path( $target ) ) ) {
+				return false;
+			}
+			$id    = (int) ( $data['id'] ?? 0 );
+			$rules = array_filter(
+				$this->all_rules(),
+				static function ( $rule ) use ( $id ) {
+					return (int) ( (array) $rule )['id'] !== $id;
+				}
+			);
+			$rules[] = [ 'id' => 0, 'source_url' => $source, 'target_url' => $target, 'status_code' => $status_code, 'match_type' => 'exact', 'enabled' => 1 ];
+			foreach ( self::find_chains( $rules ) as $chain ) {
+				if ( $chain['loop'] && in_array( self::chain_key( self::internal_path( $source ) ), array_map( [ self::class, 'chain_key' ], array_map( [ self::class, 'internal_path' ], $chain['paths'] ) ), true ) ) {
+					return false;
+				}
+			}
 		}
 
 		$row = [
@@ -637,8 +654,8 @@ class Redirect_Manager {
 			}
 
 			$data = [
-				'source_url'  => $cols[0] ?? '',
-				'target_url'  => $cols[1] ?? '',
+				'source_url'  => self::clean_url_field( (string) ( $cols[0] ?? '' ) ),
+				'target_url'  => self::clean_url_field( (string) ( $cols[1] ?? '' ) ),
 				'status_code' => (int) ( $cols[2] ?? 301 ),
 				'match_type'  => $cols[3] ?? 'exact',
 				'enabled'     => $cols[4] ?? '1',
@@ -654,6 +671,337 @@ class Redirect_Manager {
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Every redirect rule, for chain checks and server exports.
+	 *
+	 * @return array<int,array<string,mixed>>
+	 */
+	protected function all_rules(): array {
+		global $wpdb;
+		$table = $wpdb->prefix . self::TABLE_REDIRECTS;
+		$rows  = $wpdb->get_results( $wpdb->prepare( 'SELECT id, source_url, target_url, status_code, match_type, enabled FROM %i ORDER BY id ASC', $table ), ARRAY_A );
+		return is_array( $rows ) ? $rows : [];
+	}
+
+	/**
+	 * Clean a source or target typed into the form.
+	 *
+	 * Unlike sanitize_text_field() this keeps percent-encoded characters
+	 * (/caf%C3%A9/) and regex syntax, and only drops tags, control
+	 * characters and surrounding space.
+	 *
+	 * @param string $value Unslashed value.
+	 * @return string
+	 */
+	public static function clean_url_field( string $value ): string {
+		$value = wp_strip_all_tags( $value );
+		$value = (string) preg_replace( '/[\x00-\x1F\x7F]/', '', $value );
+		return trim( $value );
+	}
+
+	/**
+	 * The site-relative path a target points to, or '' for another site.
+	 *
+	 * @param string $target Target URL or path.
+	 * @return string
+	 */
+	private static function internal_path( string $target ): string {
+		$target = trim( $target );
+		if ( '' === $target ) {
+			return '';
+		}
+		if ( preg_match( '#^[a-z][a-z0-9+.-]*://#i', $target ) || 0 === strpos( $target, '//' ) ) {
+			$host = (string) wp_parse_url( $target, PHP_URL_HOST );
+			$home = (string) wp_parse_url( home_url(), PHP_URL_HOST );
+			if ( '' === $host || strtolower( $host ) !== strtolower( $home ) ) {
+				return '';
+			}
+			$target = (string) ( wp_parse_url( $target, PHP_URL_PATH ) ?: '/' );
+		}
+		$target = (string) strtok( $target, '?#' );
+		return '/' === substr( $target, 0, 1 ) ? $target : '/' . $target;
+	}
+
+	/**
+	 * Comparable form of a path: lower case, no trailing slash (except "/").
+	 *
+	 * @param string $path Path.
+	 * @return string
+	 */
+	private static function chain_key( string $path ): string {
+		$path = function_exists( 'mb_strtolower' ) ? mb_strtolower( $path ) : strtolower( $path );
+		return '/' === $path ? '/' : rtrim( $path, '/' );
+	}
+
+	/**
+	 * Find redirect chains and loops among enabled exact rules.
+	 *
+	 * A chain is A → B → C: visitors and crawlers take two hops where one
+	 * would do. A loop never ends. Each result lists the paths in order.
+	 *
+	 * @param array<int,array<string,mixed>|object> $rules Rules.
+	 * @return array<int,array{paths:string[],loop:bool}>
+	 */
+	public static function find_chains( array $rules ): array {
+		$map = [];
+		foreach ( $rules as $rule ) {
+			$rule = (array) $rule;
+			if ( empty( $rule['enabled'] ) || 'exact' !== ( $rule['match_type'] ?? 'exact' ) || 410 === (int) ( $rule['status_code'] ?? 301 ) ) {
+				continue;
+			}
+			$target = self::internal_path( (string) ( $rule['target_url'] ?? '' ) );
+			$source = self::chain_key( self::internal_path( (string) ( $rule['source_url'] ?? '' ) ) );
+			if ( '' === $target || '' === $source || isset( $map[ $source ] ) ) {
+				continue;
+			}
+			$map[ $source ] = [ (string) $rule['source_url'], $target ];
+		}
+
+		$targets = [];
+		foreach ( $map as $hop ) {
+			$targets[ self::chain_key( $hop[1] ) ] = true;
+		}
+
+		$chains = [];
+		$seen   = [];
+		foreach ( $map as $start => $hop ) {
+			// Start only where nothing leads in, unless this rule is part of a loop.
+			if ( isset( $targets[ $start ] ) && ! self::in_loop( $start, $map ) ) {
+				continue;
+			}
+			if ( isset( $seen[ $start ] ) ) {
+				continue;
+			}
+			$paths   = [ $hop[0] ];
+			$visited = [ $start => true ];
+			$key     = $start;
+			$loop    = false;
+			while ( isset( $map[ $key ] ) ) {
+				$next    = $map[ $key ][1];
+				$paths[] = $next;
+				$key     = self::chain_key( $next );
+				if ( isset( $visited[ $key ] ) ) {
+					$loop = true;
+					break;
+				}
+				$visited[ $key ] = true;
+			}
+			if ( $loop ) {
+				$seen += $visited;
+			}
+			if ( $loop || count( $paths ) > 2 ) {
+				$chains[] = [
+					'paths' => $paths,
+					'loop'  => $loop,
+				];
+			}
+		}
+		return $chains;
+	}
+
+	/**
+	 * Whether following redirects from a path comes back to it.
+	 *
+	 * @param string                    $start Chain key.
+	 * @param array<string,array<int,string>> $map   Source key => [source, target].
+	 * @return bool
+	 */
+	private static function in_loop( string $start, array $map ): bool {
+		$key   = $start;
+		$steps = 0;
+		while ( isset( $map[ $key ] ) && $steps++ <= count( $map ) ) {
+			$key = self::chain_key( $map[ $key ][1] );
+			if ( $key === $start ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Chains and loops among the saved rules.
+	 *
+	 * @return array<int,array{paths:string[],loop:bool}>
+	 */
+	public function get_chains(): array {
+		return self::find_chains( $this->all_rules() );
+	}
+
+	/**
+	 * Redirect rules for the web server, so they work before WordPress loads.
+	 *
+	 * @param array<int,array<string,mixed>|object> $rules  Rules.
+	 * @param string                                $format apache|nginx.
+	 * @return string
+	 */
+	public static function server_rules( array $rules, string $format ): string {
+		$exact  = [];
+		$prefix = [];
+		$regex  = [];
+		foreach ( $rules as $rule ) {
+			$rule = (array) $rule;
+			if ( empty( $rule['enabled'] ) ) {
+				continue;
+			}
+			$type = (string) ( $rule['match_type'] ?? 'exact' );
+			if ( 'prefix' === $type ) {
+				$prefix[] = $rule;
+			} elseif ( 'regex' === $type ) {
+				$regex[] = $rule;
+			} else {
+				$exact[] = $rule;
+			}
+		}
+		usort(
+			$prefix,
+			static function ( $a, $b ) {
+				return strlen( (string) $b['source_url'] ) <=> strlen( (string) $a['source_url'] );
+			}
+		);
+
+		$date = gmdate( 'Y-m-d' );
+		$out  = [];
+
+		if ( 'nginx' === $format ) {
+			$out[] = '# JAT Search Intel redirects, exported ' . $date . '.';
+			$out[] = '# Paste inside your server { } block, above your other location blocks.';
+			foreach ( [ $exact, $prefix, $regex ] as $i => $group ) {
+				foreach ( $group as $rule ) {
+					$source = (string) $rule['source_url'];
+					if ( 0 === $i ) {
+						$pattern = '^' . self::regex_quote( self::path_only( $source ) ) . '/?$';
+					} elseif ( 1 === $i ) {
+						$pattern = '^' . self::regex_quote( self::path_only( $source ) );
+					} else {
+						$pattern = $source;
+					}
+					$out[] = 'location ~* "' . str_replace( '"', '\"', $pattern ) . '" { ' . self::nginx_return( $rule ) . ' }';
+				}
+			}
+			return implode( "\n", $out ) . "\n";
+		}
+
+		$out[] = '# BEGIN JAT Search Intel redirects (exported ' . $date . ')';
+		$out[] = '<IfModule mod_rewrite.c>';
+		$out[] = 'RewriteEngine On';
+		foreach ( [ $exact, $prefix, $regex ] as $i => $group ) {
+			foreach ( $group as $rule ) {
+				$source = (string) $rule['source_url'];
+				$target = (string) $rule['target_url'];
+				if ( 0 === $i ) {
+					$pattern = '^' . self::regex_quote( self::path_only( $source ) ) . '/?$';
+				} elseif ( 1 === $i ) {
+					$pattern = '^' . self::regex_quote( self::path_only( $source ) );
+				} else {
+					$pattern = $source;
+					// Groups captured by RewriteCond are %1, not $1.
+					$target = (string) preg_replace( '/\$(\d)/', '%$1', $target );
+				}
+				$out[] = 'RewriteCond %{REQUEST_URI} ' . str_replace( ' ', '\ ', $pattern ) . ' [NC]';
+				$code  = (int) ( $rule['status_code'] ?? 301 );
+				$out[] = 410 === $code
+					? 'RewriteRule ^ - [G,L]'
+					: 'RewriteRule ^ ' . str_replace( ' ', '%20', $target ) . ' [R=' . $code . ',L,NE]';
+			}
+		}
+		$out[] = '</IfModule>';
+		$out[] = '# END JAT Search Intel redirects';
+		return implode( "\n", $out ) . "\n";
+	}
+
+	/**
+	 * The path part of a source (drops any scheme and host).
+	 *
+	 * @param string $source Source.
+	 * @return string
+	 */
+	private static function path_only( string $source ): string {
+		if ( preg_match( '#^[a-z][a-z0-9+.-]*://#i', $source ) ) {
+			$source = (string) ( wp_parse_url( $source, PHP_URL_PATH ) ?: '/' );
+		}
+		$source = '/' === substr( $source, 0, 1 ) ? $source : '/' . $source;
+		return '/' === $source ? '/' : rtrim( $source, '/' );
+	}
+
+	/**
+	 * Escape a literal path for a PCRE pattern.
+	 *
+	 * @param string $path Path.
+	 * @return string
+	 */
+	private static function regex_quote( string $path ): string {
+		return preg_quote( $path, '#' );
+	}
+
+	/**
+	 * Nginx "return" for a rule.
+	 *
+	 * @param array<string,mixed> $rule Rule.
+	 * @return string
+	 */
+	private static function nginx_return( array $rule ): string {
+		$code = (int) ( $rule['status_code'] ?? 301 );
+		if ( 410 === $code ) {
+			return 'return 410;';
+		}
+		$target = str_replace( [ '"', ' ' ], [ '\"', '%20' ], (string) $rule['target_url'] );
+		return 'return ' . $code . ' "' . $target . '";';
+	}
+
+	/**
+	 * AJAX: download the rules for Apache (.htaccess) or Nginx.
+	 */
+	public function ajax_export_server_rules(): void {
+		check_ajax_referer( 'si_redirect_nonce', 'nonce' );
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You are not allowed to export redirects.', 'jat-search-intel' ), '', [ 'response' => 403 ] );
+		}
+
+		$format = isset( $_REQUEST['format'] ) && 'nginx' === sanitize_key( wp_unslash( $_REQUEST['format'] ) ) ? 'nginx' : 'apache';
+		$name   = 'nginx' === $format ? 'jat-search-intel-redirects.conf' : 'jat-search-intel-redirects.htaccess';
+
+		header( 'Content-Type: text/plain; charset=utf-8' );
+		header( 'Content-Disposition: attachment; filename=' . $name );
+		echo self::server_rules( $this->all_rules(), $format ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text file download, not HTML.
+		exit;
+	}
+
+	/**
+	 * Load the redirects page script.
+	 *
+	 * @param string $hook Admin page hook.
+	 */
+	public function enqueue_assets( $hook ): void {
+		if ( false === strpos( (string) $hook, 'jat-search-intel-redirects' ) ) {
+			return;
+		}
+		wp_enqueue_script(
+			'jat-search-intel-redirects',
+			JAT_SEARCH_INTEL_URL . 'admin/js/redirects.js',
+			[],
+			defined( 'JAT_SEARCH_INTEL_VERSION' ) ? JAT_SEARCH_INTEL_VERSION : '1',
+			true
+		);
+		wp_localize_script(
+			'jat-search-intel-redirects',
+			'jatSearchIntelRedirects',
+			[
+				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+				'nonce'   => wp_create_nonce( 'si_redirect_nonce' ),
+				'i18n'    => [
+					'add'           => __( 'Add Redirect', 'jat-search-intel' ),
+					'edit'          => __( 'Edit Redirect', 'jat-search-intel' ),
+					'confirmDelete' => __( 'Delete this redirect?', 'jat-search-intel' ),
+					'confirmClear'  => __( 'Clear the whole 404 log?', 'jat-search-intel' ),
+					'saveFailed'    => __( 'The redirect was not saved. Check the source, and that it does not point back to itself.', 'jat-search-intel' ),
+					'failed'        => __( 'That did not work. Reload the page and try again.', 'jat-search-intel' ),
+					/* translators: 1: imported, 2: skipped, 3: errors */
+					'imported'      => __( 'Imported %1$d, skipped %2$d, failed %3$d.', 'jat-search-intel' ),
+				],
+			]
+		);
 	}
 
 	/**
@@ -757,9 +1105,24 @@ class Redirect_Manager {
 		$total    = $result['total'];
 		$items    = $result['items'];
 		$pages    = (int) ceil( $total / 25 );
+		$chains   = $total <= 5000 ? $this->get_chains() : [];
 
 		?>
 		<div class="si-redirects-wrap" style="margin-top: 20px;">
+			<?php if ( $chains ) : ?>
+				<div class="notice notice-warning inline">
+					<p><strong><?php esc_html_e( 'Some redirects lead to other redirects.', 'jat-search-intel' ); ?></strong>
+					<?php esc_html_e( 'Point the first URL straight at the last one so visitors and search engines take one hop. Loops never reach a page: fix them first.', 'jat-search-intel' ); ?></p>
+					<ul style="list-style:disc;margin-left:20px;">
+						<?php foreach ( array_slice( $chains, 0, 20 ) as $chain ) : ?>
+							<li>
+								<?php echo $chain['loop'] ? '<strong>' . esc_html__( 'Loop:', 'jat-search-intel' ) . '</strong> ' : ''; ?>
+								<code><?php echo esc_html( implode( ' → ', $chain['paths'] ) ); ?></code>
+							</li>
+						<?php endforeach; ?>
+					</ul>
+				</div>
+			<?php endif; ?>
 			<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
 				<form method="get" style="display:flex; gap:8px; align-items:center;">
 					<input type="hidden" name="page" value="jat-search-intel-redirects" />
@@ -770,6 +1133,8 @@ class Redirect_Manager {
 				<div style="display:flex; gap:8px;">
 					<button type="button" class="button" id="si-import-csv"><?php esc_html_e( 'Import CSV', 'jat-search-intel' ); ?></button>
 					<button type="button" class="button" id="si-export-csv"><?php esc_html_e( 'Export CSV', 'jat-search-intel' ); ?></button>
+					<button type="button" class="button si-export-server" data-format="apache"><?php esc_html_e( 'Export .htaccess', 'jat-search-intel' ); ?></button>
+					<button type="button" class="button si-export-server" data-format="nginx"><?php esc_html_e( 'Export Nginx', 'jat-search-intel' ); ?></button>
 					<button type="button" class="button button-primary" id="si-add-redirect"><?php esc_html_e( 'Add Redirect', 'jat-search-intel' ); ?></button>
 				</div>
 			</div>
@@ -791,7 +1156,13 @@ class Redirect_Manager {
 					<tr><td colspan="7"><?php esc_html_e( 'No redirect rules found.', 'jat-search-intel' ); ?></td></tr>
 				<?php else : ?>
 					<?php foreach ( $items as $item ) : ?>
-						<tr data-id="<?php echo esc_attr( $item->id ); ?>">
+						<tr data-id="<?php echo esc_attr( $item->id ); ?>"
+							data-source="<?php echo esc_attr( $item->source_url ); ?>"
+							data-target="<?php echo esc_attr( $item->target_url ); ?>"
+							data-code="<?php echo esc_attr( $item->status_code ); ?>"
+							data-type="<?php echo esc_attr( $item->match_type ); ?>"
+							data-note="<?php echo esc_attr( $item->note ?? '' ); ?>"
+							data-enabled="<?php echo esc_attr( empty( $item->enabled ) ? '0' : '1' ); ?>">
 							<td><code><?php echo esc_html( $item->source_url ); ?></code></td>
 							<td><?php echo $item->target_url ? esc_html( $item->target_url ) : '<em>—</em>'; ?></td>
 							<td><span class="si-badge si-badge-<?php echo esc_attr( $item->status_code ); ?>"><?php echo esc_html( $item->status_code ); ?></span></td>
@@ -875,7 +1246,7 @@ class Redirect_Manager {
 			</div>
 		</div>
 
-		<input type="hidden" id="si-import-file" style="display:none" />
+		<input type="file" id="si-import-file" accept=".csv,text/csv" hidden />
 		<?php
 		wp_nonce_field( 'si_redirect_nonce', 'si_redirect_nonce_field' );
 	}
@@ -955,8 +1326,8 @@ class Redirect_Manager {
 
 		$data = [
 			'id'          => absint( $_POST['id'] ?? 0 ),
-			'source_url'  => sanitize_text_field( wp_unslash( $_POST['source_url'] ?? '' ) ),
-			'target_url'  => sanitize_text_field( wp_unslash( $_POST['target_url'] ?? '' ) ),
+			'source_url'  => self::clean_url_field( (string) wp_unslash( $_POST['source_url'] ?? '' ) ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized by clean_url_field(), which keeps %xx and regex syntax.
+			'target_url'  => self::clean_url_field( (string) wp_unslash( $_POST['target_url'] ?? '' ) ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized by clean_url_field().
 			'status_code' => absint( $_POST['status_code'] ?? 301 ),
 			'match_type'  => sanitize_key( $_POST['match_type'] ?? 'exact' ),
 			'enabled'     => ! empty( $_POST['enabled'] ),
