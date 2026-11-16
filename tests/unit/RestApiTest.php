@@ -283,6 +283,18 @@ class RestApiTest extends TestCase {
         $this->assertFalse( $saved['enable_seo'] );
     }
 
+    public function test_update_settings_keeps_title_template_variables(): void {
+        $request = new \WP_REST_Request( 'PUT', '/jat-search-intel/v1/settings' );
+        $request->set_json_params( [
+            'title_templates' => [ 'category' => '%category% %sep% %sitename%', 'archive' => '%date% %sep% %search_query%' ],
+        ] );
+
+        $data = $this->rest_api->update_settings( $request )->get_data();
+
+        $this->assertSame( '%category% %sep% %sitename%', $data['updated']['title_templates']['category'] );
+        $this->assertSame( '%date% %sep% %search_query%', $data['updated']['title_templates']['archive'] );
+    }
+
     public function test_update_settings_rejects_unknown_keys(): void {
         $request = new \WP_REST_Request( 'PUT', '/jat-search-intel/v1/settings' );
         $request->set_json_params( [

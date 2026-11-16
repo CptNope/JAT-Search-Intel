@@ -10,6 +10,7 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ### Fixed
 - Sitemap cache keys include a hash of the sitemap settings, so adding a post type takes effect at once (also with a persistent object cache). Found when Projects and Services were added on jeremyanderson.tech and /sitemap.xml kept the old list.
+- `PUT /settings` sanitized every string with `sanitize_text_field()`, which strips `%ca`, `%da` and `%se` as URL octets: saving title templates turned `%category%` into `tegory%`. Templates now use `Title_Engine::sanitize_template()`, nested arrays use `map_deep()`, and `*_url`/`*_image`/`*_logo` keys use `esc_url_raw()`.
 - AIOSEO migration maps `#archive_date`, and skips a converted template that is left with only site-wide variables (it would give every archive the site name as its title).
 
 ---

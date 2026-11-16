@@ -264,6 +264,7 @@ Sends an HTTP HEAD request to each external URL linked from your content to chec
 
 = 3.8.4 =
 * Fixed: changing which post types or taxonomies are in the sitemap shows at once, instead of after the 12-hour sitemap cache expires.
+* Fixed: saving settings through the REST API no longer breaks title templates (%category%, %date% and %search_query% lost characters) or nested settings such as Local Business locations.
 * Fixed: migrating from All in One SEO no longer turns a date or author archive title into just the site name when it uses a variable this plugin doesn't have; #archive_date is now converted.
 
 = 3.8.3 =
