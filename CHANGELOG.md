@@ -6,6 +6,11 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.8.16] — 2026-11-16
+
+### Fixed
+- The SEO "focus keyword in first paragraph" check and `keyword_data.in_first_para` matched the first `<p>` even when it was empty, such as a block theme's subtitle paragraph bound to a field, so pages that open with the keyword failed. `Content_Analyzer::first_paragraph()` returns the first paragraph with text.
+
 ## [3.8.15] — 2026-11-16
 
 ### Fixed

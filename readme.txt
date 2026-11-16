@@ -4,7 +4,7 @@ Tags: seo, schema, llms-txt, ai-search, redirects
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.8.15
+Stable tag: 3.8.16
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -262,6 +262,9 @@ Sends an HTTP HEAD request to each external URL linked from your content to chec
 
 == Changelog ==
 
+= 3.8.16 =
+* Fixed: the "focus keyword in first paragraph" check read the first paragraph tag even when it was empty (a subtitle line or spacer), so it failed on pages that open with the keyword. It now uses the first paragraph with text.
+
 = 3.8.15 =
 * Fixed: "Rescore all" (Tools page, REST API and WP-CLI) never saved new scores, so scores stayed at whatever they were when each page was last saved. It now saves them, and it reads the same content as saving a post does (page builders and server-rendered blocks included).
 
@@ -421,6 +424,9 @@ Every feature other SEO plugins sell in their premium plans, free.
 Earlier releases are listed in CHANGELOG.md in the development repository.
 
 == Upgrade Notice ==
+
+= 3.8.16 =
+The first-paragraph keyword check now skips empty paragraphs.
 
 = 3.8.15 =
 Rescoring all pages now saves the new scores. Run it once after updating.
