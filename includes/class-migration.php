@@ -569,7 +569,7 @@ class Migration {
 		if ( empty( $additional ) && ! empty( $keyphrases['additional'] ) && is_array( $keyphrases['additional'] ) ) {
 			$additional = $keyphrases['additional'];
 		}
-		foreach ( (array) $additional as $item ) {
+		foreach ( $additional as $item ) {
 			$phrase = is_array( $item ) ? ( $item['keyphrase'] ?? $item['keyword'] ?? '' ) : $item;
 			$phrase = trim( (string) $phrase );
 			if ( '' !== $phrase ) {
@@ -1202,7 +1202,7 @@ class Migration {
 		}
 
 		$source    = ( isset( $_POST['source'] ) ? sanitize_key( wp_unslash( $_POST['source'] ) ) : '' );
-		$overwrite = ! empty( $_POST['overwrite'] ) && '0' !== $_POST['overwrite'];
+		$overwrite = ! empty( $_POST['overwrite'] );
 
 		wp_send_json_success( $this->migrate( $source, $overwrite ) );
 	}

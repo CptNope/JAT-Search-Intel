@@ -187,7 +187,7 @@ class Head_Rest {
 	/**
 	 * This plugin's wp_head callbacks, in priority order.
 	 *
-	 * @return callable[]
+	 * @return array<int,array{0:object|string,1:string}>
 	 */
 	private static function own_head_callbacks(): array {
 		global $wp_filter;
@@ -201,10 +201,10 @@ class Head_Rest {
 		foreach ( $priorities as $callbacks ) {
 			foreach ( $callbacks as $item ) {
 				$fn = $item['function'] ?? null;
-				if ( is_array( $fn ) && isset( $fn[0] ) ) {
-					$class = is_object( $fn[0] ) ? get_class( $fn[0] ) : (string) $fn[0];
-					if ( 0 === strpos( $class, __NAMESPACE__ . '\\' ) ) {
-						$out[] = $fn;
+				if ( is_array( $fn ) && isset( $fn[0], $fn[1] ) && is_string( $fn[1] ) && ( is_object( $fn[0] ) || is_string( $fn[0] ) ) ) {
+					$class = is_object( $fn[0] ) ? get_class( $fn[0] ) : $fn[0];
+					if ( 0 === strpos( $class, __NAMESPACE__ . '\\' ) && is_callable( [ $fn[0], $fn[1] ] ) ) {
+						$out[] = [ $fn[0], $fn[1] ];
 					}
 				}
 			}

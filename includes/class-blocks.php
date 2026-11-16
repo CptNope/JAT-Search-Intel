@@ -206,7 +206,11 @@ class Blocks {
 		if ( ! is_admin() ) {
 			foreach ( $blocks as $slug => $args ) {
 				if ( ! empty( $args['render_callback'] ) ) {
-					register_block_type( "jat-search-intel/{$slug}", array_intersect_key( $args, [ 'render_callback' => 1, 'attributes' => 1 ] ) );
+					$front = [ 'render_callback' => $args['render_callback'] ];
+					if ( isset( $args['attributes'] ) && is_array( $args['attributes'] ) ) {
+						$front['attributes'] = $args['attributes'];
+					}
+					register_block_type( "jat-search-intel/{$slug}", $front );
 				}
 			}
 			register_block_type( 'jat-search-intel/preferred-source', self::preferred_source_args() );

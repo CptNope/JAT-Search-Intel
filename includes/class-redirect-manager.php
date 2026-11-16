@@ -529,8 +529,14 @@ class Redirect_Manager {
 			);
 			$rules[] = [ 'id' => 0, 'source_url' => $source, 'target_url' => $target, 'status_code' => $status_code, 'match_type' => 'exact', 'enabled' => 1 ];
 			foreach ( self::find_chains( $rules ) as $chain ) {
-				if ( $chain['loop'] && in_array( self::chain_key( self::internal_path( $source ) ), array_map( [ self::class, 'chain_key' ], array_map( [ self::class, 'internal_path' ], $chain['paths'] ) ), true ) ) {
-					return false;
+				if ( ! $chain['loop'] ) {
+					continue;
+				}
+				$own = self::chain_key( self::internal_path( $source ) );
+				foreach ( $chain['paths'] as $path ) {
+					if ( self::chain_key( self::internal_path( $path ) ) === $own ) {
+						return false;
+					}
 				}
 			}
 		}
@@ -718,7 +724,7 @@ class Redirect_Manager {
 			if ( '' === $host || strtolower( $host ) !== strtolower( $home ) ) {
 				return '';
 			}
-			$target = (string) ( wp_parse_url( $target, PHP_URL_PATH ) ?: '/' );
+			$target = wp_parse_url( $target, PHP_URL_PATH ) ?: '/';
 		}
 		$target = (string) strtok( $target, '?#' );
 		return '/' === substr( $target, 0, 1 ) ? $target : '/' . $target;
@@ -919,7 +925,7 @@ class Redirect_Manager {
 	 */
 	private static function path_only( string $source ): string {
 		if ( preg_match( '#^[a-z][a-z0-9+.-]*://#i', $source ) ) {
-			$source = (string) ( wp_parse_url( $source, PHP_URL_PATH ) ?: '/' );
+			$source = wp_parse_url( $source, PHP_URL_PATH ) ?: '/';
 		}
 		$source = '/' === substr( $source, 0, 1 ) ? $source : '/' . $source;
 		return '/' === $source ? '/' : rtrim( $source, '/' );

@@ -224,14 +224,12 @@ class Schema_Types {
 		];
 
 		// Steps.
-		if ( $steps ) {
-			$schema['recipeInstructions'] = [];
-			foreach ( $steps as $step ) {
-				$schema['recipeInstructions'][] = [
-					'@type' => 'HowToStep',
-					'text'  => sanitize_text_field( $step ),
-				];
-			}
+		$schema['recipeInstructions'] = [];
+		foreach ( $steps as $step ) {
+			$schema['recipeInstructions'][] = [
+				'@type' => 'HowToStep',
+				'text'  => sanitize_text_field( $step ),
+			];
 		}
 
 		// Optional fields.
@@ -707,9 +705,14 @@ class Schema_Types {
 		if ( ! is_array( $value ) ) {
 			return [];
 		}
-		return array_values( array_filter( array_map( static function ( $item ) {
-			return is_scalar( $item ) ? trim( (string) $item ) : '';
-		}, $value ), 'strlen' ) );
+		$lines = [];
+		foreach ( $value as $item ) {
+			$line = is_scalar( $item ) ? trim( (string) $item ) : '';
+			if ( '' !== $line ) {
+				$lines[] = $line;
+			}
+		}
+		return $lines;
 	}
 
 	/**

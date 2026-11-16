@@ -22,14 +22,10 @@ class Editor_Tools {
 	private const NONCE_FIELD  = 'jat_search_intel_inline_nonce';
 	private const COLUMN       = 'si_scores';
 
-	/** @var array<string,mixed> */
-	private $settings;
-
 	/**
 	 * @param array<string,mixed> $settings Plugin settings.
 	 */
-	public function __construct( array $settings ) {
-		$this->settings = $settings;
+	public function __construct( array $settings ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Modules share one constructor signature.
 
 		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
 		add_action( 'admin_bar_menu', [ $this, 'admin_bar' ], 90 );
@@ -277,14 +273,15 @@ class Editor_Tools {
 			}
 		}
 
-		$bar->add_node(
-			[
-				'id'    => 'jat-search-intel',
-				'title' => esc_html( $title ),
-				'href'  => current_user_can( 'manage_options' ) ? admin_url( 'admin.php?page=' . Readiness::PAGE_SLUG ) : false,
-				'meta'  => [ 'title' => __( 'JAT Search Intel', 'jat-search-intel' ) ],
-			]
-		);
+		$root = [
+			'id'    => 'jat-search-intel',
+			'title' => esc_html( $title ),
+			'meta'  => [ 'title' => __( 'JAT Search Intel', 'jat-search-intel' ) ],
+		];
+		if ( current_user_can( 'manage_options' ) ) {
+			$root['href'] = admin_url( 'admin.php?page=' . Readiness::PAGE_SLUG );
+		}
+		$bar->add_node( $root );
 
 		if ( $post_id && current_user_can( 'edit_post', $post_id ) ) {
 			$url = get_permalink( $post_id );
@@ -308,7 +305,7 @@ class Editor_Tools {
 						'parent' => 'jat-search-intel',
 						'id'     => 'jat-search-intel-edit',
 						'title'  => esc_html__( 'Edit SEO for this page', 'jat-search-intel' ),
-						'href'   => get_edit_post_link( $post_id ),
+						'href'   => (string) get_edit_post_link( $post_id ),
 					]
 				);
 			}
