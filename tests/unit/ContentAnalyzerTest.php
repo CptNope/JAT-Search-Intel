@@ -44,6 +44,16 @@ class ContentAnalyzerTest extends TestCase {
         $this->assertArrayHasKey( 'content_checks', $result );
     }
 
+    public function test_first_paragraph_skips_empty_paragraphs(): void {
+        $html = '<p class="subtitle"></p><p>&nbsp;</p><p>Cybersecurity consulting is <strong>hands-on</strong> work.</p><p>Later.</p>';
+        $this->assertSame( 'Cybersecurity consulting is hands-on work.', Content_Analyzer::first_paragraph( str_replace( '&nbsp;', '', $html ) ) );
+        $this->assertSame( '', Content_Analyzer::first_paragraph( '<div>No paragraphs</div>' ) );
+
+        $result = $this->analyzer->analyze( 1, '<p></p><p>Cybersecurity consulting by the hour. ' . str_repeat( 'More words here. ', 30 ) . '</p>', 'Cybersecurity consulting', 'cybersecurity consulting', 'd' );
+        $this->assertContains( 'Focus keyword in first paragraph', array_column( $result['seo_score']['checks'], 'label' ) );
+        $this->assertTrue( $result['keyword_data']['in_first_para'] );
+    }
+
     public function test_featured_image_with_alt_counts_as_an_image(): void {
         global $si_test_state;
         $content = '<p>' . str_repeat( 'Plain words about a project. ', 80 ) . '</p>';

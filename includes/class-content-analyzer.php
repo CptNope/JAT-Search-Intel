@@ -274,10 +274,7 @@ class Content_Analyzer {
 
         // 6. Focus keyword in first paragraph (10 pts)
         if ( $keyword ) {
-            $first_para = '';
-            if ( preg_match( '/<p[^>]*>(.*?)<\/p>/is', $content, $m ) ) {
-                $first_para = wp_strip_all_tags( $m[1] );
-            }
+            $first_para = self::first_paragraph( $content );
             if ( $first_para && stripos( $first_para, $keyword ) !== false ) {
                 $score += 10;
                 $checks[] = [ 'pass' => true, 'label' => __( 'Focus keyword in first paragraph', 'jat-search-intel' ) ];
@@ -357,6 +354,27 @@ class Content_Analyzer {
             'max'    => 100,
             'checks' => $checks,
         ];
+    }
+
+    /**
+     * Text of the first paragraph that has words in it.
+     *
+     * Block themes often open with an empty paragraph (a subtitle bound to a
+     * field, a spacer), which is not the paragraph a reader sees first.
+     *
+     * @param string $content HTML.
+     * @return string Plain text, or '' when there is no paragraph with text.
+     */
+    public static function first_paragraph( string $content ): string {
+        if ( preg_match_all( '/<p[^>]*>(.*?)<\/p>/is', $content, $matches ) ) {
+            foreach ( $matches[1] as $inner ) {
+                $text = trim( html_entity_decode( wp_strip_all_tags( $inner ), ENT_QUOTES, 'UTF-8' ) );
+                if ( '' !== $text ) {
+                    return $text;
+                }
+            }
+        }
+        return '';
     }
 
     /**
@@ -582,11 +600,8 @@ class Content_Analyzer {
         $in_title       = stripos( $title, $keyword ) !== false;
         $in_description = $description && stripos( $description, $keyword ) !== false;
         $in_h2          = (bool) preg_match( '/<h2[^>]*>.*?' . preg_quote( $keyword, '/' ) . '.*?<\/h2>/is', $content );
-        $in_first_para  = false;
-
-        if ( preg_match( '/<p[^>]*>(.*?)<\/p>/is', $content, $m ) ) {
-            $in_first_para = stripos( $m[1], $keyword ) !== false;
-        }
+        $first_para     = self::first_paragraph( $content );
+        $in_first_para  = '' !== $first_para && stripos( $first_para, $keyword ) !== false;
 
         // Check URL slug
         $in_slug = false;
