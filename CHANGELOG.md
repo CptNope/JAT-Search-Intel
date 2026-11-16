@@ -6,6 +6,11 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.8.8] — 2026-11-16
+
+### Fixed
+- Index Status inspected posts whose permalink is a fragment of another page (`/service/care-plans/#guardian`). Google reports those as "URL is unknown" for ever, which inflated the not-indexed count (22 of 49 on jeremyanderson.tech) and spent inspection quota. `Index_Status::inspectable()` skips any post without a URL of its own (`Sitemap::own_url()`), in the batch, the report and `check_post()`.
+
 ## [3.8.7] — 2026-11-16
 
 ### Fixed

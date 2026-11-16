@@ -149,8 +149,8 @@ class Index_Status {
 	 * @return array<string,string>|\WP_Error
 	 */
 	public function check_post( int $post_id ) {
-		$url = get_permalink( $post_id );
-		if ( ! $url ) {
+		$url = Sitemap::own_url( $post_id );
+		if ( '' === $url ) {
 			return new \WP_Error( 'jsi_url', __( 'This post has no public URL.', 'jat-search-intel' ) );
 		}
 		$result = $this->inspect( $url );
@@ -158,6 +158,20 @@ class Index_Status {
 			update_post_meta( $post_id, self::META_KEY, $result );
 		}
 		return $result;
+	}
+
+	/**
+	 * Whether a post has a URL of its own that Google can index.
+	 *
+	 * Posts whose permalink points at a section of another page
+	 * (/service/care-plans/#guardian) are part of that page, so Google
+	 * reports them as "URL is unknown" for ever. They are not checked.
+	 *
+	 * @param int $post_id Post ID.
+	 * @return bool
+	 */
+	public static function inspectable( int $post_id ): bool {
+		return '' !== Sitemap::own_url( $post_id );
 	}
 
 	/**
@@ -221,8 +235,8 @@ class Index_Status {
 		];
 
 		// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Small, bounded batches.
-		$never = get_posts( $base + [ 'posts_per_page' => $limit, 'orderby' => 'modified', 'order' => 'DESC', 'meta_query' => [ 'relation' => 'AND', $not_noindex, [ 'key' => self::META_KEY, 'compare' => 'NOT EXISTS' ] ] ] );
-		$never = array_map( 'intval', $never );
+		$never = get_posts( $base + [ 'posts_per_page' => 500, 'orderby' => 'modified', 'order' => 'DESC', 'meta_query' => [ 'relation' => 'AND', $not_noindex, [ 'key' => self::META_KEY, 'compare' => 'NOT EXISTS' ] ] ] );
+		$never = array_slice( array_values( array_filter( array_map( 'intval', $never ), [ self::class, 'inspectable' ] ) ), 0, $limit );
 		if ( count( $never ) >= $limit ) {
 			return $never;
 		}
@@ -231,7 +245,7 @@ class Index_Status {
 		// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Small, bounded batches.
 		$checked = get_posts( $base + [ 'posts_per_page' => 500, 'meta_query' => [ 'relation' => 'AND', $not_noindex, [ 'key' => self::META_KEY, 'compare' => 'EXISTS' ] ] ] );
 		$ages    = [];
-		foreach ( array_map( 'intval', $checked ) as $id ) {
+		foreach ( array_filter( array_map( 'intval', $checked ), [ self::class, 'inspectable' ] ) as $id ) {
 			$ages[ $id ] = (string) ( self::get( $id )['checked'] ?? '' );
 		}
 		asort( $ages );
@@ -425,7 +439,7 @@ class Index_Status {
 		);
 		$rows  = [];
 		$order = [ 'error' => 0, 'excluded' => 1, 'unknown' => 2, 'indexed' => 3 ];
-		foreach ( array_map( 'intval', $ids ) as $id ) {
+		foreach ( array_filter( array_map( 'intval', $ids ), [ self::class, 'inspectable' ] ) as $id ) {
 			$result               = self::get( $id );
 			list( $state, $label ) = self::describe( $result );
 			$rows[]               = [ 'id' => $id, 'result' => $result, 'state' => $state, 'label' => $label ];
