@@ -24,6 +24,12 @@ class Core_Web_Vitals {
     /** @var string Post meta key for CWV data. */
     private const CWV_META_KEY = '_jat_search_intel_cwv';
 
+    /** Pages tested per manual run (each test takes 10 to 20 seconds). */
+    public const MANUAL_BATCH = 8;
+
+    /** Pages tested per daily cron run. */
+    public const CRON_BATCH = 15;
+
     /** @var string Option key for site-wide CWV history. */
     private const SITE_CWV_KEY = 'jat_search_intel_site_cwv_history';
 
@@ -45,11 +51,14 @@ class Core_Web_Vitals {
             return;
         }
 
-        // Weekly CWV scan cron.
-        add_action( 'jat_search_intel_cwv_scan', [ $this, 'run_scan' ] );
+        // Daily CWV scan cron: a small batch each day, stalest pages first.
+        add_action( 'jat_search_intel_cwv_scan', [ $this, 'run_scheduled_scan' ] );
 
+        if ( 'weekly' === wp_get_schedule( 'jat_search_intel_cwv_scan' ) ) {
+            wp_clear_scheduled_hook( 'jat_search_intel_cwv_scan' );
+        }
         if ( ! wp_next_scheduled( 'jat_search_intel_cwv_scan' ) ) {
-            wp_schedule_event( time(), 'weekly', 'jat_search_intel_cwv_scan' );
+            wp_schedule_event( time(), 'daily', 'jat_search_intel_cwv_scan' );
         }
 
         if ( is_admin() ) {
@@ -86,8 +95,10 @@ class Core_Web_Vitals {
         if ( ! $this->is_configured() ) {
             wp_send_json_error( [ 'message' => 'PSI API key not configured.' ] );
         }
-        $stats = $this->run_scan();
-        wp_send_json_success( [ 'message' => 'Scanned ' . (int) $stats['scanned'] . ' posts (' . (int) $stats['success'] . ' OK, ' . (int) $stats['failed'] . ' failed). Reload to see results.' ] );
+        // Each PageSpeed test takes 10 to 20 seconds, so a manual run stays small
+        // enough to finish inside one request. Click again to continue.
+        $stats = $this->run_scan( self::MANUAL_BATCH );
+        wp_send_json_success( [ 'message' => 'Scanned ' . (int) $stats['scanned'] . ' pages (' . (int) $stats['success'] . ' OK, ' . (int) $stats['failed'] . ' failed). ' . (int) $stats['remaining'] . ' never scanned yet. Reload to see results, or run again to continue.' ] );
     }
 
     /*----------------------------------------------------------------------
@@ -192,8 +203,8 @@ class Core_Web_Vitals {
      * @return array CWV result.
      */
     public function check_post( int $post_id, string $strategy = 'mobile' ): array {
-        $url = get_permalink( $post_id );
-        if ( ! $url ) {
+        $url = Sitemap::own_url( $post_id );
+        if ( '' === $url ) {
             return [ 'success' => false, 'error' => 'Invalid post.' ];
         }
 
@@ -334,7 +345,7 @@ class Core_Web_Vitals {
      */
     public function get_correlation_report( int $limit = 50 ): array {
         $post_ids = get_posts( [
-            'post_type'   => 'any',
+            'post_type'   => $this->post_types(),
             'post_status' => 'publish',
             'fields'      => 'ids',
             'numberposts' => $limit,
@@ -345,7 +356,6 @@ class Core_Web_Vitals {
         foreach ( $post_ids as $pid ) {
             $pid    = (int) $pid;
             $cwv    = $this->get_latest_cwv( $pid );
-            $scores = get_post_meta( $pid, '_jat_search_intel_scores', true );
 
             if ( empty( $cwv ) ) {
                 continue;
@@ -361,11 +371,19 @@ class Core_Web_Vitals {
                 'lcp_class'  => $this->classify_metric( 'lcp', $cwv['lcp'] ?? null ),
                 'cls_class'  => $this->classify_metric( 'cls', $cwv['cls'] ?? null ),
                 'inp_class'  => $this->classify_metric( 'inp', $cwv['inp'] ?? null ),
-                'seo_score'  => is_array( $scores ) ? (float) ( $scores['seo'] ?? 0 ) : 0.0,
-                'aeo_score'  => is_array( $scores ) ? (float) ( $scores['aeo'] ?? 0 ) : 0.0,
-                'geo_score'  => is_array( $scores ) ? (float) ( $scores['geo'] ?? 0 ) : 0.0,
+                'seo_score'  => (float) get_post_meta( $pid, '_jat_search_intel_seo_score', true ),
+                'aeo_score'  => (float) get_post_meta( $pid, '_jat_search_intel_aeo_score', true ),
+                'geo_score'  => (float) get_post_meta( $pid, '_jat_search_intel_geo_score', true ),
             ];
         }
+
+        // Worst performance first.
+        usort(
+            $report,
+            static function ( array $a, array $b ): int {
+                return (float) ( $a['perf_score'] ?? 101 ) <=> (float) ( $b['perf_score'] ?? 101 );
+            }
+        );
 
         return $report;
     }
@@ -381,23 +399,16 @@ class Core_Web_Vitals {
      * @return array Scan stats.
      */
     public function run_scan( int $limit = 20 ): array {
-        $stats = [ 'scanned' => 0, 'success' => 0, 'failed' => 0 ];
+        $stats = [ 'scanned' => 0, 'success' => 0, 'failed' => 0, 'remaining' => 0 ];
 
         if ( ! $this->is_configured() ) {
             return $stats;
         }
 
-        $post_ids = get_posts( [
-            'post_type'   => 'any',
-            'post_status' => 'publish',
-            'fields'      => 'ids',
-            'numberposts' => $limit,
-            'orderby'     => 'rand',
-        ] );
-
-        foreach ( $post_ids as $pid ) {
+        $queue = $this->scan_queue();
+        foreach ( array_slice( $queue['ids'], 0, max( 0, $limit ) ) as $pid ) {
             $stats['scanned']++;
-            $result = $this->check_post( (int) $pid );
+            $result = $this->check_post( $pid );
 
             if ( $result['success'] ?? false ) {
                 $stats['success']++;
@@ -405,8 +416,64 @@ class Core_Web_Vitals {
                 $stats['failed']++;
             }
         }
+        $stats['remaining'] = max( 0, $queue['never'] - $stats['success'] );
 
         return $stats;
+    }
+
+    /**
+     * Daily cron run.
+     */
+    public function run_scheduled_scan(): void {
+        $this->run_scan( self::CRON_BATCH );
+    }
+
+    /**
+     * Pages to scan, in order: never scanned first, then the oldest results.
+     *
+     * Only published, indexable posts of the enabled types that have a URL
+     * of their own (not a section of another page).
+     *
+     * @return array{ids:int[],never:int}
+     */
+    public function scan_queue(): array {
+        $ids = get_posts( [
+            'post_type'     => $this->post_types(),
+            'post_status'   => 'publish',
+            'has_password'  => false,
+            'fields'        => 'ids',
+            'numberposts'   => 500,
+            'orderby'       => 'modified',
+            'order'         => 'DESC',
+            'no_found_rows' => true,
+        ] );
+
+        $never = [];
+        $dated = [];
+        foreach ( array_map( 'intval', (array) $ids ) as $pid ) {
+            if ( '1' === (string) get_post_meta( $pid, '_jat_search_intel_noindex', true ) || '' === Sitemap::own_url( $pid ) ) {
+                continue;
+            }
+            $latest = $this->get_latest_cwv( $pid );
+            if ( empty( $latest['date'] ) ) {
+                $never[] = $pid;
+            } else {
+                $dated[ $pid ] = (string) $latest['date'];
+            }
+        }
+        asort( $dated );
+
+        return [ 'ids' => array_merge( $never, array_keys( $dated ) ), 'never' => count( $never ) ];
+    }
+
+    /**
+     * Post types to test.
+     *
+     * @return string[]
+     */
+    private function post_types(): array {
+        $types = (array) ( $this->settings['enabled_post_types'] ?? [ 'post', 'page' ] );
+        return array_values( array_filter( array_map( 'strval', $types ), 'post_type_exists' ) ) ?: [ 'post', 'page' ];
     }
 
     /*----------------------------------------------------------------------
@@ -431,7 +498,7 @@ class Core_Web_Vitals {
      * Render the CWV dashboard admin page.
      */
     public function render_admin_page(): void {
-        $report  = $this->get_correlation_report( 50 );
+        $report  = $this->get_correlation_report( 500 );
         $api_key = $this->get_api_key();
         $nonce   = wp_create_nonce( 'si_cwv_settings' );
         ?>
@@ -457,7 +524,7 @@ class Core_Web_Vitals {
                         <td>
                             <button type="button" id="si-run-cwv-scan" class="button" <?php echo $api_key === '' ? 'disabled' : ''; ?>>Run CWV Scan Now</button>
                             <span id="si-scan-status"></span>
-                            <p class="description">Scans all published posts via the PageSpeed Insights API. Weekly scans also run automatically.</p>
+                            <p class="description">Tests 8 pages per click, never-tested pages first. A daily scan tests 15 more automatically, so every page is re-tested every few days.</p>
                         </td>
                     </tr>
                 </table>
@@ -466,7 +533,7 @@ class Core_Web_Vitals {
             <?php if ( ! $this->is_configured() ) : ?>
                 <div class="notice notice-warning"><p>Enter your PageSpeed Insights API key above to start tracking Core Web Vitals.</p></div>
             <?php elseif ( empty( $report ) ) : ?>
-                <div class="notice notice-info"><p>No CWV data yet. Click "Run CWV Scan Now" above, or wait for the weekly automatic scan.</p></div>
+                <div class="notice notice-info"><p>No CWV data yet. Click "Run CWV Scan Now" above, or wait for the daily automatic scan.</p></div>
             <?php else : ?>
                 <table class="wp-list-table widefat fixed striped">
                     <thead>
