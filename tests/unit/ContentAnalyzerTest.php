@@ -48,6 +48,8 @@ class ContentAnalyzerTest extends TestCase {
         $html = '<p class="subtitle"></p><p>&nbsp;</p><p>Cybersecurity consulting is <strong>hands-on</strong> work.</p><p>Later.</p>';
         $this->assertSame( 'Cybersecurity consulting is hands-on work.', Content_Analyzer::first_paragraph( str_replace( '&nbsp;', '', $html ) ) );
         $this->assertSame( '', Content_Analyzer::first_paragraph( '<div>No paragraphs</div>' ) );
+        $this->assertSame( 'Cybersecurity consulting is hands-on security work by the hour.', Content_Analyzer::first_paragraph( '<p>Security</p><p>Hardening + audits</p><p>Cybersecurity consulting is hands-on security work by the hour.</p>' ) );
+        $this->assertSame( 'Just a label', Content_Analyzer::first_paragraph( '<p></p><p>Just a label</p><p>Short too</p>' ) );
 
         $result = $this->analyzer->analyze( 1, '<p></p><p>Cybersecurity consulting by the hour. ' . str_repeat( 'More words here. ', 30 ) . '</p>', 'Cybersecurity consulting', 'cybersecurity consulting', 'd' );
         $this->assertContains( 'Focus keyword in first paragraph', array_column( $result['seo_score']['checks'], 'label' ) );
