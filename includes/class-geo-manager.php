@@ -619,7 +619,7 @@ class GEO_Manager {
         $author_schema = [
             '@context'    => 'https://schema.org',
             '@type'       => 'Person',
-            '@id'         => Schema_Manager::author_node_id( (int) $author_id, $this->settings ),
+            '@id'         => Schema_Manager::author_node_id( $author_id, $this->settings ),
             'name'        => get_the_author_meta( 'display_name', $author_id ),
             'url'         => get_author_posts_url( $author_id ),
             'description' => get_the_author_meta( 'description', $author_id ),

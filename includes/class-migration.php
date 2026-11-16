@@ -793,7 +793,7 @@ class Migration {
 		}
 
 		// The other plugin covered these post types; keep them in the editor tools and the sitemap.
-		$result['post_types'] = $this->cover_post_types( array_keys( array_filter( $types ) ) );
+		$result['post_types'] = $this->cover_post_types( array_keys( $types ) );
 
 		if ( 'aioseo' === $source ) {
 			$result['terms']    = $this->migrate_aioseo_terms( $overwrite );
