@@ -26,6 +26,38 @@ class SitemapTest extends TestCase {
         $si_test_state['transients'] = [];
     }
 
+    // ── Rewrite patterns ─────────────────────────────────────────────────
+
+    /**
+     * Resolve a path the way WordPress would with the two child-sitemap rules, in order.
+     *
+     * @return array{0:string,1:string}|null [type, page] or null when no rule matches.
+     */
+    private function resolve( string $path ): ?array {
+        foreach ( [ Sitemap::LEGACY_PAGE_RULE, Sitemap::CHILD_RULE ] as $rule ) {
+            if ( preg_match( '#' . $rule . '#', $path, $m ) ) {
+                return [ $m[1], $m[2] ?? '' ];
+            }
+        }
+        return null;
+    }
+
+    public function test_child_rule_matches_custom_post_types_with_underscores(): void {
+        // Regression: sitemap-([a-z]+) never matched ltef_place, so the child sitemap 404'd.
+        $this->assertSame( [ 'ltef_place', '' ], $this->resolve( 'sitemap-ltef_place.xml' ) );
+        $this->assertSame( [ 'ltef_place', '2' ], $this->resolve( 'sitemap-ltef_place-2.xml' ) );
+    }
+
+    public function test_child_rule_matches_hyphenated_and_plain_names(): void {
+        $this->assertSame( [ 'post', '' ], $this->resolve( 'sitemap-post.xml' ) );
+        $this->assertSame( [ 'my-type', '' ], $this->resolve( 'sitemap-my-type.xml' ) );
+        $this->assertSame( [ 'my-type', '3' ], $this->resolve( 'sitemap-my-type-3.xml' ) );
+    }
+
+    public function test_legacy_page_addresses_still_resolve(): void {
+        $this->assertSame( [ 'post', '2' ], $this->resolve( 'sitemap-post2.xml' ) );
+    }
+
     // ── Constructor / hooks ──────────────────────────────────────────────
 
     public function test_registers_rewrite_hooks_when_enabled(): void {
