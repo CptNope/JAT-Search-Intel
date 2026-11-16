@@ -423,8 +423,13 @@ class Rest_Api {
 				$current[ $key ] = (bool) $value;
 			} elseif ( is_int( $default_val ) ) {
 				$current[ $key ] = absint( $value );
+			} elseif ( 'title_templates' === $key ) {
+				// sanitize_text_field() strips "%ca"/"%da"/"%se" as URL octets and breaks %category%, %date% and %search_query%.
+				$current[ $key ] = is_array( $value ) ? array_map( [ Title_Engine::class, 'sanitize_template' ], array_map( 'strval', $value ) ) : $default_val;
 			} elseif ( is_array( $default_val ) ) {
-				$current[ $key ] = is_array( $value ) ? array_map( 'sanitize_text_field', $value ) : $default_val;
+				$current[ $key ] = is_array( $value ) ? map_deep( $value, 'sanitize_text_field' ) : $default_val;
+			} elseif ( preg_match( '/(_url|_image|_logo)$/', $key ) ) {
+				$current[ $key ] = esc_url_raw( (string) $value );
 			} else {
 				$current[ $key ] = sanitize_text_field( $value );
 			}

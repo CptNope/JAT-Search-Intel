@@ -180,6 +180,7 @@ class Migration {
 			'#post_title'       => '%title%',
 			'#page_title'       => '%title%',
 			'#archive_title'    => '%title%',
+			'#archive_date'     => '%title%',
 			'#taxonomy_title'   => '%category%',
 			'#category_title'   => '%category%',
 			'#categories'       => '%category%',
@@ -973,7 +974,10 @@ class Migration {
 		foreach ( $map as $context => $template ) {
 			if ( is_string( $template ) && '' !== trim( $template ) ) {
 				$converted = self::convert_variables( $template, 'aioseo' );
-				if ( '' !== $converted ) {
+				// A page-specific template that lost every page variable would give each
+				// page the same title (just the site name); keep the default instead.
+				$specific = trim( str_replace( [ '%sitename%', '%sep%', '%tagline%', '%page%' ], '', $converted ) );
+				if ( '' !== $converted && '' !== $specific ) {
 					$templates[ $context ] = $converted;
 				}
 			}
