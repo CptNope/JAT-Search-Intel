@@ -6,6 +6,14 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.8.4] — 2026-11-16
+
+### Fixed
+- Sitemap cache keys include a hash of the sitemap settings, so adding a post type takes effect at once (also with a persistent object cache). Found when Projects and Services were added on jeremyanderson.tech and /sitemap.xml kept the old list.
+- AIOSEO migration maps `#archive_date`, and skips a converted template that is left with only site-wide variables (it would give every archive the site name as its title).
+
+---
+
 ## [3.8.3] — 2026-11-16
 
 ### Fixed

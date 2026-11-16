@@ -150,4 +150,15 @@ class SitemapTest extends TestCase {
         $this->assertSame( '', \JAT_Search_Intel\Sitemap::own_url( 6 ) );
         unset( $si_test_state['permalinks'] );
     }
+
+    public function test_cache_key_changes_when_sitemap_post_types_change(): void {
+        $hash = static function ( array $types ): string {
+            $sitemap = new \JAT_Search_Intel\Sitemap( [ 'enable_sitemap' => true, 'sitemap_post_types' => $types ] );
+            $method  = new \ReflectionMethod( $sitemap, 'settings_hash' );
+            $method->setAccessible( true );
+            return (string) $method->invoke( $sitemap );
+        };
+        $this->assertNotSame( $hash( [ 'post', 'page' ] ), $hash( [ 'post', 'page', 'project' ] ) );
+        $this->assertSame( $hash( [ 'post' ] ), $hash( [ 'post' ] ) );
+    }
 }

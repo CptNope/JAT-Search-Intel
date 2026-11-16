@@ -384,6 +384,10 @@ class MigrationTest extends TestCase {
 					'schema'    => [ 'siteRepresents' => 'organization', 'organizationName' => 'Jeremy Anderson Tech', 'organizationLogo' => 'https://example.com/logo.png' ],
 				],
 				'postTypes' => [ 'post' => [ 'title' => '#post_title #separator_sa #site_title' ] ],
+				'archives'  => [
+					'date'   => [ 'title' => '#archive_date #separator_sa #site_title' ],
+					'author' => [ 'title' => '#unknown_tag #separator_sa #site_title' ],
+				],
 			],
 			'webmasterTools' => [ 'google' => 'abc123', 'bing' => 'def456' ],
 			'social'         => [ 'profiles' => [ 'urls' => [ 'twitterUrl' => 'https://x.com/JAndersonTech', 'linkedinUrl' => 'https://www.linkedin.com/in/example' ] ] ],
@@ -395,6 +399,8 @@ class MigrationTest extends TestCase {
 		$this->assertSame( '-', $saved['separator'] );
 		$this->assertSame( '%sitename% %sep% %tagline%', $saved['title_templates']['homepage'] );
 		$this->assertSame( '%title% %sep% %sitename%', $saved['title_templates']['single'] );
+		$this->assertSame( '%title% %sep% %sitename%', $saved['title_templates']['archive'] );
+		$this->assertNotSame( '%sitename%', $saved['title_templates']['author'] ?? '' );
 		$this->assertSame( 'Jeremy Anderson Tech', $saved['knowledge_name'] );
 		$this->assertSame( 'abc123', $saved['verify_google'] );
 		$this->assertSame( '@JAndersonTech', $saved['twitter_site'] );

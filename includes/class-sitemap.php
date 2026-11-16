@@ -46,6 +46,20 @@ class Sitemap {
     }
 
     /**
+     * Short hash of the settings that change what the sitemaps contain.
+     *
+     * @return string
+     */
+    private function settings_hash(): string {
+        $keys = [ 'sitemap_post_types', 'sitemap_taxonomies', 'sitemap_max_urls', 'enable_news_sitemap', 'news_post_types', 'news_publication_name', 'enable_video_sitemap', 'enable_rss_sitemap', 'site_name' ];
+        $used = [];
+        foreach ( $keys as $key ) {
+            $used[ $key ] = $this->settings[ $key ] ?? null;
+        }
+        return substr( md5( (string) wp_json_encode( $used ) ), 0, 8 );
+    }
+
+    /**
      * Invalidate all sitemap transient caches.
      */
     public function invalidate_cache(): void {
@@ -143,7 +157,9 @@ class Sitemap {
         header( 'X-Robots-Tag: noindex, follow' );
         header( 'Cache-Control: public, max-age=3600' );
 
-        $cache_key = 'jat_search_intel_sitemap_' . $type . '_' . $page;
+        // The settings that shape the sitemaps are part of the key, so changing them
+        // (for example adding a post type) shows at once, even with a persistent object cache.
+        $cache_key = 'jat_search_intel_sitemap_' . $type . '_' . $page . '_' . $this->settings_hash();
         $cached    = get_transient( $cache_key );
 
         if ( false !== $cached ) {
