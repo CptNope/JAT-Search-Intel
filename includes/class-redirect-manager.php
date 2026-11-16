@@ -313,6 +313,9 @@ class Redirect_Manager {
 	 * @return string
 	 */
 	private function normalize_for_match( string $path ): string {
+		// Decode %xx so a rule saved as /🧠-post/ and one saved as /%F0%9F%A7%A0-post/
+		// both match the same request.
+		$path = rawurldecode( $path );
 		return function_exists( 'mb_strtolower' ) ? mb_strtolower( $path ) : strtolower( $path );
 	}
 
@@ -329,9 +332,10 @@ class Redirect_Manager {
 
 		return (int) $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT id FROM %i WHERE match_type = 'exact' AND source_url = %s AND enabled = 1 ORDER BY id ASC LIMIT 1",
+				"SELECT id FROM %i WHERE match_type = 'exact' AND source_url IN (%s, %s) AND enabled = 1 ORDER BY id ASC LIMIT 1",
 				$table,
-				$request_path
+				$request_path,
+				rawurldecode( $request_path )
 			)
 		);
 	}
@@ -1448,9 +1452,27 @@ class Redirect_Manager {
 	 * @return string
 	 */
 	private function get_request_path(): string {
-		$uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '/';
+		// Not sanitize_text_field(): it deletes percent-encoded octets, so
+		// /%F0%9F%A7%A0-post/ (an emoji slug) would become /-post/ and never match.
+		$uri  = isset( $_SERVER['REQUEST_URI'] ) ? self::clean_request_uri( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '/'; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Cleaned by clean_request_uri().
 		$path = wp_parse_url( $uri, PHP_URL_PATH );
-		return $path ?: '/';
+		return is_string( $path ) && '' !== $path ? $path : '/';
+	}
+
+	/**
+	 * Clean a request URI for matching and logging, keeping %xx escapes.
+	 *
+	 * Removes control characters, whitespace, quotes and angle brackets. The
+	 * result is only compared with rules, stored with prepared statements and
+	 * escaped on output.
+	 *
+	 * @param mixed $uri Raw request URI.
+	 * @return string
+	 */
+	public static function clean_request_uri( $uri ): string {
+		$uri = is_string( $uri ) ? $uri : '';
+		$uri = (string) preg_replace( '/[\x00-\x20\x7F<>"\'`\\\\]/', '', $uri );
+		return '' !== $uri ? $uri : '/';
 	}
 
 	/**
