@@ -71,6 +71,13 @@ class Builder_Content {
 				break;
 		}
 
+		if ( '' === $builder && self::has_dynamic_blocks( $content ) ) {
+			$rendered = self::render_blocks( $post, $content );
+			if ( '' !== trim( wp_strip_all_tags( $rendered ) ) ) {
+				$html = $rendered;
+			}
+		}
+
 		if ( '' === trim( wp_strip_all_tags( $html ) ) ) {
 			$html = $content;
 		}
@@ -86,6 +93,71 @@ class Builder_Content {
 
 		self::$cache[ $key ] = $html;
 		return $html;
+	}
+
+	/** @var bool Guards against a block that renders this same content again. */
+	private static $rendering = false;
+
+	/**
+	 * Whether the content uses server-rendered (dynamic) blocks.
+	 *
+	 * Their text is produced by PHP when the page is viewed, so post_content
+	 * holds only the block comment and the analyzer would see an empty page.
+	 *
+	 * @param string $content post_content.
+	 * @return bool
+	 */
+	public static function has_dynamic_blocks( string $content ): bool {
+		if ( false === strpos( $content, '<!-- wp:' ) || ! function_exists( 'parse_blocks' ) || ! class_exists( 'WP_Block_Type_Registry' ) ) {
+			return false;
+		}
+		$registry = \WP_Block_Type_Registry::get_instance();
+		$stack    = parse_blocks( $content );
+		while ( $stack ) {
+			$block = array_pop( $stack );
+			$name  = $block['blockName'] ?? null;
+			if ( $name && ! in_array( $name, [ 'core/post-content', 'core/template-part' ], true ) ) {
+				$type = $registry->get_registered( $name );
+				if ( $type && $type->is_dynamic() ) {
+					return true;
+				}
+			}
+			foreach ( (array) ( $block['innerBlocks'] ?? [] ) as $inner ) {
+				$stack[] = $inner;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Render blocks for a post the way the front end would.
+	 *
+	 * @param \WP_Post|object $post    Post.
+	 * @param string          $content post_content.
+	 * @return string
+	 */
+	private static function render_blocks( $post, string $content ): string {
+		if ( self::$rendering || ! function_exists( 'do_blocks' ) ) {
+			return '';
+		}
+		self::$rendering = true;
+		$previous        = $GLOBALS['post'] ?? null;
+		if ( $post instanceof \WP_Post ) {
+			$GLOBALS['post'] = $post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Blocks read the current post while rendering; restored below.
+			setup_postdata( $post );
+		}
+		try {
+			$html = (string) do_blocks( $content );
+		} catch ( \Throwable $e ) {
+			$html = '';
+		}
+		$GLOBALS['post'] = $previous; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring the previous global.
+		if ( $previous instanceof \WP_Post ) {
+			setup_postdata( $previous );
+		}
+		self::$rendering = false;
+		// Drop scripts, styles and inline JSON-LD that blocks print alongside their markup.
+		return (string) preg_replace( '#<(script|style)\b[^>]*>.*?</\1>#is', '', $html );
 	}
 
 	/**

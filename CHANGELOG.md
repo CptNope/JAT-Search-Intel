@@ -6,6 +6,11 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.8.14] — 2026-11-16
+
+### Fixed
+- `Builder_Content::get()` used raw `post_content`, where dynamic blocks are only a comment, so pages built from them (a block theme's hero, services, pricing or testimonial blocks) were analyzed as having 0 words. When the content contains a registered dynamic block it is now rendered with `do_blocks()` (scripts and styles removed, guarded against recursion) before analysis.
+
 ## [3.8.13] — 2026-11-16
 
 ### Fixed

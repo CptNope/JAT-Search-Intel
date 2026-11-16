@@ -4,7 +4,7 @@ Tags: seo, schema, llms-txt, ai-search, redirects
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.8.13
+Stable tag: 3.8.14
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -262,6 +262,9 @@ Sends an HTTP HEAD request to each external URL linked from your content to chec
 
 == Changelog ==
 
+= 3.8.14 =
+* Fixed: pages built from blocks that render on the server (theme or plugin blocks such as a hero, pricing table or testimonials) were analyzed as empty, so they scored near zero. Those blocks are now rendered before analysis.
+
 = 3.8.13 =
 * Fixed: sitemaps for post types and taxonomies whose names contain an underscore, digit or hyphen (such as a theme's custom places or events type) no longer return "page not found". Later pages of a large sitemap are now sitemap-post-2.xml; the old sitemap-post2.xml addresses still work.
 * Fixed: after a bulk rescore, the Readiness page shows the new count of scored pages at once.
@@ -415,6 +418,9 @@ Every feature other SEO plugins sell in their premium plans, free.
 Earlier releases are listed in CHANGELOG.md in the development repository.
 
 == Upgrade Notice ==
+
+= 3.8.14 =
+Pages built from server-rendered blocks are now scored on their real content.
 
 = 3.8.13 =
 Sitemaps for custom post types with an underscore in their name now load.
