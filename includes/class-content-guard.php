@@ -41,7 +41,11 @@ class Content_Guard {
 	 * @return string
 	 */
 	public static function content( $post ): string {
-		return self::is_protected( $post ) ? '' : (string) ( $post->post_content ?? '' );
+		if ( self::is_protected( $post ) ) {
+			return '';
+		}
+		// Page-builder pages: read the builder's content, not its shortcodes or an empty body.
+		return Builder_Content::get( $post );
 	}
 
 	/**

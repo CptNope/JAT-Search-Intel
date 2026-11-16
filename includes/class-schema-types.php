@@ -192,7 +192,7 @@ class Schema_Types {
 		}
 
 		if ( $duration ) {
-			$schema['duration'] = sanitize_text_field( $duration );
+			$schema['duration'] = self::duration( $duration );
 		}
 
 		return $schema;
@@ -210,8 +210,8 @@ class Schema_Types {
 			$name = get_the_title( $post_id );
 		}
 
-		$ingredients = get_post_meta( $post_id, '_jat_search_intel_recipe_ingredients', true );
-		$steps       = get_post_meta( $post_id, '_jat_search_intel_recipe_steps', true );
+		$ingredients = self::lines( get_post_meta( $post_id, '_jat_search_intel_recipe_ingredients', true ) );
+		$steps       = self::lines( get_post_meta( $post_id, '_jat_search_intel_recipe_steps', true ) );
 
 		if ( empty( $ingredients ) || empty( $steps ) ) {
 			return null;
@@ -220,11 +220,11 @@ class Schema_Types {
 		$schema = [
 			'@type'               => 'Recipe',
 			'name'                => sanitize_text_field( $name ),
-			'recipeIngredient'    => is_array( $ingredients ) ? array_map( 'sanitize_text_field', $ingredients ) : [],
+			'recipeIngredient'    => array_map( 'sanitize_text_field', $ingredients ),
 		];
 
 		// Steps.
-		if ( is_array( $steps ) ) {
+		if ( $steps ) {
 			$schema['recipeInstructions'] = [];
 			foreach ( $steps as $step ) {
 				$schema['recipeInstructions'][] = [
@@ -242,12 +242,12 @@ class Schema_Types {
 
 		$cook_time = get_post_meta( $post_id, '_jat_search_intel_recipe_cook_time', true );
 		if ( $cook_time ) {
-			$schema['cookTime'] = sanitize_text_field( $cook_time );
+			$schema['cookTime'] = self::duration( $cook_time );
 		}
 
 		$prep_time = get_post_meta( $post_id, '_jat_search_intel_recipe_prep_time', true );
 		if ( $prep_time ) {
-			$schema['prepTime'] = sanitize_text_field( $prep_time );
+			$schema['prepTime'] = self::duration( $prep_time );
 		}
 
 		$servings = get_post_meta( $post_id, '_jat_search_intel_recipe_servings', true );
@@ -389,8 +389,8 @@ class Schema_Types {
 		}
 
 		// Pros / Cons.
-		$pros = get_post_meta( $post_id, '_jat_search_intel_review_pros', true );
-		if ( ! empty( $pros ) && is_array( $pros ) ) {
+		$pros = self::lines( get_post_meta( $post_id, '_jat_search_intel_review_pros', true ) );
+		if ( $pros ) {
 			$schema['positiveNotes'] = [
 				'@type'           => 'ItemList',
 				'itemListElement' => array_map( function ( $pro ) {
@@ -402,8 +402,8 @@ class Schema_Types {
 			];
 		}
 
-		$cons = get_post_meta( $post_id, '_jat_search_intel_review_cons', true );
-		if ( ! empty( $cons ) && is_array( $cons ) ) {
+		$cons = self::lines( get_post_meta( $post_id, '_jat_search_intel_review_cons', true ) );
+		if ( $cons ) {
 			$schema['negativeNotes'] = [
 				'@type'           => 'ItemList',
 				'itemListElement' => array_map( function ( $con ) {
@@ -456,7 +456,7 @@ class Schema_Types {
 
 		$duration = get_post_meta( $post_id, '_jat_search_intel_course_duration', true );
 		if ( $duration ) {
-			$schema['timeRequired'] = sanitize_text_field( $duration );
+			$schema['timeRequired'] = self::duration( $duration );
 		}
 
 		$price    = get_post_meta( $post_id, '_jat_search_intel_course_price', true );
@@ -597,6 +597,136 @@ class Schema_Types {
 	 */
 	public static function get_types(): array {
 		return self::TYPES;
+	}
+
+	/**
+	 * Editor fields per type: field key (meta suffix) => [ label, kind, help ].
+	 *
+	 * Kinds: text, textarea, lines (one item per line), datetime, number, url, minutes.
+	 * Used by the block editor's Schema tab and to register the post meta.
+	 *
+	 * @return array<string,array<string,array{0:string,1:string,2?:string}>>
+	 */
+	public static function get_fields(): array {
+		return [
+			'recipe'      => [
+				'recipe_name'        => [ __( 'Recipe name', 'jat-search-intel' ), 'text', __( 'Leave empty to use the post title.', 'jat-search-intel' ) ],
+				'recipe_description' => [ __( 'Description', 'jat-search-intel' ), 'textarea' ],
+				'recipe_ingredients' => [ __( 'Ingredients', 'jat-search-intel' ), 'lines', __( 'One per line. Required.', 'jat-search-intel' ) ],
+				'recipe_steps'       => [ __( 'Steps', 'jat-search-intel' ), 'lines', __( 'One per line. Required.', 'jat-search-intel' ) ],
+				'recipe_prep_time'   => [ __( 'Prep time (minutes)', 'jat-search-intel' ), 'minutes' ],
+				'recipe_cook_time'   => [ __( 'Cook time (minutes)', 'jat-search-intel' ), 'minutes' ],
+				'recipe_servings'    => [ __( 'Servings', 'jat-search-intel' ), 'text' ],
+				'recipe_calories'    => [ __( 'Calories', 'jat-search-intel' ), 'text', __( 'For example: 240 calories', 'jat-search-intel' ) ],
+			],
+			'event'       => [
+				'event_name'        => [ __( 'Event name', 'jat-search-intel' ), 'text', __( 'Required.', 'jat-search-intel' ) ],
+				'event_description' => [ __( 'Description', 'jat-search-intel' ), 'textarea' ],
+				'event_start_date'  => [ __( 'Starts', 'jat-search-intel' ), 'datetime', __( 'Required.', 'jat-search-intel' ) ],
+				'event_end_date'    => [ __( 'Ends', 'jat-search-intel' ), 'datetime' ],
+				'event_location'    => [ __( 'Venue name', 'jat-search-intel' ), 'text' ],
+				'event_address'     => [ __( 'Venue address', 'jat-search-intel' ), 'text' ],
+				'event_organizer'   => [ __( 'Organizer', 'jat-search-intel' ), 'text' ],
+				'event_performer'   => [ __( 'Performer', 'jat-search-intel' ), 'text' ],
+				'event_price'       => [ __( 'Ticket price', 'jat-search-intel' ), 'number' ],
+				'event_currency'    => [ __( 'Currency', 'jat-search-intel' ), 'text', __( 'Three letters, for example USD.', 'jat-search-intel' ) ],
+			],
+			'review'      => [
+				'review_item_name'   => [ __( 'What is reviewed', 'jat-search-intel' ), 'text', __( 'Required.', 'jat-search-intel' ) ],
+				'review_item_type'   => [ __( 'Type of thing', 'jat-search-intel' ), 'text', __( 'Schema.org type, for example Product, Book, Restaurant or SoftwareApplication.', 'jat-search-intel' ) ],
+				'review_rating'      => [ __( 'Your rating', 'jat-search-intel' ), 'number', __( 'Required.', 'jat-search-intel' ) ],
+				'review_best_rating' => [ __( 'Best possible rating', 'jat-search-intel' ), 'number', __( 'Defaults to 5.', 'jat-search-intel' ) ],
+				'review_pros'        => [ __( 'Pros', 'jat-search-intel' ), 'lines', __( 'One per line.', 'jat-search-intel' ) ],
+				'review_cons'        => [ __( 'Cons', 'jat-search-intel' ), 'lines', __( 'One per line.', 'jat-search-intel' ) ],
+				'review_body'        => [ __( 'Summary', 'jat-search-intel' ), 'textarea' ],
+			],
+			'course'      => [
+				'course_name'        => [ __( 'Course name', 'jat-search-intel' ), 'text', __( 'Required.', 'jat-search-intel' ) ],
+				'course_description' => [ __( 'Description', 'jat-search-intel' ), 'textarea', __( 'Required.', 'jat-search-intel' ) ],
+				'course_provider'    => [ __( 'Provider', 'jat-search-intel' ), 'text' ],
+				'course_duration'    => [ __( 'Length (minutes)', 'jat-search-intel' ), 'minutes' ],
+				'course_price'       => [ __( 'Price', 'jat-search-intel' ), 'number' ],
+				'course_currency'    => [ __( 'Currency', 'jat-search-intel' ), 'text' ],
+			],
+			'software'    => [
+				'software_name'         => [ __( 'App name', 'jat-search-intel' ), 'text', __( 'Leave empty to use the post title.', 'jat-search-intel' ) ],
+				'software_category'     => [ __( 'Category', 'jat-search-intel' ), 'text', __( 'For example BusinessApplication, GameApplication or SecurityApplication.', 'jat-search-intel' ) ],
+				'software_os'           => [ __( 'Operating systems', 'jat-search-intel' ), 'text', __( 'For example: Windows, macOS, Web browser', 'jat-search-intel' ) ],
+				'software_price'        => [ __( 'Price', 'jat-search-intel' ), 'number', __( 'Use 0 for free.', 'jat-search-intel' ) ],
+				'software_currency'     => [ __( 'Currency', 'jat-search-intel' ), 'text' ],
+				'software_rating'       => [ __( 'Average rating', 'jat-search-intel' ), 'number', __( 'Only real ratings from users.', 'jat-search-intel' ) ],
+				'software_rating_count' => [ __( 'Number of ratings', 'jat-search-intel' ), 'number' ],
+			],
+			'job_posting' => [
+				'job_title'           => [ __( 'Job title', 'jat-search-intel' ), 'text', __( 'Required.', 'jat-search-intel' ) ],
+				'job_description'     => [ __( 'Description', 'jat-search-intel' ), 'textarea', __( 'Required.', 'jat-search-intel' ) ],
+				'job_company'         => [ __( 'Hiring organization', 'jat-search-intel' ), 'text' ],
+				'job_location'        => [ __( 'Location', 'jat-search-intel' ), 'text' ],
+				'job_employment_type' => [ __( 'Employment type', 'jat-search-intel' ), 'text', __( 'FULL_TIME, PART_TIME, CONTRACTOR, TEMPORARY or INTERN.', 'jat-search-intel' ) ],
+				'job_salary'          => [ __( 'Salary', 'jat-search-intel' ), 'number' ],
+				'job_salary_currency' => [ __( 'Salary currency', 'jat-search-intel' ), 'text' ],
+				'job_salary_unit'     => [ __( 'Salary per', 'jat-search-intel' ), 'text', __( 'HOUR, DAY, WEEK, MONTH or YEAR.', 'jat-search-intel' ) ],
+				'job_valid_through'   => [ __( 'Apply by', 'jat-search-intel' ), 'datetime' ],
+			],
+			'video'       => [
+				'video_url'         => [ __( 'Video URL', 'jat-search-intel' ), 'url', __( 'YouTube, Vimeo or a video file. Videos embedded in the post are found automatically.', 'jat-search-intel' ) ],
+				'video_name'        => [ __( 'Video title', 'jat-search-intel' ), 'text' ],
+				'video_description' => [ __( 'Description', 'jat-search-intel' ), 'textarea' ],
+				'video_thumbnail'   => [ __( 'Thumbnail URL', 'jat-search-intel' ), 'url' ],
+				'video_upload_date' => [ __( 'Upload date', 'jat-search-intel' ), 'datetime' ],
+				'video_duration'    => [ __( 'Length (minutes)', 'jat-search-intel' ), 'minutes' ],
+			],
+		];
+	}
+
+	/**
+	 * Every meta key the Schema tab edits.
+	 *
+	 * @return string[]
+	 */
+	public static function meta_keys(): array {
+		$keys = [ '_jat_search_intel_schema_type_extra' ];
+		foreach ( self::get_fields() as $fields ) {
+			foreach ( array_keys( $fields ) as $field ) {
+				$keys[] = '_jat_search_intel_' . $field;
+			}
+		}
+		return array_values( array_unique( $keys ) );
+	}
+
+	/**
+	 * A list stored as an array or as text with one item per line.
+	 *
+	 * @param mixed $value Stored value.
+	 * @return string[]
+	 */
+	public static function lines( $value ): array {
+		if ( is_string( $value ) ) {
+			$value = preg_split( '/\r\n|\r|\n/', $value );
+		}
+		if ( ! is_array( $value ) ) {
+			return [];
+		}
+		return array_values( array_filter( array_map( static function ( $item ) {
+			return is_scalar( $item ) ? trim( (string) $item ) : '';
+		}, $value ), 'strlen' ) );
+	}
+
+	/**
+	 * An ISO 8601 duration from minutes, or the value itself if it already is one.
+	 *
+	 * @param mixed $value Minutes or an ISO 8601 duration.
+	 * @return string
+	 */
+	public static function duration( $value ): string {
+		$value = trim( (string) $value );
+		if ( is_numeric( $value ) ) {
+			$minutes = (int) round( (float) $value );
+			$hours   = intdiv( $minutes, 60 );
+			$rest    = $minutes % 60;
+			return 'PT' . ( $hours ? $hours . 'H' : '' ) . ( $rest || ! $hours ? $rest . 'M' : '' );
+		}
+		return sanitize_text_field( $value );
 	}
 
 	/**

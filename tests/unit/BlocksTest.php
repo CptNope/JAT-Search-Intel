@@ -78,14 +78,16 @@ class BlocksTest extends TestCase {
 
 	// ── register_meta() ─────────────────────────────────────────────────────
 
-	public function test_register_meta_registers_all_31_keys(): void {
+	public function test_register_meta_registers_sidebar_and_schema_keys(): void {
 		global $si_registered_meta;
 
 		$this->blocks->register_meta();
 
 		// get_post_types stub returns ['post' => ...], so we check 'post'.
 		$this->assertArrayHasKey( 'post', $si_registered_meta );
-		$this->assertCount( 31, $si_registered_meta['post'] );
+		$expected = 31 + count( \JAT_Search_Intel\Schema_Types::meta_keys() );
+		$this->assertCount( $expected, $si_registered_meta['post'] );
+		$this->assertArrayHasKey( '_jat_search_intel_schema_type_extra', $si_registered_meta['post'] );
 	}
 
 	public function test_register_meta_keys_start_with_prefix(): void {

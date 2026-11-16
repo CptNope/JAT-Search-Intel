@@ -365,6 +365,9 @@ class Core {
         add_filter( 'post_link_category', [ Primary_Term::class, 'filter_post_link_category' ], 10, 3 );
         add_filter( 'wc_product_post_type_link_product_cat', [ Primary_Term::class, 'filter_product_link_category' ], 10, 3 );
 
+        // Page-builder content is cached per request; drop it when a post is saved.
+        add_action( 'save_post', [ Builder_Content::class, 'flush' ] );
+
         // Auto-redirect on slug change.
         add_action( 'post_updated', [ $this->redirects, 'detect_slug_change' ], 10, 3 );
 

@@ -16,6 +16,7 @@ import SeoPanel from './panels/seo-panel';
 import AeoPanel from './panels/aeo-panel';
 import GeoPanel from './panels/geo-panel';
 import ScorePanel from './panels/score-panel';
+import SchemaPanel from './panels/schema-panel';
 
 import './sidebar.css';
 
@@ -33,6 +34,11 @@ const TABS = [
 	{
 		name: 'geo',
 		title: __( 'GEO', 'jat-search-intel' ),
+		className: 'si-sidebar-tab',
+	},
+	{
+		name: 'schema',
+		title: __( 'Schema', 'jat-search-intel' ),
 		className: 'si-sidebar-tab',
 	},
 	{
@@ -71,6 +77,8 @@ function JATSearchIntelSidebar() {
 							return <AeoPanel />;
 						case 'geo':
 							return <GeoPanel />;
+						case 'schema':
+							return <SchemaPanel />;
 						case 'analysis':
 							return <ScorePanel />;
 						default:

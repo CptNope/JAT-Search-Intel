@@ -67,7 +67,12 @@ class Blocks {
 	public function register_meta(): void {
 		$post_types = get_post_types( [ 'public' => true ] );
 
-		foreach ( self::META_KEYS as $key => $config ) {
+		$keys = self::META_KEYS;
+		foreach ( Schema_Types::meta_keys() as $schema_key ) {
+			$keys[ $schema_key ] = [ 'type' => 'string', 'default' => '' ];
+		}
+
+		foreach ( $keys as $key => $config ) {
 			foreach ( $post_types as $post_type ) {
 				register_post_meta( $post_type, $key, [
 					'show_in_rest'  => true,
@@ -123,6 +128,15 @@ class Blocks {
 		);
 
 		wp_set_script_translations( 'jat-search-intel-sidebar', 'jat-search-intel' );
+
+		// Schema tab: the types, their fields and whether the module is on.
+		$settings = get_option( 'jat_search_intel_settings', [] );
+		wp_localize_script( 'jat-search-intel-sidebar', 'jatSearchIntelSchema', [
+			'enabled'     => ! empty( $settings['enable_schema_types'] ),
+			'settingsUrl' => admin_url( 'admin.php?page=jat-search-intel' ),
+			'types'       => Schema_Types::get_types(),
+			'fields'      => Schema_Types::get_fields(),
+		] );
 
 		// Pass theme.json color palette to JS for score ring theming.
 		wp_localize_script( 'jat-search-intel-sidebar', 'jatSearchIntelTheme', [
