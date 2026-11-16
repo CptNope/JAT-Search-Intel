@@ -156,6 +156,8 @@ class SEO_Manager {
         if ( is_singular() ) {
             $post_id     = get_queried_object_id();
             $description = $this->get_description( $post_id );
+        } elseif ( Title_Engine::posts_page_id() ) {
+            $description = $this->get_description( Title_Engine::posts_page_id() );
         } elseif ( is_front_page() ) {
             $description = get_bloginfo( 'description' );
         } elseif ( $this->current_term() ) {
@@ -203,6 +205,11 @@ class SEO_Manager {
             $post_id   = get_queried_object_id();
             $custom    = get_post_meta( $post_id, '_jat_search_intel_canonical', true );
             $canonical = $custom ?: get_permalink( $post_id );
+        } elseif ( Title_Engine::posts_page_id() ) {
+            $page_id   = Title_Engine::posts_page_id();
+            $custom    = get_post_meta( $page_id, '_jat_search_intel_canonical', true );
+            $paged     = max( 1, (int) get_query_var( 'paged' ) );
+            $canonical = $custom ?: ( $paged > 1 ? get_pagenum_link( $paged, false ) : get_permalink( $page_id ) );
         } elseif ( is_front_page() ) {
             $canonical = home_url( '/' );
         } elseif ( $this->current_term() ) {

@@ -10,6 +10,7 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ### Fixed
 - A static front page uses its own SEO title instead of the homepage title template, matching All in One SEO, Yoast and Rank Math. Found migrating jeremyanderson.tech.
+- The "Posts page" (blog index) uses that page's own SEO title, meta description and canonical URL; before, it fell back to the homepage title and had no description.
 
 ---
 

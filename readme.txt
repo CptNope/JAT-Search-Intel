@@ -264,6 +264,7 @@ Sends an HTTP HEAD request to each external URL linked from your content to chec
 
 = 3.8.1 =
 * Fixed: a static front page uses its own SEO title (as All in One SEO does) instead of the homepage title template.
+* Fixed: the blog page chosen as "Posts page" uses its own SEO title, description and canonical URL.
 
 = 3.8.0 =
 A clean move from All in One SEO, and the features it sells, free.
