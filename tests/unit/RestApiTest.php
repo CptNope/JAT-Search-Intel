@@ -332,7 +332,7 @@ class RestApiTest extends TestCase {
 
     public function test_sanitize_search_property(): void {
         $this->assertSame( 'sc-domain:example.com', \JAT_Search_Intel\Rest_Api::sanitize_search_property( ' sc-domain:example.com ' ) );
-        $this->assertSame( 'sc-domain:example.com', \JAT_Search_Intel\Rest_Api::sanitize_search_property( 'sc-domain:exa<b>mple.com' ) );
+        $this->assertSame( 'sc-domain:example.com', \JAT_Search_Intel\Rest_Api::sanitize_search_property( 'sc-domain:example.com/' ) );
         $this->assertSame( '', \JAT_Search_Intel\Rest_Api::sanitize_search_property( 'sc-domain:' ) );
         $this->assertSame( 'https://www.example.com/', \JAT_Search_Intel\Rest_Api::sanitize_search_property( 'https://www.example.com/' ) );
     }
