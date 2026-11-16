@@ -6,6 +6,12 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.8.9] — 2026-11-16
+
+### Fixed
+- Core Web Vitals report read SEO/AEO/GEO from a `_jat_search_intel_scores` meta key that is never written, so every row showed 0. It now reads `_jat_search_intel_{seo,aeo,geo}_score` and lists the slowest pages first.
+- Scans took 20 random posts of any type in one request. Each PageSpeed test takes 10 to 20 seconds, so manual runs timed out, and random picks left pages untested. `scan_queue()` orders never-tested pages first, then the oldest results, using the enabled post types and skipping noindex posts and section permalinks. Manual runs test 8 pages; the cron is now daily with 15 (an existing weekly event is replaced).
+
 ## [3.8.8] — 2026-11-16
 
 ### Fixed

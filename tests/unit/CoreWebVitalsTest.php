@@ -219,4 +219,39 @@ class CoreWebVitalsTest extends TestCase {
         $cwv = $this->make();
         $this->assertSame( [], $cwv->get_correlation_report() );
     }
+
+    public function test_scan_queue_puts_never_tested_first_and_skips_sections_and_noindex(): void {
+        global $si_test_state;
+        $si_test_state['posts'] = [];
+        foreach ( [ 1, 2, 3, 4, 5 ] as $id ) {
+            $si_test_state['posts'][ $id ] = [ 'ID' => $id, 'post_type' => 'post', 'post_status' => 'publish', 'post_title' => 'Post ' . $id ];
+        }
+        $si_test_state['post_meta']                                   = [];
+        $si_test_state['post_meta'][1]['_jat_search_intel_cwv']       = [ [ 'date' => '2026-11-10', 'perf_score' => 90 ] ];
+        $si_test_state['post_meta'][2]['_jat_search_intel_cwv']       = [ [ 'date' => '2026-11-01', 'perf_score' => 80 ] ];
+        $si_test_state['post_meta'][4]['_jat_search_intel_noindex']   = '1';
+        $si_test_state['permalinks'][5]                               = 'https://example.com/service/plans/#tier';
+
+        $queue = $this->make( [ 'enabled_post_types' => [ 'post' ] ] )->scan_queue();
+
+        $this->assertSame( [ 3, 2, 1 ], $queue['ids'] );
+        $this->assertSame( 1, $queue['never'] );
+    }
+
+    public function test_correlation_report_reads_scores_and_sorts_worst_first(): void {
+        global $si_test_state;
+        $si_test_state['posts'] = [];
+        foreach ( [ 1, 2 ] as $id ) {
+            $si_test_state['posts'][ $id ] = [ 'ID' => $id, 'post_type' => 'post', 'post_status' => 'publish', 'post_title' => 'Post ' . $id ];
+        }
+        $si_test_state['post_meta']    = [];
+        $si_test_state['post_meta'][1] = [ '_jat_search_intel_cwv' => [ [ 'date' => '2026-11-16', 'perf_score' => 99 ] ], '_jat_search_intel_seo_score' => '78', '_jat_search_intel_aeo_score' => '70', '_jat_search_intel_geo_score' => '55' ];
+        $si_test_state['post_meta'][2] = [ '_jat_search_intel_cwv' => [ [ 'date' => '2026-11-16', 'perf_score' => 89 ] ] ];
+
+        $report = $this->make( [ 'enabled_post_types' => [ 'post' ] ] )->get_correlation_report();
+
+        $this->assertSame( [ 2, 1 ], array_column( $report, 'post_id' ) );
+        $this->assertSame( 78.0, $report[1]['seo_score'] );
+        $this->assertSame( 55.0, $report[1]['geo_score'] );
+    }
 }

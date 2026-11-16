@@ -4,7 +4,7 @@ Tags: seo, schema, llms-txt, ai-search, redirects
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.8.8
+Stable tag: 3.8.9
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -262,6 +262,10 @@ Sends an HTTP HEAD request to each external URL linked from your content to chec
 
 == Changelog ==
 
+= 3.8.9 =
+* Fixed: Core Web Vitals showed 0 for every SEO, AEO and GEO score.
+* Fixed: Core Web Vitals scans picked random pages and timed out, so some pages were never tested. Never-tested pages now go first, then the oldest results; a manual run tests 8 pages and a daily run tests 15. Sections of other pages and noindex pages are skipped.
+
 = 3.8.8 =
 * Fixed: Index Status checked items whose address is a section of another page (such as a service tier at /service/care-plans/#guardian). Google can never index those on their own, so they showed as "URL is unknown to Google" and used up the daily inspection quota. They are now skipped.
 
@@ -397,6 +401,9 @@ Every feature other SEO plugins sell in their premium plans, free.
 Earlier releases are listed in CHANGELOG.md in the development repository.
 
 == Upgrade Notice ==
+
+= 3.8.9 =
+Core Web Vitals now covers every page and shows the right scores.
 
 = 3.8.8 =
 Index Status no longer reports page sections as unindexed.
