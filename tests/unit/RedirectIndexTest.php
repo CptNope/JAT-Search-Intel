@@ -68,6 +68,8 @@ class RedirectIndexTest extends TestCase {
 			3 => (object) [ 'id' => 3, 'source_url' => '/blog/2019/', 'target_url' => '/archive/', 'match_type' => 'prefix', 'enabled' => 1, 'status_code' => 301 ],
 			4 => (object) [ 'id' => 4, 'source_url' => '^/p/(\d+)$', 'target_url' => '/?p=$1', 'match_type' => 'regex', 'enabled' => 1, 'status_code' => 302 ],
 			5 => (object) [ 'id' => 5, 'source_url' => '/disabled', 'target_url' => '/x', 'match_type' => 'exact', 'enabled' => 0, 'status_code' => 301 ],
+			6 => (object) [ 'id' => 6, 'source_url' => '/%F0%9F%A7%A0-encoded-post/', 'target_url' => '/new/', 'match_type' => 'exact', 'enabled' => 1, 'status_code' => 301 ],
+			7 => (object) [ 'id' => 7, 'source_url' => "/\u{1F9E0}-literal-post/", 'target_url' => '/new/', 'match_type' => 'exact', 'enabled' => 1, 'status_code' => 301 ],
 		];
 
 		$wpdb = $this->db;
@@ -127,5 +129,17 @@ class RedirectIndexTest extends TestCase {
 		foreach ( [ '/old-blog-post/', '/products/blue-shoes', '/2019/05/hello/' ] as $real ) {
 			$this->assertFalse( Redirect_Manager::is_probe_path( $real ), $real );
 		}
+	}
+
+	public function test_percent_encoded_request_matches_encoded_or_literal_rule(): void {
+		$this->assertSame( 6, (int) $this->manager->find_matching_redirect( '/%F0%9F%A7%A0-encoded-post/' )->id );
+		$this->assertSame( 6, (int) $this->manager->find_matching_redirect( '/%f0%9f%a7%a0-encoded-post/' )->id );
+		$this->assertSame( 7, (int) $this->manager->find_matching_redirect( '/%F0%9F%A7%A0-literal-post/' )->id );
+	}
+
+	public function test_clean_request_uri_keeps_percent_escapes(): void {
+		$this->assertSame( '/%F0%9F%A7%A0-post/?a=1', Redirect_Manager::clean_request_uri( '/%F0%9F%A7%A0-post/?a=1' ) );
+		$this->assertSame( '/x/scriptalert(1)/script', Redirect_Manager::clean_request_uri( "/x/<script>alert(1)</script>" ) );
+		$this->assertSame( '/', Redirect_Manager::clean_request_uri( null ) );
 	}
 }

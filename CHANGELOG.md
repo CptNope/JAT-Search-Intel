@@ -6,6 +6,12 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.8.10] — 2026-11-16
+
+### Fixed
+- `Redirect_Manager::get_request_path()` ran `REQUEST_URI` through `sanitize_text_field()`, which strips percent-encoded octets. A request for `/%F0%9F%A7%A0-post/` (an emoji slug) became `/-post/`, so no redirect could ever match it and the 404 log stored the mangled path. The path is now cleaned by `clean_request_uri()` (control characters, whitespace, quotes and angle brackets removed; `%xx` kept).
+- Rules match whether their source was saved percent-encoded or with the literal characters: `normalize_for_match()` decodes before lower-casing, and the database fallback checks both forms.
+
 ## [3.8.9] — 2026-11-16
 
 ### Fixed
