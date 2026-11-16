@@ -4,7 +4,7 @@ Tags: seo, schema, llms-txt, ai-search, redirects
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.8.0
+Stable tag: 3.8.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -262,6 +262,9 @@ Sends an HTTP HEAD request to each external URL linked from your content to chec
 
 == Changelog ==
 
+= 3.8.1 =
+* Fixed: a static front page uses its own SEO title (as All in One SEO does) instead of the homepage title template.
+
 = 3.8.0 =
 A clean move from All in One SEO, and the features it sells, free.
 
@@ -367,6 +370,9 @@ Every feature other SEO plugins sell in their premium plans, free.
 Earlier releases are listed in CHANGELOG.md in the development repository.
 
 == Upgrade Notice ==
+
+= 3.8.1 =
+A static front page now shows its own SEO title.
 
 = 3.8.0 =
 Fixes migration from All in One SEO and the Redirects page buttons, and adds schema forms, Quick Edit, redirect chain checks, a Local Business block and headless REST output.

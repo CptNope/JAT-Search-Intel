@@ -94,8 +94,8 @@ class Title_Engine {
         $context   = $this->detect_context();
         $template  = $templates[ $context ] ?? self::$default_templates[ $context ] ?? '%title% %sep% %sitename%';
 
-        // For single posts/pages, check for a manual SEO title override first
-        if ( in_array( $context, [ 'single', 'page' ], true ) && is_singular() ) {
+        // For single posts and pages (a static front page too), a manual SEO title comes first.
+        if ( is_singular() ) {
             $post_id   = get_queried_object_id();
             $seo_title = (string) get_post_meta( $post_id, '_jat_search_intel_title', true );
             if ( '' !== $seo_title ) {

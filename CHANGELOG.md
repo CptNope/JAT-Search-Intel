@@ -6,6 +6,13 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.8.1] — 2026-11-15
+
+### Fixed
+- A static front page uses its own SEO title instead of the homepage title template, matching All in One SEO, Yoast and Rank Math. Found migrating jeremyanderson.tech.
+
+---
+
 ## [3.8.0] — 2026-11-15
 
 A clean move from All in One SEO, and the features it sells, free.
