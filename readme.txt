@@ -4,7 +4,7 @@ Tags: seo, schema, llms-txt, ai-search, redirects
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.7.0
+Stable tag: 3.8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -63,6 +63,15 @@ Traditional search optimization with a modern implementation.
 * One connected JSON-LD graph: Organization/Person, WebSite, WebPage, Article, author, breadcrumbs and image, linked by @id
 * Article schema with full author, date, and category support
 * Custom JSON-LD per post (paste any Schema.org markup; validated and merged into the graph)
+* Schema tab in the editor: fill-in forms for Recipe, Event, Review, Course, SoftwareApplication, JobPosting and VideoObject, with a link to Google's Rich Results Test
+* Headline analyzer: scores each title for length, word balance, power and emotional words, and numbers as you type
+* SEO title, description, focus keyword and noindex in Quick Edit and Bulk Edit on the posts list
+* Admin bar menu with the page's scores and links to the Rich Results Test, Schema Markup Validator and PageSpeed Insights
+* RSS sitemap (`/sitemap.rss`) of recently updated content, for fast discovery
+* Page builders: Elementor, Bricks, Beaver Builder, Divi and WPBakery content is read for scores, descriptions and schema
+* Image titles and alt text from file names, with your choice of letter case and punctuation, and a Media > Missing alt text screen to fill the gaps
+* Local Business block and `[jat_search_intel_local]` shortcode: show a location's address, opening hours or a map, matching its schema
+* Headless sites: every published post and page has `jat_search_intel_head` (HTML) and `jat_search_intel_head_json` in the WordPress REST API
 
 **AEO — Answer Engine Optimization**
 Optimize your content for featured snippets, voice assistants, and People Also Ask boxes.
@@ -149,7 +158,7 @@ Native Block Editor integration with a tabbed sidebar panel:
 * Preferred Source on Google — a button that lets readers add your site as a preferred source
 
 **Optional modules**
-Turn on only what you need under Settings > General > Module Toggles: redirect manager with 404 log, IndexNow, robots.txt editor, broken link checker, internal linking suggestions, Local Business and WooCommerce schema, multilingual hreflang (WPML/Polylang), role-based access, AI writing assistance, content decay and keyword cannibalization reports, Core Web Vitals, GA4 insights and scheduled reports. Disabled modules are not loaded at all.
+Turn on only what you need under Settings > General > Module Toggles: redirect manager with 404 log, redirect chain and loop warnings and export to .htaccess or Nginx, IndexNow, robots.txt editor, broken link checker, internal linking suggestions, Local Business and WooCommerce schema, multilingual hreflang (WPML/Polylang), role-based access, AI writing assistance, content decay and keyword cannibalization reports, Core Web Vitals, GA4 insights and scheduled reports. Disabled modules are not loaded at all.
 
 == Installation ==
 
@@ -163,6 +172,9 @@ Optional modules are switched on under **Settings > General**.
 If you are switching from another SEO plugin, use **JAT Search Intel > Tools > Migration** to import titles, descriptions and focus keywords from Yoast SEO, Rank Math, All in One SEO, SEOPress or The SEO Framework, then deactivate the old plugin to avoid duplicate meta tags.
 
 == Frequently Asked Questions ==
+
+= Can I move from another SEO plugin? =
+Yes. Tools > Migration imports titles, descriptions, focus keyphrases, robots settings, social fields, canonical URLs, primary categories, category and tag SEO, site-wide settings and redirects from All in One SEO, Yoast SEO, Rank Math and SEOPress. Title variables such as `#post_title` or `%%title%%` are converted. Preview the counts first; nothing in the other plugin is changed or deleted.
 
 = Can I use it alongside another SEO plugin? =
 
@@ -242,10 +254,27 @@ Notifies search engines when you publish or update content. Sends the changed UR
 = Slack incoming webhooks (Notifications, optional) =
 Posts score-drop alerts and the weekly digest to the Slack webhook URL you enter. Sends post titles, URLs and scores. [Slack Terms](https://slack.com/terms-of-service), [Slack Privacy Policy](https://slack.com/trust/privacy/privacy-policy).
 
+= OpenStreetMap and Google Maps (Local Business block, optional) =
+When you show a location as a map with the Local Business block or shortcode, the visitor's browser loads the map from openstreetmap.org, which receives the visitor's IP address and the map area. The Get directions link opens Google Maps only when a visitor clicks it. Nothing is sent from your server. OpenStreetMap: [Terms](https://wiki.osmfoundation.org/wiki/Terms_of_Use), [Privacy policy](https://wiki.osmfoundation.org/wiki/Privacy_Policy). Google: [Terms](https://policies.google.com/terms), [Privacy policy](https://policies.google.com/privacy).
+
 = Broken link checker (optional) =
 Sends an HTTP HEAD request to each external URL linked from your content to check whether it still resolves. Only the linked URL is requested; no site data is sent.
 
 == Changelog ==
+
+= 3.8.0 =
+A clean move from All in One SEO, and the features it sells, free.
+
+* Fixed: migration from All in One SEO now reads its own tables (titles, descriptions, focus keyphrases, robots, social fields, canonical URLs, primary category and custom schema), category and tag SEO, site-wide settings and redirects. Title variables are converted for every source plugin, all public post types are included, and the Migration page's buttons work.
+* Fixed: the Redirects page buttons (Add, Edit, Delete, Import, Export, Clear log) now work, and sources with percent-encoded characters are kept intact.
+* New: redirect chain and loop warnings; a rule that would create a loop is refused. Export redirects as .htaccess or Nginx rules.
+* New: Schema tab with Recipe, Event, Review, Course, SoftwareApplication, JobPosting and VideoObject forms.
+* New: headline analyzer, SEO fields in Quick Edit and Bulk Edit, and an admin bar SEO menu.
+* New: RSS sitemap, page-builder content support (Elementor, Bricks, Beaver Builder, Divi, WPBakery), image title and alt text rules, and a Missing alt text screen.
+* New: Local Business block and shortcode for address, opening hours and map.
+* New: SEO head in the REST API for headless sites.
+* Fixed: title templates keep `%category%` and other variables when saved.
+* Security: explicit capability checks on every admin page.
 
 = 3.7.0 =
 Measure what works, and score what matters.
@@ -338,6 +367,9 @@ Every feature other SEO plugins sell in their premium plans, free.
 Earlier releases are listed in CHANGELOG.md in the development repository.
 
 == Upgrade Notice ==
+
+= 3.8.0 =
+Fixes migration from All in One SEO and the Redirects page buttons, and adds schema forms, Quick Edit, redirect chain checks, a Local Business block and headless REST output.
 
 = 3.7.0 =
 Adds the AI Citations report and an evidence-based GEO health score. Your GEO score will change: llms.txt and AI meta tags no longer earn points.

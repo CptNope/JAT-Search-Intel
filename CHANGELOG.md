@@ -6,6 +6,30 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.8.0] — 2026-11-15
+
+A clean move from All in One SEO, and the features it sells, free.
+
+### Fixed
+- **Migration** (Tools → Migration): All in One SEO data is read from its `aioseo_posts` and `aioseo_terms` tables, not only post meta. Imports focus keyphrases, robots (noindex, nofollow), Open Graph and X fields, canonical URLs, primary categories and custom schema; category and tag SEO; site settings (separator, title templates, knowledge graph, verification codes, social profiles); and redirects from All in One SEO, Rank Math and Yoast. Title variables are converted for every source plugin. All public post types are included. The page's Preview and Run buttons now work (`admin/js/migration.js`).
+- **Redirects page**: Add, Edit, Delete, Import CSV, Export CSV and Clear log had no script and did nothing; `admin/js/redirects.js` wires them up. Sources and targets keep percent-encoded characters and regex syntax (`sanitize_text_field()` stripped `%xx`).
+- Title templates and per-post titles keep `%category%`, `%date%` and other variables when saved (`Title_Engine::sanitize_template()`).
+
+### Added
+- Redirect chain and loop detection: chains are listed on the Redirects page and a rule that closes a loop is refused. Export to `.htaccess` (mod_rewrite) or Nginx.
+- REST fields `jat_search_intel_head` and `jat_search_intel_head_json` on public post types, for headless front ends (single items, or when named in `_fields`).
+- Schema tab in the editor sidebar for Recipe, Event, Review, Course, SoftwareApplication, JobPosting and VideoObject (`Schema_Types::get_fields()` is the single source for PHP and the editor).
+- Headline analyzer (`POST jat-search-intel/v1/headline`), SEO fields in Quick Edit and Bulk Edit, and an admin bar menu with scores and testing links.
+- RSS sitemap at `/sitemap.rss` (setting: `enable_rss_sitemap`).
+- `Builder_Content`: Elementor, Bricks, Beaver Builder, Divi and WPBakery content for analysis, descriptions and schema; filter `jat_search_intel_builder_content`.
+- Local Business block (`jat-search-intel/local-business`) and `[jat_search_intel_local display="info|hours|map"]` shortcode. Maps use an OpenStreetMap embed; see External services in readme.txt.
+- Image title and alt text formatting (case, punctuation) and a Media → Missing alt text screen.
+
+### Security
+- Every AJAX handler checks a nonce and a capability; admin pages that relied only on the menu capability now check it themselves.
+
+---
+
 ## [3.7.0] — 2026-11-09
 
 Measure what works, and score what matters.
