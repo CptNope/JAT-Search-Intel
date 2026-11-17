@@ -460,6 +460,22 @@ class Readiness {
 		);
 		// phpcs:enable
 
+		// Count only pages with an address of their own: a section stored as its
+		// own post (a service package shown inside its parent page) is never
+		// served or cited by itself, so its score is not one to improve.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Same aggregate report as above.
+		$low_ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT p.ID FROM {$wpdb->posts} p
+				INNER JOIN {$wpdb->postmeta} g ON g.post_id = p.ID AND g.meta_key = '_jat_search_intel_geo_score'
+				WHERE p.post_status = 'publish' AND p.post_password = '' AND p.post_type IN ({$in})
+				AND CAST( g.meta_value AS DECIMAL(5,1) ) < 50",
+				$types
+			)
+		);
+		// phpcs:enable
+		$row['low_geo'] = count( array_filter( array_map( 'intval', (array) $low_ids ), [ Index_Status::class, 'inspectable' ] ) );
+
 		$stats = [
 			'total'          => (int) ( $row['total'] ?? 0 ),
 			'stale'          => (int) ( $row['stale'] ?? 0 ),
