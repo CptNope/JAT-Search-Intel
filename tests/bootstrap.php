@@ -464,7 +464,8 @@ function single_tag_title( string $prefix = '', bool $display = true ): string {
 }
 
 function get_query_var( string $var, $default = '' ) {
-    return $default;
+    global $si_test_state;
+    return $si_test_state['query_vars'][ $var ] ?? $default;
 }
 
 function wp_nonce_field( string $action, string $name = '_wpnonce', bool $referer = true, bool $echo = true ): string {
@@ -669,8 +670,18 @@ function is_date(): bool {
     return false;
 }
 
-function is_post_type_archive(): bool {
-    return false;
+function is_post_type_archive( $post_types = '' ): bool {
+    global $si_test_state;
+    return (bool) ( $si_test_state['conditionals']['is_post_type_archive'] ?? false );
+}
+
+function get_post_type_archive_link( string $post_type ) {
+    return 'https://example.com/' . $post_type . '/';
+}
+
+function wp_get_canonical_url( $post = null ) {
+    $post_id = is_object( $post ) ? (int) ( $post->ID ?? 0 ) : (int) $post;
+    return apply_filters( 'get_canonical_url', get_permalink( $post_id ), get_post( $post_id ) );
 }
 
 function single_term_title( string $prefix = '', bool $display = true ): string {

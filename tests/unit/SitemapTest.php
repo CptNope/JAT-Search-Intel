@@ -141,6 +141,25 @@ class SitemapTest extends TestCase {
         $this->assertStringContainsString( '</urlset>', $xml );
     }
 
+    public function test_extra_urls_filter_adds_entries_to_page_one(): void {
+        global $si_test_state;
+        add_filter( 'jat_search_intel_sitemap_extra_urls', function ( $extra, $type ) {
+            return 'post' === $type ? [ 'https://example.com/agent/listings/', [ 'loc' => 'https://example.com/other/', 'lastmod' => '2026-11-16' ], [ 'lastmod' => 'no loc' ] ] : $extra;
+        }, 10, 2 );
+
+        $sitemap = $this->make_sitemap();
+        $method  = new ReflectionMethod( $sitemap, 'generate_sitemap' );
+        $method->setAccessible( true );
+        $page1 = $method->invoke( $sitemap, 'post', 1 );
+        $page2 = $method->invoke( $sitemap, 'post', 2 );
+        unset( $si_test_state['filters']['jat_search_intel_sitemap_extra_urls'] );
+
+        $this->assertStringContainsString( '<loc>https://example.com/agent/listings/</loc>', $page1 );
+        $this->assertStringContainsString( '<loc>https://example.com/other/</loc>', $page1 );
+        $this->assertStringContainsString( '<lastmod>2026-11-16T00:00:00+00:00</lastmod>', $page1 );
+        $this->assertStringNotContainsString( 'agent/listings', $page2 );
+    }
+
     // ── Cache TTL constant ───────────────────────────────────────────────
 
     public function test_cache_ttl_is_twelve_hours(): void {

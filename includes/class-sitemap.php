@@ -350,6 +350,28 @@ class Sitemap {
             $xml .= '</url>' . "\n";
         }
 
+        if ( 1 === $page ) {
+            /**
+             * Filters extra URLs listed in a post type's sitemap, such as views a plugin serves
+             * beneath a post. Each entry is a URL string or [ 'loc' => URL, 'lastmod' => date ].
+             *
+             * @param array  $extra     Extra entries.
+             * @param string $post_type Post type.
+             */
+            foreach ( (array) apply_filters( 'jat_search_intel_sitemap_extra_urls', [], $post_type ) as $entry ) {
+                $loc     = is_array( $entry ) ? (string) ( $entry['loc'] ?? '' ) : (string) $entry;
+                $lastmod = is_array( $entry ) ? (string) ( $entry['lastmod'] ?? '' ) : '';
+                if ( '' === $loc ) {
+                    continue;
+                }
+                $xml .= '<url>' . "\n" . '  <loc>' . esc_url( $loc ) . '</loc>' . "\n";
+                if ( '' !== $lastmod && false !== strtotime( $lastmod ) ) {
+                    $xml .= '  <lastmod>' . esc_html( gmdate( 'c', (int) strtotime( $lastmod ) ) ) . '</lastmod>' . "\n";
+                }
+                $xml .= '</url>' . "\n";
+            }
+        }
+
         return $xml;
     }
 

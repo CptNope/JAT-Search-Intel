@@ -99,7 +99,16 @@ class SeoExtrasTest extends TestCase {
 
 		$media = new Media_SEO( $this->settings() );
 		$this->assertSame( '<img alt="Sunset over harbor" src="a.jpg">', $media->filter_content_img_tag( '<img src="a.jpg">', 'the_content', 5 ) );
-		$this->assertSame( '<img src="a.jpg" alt="Sunset over harbor">', $media->filter_content_img_tag( '<img src="a.jpg" alt="">', 'the_content', 5 ) );
+	}
+
+	public function test_content_img_keeps_deliberately_empty_alt(): void {
+		global $si_test_state;
+		$si_test_state['post_meta'][5]['_wp_attachment_image_alt'] = 'Sunset over harbor';
+
+		// alt="" marks a decorative image that screen readers should skip; it must stay empty.
+		$media = new Media_SEO( $this->settings() );
+		$this->assertSame( '<img src="a.jpg" alt="">', $media->filter_content_img_tag( '<img src="a.jpg" alt="">', 'the_content', 5 ) );
+		$this->assertSame( "<img src='a.jpg' alt=''>", $media->filter_content_img_tag( "<img src='a.jpg' alt=''>", 'the_content', 5 ) );
 	}
 
 	public function test_media_hooks_follow_settings(): void {

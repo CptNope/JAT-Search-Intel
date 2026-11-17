@@ -65,7 +65,9 @@ class Schema_Map {
 		if ( ! $public ) {
 			return $output;
 		}
-		$line = 'Sitemap: ' . self::map_url();
+		// Sitemap: lines must point at XML, RSS or text sitemaps (Search Console flags anything
+		// else as invalid), so the JSON map is named in a comment that agents can still read.
+		$line = '# Schema map (JSON-LD, for AI agents): ' . self::map_url();
 		return false !== strpos( $output, $line ) ? $output : rtrim( $output ) . "\n" . $line . "\n";
 	}
 

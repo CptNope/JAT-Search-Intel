@@ -18,6 +18,39 @@ add_filter( 'jat_search_intel_singular_schema', function ( array $schema, int $p
 }, 10, 2 );
 ```
 
+### `jat_search_intel_canonical`
+
+The canonical URL of the current view (singular, posts page, front page, terms, post-type archives). Return `''` to print none.
+
+```php
+add_filter( 'jat_search_intel_canonical', function ( string $canonical ) {
+	return is_page( 'print' ) ? '' : $canonical;
+} );
+```
+
+### `jat_search_intel_meta_description`
+
+The meta description of the current view, after Search Intel works it out. Return `''` to print none.
+
+```php
+add_filter( 'jat_search_intel_meta_description', function ( string $description ) {
+	return is_post_type_archive( 'guide' ) ? 'Every town guide, with sources.' : $description;
+} );
+```
+
+### `jat_search_intel_sitemap_extra_urls`
+
+Extra entries for page 1 of a post type's sitemap, such as views a plugin serves beneath a post. Each is a URL or `[ 'loc' => URL, 'lastmod' => date ]`.
+
+```php
+add_filter( 'jat_search_intel_sitemap_extra_urls', function ( array $extra, string $post_type ) {
+	if ( 'agent' === $post_type ) {
+		$extra[] = [ 'loc' => home_url( '/agents/jane/listings/' ), 'lastmod' => '2026-11-16' ];
+	}
+	return $extra;
+}, 10, 2 );
+```
+
 ### `jat_search_intel_llms_txt`
 
 The full text of `/llms.txt`, or of `/llms-full.txt` when `$full` is true.
