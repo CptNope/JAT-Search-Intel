@@ -4,7 +4,7 @@ Tags: seo, schema, llms-txt, ai-search, redirects
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.8.21
+Stable tag: 3.8.22
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -262,6 +262,13 @@ Sends an HTTP HEAD request to each external URL linked from your content to chec
 
 == Changelog ==
 
+= 3.8.22 =
+* Fixed: images marked as decorative (an empty alt="") no longer get alt text added from the file name. Screen readers skip decorative images; filling them in made pages noisier for people who use one. Only images with no alt attribute at all get one.
+* Fixed: the canonical link now follows WordPress's own canonical URL, so the pages of a split post and views other plugins add beneath a post (such as an agent's listings page) point at themselves instead of the post.
+* Fixed: archive pages of custom post types (such as /communities/) now get a canonical link, and a meta description when the post type has one.
+* Fixed: robots.txt no longer lists the JSON schema map as a "Sitemap:". Search Console only accepts XML, RSS or text sitemaps there; the map is now named in a comment.
+* New: developers can change the canonical URL and meta description of any page (jat_search_intel_canonical, jat_search_intel_meta_description) and add URLs to a post type's sitemap (jat_search_intel_sitemap_extra_urls).
+
 = 3.8.21 =
 * New: entities saved in the GEO tab (people, organizations, places, software) are now added to the page's structured data as schema.org "mentions", so search engines and AI assistants can read them. Before, they were only used for optional inline markup.
 
@@ -442,6 +449,9 @@ Every feature other SEO plugins sell in their premium plans, free.
 Earlier releases are listed in CHANGELOG.md in the development repository.
 
 == Upgrade Notice ==
+
+= 3.8.22 =
+Keeps decorative images decorative, fixes canonicals for split posts and custom post-type archives, and stops listing the JSON schema map as a sitemap.
 
 = 3.8.21 =
 Saved entities now appear in structured data as schema.org mentions.

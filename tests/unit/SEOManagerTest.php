@@ -43,6 +43,14 @@ class SEOManagerTest extends TestCase {
         ];
     }
 
+    protected function tearDown(): void {
+        global $si_test_state;
+        foreach ( [ 'get_canonical_url', 'jat_search_intel_canonical', 'jat_search_intel_meta_description' ] as $tag ) {
+            unset( $si_test_state['filters'][ $tag ] );
+        }
+        unset( $si_test_state['conditionals']['is_singular'], $si_test_state['conditionals']['is_post_type_archive'], $si_test_state['query_vars'] );
+    }
+
     // ── get_title ────────────────────────────────────────────────────────
 
     public function test_get_title_returns_custom_seo_title(): void {
@@ -224,5 +232,42 @@ class SEOManagerTest extends TestCase {
         $output = ob_get_clean();
 
         $this->assertStringContainsString( 'canonical.example.com/page', $output );
+    }
+
+    public function test_canonical_honours_core_get_canonical_url_filter(): void {
+        // A plugin serving a virtual view beneath a post (/agent/listings/) sets its canonical
+        // through core's filter; Search Intel must print that, not the post's permalink.
+        add_filter( 'get_canonical_url', fn( $url ) => 'https://example.com/agent/listings/' );
+
+        $mgr = $this->make_manager();
+        ob_start();
+        $mgr->render_canonical();
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString( 'href="https://example.com/agent/listings/"', $output );
+    }
+
+    public function test_canonical_filter_can_change_or_remove_it(): void {
+        add_filter( 'jat_search_intel_canonical', fn() => '' );
+
+        $mgr = $this->make_manager();
+        ob_start();
+        $mgr->render_canonical();
+        $this->assertStringNotContainsString( 'rel="canonical"', (string) ob_get_clean() );
+    }
+
+    public function test_post_type_archive_gets_canonical_and_description(): void {
+        global $si_test_state;
+        $si_test_state['conditionals']['is_singular']          = false;
+        $si_test_state['conditionals']['is_post_type_archive'] = true;
+        $si_test_state['query_vars']['post_type']              = 'guide';
+
+        $mgr = $this->make_manager();
+        $this->assertSame( 'https://example.com/guide/', $mgr->current_canonical() );
+
+        add_filter( 'jat_search_intel_meta_description', fn( $d ) => 'Every town guide.' );
+        ob_start();
+        $mgr->render_meta_tags();
+        $this->assertStringContainsString( '<meta name="description" content="Every town guide." />', (string) ob_get_clean() );
     }
 }

@@ -162,7 +162,18 @@ class SEO_Manager {
             $description = get_bloginfo( 'description' );
         } elseif ( $this->current_term() ) {
             $description = $this->get_term_description( $this->current_term() );
+        } elseif ( is_post_type_archive() ) {
+            $type        = get_query_var( 'post_type' );
+            $object      = get_post_type_object( is_array( $type ) ? (string) reset( $type ) : (string) $type );
+            $description = $object && ! empty( $object->description ) ? $this->truncate_description( wp_strip_all_tags( (string) $object->description ) ) : '';
         }
+
+        /**
+         * Filters the meta description of the current view ('' prints none).
+         *
+         * @param string $description Description.
+         */
+        $description = (string) apply_filters( 'jat_search_intel_meta_description', $description );
 
         if ( $description ) {
             printf(
@@ -199,12 +210,31 @@ class SEO_Manager {
             return;
         }
 
+        $canonical = $this->current_canonical();
+
+        if ( $canonical ) {
+            // Remove WP default canonical to avoid duplication
+            remove_action( 'wp_head', 'rel_canonical' );
+            printf( '<link rel="canonical" href="%s" />' . "\n", esc_url( $canonical ) );
+        }
+    }
+
+    /**
+     * The canonical URL of the current view, or ''.
+     *
+     * A singular view goes through wp_get_canonical_url(), so the page number of a split post and
+     * the core `get_canonical_url` filter (used by plugins with virtual sub-pages of a post) are
+     * respected. Post-type archives get their archive link.
+     *
+     * @return string
+     */
+    public function current_canonical(): string {
         $canonical = '';
 
         if ( is_singular() ) {
             $post_id   = get_queried_object_id();
             $custom    = get_post_meta( $post_id, '_jat_search_intel_canonical', true );
-            $canonical = $custom ?: get_permalink( $post_id );
+            $canonical = $custom ?: ( wp_get_canonical_url( $post_id ) ?: get_permalink( $post_id ) );
         } elseif ( Title_Engine::posts_page_id() ) {
             $page_id   = Title_Engine::posts_page_id();
             $custom    = get_post_meta( $page_id, '_jat_search_intel_canonical', true );
@@ -218,13 +248,23 @@ class SEO_Manager {
             $paged     = max( 1, (int) get_query_var( 'paged' ) );
             // Each page of an archive is its own canonical URL; page 2 is not a duplicate of page 1.
             $canonical = $custom ?: ( $paged > 1 ? get_pagenum_link( $paged, false ) : get_term_link( $term ) );
+        } elseif ( is_post_type_archive() ) {
+            $paged     = max( 1, (int) get_query_var( 'paged' ) );
+            $type      = get_query_var( 'post_type' );
+            $type      = is_array( $type ) ? (string) reset( $type ) : (string) $type;
+            $canonical = $paged > 1 ? get_pagenum_link( $paged, false ) : get_post_type_archive_link( $type );
         }
 
-        if ( $canonical && ! is_wp_error( $canonical ) ) {
-            // Remove WP default canonical to avoid duplication
-            remove_action( 'wp_head', 'rel_canonical' );
-            printf( '<link rel="canonical" href="%s" />' . "\n", esc_url( $canonical ) );
+        if ( ! is_string( $canonical ) ) {
+            $canonical = '';
         }
+
+        /**
+         * Filters the canonical URL of the current view ('' prints none).
+         *
+         * @param string $canonical Canonical URL.
+         */
+        return (string) apply_filters( 'jat_search_intel_canonical', $canonical );
     }
 
     /**
@@ -342,7 +382,7 @@ class SEO_Manager {
             $social_desc  = get_post_meta( $post_id, '_jat_search_intel_social_description', true );
             $tags['og:title']       = $social_title ?: $this->get_title( $post_id );
             $tags['og:description'] = $social_desc ?: $this->get_description( $post_id );
-            $tags['og:url']         = get_permalink( $post_id );
+            $tags['og:url']         = $this->current_canonical() ?: get_permalink( $post_id );
 
             // Featured image
             $image = $this->get_og_image( $post_id );

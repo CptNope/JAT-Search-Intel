@@ -182,7 +182,9 @@ class Media_SEO {
 		$filtered_image = (string) $filtered_image;
 		$attachment_id  = (int) $attachment_id;
 
-		if ( ! $attachment_id || preg_match( '/\salt="[^"]+"/i', $filtered_image ) ) {
+		// An image with any alt attribute, including a deliberately empty alt="" (a decorative
+		// image, which screen readers should skip), keeps it. Only a missing alt is filled in.
+		if ( ! $attachment_id || preg_match( '/\salt=("|\')/i', $filtered_image ) ) {
 			return $filtered_image;
 		}
 
@@ -195,9 +197,6 @@ class Media_SEO {
 		}
 
 		$attr = ' alt="' . esc_attr( $alt ) . '"';
-		if ( preg_match( '/\salt=""/i', $filtered_image ) ) {
-			return (string) preg_replace( '/\salt=""/i', $attr, $filtered_image, 1 );
-		}
 		return (string) preg_replace( '/^<img\b/i', '<img' . $attr, $filtered_image, 1 );
 	}
 

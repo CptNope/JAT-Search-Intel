@@ -6,9 +6,11 @@ use JAT_Search_Intel\Schema_Map;
 class SchemaMapTest extends ParityTestCase {
 
 	public function test_robots_line_added_once_for_public_sites(): void {
-		$line = 'Sitemap: https://example.com/wp-json/jat-search-intel/v1/schema-map';
+		$line = '# Schema map (JSON-LD, for AI agents): https://example.com/wp-json/jat-search-intel/v1/schema-map';
 		$out  = Schema_Map::robots_line( "User-agent: *\nDisallow:\n", true );
 		$this->assertStringContainsString( $line, $out );
+		// Sitemap: lines are for XML, RSS or text sitemaps only.
+		$this->assertStringNotContainsString( 'Sitemap: https://example.com/wp-json/', $out );
 		$this->assertSame( $out, Schema_Map::robots_line( $out, true ) );
 		$this->assertSame( 'User-agent: *', Schema_Map::robots_line( 'User-agent: *', false ) );
 	}

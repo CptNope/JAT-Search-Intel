@@ -6,6 +6,20 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.8.22] — 2026-11-17
+
+Found while setting Search Intel up on a site whose own plugin adds views and archives of its own (oberdorferteam.com).
+
+### Fixed
+- `Media_SEO::filter_content_img_tag()` replaced a deliberately empty `alt=""` with alt text derived from the file name. An empty alt marks a decorative image that assistive technology should skip (WCAG 1.1.1), so only an `img` with no `alt` attribute is filled in now.
+- `SEO_Manager::render_canonical()` printed `get_permalink()` on every singular view, ignoring the page number of a split post and core's `get_canonical_url` filter, which plugins use for views served beneath a post. The canonical now comes from `wp_get_canonical_url()`; `og:url` follows it.
+- Custom post-type archives had no canonical and no meta description. They now get `get_post_type_archive_link()` (or the paged URL) and the post type's `description` when it has one.
+- `Schema_Map::robots_line()` added the JSON schema map as a `Sitemap:` line, which Search Console reports as an invalid sitemap. It is now a comment: `# Schema map (JSON-LD, for AI agents): …`.
+
+### Added
+- `jat_search_intel_canonical` ( `$canonical` ) and `jat_search_intel_meta_description` ( `$description` ) filter the canonical URL and meta description of every view (`''` prints none). `SEO_Manager::current_canonical()` is public.
+- `jat_search_intel_sitemap_extra_urls` ( `$extra`, `$post_type` ) adds entries to page 1 of a post type's sitemap: URL strings or `[ 'loc' => …, 'lastmod' => … ]`.
+
 ## [3.8.21] — 2026-11-16
 
 ### Added
