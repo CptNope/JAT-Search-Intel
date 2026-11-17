@@ -6,6 +6,11 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.8.21] — 2026-11-16
+
+### Added
+- The WebPage node of a singular page carries `mentions` built from `_jat_search_intel_entities` (`Schema_Manager::entity_mentions()`): type limited to a known list (else `Thing`), names de-duplicated, URL when set. Saved entities were previously used only by the optional inline entity markup (`enable_entity_markup`) and never reached JSON-LD.
+
 ## [3.8.20] — 2026-11-16
 
 ### Changed

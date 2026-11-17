@@ -41,6 +41,24 @@ class SchemaManagerTest extends TestCase {
 
     // ── Hooks ────────────────────────────────────────────────────────────
 
+    public function test_entity_mentions_from_saved_entities(): void {
+        global $si_test_state;
+        $si_test_state['post_meta'][77]['_jat_search_intel_entities'] = [
+            [ 'name' => 'Ollama', 'type' => 'SoftwareApplication', 'url' => 'https://ollama.com/' ],
+            [ 'name' => 'ollama', 'type' => 'Thing' ],
+            [ 'name' => 'Worcester', 'type' => 'Galaxy' ],
+            [ 'name' => '' ],
+        ];
+        $this->assertSame(
+            [
+                [ '@type' => 'SoftwareApplication', 'name' => 'Ollama', 'url' => 'https://ollama.com/' ],
+                [ '@type' => 'Thing', 'name' => 'Worcester' ],
+            ],
+            \JAT_Search_Intel\Schema_Manager::entity_mentions( 77 )
+        );
+        $this->assertSame( [], \JAT_Search_Intel\Schema_Manager::entity_mentions( 78 ) );
+    }
+
     public function test_hooks_registered_when_schema_enabled(): void {
         $this->make_manager();
 
