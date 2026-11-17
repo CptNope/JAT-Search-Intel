@@ -4,7 +4,7 @@ Tags: seo, schema, llms-txt, ai-search, redirects
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.8.20
+Stable tag: 3.8.21
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -262,6 +262,9 @@ Sends an HTTP HEAD request to each external URL linked from your content to chec
 
 == Changelog ==
 
+= 3.8.21 =
+* New: entities saved in the GEO tab (people, organizations, places, software) are now added to the page's structured data as schema.org "mentions", so search engines and AI assistants can read them. Before, they were only used for optional inline markup.
+
 = 3.8.20 =
 * Improved: the GEO "source citations" check also counts sources saved in the GEO tab and links to two or more outside sites, not only phrases like "according to".
 * Fixed: the AI Search Readiness count of pages scoring below 50 included sections stored as their own posts that have no page of their own (such as service packages shown inside a service page).
@@ -439,6 +442,9 @@ Every feature other SEO plugins sell in their premium plans, free.
 Earlier releases are listed in CHANGELOG.md in the development repository.
 
 == Upgrade Notice ==
+
+= 3.8.21 =
+Saved entities now appear in structured data as schema.org mentions.
 
 = 3.8.20 =
 Citations by link now count for GEO, and the readiness count skips sections without their own page. Rescore after updating.

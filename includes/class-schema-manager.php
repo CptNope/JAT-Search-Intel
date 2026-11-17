@@ -150,6 +150,43 @@ class Schema_Manager {
     }
 
     /**
+     * The entities saved on a post (GEO tab), as schema.org "mentions".
+     *
+     * Search engines and AI assistants read these to know which people,
+     * organisations, places and products a page is about.
+     *
+     * @param int $post_id Post ID.
+     * @return array<int,array<string,string>>
+     */
+    public static function entity_mentions( int $post_id ): array {
+        $entities = get_post_meta( $post_id, '_jat_search_intel_entities', true );
+        if ( ! is_array( $entities ) ) {
+            return [];
+        }
+        $allowed  = [ 'Person', 'Organization', 'Place', 'Product', 'Event', 'Thing', 'CreativeWork', 'Brand', 'SoftwareApplication' ];
+        $mentions = [];
+        $seen     = [];
+        foreach ( $entities as $entity ) {
+            $name = is_array( $entity ) ? trim( (string) ( $entity['name'] ?? '' ) ) : '';
+            if ( '' === $name || isset( $seen[ strtolower( $name ) ] ) ) {
+                continue;
+            }
+            $seen[ strtolower( $name ) ] = true;
+            $type                        = (string) ( $entity['type'] ?? 'Thing' );
+            $item                        = [
+                '@type' => in_array( $type, $allowed, true ) ? $type : 'Thing',
+                'name'  => $name,
+            ];
+            $url = esc_url_raw( (string) ( $entity['url'] ?? '' ) );
+            if ( '' !== $url ) {
+                $item['url'] = $url;
+            }
+            $mentions[] = $item;
+        }
+        return $mentions;
+    }
+
+    /**
      * WebPage-family node describing the current URL.
      *
      * @return array<string,mixed>
@@ -193,6 +230,10 @@ class Schema_Manager {
             $description           = $this->get_description( $post_id );
             if ( $description ) {
                 $node['description'] = $description;
+            }
+            $mentions = self::entity_mentions( $post_id );
+            if ( $mentions ) {
+                $node['mentions'] = $mentions;
             }
             $node['potentialAction'] = [
                 [
