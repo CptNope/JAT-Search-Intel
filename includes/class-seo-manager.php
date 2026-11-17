@@ -165,7 +165,7 @@ class SEO_Manager {
         } elseif ( is_post_type_archive() ) {
             $type        = get_query_var( 'post_type' );
             $object      = get_post_type_object( is_array( $type ) ? (string) reset( $type ) : (string) $type );
-            $description = $object && ! empty( $object->description ) ? $this->truncate_description( wp_strip_all_tags( (string) $object->description ) ) : '';
+            $description = $object && ! empty( $object->description ) ? $this->truncate_description( wp_strip_all_tags( $object->description ) ) : '';
         }
 
         /**
