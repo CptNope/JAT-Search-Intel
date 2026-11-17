@@ -6,6 +6,17 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.8.19] — 2026-11-16
+
+### Added
+- `jat_search_intel_link_checker_links` ( `$urls`, `$post_id` ) filters the links checked for a post, so a theme or plugin can add links it keeps in post meta (a listing's website, menu or order page). Non-HTTP results (`tel:`, `mailto:`) are dropped after the filter.
+- `jat_search_intel_link_checker_post_types` ( `$types` ) filters the post types the scheduled scan walks, via the new `Link_Checker::post_types()`.
+
+### Changed
+- `extract_links()` no longer returns early for an empty post body, so the filter can supply links for listings that have none in their content.
+
+---
+
 ## [3.8.18] — 2026-11-16
 
 ### Fixed
