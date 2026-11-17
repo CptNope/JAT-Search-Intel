@@ -102,12 +102,12 @@ class Link_Checker {
 	 */
 	public function extract_links( int $post_id ): array {
 		$post = get_post( $post_id );
-		if ( ! $post || empty( $post->post_content ) ) {
+		if ( ! $post ) {
 			return [];
 		}
 
 		$urls = [];
-		if ( preg_match_all( '/<a\s[^>]*href=["\']([^"\']+)["\'][^>]*>/i', $post->post_content, $matches ) ) {
+		if ( ! empty( $post->post_content ) && preg_match_all( '/<a\s[^>]*href=["\']([^"\']+)["\'][^>]*>/i', $post->post_content, $matches ) ) {
 			foreach ( $matches[1] as $url ) {
 				$url = trim( $url );
 				// Skip anchors, mailto, tel, javascript.
@@ -122,7 +122,37 @@ class Link_Checker {
 			}
 		}
 
-		return array_unique( $urls );
+		/**
+		 * Filters the links checked for a post. Use it to add links a theme keeps outside
+		 * the post content, such as a listing's website or menu stored in post meta.
+		 *
+		 * @since 3.8.19
+		 *
+		 * @param string[] $urls    Absolute URLs found in the content.
+		 * @param int      $post_id Post ID.
+		 */
+		$urls = (array) apply_filters( 'jat_search_intel_link_checker_links', $urls, $post_id );
+		$urls = array_filter( array_map( 'strval', $urls ), static function ( $url ) {
+			return 0 === strpos( $url, 'http' );
+		} );
+
+		return array_values( array_unique( $urls ) );
+	}
+
+	/**
+	 * Post types the scheduled scan walks: the enabled post types, filterable.
+	 *
+	 * @return string[]
+	 */
+	public function post_types(): array {
+		/**
+		 * Filters the post types the link checker scans.
+		 *
+		 * @since 3.8.19
+		 *
+		 * @param string[] $types Enabled post types.
+		 */
+		return array_values( (array) apply_filters( 'jat_search_intel_link_checker_post_types', $this->settings['enabled_post_types'] ?? [ 'post', 'page' ] ) );
 	}
 
 	/**
@@ -188,7 +218,7 @@ class Link_Checker {
 	public function run_batch_check(): void {
 		$offset = (int) get_option( 'jat_search_intel_link_checker_offset', 0 );
 		$posts  = get_posts( [
-			'post_type'      => $this->settings['enabled_post_types'] ?? [ 'post', 'page' ],
+			'post_type'      => $this->post_types(),
 			'post_status'    => 'publish',
 			'posts_per_page' => self::BATCH_SIZE,
 			'offset'         => $offset,

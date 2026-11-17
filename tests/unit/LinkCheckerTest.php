@@ -6,6 +6,12 @@ use JAT_Search_Intel\Link_Checker;
 
 class LinkCheckerTest extends TestCase {
 
+	protected function tearDown(): void {
+		global $si_test_state;
+		unset( $si_test_state['filters']['jat_search_intel_link_checker_links'], $si_test_state['filters']['jat_search_intel_link_checker_post_types'] );
+	}
+
+
 	private Link_Checker $checker;
 
 	protected function setUp(): void {
@@ -14,6 +20,7 @@ class LinkCheckerTest extends TestCase {
 		$si_test_state['posts']            = [];
 		$si_test_state['scheduled_events'] = [];
 		$si_test_state['remote_head_response'] = null;
+		unset( $si_test_state['filters']['jat_search_intel_link_checker_links'], $si_test_state['filters']['jat_search_intel_link_checker_post_types'] );
 
 		$this->checker = new Link_Checker( [
 			'enable_link_checker' => true,
@@ -82,6 +89,34 @@ class LinkCheckerTest extends TestCase {
 
 		$links = $this->checker->extract_links( 1 );
 		$this->assertCount( 1, $links );
+	}
+
+	public function test_extract_links_filter_adds_links_kept_outside_the_content(): void {
+		global $si_test_state;
+		// A listing with no body text: its website and menu live in post meta.
+		$si_test_state['posts'][7] = [
+			'ID'           => 7,
+			'post_title'   => 'A place',
+			'post_content' => '',
+			'post_status'  => 'publish',
+			'post_type'    => 'listing',
+		];
+		add_filter( 'jat_search_intel_link_checker_links', function ( $urls, $post_id ) {
+			return 7 === $post_id ? array_merge( $urls, [ 'https://place.example/', 'https://place.example/menu', 'tel:5085551234' ] ) : $urls;
+		}, 10, 2 );
+
+		$links = $this->checker->extract_links( 7 );
+
+		$this->assertSame( [ 'https://place.example/', 'https://place.example/menu' ], $links );
+	}
+
+	public function test_post_types_filter_adds_custom_types(): void {
+		add_filter( 'jat_search_intel_link_checker_post_types', function ( $types ) {
+			return array_merge( $types, [ 'listing' ] );
+		} );
+
+		$this->assertContains( 'listing', $this->checker->post_types() );
+		$this->assertContains( 'post', $this->checker->post_types() );
 	}
 
 	public function test_extract_links_empty_for_missing_post(): void {
