@@ -481,7 +481,7 @@ class Readiness {
 			'stale'          => (int) ( $row['stale'] ?? 0 ),
 			'no_description' => (int) ( $row['no_description'] ?? 0 ),
 			'analyzed'       => (int) ( $row['analyzed'] ?? 0 ),
-			'low_geo'        => (int) ( $row['low_geo'] ?? 0 ),
+			'low_geo'        => $row['low_geo'],
 		];
 		// Whole-site aggregate: cache briefly so repeated views and agent calls stay cheap.
 		set_transient( $cache_key, $stats, 10 * MINUTE_IN_SECONDS );
