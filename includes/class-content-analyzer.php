@@ -469,6 +469,30 @@ class Content_Analyzer {
     }
 
     /**
+     * How many different outside sites the content links to.
+     *
+     * A link to documentation, a standard or a dataset is how most writers cite
+     * a source, so two or more distinct external domains count as citations.
+     *
+     * @param string $content HTML.
+     * @return int
+     */
+    public static function external_source_count( string $content ): int {
+        if ( ! preg_match_all( '/<a\s[^>]*href=["\']https?:\/\/([^\/"\'?#:]+)/i', $content, $m ) ) {
+            return 0;
+        }
+        $own     = strtolower( preg_replace( '/^www\./', '', (string) wp_parse_url( home_url(), PHP_URL_HOST ) ) );
+        $domains = [];
+        foreach ( $m[1] as $host ) {
+            $host = strtolower( preg_replace( '/^www\./', '', $host ) );
+            if ( '' !== $host && $host !== $own ) {
+                $domains[ $host ] = true;
+            }
+        }
+        return count( $domains );
+    }
+
+    /**
      * GEO Score — generative engine optimization checks.
      */
     private function get_geo_score( int $post_id, string $content, string $text, int $word_count ): array {
@@ -484,8 +508,10 @@ class Content_Analyzer {
             $checks[] = [ 'pass' => false, 'label' => __( 'Add an AI summary for LLM indexing', 'jat-search-intel' ) ];
         }
 
-        // 2. Source citations (15 pts)
-        $has_citations = (bool) preg_match( '/(according to|source:|study shows|research from|data from)/i', $text );
+        // 2. Source citations (15 pts): attribution phrases, sources saved in the GEO tab, or links to outside sources.
+        $has_citations = (bool) preg_match( '/(according to|source:|study shows|research from|data from)/i', $text )
+            || ! empty( get_post_meta( $post_id, '_jat_search_intel_citations', true ) )
+            || self::external_source_count( $content ) >= 2;
         if ( $has_citations ) {
             $score += 15;
             $checks[] = [ 'pass' => true, 'label' => __( 'Content includes source citations', 'jat-search-intel' ) ];

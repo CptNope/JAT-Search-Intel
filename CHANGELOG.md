@@ -6,6 +6,14 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.8.20] — 2026-11-16
+
+### Changed
+- GEO "source citations" passes when the post has saved citations (`_jat_search_intel_citations`) or links to two or more distinct external domains (`Content_Analyzer::external_source_count()`), in addition to the attribution phrases.
+
+### Fixed
+- `Readiness::content_stats()` counted every published post with a GEO score under 50, including posts with no URL of their own (sections such as service packages rendered inside a parent page). `low_geo` now counts only `Index_Status::inspectable()` posts.
+
 ## [3.8.19] — 2026-11-16
 
 ### Added

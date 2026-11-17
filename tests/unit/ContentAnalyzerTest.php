@@ -44,6 +44,19 @@ class ContentAnalyzerTest extends TestCase {
         $this->assertArrayHasKey( 'content_checks', $result );
     }
 
+    public function test_external_links_count_as_citations(): void {
+        $html = '<p>See <a href="https://docs.ollama.com/api">the docs</a>, <a href="https://www.nist.gov/x">NIST</a>, '
+            . '<a href="https://nist.gov/y">again</a> and <a href="' . home_url( '/about/' ) . '">about</a>.</p>';
+        $this->assertSame( 2, Content_Analyzer::external_source_count( $html ) );
+        $this->assertSame( 0, Content_Analyzer::external_source_count( '<p>No links.</p>' ) );
+
+        $labels = array_column( $this->analyzer->analyze( 1, $html, 'T', '', 'd' )['geo_score']['checks'], 'label' );
+        $this->assertContains( 'Content includes source citations', $labels );
+
+        $one = '<p>Only <a href="https://docs.ollama.com/api">one source</a>.</p>';
+        $this->assertNotContains( 'Content includes source citations', array_column( $this->analyzer->analyze( 1, $one, 'T', '', 'd' )['geo_score']['checks'], 'label' ) );
+    }
+
     public function test_first_paragraph_skips_empty_paragraphs(): void {
         $html = '<p class="subtitle"></p><p>&nbsp;</p><p>Cybersecurity consulting is <strong>hands-on</strong> work.</p><p>Later.</p>';
         $this->assertSame( 'Cybersecurity consulting is hands-on work.', Content_Analyzer::first_paragraph( str_replace( '&nbsp;', '', $html ) ) );

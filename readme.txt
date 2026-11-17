@@ -4,7 +4,7 @@ Tags: seo, schema, llms-txt, ai-search, redirects
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.8.19
+Stable tag: 3.8.20
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -262,6 +262,10 @@ Sends an HTTP HEAD request to each external URL linked from your content to chec
 
 == Changelog ==
 
+= 3.8.20 =
+* Improved: the GEO "source citations" check also counts sources saved in the GEO tab and links to two or more outside sites, not only phrases like "according to".
+* Fixed: the AI Search Readiness count of pages scoring below 50 included sections stored as their own posts that have no page of their own (such as service packages shown inside a service page).
+
 = 3.8.19 =
 * New: developers can add links kept outside the post content (a listing's website or menu in post meta) and extra post types to the broken link checker with the jat_search_intel_link_checker_links and jat_search_intel_link_checker_post_types filters.
 * Fixed: the link checker no longer skips posts with an empty body before those filters run.
@@ -435,6 +439,9 @@ Every feature other SEO plugins sell in their premium plans, free.
 Earlier releases are listed in CHANGELOG.md in the development repository.
 
 == Upgrade Notice ==
+
+= 3.8.20 =
+Citations by link now count for GEO, and the readiness count skips sections without their own page. Rescore after updating.
 
 = 3.8.19 =
 The broken link checker can now check links stored outside post content.
