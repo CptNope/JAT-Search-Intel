@@ -1030,6 +1030,18 @@ class Redirect_Manager {
 			return;
 		}
 
+		// Only a URL that was live can need a redirect. A draft, pending or private post being
+		// published (or a submission becoming an event) had no public address before: its
+		// "permalink" is a query URL whose path is "/", and redirecting that hijacks the home page.
+		if ( 'publish' !== ( $post_before->post_status ?? '' ) ) {
+			return;
+		}
+		$type_before = $post_before->post_type ?? 'post';
+		$type_after  = $post->post_type ?? 'post';
+		if ( $type_before !== $type_after || ! is_post_type_viewable( $type_after ) ) {
+			return;
+		}
+
 		$old_url = get_permalink( $post_before );
 		$new_url = get_permalink( $post );
 
@@ -1041,6 +1053,13 @@ class Redirect_Manager {
 		$new_path = wp_parse_url( $new_url, PHP_URL_PATH );
 
 		if ( ! $old_path || ! $new_path ) {
+			return;
+		}
+
+		// Never send the home page anywhere automatically, and skip query-string permalinks
+		// (?p=123), whose path is the home page too.
+		$home_path = trailingslashit( (string) wp_parse_url( home_url( '/' ), PHP_URL_PATH ) );
+		if ( trailingslashit( $old_path ) === $home_path || wp_parse_url( $old_url, PHP_URL_QUERY ) ) {
 			return;
 		}
 
