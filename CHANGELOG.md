@@ -6,6 +6,13 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.8.23] — 2026-11-18
+
+Found on livetoeatfoodie.com, where approving submitted events sent the home page to the newest event.
+
+### Fixed
+- `Redirect_Manager::detect_slug_change()` added a 301 from the post's previous permalink whenever a post was published with a new `post_name`, including posts that were never public. A pending or draft post (or one changing post type, such as a submission becoming an event) has a query-string permalink whose path is `/`, so the auto rule redirected the home page. It now runs only when the post was already published, keeps its post type, the type is viewable, and the old URL is neither the home path nor a `?p=` URL.
+
 ## [3.8.22] — 2026-11-17
 
 Found while setting Search Intel up on a site whose own plugin adds views and archives of its own (oberdorferteam.com).

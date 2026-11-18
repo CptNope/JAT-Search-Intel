@@ -258,6 +258,76 @@ class RedirectManagerTest extends TestCase {
 		$this->assertEmpty( $table );
 	}
 
+	public function test_detect_slug_change_redirects_a_published_post_whose_slug_changed(): void {
+		global $wpdb, $si_test_state;
+
+		$si_test_state['permalinks'][20] = 'https://example.com/old-slug/';
+		$si_test_state['permalinks'][10] = 'https://example.com/new-slug/';
+		$post_before = (object) [ 'ID' => 20, 'post_name' => 'old-slug', 'post_status' => 'publish', 'post_type' => 'post' ];
+		$post_after  = (object) [ 'ID' => 10, 'post_name' => 'new-slug', 'post_status' => 'publish', 'post_type' => 'post' ];
+
+		$this->manager->detect_slug_change( 10, $post_after, $post_before );
+
+		$rows = array_values( $wpdb->tables['wp_jat_search_intel_redirects'] ?? [] );
+		$this->assertCount( 1, $rows );
+		$this->assertSame( '/old-slug/', $rows[0]['source_url'] );
+		$this->assertSame( '/new-slug/', $rows[0]['target_url'] );
+	}
+
+	public function test_detect_slug_change_ignores_pending_post_being_published(): void {
+		global $wpdb, $si_test_state;
+
+		// A pending submission approved as a published post: its old "permalink" is a query URL
+		// whose path is "/". Redirecting it would send the home page to the new post.
+		$si_test_state['permalinks'][20] = 'https://example.com/?post_type=post&p=20';
+		$si_test_state['permalinks'][10] = 'https://example.com/event/tree-lighting/';
+		$post_before = (object) [ 'ID' => 20, 'post_name' => '', 'post_status' => 'pending', 'post_type' => 'post' ];
+		$post_after  = (object) [ 'ID' => 10, 'post_name' => 'tree-lighting', 'post_status' => 'publish', 'post_type' => 'post' ];
+
+		$this->manager->detect_slug_change( 10, $post_after, $post_before );
+
+		$this->assertEmpty( $wpdb->tables['wp_jat_search_intel_redirects'] ?? [] );
+	}
+
+	public function test_detect_slug_change_never_redirects_the_home_page(): void {
+		global $wpdb, $si_test_state;
+
+		$si_test_state['permalinks'][20] = 'https://example.com/';
+		$si_test_state['permalinks'][10] = 'https://example.com/new-slug/';
+		$post_before = (object) [ 'ID' => 20, 'post_name' => 'home', 'post_status' => 'publish', 'post_type' => 'page' ];
+		$post_after  = (object) [ 'ID' => 10, 'post_name' => 'new-slug', 'post_status' => 'publish', 'post_type' => 'page' ];
+
+		$this->manager->detect_slug_change( 10, $post_after, $post_before );
+
+		$this->assertEmpty( $wpdb->tables['wp_jat_search_intel_redirects'] ?? [] );
+	}
+
+	public function test_detect_slug_change_ignores_query_string_permalinks(): void {
+		global $wpdb, $si_test_state;
+
+		$si_test_state['permalinks'][20] = 'https://example.com/?p=20';
+		$si_test_state['permalinks'][10] = 'https://example.com/new-slug/';
+		$post_before = (object) [ 'ID' => 20, 'post_name' => 'old', 'post_status' => 'publish', 'post_type' => 'post' ];
+		$post_after  = (object) [ 'ID' => 10, 'post_name' => 'new-slug', 'post_status' => 'publish', 'post_type' => 'post' ];
+
+		$this->manager->detect_slug_change( 10, $post_after, $post_before );
+
+		$this->assertEmpty( $wpdb->tables['wp_jat_search_intel_redirects'] ?? [] );
+	}
+
+	public function test_detect_slug_change_ignores_post_type_change(): void {
+		global $wpdb, $si_test_state;
+
+		$si_test_state['permalinks'][20] = 'https://example.com/old-slug/';
+		$si_test_state['permalinks'][10] = 'https://example.com/product/new-slug/';
+		$post_before = (object) [ 'ID' => 20, 'post_name' => 'old-slug', 'post_status' => 'publish', 'post_type' => 'post' ];
+		$post_after  = (object) [ 'ID' => 10, 'post_name' => 'new-slug', 'post_status' => 'publish', 'post_type' => 'product' ];
+
+		$this->manager->detect_slug_change( 10, $post_after, $post_before );
+
+		$this->assertEmpty( $wpdb->tables['wp_jat_search_intel_redirects'] ?? [] );
+	}
+
 	// ── Admin registration ───────────────────────────────────────────────
 
 	public function test_register_admin_page_hooks_admin_menu(): void {
