@@ -6,6 +6,16 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.8.24] — 2026-11-19
+
+Found while marking up the itch.io games on jeremyanderson.tech.
+
+### Fixed
+- `Schema_Types::get_software_schema()` returned nothing when App name was empty, although the field says it falls back to the post title. It now uses the title.
+
+### Added
+- SoftwareApplication nodes carry `url` (the permalink) and `sameAs` from a new `software_links` field ("Store and download pages", one URL per line; only http(s), de-duplicated), so a game or app links to its itch.io, Steam, GitHub or app store listing.
+
 ## [3.8.23] — 2026-11-18
 
 Found on livetoeatfoodie.com, where approving submitted events sent the home page to the newest event.

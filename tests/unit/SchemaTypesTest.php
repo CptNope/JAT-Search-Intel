@@ -272,6 +272,27 @@ class SchemaTypesTest extends TestCase {
 		$this->assertEquals( '4.8', $schema['aggregateRating']['ratingValue'] );
 	}
 
+	public function test_software_schema_falls_back_to_title_with_url_and_links(): void {
+		global $si_test_state;
+		$si_test_state['posts'][2] = [
+			'ID' => 2, 'post_title' => 'Hearthdeep', 'post_content' => '',
+			'post_status' => 'publish', 'post_type' => 'project', 'post_author' => 1,
+		];
+		$si_test_state['post_meta'][2]['_jat_search_intel_software_category'] = 'GameApplication';
+		$si_test_state['post_meta'][2]['_jat_search_intel_software_links']    = "https://cptnope.itch.io/hearthdeep\n\njavascript:alert(1)\nhttps://cptnope.itch.io/hearthdeep\nhttps://github.com/CptNope/hearthdeep";
+
+		$schema = $this->types->get_software_schema( 2 );
+
+		$this->assertSame( 'Hearthdeep', $schema['name'] );
+		$this->assertSame( 'https://example.com/?p=2', $schema['url'] );
+		$this->assertSame( [ 'https://cptnope.itch.io/hearthdeep', 'https://github.com/CptNope/hearthdeep' ], $schema['sameAs'] );
+		$this->assertArrayNotHasKey( 'offers', $schema );
+	}
+
+	public function test_software_links_field_is_registered(): void {
+		$this->assertContains( '_jat_search_intel_software_links', Schema_Types::meta_keys() );
+	}
+
 	public function test_software_schema_null_without_name(): void {
 		$this->assertNull( $this->types->get_software_schema( 999 ) );
 	}

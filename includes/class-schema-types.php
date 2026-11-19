@@ -479,13 +479,24 @@ class Schema_Types {
 	public function get_software_schema( int $post_id ): ?array {
 		$name = get_post_meta( $post_id, '_jat_search_intel_software_name', true );
 		if ( ! $name ) {
+			// The field's help text promises the post title as the fallback.
+			$post = get_post( $post_id );
+			$name = $post ? get_the_title( $post_id ) : '';
+		}
+		if ( ! $name ) {
 			return null;
 		}
 
 		$schema = [
 			'@type' => 'SoftwareApplication',
-			'name'  => sanitize_text_field( $name ),
+			'name'  => sanitize_text_field( (string) $name ),
+			'url'   => get_permalink( $post_id ),
 		];
+
+		$links = self::software_links( get_post_meta( $post_id, '_jat_search_intel_software_links', true ) );
+		if ( $links ) {
+			$schema['sameAs'] = $links;
+		}
 
 		$os = get_post_meta( $post_id, '_jat_search_intel_software_os', true );
 		if ( $os ) {
@@ -518,6 +529,23 @@ class Schema_Types {
 		}
 
 		return $schema;
+	}
+
+	/**
+	 * Store, download and play pages for an app (itch.io, Steam, GitHub, an app store).
+	 *
+	 * @param mixed $value One URL per line, or a list.
+	 * @return string[] Unique http(s) URLs.
+	 */
+	public static function software_links( $value ): array {
+		$links = [];
+		foreach ( self::lines( $value ) as $line ) {
+			$url = esc_url_raw( $line );
+			if ( $url && preg_match( '#^https?://[^/\s]+#i', $url ) && ! in_array( $url, $links, true ) ) {
+				$links[] = $url;
+			}
+		}
+		return $links;
 	}
 
 	/**
@@ -654,6 +682,7 @@ class Schema_Types {
 				'software_currency'     => [ __( 'Currency', 'jat-search-intel' ), 'text' ],
 				'software_rating'       => [ __( 'Average rating', 'jat-search-intel' ), 'number', __( 'Only real ratings from users.', 'jat-search-intel' ) ],
 				'software_rating_count' => [ __( 'Number of ratings', 'jat-search-intel' ), 'number' ],
+				'software_links'        => [ __( 'Store and download pages', 'jat-search-intel' ), 'lines', __( 'One URL per line, for example its itch.io, Steam, GitHub or app store page.', 'jat-search-intel' ) ],
 			],
 			'job_posting' => [
 				'job_title'           => [ __( 'Job title', 'jat-search-intel' ), 'text', __( 'Required.', 'jat-search-intel' ) ],
