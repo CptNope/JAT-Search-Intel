@@ -4,7 +4,7 @@ Tags: seo, schema, llms-txt, ai-search, redirects
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.8.23
+Stable tag: 3.8.24
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -262,6 +262,9 @@ Sends an HTTP HEAD request to each external URL linked from your content to chec
 
 == Changelog ==
 
+= 3.8.24 =
+* Improved: SoftwareApplication schema (Schema tab, type "Software") now falls back to the post title when App name is empty, as its help text promised, instead of printing nothing. It also gives the page URL and a new "Store and download pages" field (one URL per line, such as itch.io, Steam, GitHub or an app store) as sameAs, so games and apps are tied to their store listings.
+
 = 3.8.23 =
 * Fixed: publishing a post that was a draft, pending or a different post type (for example a submitted event being approved) could add an automatic redirect from the home page to that post, because an unpublished post's old address is a query URL on the home page. Automatic slug-change redirects are now only added when a published post's address changes, never from the home page or a ?p= address. Existing "Auto: slug change" rules with / as the source should be deleted under Search Intel → Redirects.
 
@@ -452,6 +455,9 @@ Every feature other SEO plugins sell in their premium plans, free.
 Earlier releases are listed in CHANGELOG.md in the development repository.
 
 == Upgrade Notice ==
+
+= 3.8.24 =
+Software schema now uses the post title when App name is empty and can link store and download pages (itch.io, Steam, app stores).
 
 = 3.8.23 =
 Stops approving a pending post from redirecting the home page to it. Check Redirects for automatic rules from / and delete them.
