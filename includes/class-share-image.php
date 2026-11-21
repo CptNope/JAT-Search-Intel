@@ -86,10 +86,10 @@ class Share_Image {
 			return null;
 		}
 		return [
-			'url'    => (string) $full[0],
+			'url'    => $full[0],
 			'width'  => (int) $full[1],
 			'height' => (int) $full[2],
-			'type'   => (string) ( get_post_mime_type( $attachment_id ) ?: self::mime_from_url( (string) $full[0] ) ),
+			'type'   => (string) ( get_post_mime_type( $attachment_id ) ?: self::mime_from_url( $full[0] ) ),
 			'alt'    => $alt,
 		];
 	}
@@ -208,7 +208,7 @@ class Share_Image {
 			}
 			if ( 'image/png' === $mime && self::png_has_alpha( $head ) ) {
 				$out_mime = 'image/png';
-			} elseif ( 'image/png' !== $mime && 'image/jpeg' !== $mime && self::has_transparency_hint( $mime, $head ) ) {
+			} elseif ( 'image/png' !== $mime && self::has_transparency_hint( $mime, $head ) ) {
 				$out_mime = 'image/png';
 			}
 		}
