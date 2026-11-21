@@ -6,6 +6,17 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.8.26] — 2026-11-21
+
+Found on jeremyanderson.tech, where shared links showed no picture in messaging apps: the default image was a 1.1 MB PNG declared as 1200×630 (it is 1536×1024), and posts used WebP featured images.
+
+### Added
+- `Share_Image`: a link-preview copy of an image, at most 1200 px on its long side, saved as JPEG (or PNG when the source has transparency) and recorded as the `jat-search-intel-share` size in the attachment's metadata, so WordPress deletes it with the image. A JPEG of 300 KB or less that is already 1200 px or smaller is used as it is. The copy keeps its format even when a theme maps JPEG and PNG output to WebP. It is made when a featured or social image is set, or on the first request that needs it (one request at a time). `jat_search_intel_share_image` returning false keeps original images.
+- `og:image:type` and `og:image:secure_url`.
+
+### Fixed
+- Images outside the Media Library, and the default image, were declared as 1200×630 whatever their size. Dimensions now come from the image actually shared, and are left out when unknown.
+
 ## [3.8.25] — 2026-11-21
 
 Found while checking link previews for a site launch announcement (oberdorferteam.com).
