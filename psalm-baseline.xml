@@ -127,11 +127,6 @@
       <code><![CDATA[$settings]]></code>
     </UnusedProperty>
   </file>
-  <file src="includes/class-seo-manager.php">
-    <UnusedVariable>
-      <code><![CDATA[$robots]]></code>
-    </UnusedVariable>
-  </file>
   <file src="includes/class-woocommerce.php">
     <UndefinedFunction>
       <code><![CDATA[get_woocommerce_currency()]]></code>
