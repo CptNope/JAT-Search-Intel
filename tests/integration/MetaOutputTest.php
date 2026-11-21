@@ -269,6 +269,41 @@ class MetaOutputTest extends TestCase {
         $this->assertStringContainsString( 'https://example.com/default.jpg', $output );
     }
 
+    public function test_open_graph_post_type_archive_has_description_and_image(): void {
+        global $si_test_state;
+        $si_test_state['conditionals'] = [ 'is_singular' => false, 'is_archive' => true, 'is_post_type_archive' => true ];
+        $si_test_state['query_vars']   = [ 'post_type' => 'guide' ];
+        add_filter( 'jat_search_intel_meta_description', fn() => 'Guides to every town.' );
+        $seo = $this->make_seo( [ 'default_og_image' => 'https://example.com/share.jpg' ] );
+        ob_start();
+        $seo->render_open_graph();
+        $seo->render_twitter_card();
+        $output = ob_get_clean();
+        $si_test_state['conditionals'] = [];
+
+        $this->assertStringContainsString( '<meta property="og:description" content="Guides to every town." />', $output );
+        $this->assertStringContainsString( '<meta property="og:image" content="https://example.com/share.jpg" />', $output );
+        $this->assertStringContainsString( 'og:image:width', $output );
+        $this->assertStringContainsString( '<meta property="og:url" content="https://example.com/guide/" />', $output );
+        $this->assertStringContainsString( '<meta name="twitter:image" content="https://example.com/share.jpg" />', $output );
+        $this->assertStringContainsString( '<meta name="twitter:description" content="Guides to every town." />', $output );
+    }
+
+    public function test_open_graph_posts_page_uses_its_own_social_image(): void {
+        global $si_test_state;
+        $si_test_state['conditionals']           = [ 'is_singular' => false, 'is_home' => true ];
+        $si_test_state['options']['page_for_posts'] = 1;
+        $si_test_state['post_meta'][1]['_jat_search_intel_social_image'] = 'https://example.com/journal.jpg';
+        $seo = $this->make_seo( [ 'default_og_image' => 'https://example.com/share.jpg' ] );
+        ob_start();
+        $seo->render_open_graph();
+        $output = ob_get_clean();
+        $si_test_state['conditionals'] = [];
+
+        $this->assertStringContainsString( '<meta property="og:image" content="https://example.com/journal.jpg" />', $output );
+        $this->assertStringContainsString( 'og:description', $output );
+    }
+
     // ── Twitter Card ────────────────────────────────────────────────────
 
     public function test_twitter_card_type_output(): void {

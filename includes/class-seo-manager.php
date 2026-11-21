@@ -150,30 +150,7 @@ class SEO_Manager {
     public function render_meta_tags(): void {
         echo "\n<!-- JAT Search Intel v" . esc_attr( JAT_SEARCH_INTEL_VERSION ) . " -->\n";
 
-        $description = '';
-        $robots      = '';
-
-        if ( is_singular() ) {
-            $post_id     = get_queried_object_id();
-            $description = $this->get_description( $post_id );
-        } elseif ( Title_Engine::posts_page_id() ) {
-            $description = $this->get_description( Title_Engine::posts_page_id() );
-        } elseif ( is_front_page() ) {
-            $description = get_bloginfo( 'description' );
-        } elseif ( $this->current_term() ) {
-            $description = $this->get_term_description( $this->current_term() );
-        } elseif ( is_post_type_archive() ) {
-            $type        = get_query_var( 'post_type' );
-            $object      = get_post_type_object( is_array( $type ) ? (string) reset( $type ) : (string) $type );
-            $description = $object && ! empty( $object->description ) ? $this->truncate_description( wp_strip_all_tags( $object->description ) ) : '';
-        }
-
-        /**
-         * Filters the meta description of the current view ('' prints none).
-         *
-         * @param string $description Description.
-         */
-        $description = (string) apply_filters( 'jat_search_intel_meta_description', $description );
+        $description = $this->current_description();
 
         if ( $description ) {
             printf(
@@ -200,6 +177,36 @@ class SEO_Manager {
                 printf( '<meta name="author" content="%s" />' . "\n", esc_attr( $author ) );
             }
         }
+    }
+
+    /**
+     * The meta description of the current view, after the jat_search_intel_meta_description
+     * filter. The social tags reuse it on views that have no post of their own.
+     */
+    public function current_description(): string {
+        $description = '';
+
+        if ( is_singular() ) {
+            $post_id     = get_queried_object_id();
+            $description = $this->get_description( $post_id );
+        } elseif ( Title_Engine::posts_page_id() ) {
+            $description = $this->get_description( Title_Engine::posts_page_id() );
+        } elseif ( is_front_page() ) {
+            $description = get_bloginfo( 'description' );
+        } elseif ( $this->current_term() ) {
+            $description = $this->get_term_description( $this->current_term() );
+        } elseif ( is_post_type_archive() ) {
+            $type        = get_query_var( 'post_type' );
+            $object      = get_post_type_object( is_array( $type ) ? (string) reset( $type ) : (string) $type );
+            $description = $object && ! empty( $object->description ) ? $this->truncate_description( wp_strip_all_tags( $object->description ) ) : '';
+        }
+
+        /**
+         * Filters the meta description of the current view ('' prints none).
+         *
+         * @param string $description Description.
+         */
+        return wp_strip_all_tags( (string) apply_filters( 'jat_search_intel_meta_description', $description ) );
     }
 
     /**
@@ -410,11 +417,12 @@ class SEO_Manager {
                     }
                 }
             }
-        } elseif ( is_front_page() ) {
+        } elseif ( is_front_page() && ! Title_Engine::posts_page_id() ) {
             $tags['og:type']        = 'website';
             $tags['og:title']       = get_bloginfo( 'name' );
-            $tags['og:description'] = get_bloginfo( 'description' );
+            $tags['og:description'] = $this->current_description();
             $tags['og:url']         = home_url( '/' );
+            $tags                   = array_merge( $tags, $this->og_image_tags( $this->get_default_og_image() ) );
         } elseif ( $this->current_term() ) {
             $term                   = $this->current_term();
             $term_id                = (int) $term->term_id;
@@ -428,13 +436,21 @@ class SEO_Manager {
                 $tags['og:image'] = $image;
             }
         } elseif ( is_archive() || is_home() ) {
-            $tags['og:type']  = 'website';
-            $tags['og:title'] = wp_get_document_title();
-            if ( is_home() && get_option( 'page_for_posts' ) ) {
-                $tags['og:url'] = get_permalink( (int) get_option( 'page_for_posts' ) );
-            } elseif ( is_post_type_archive() ) {
-                $tags['og:url'] = get_post_type_archive_link( (string) get_query_var( 'post_type' ) );
+            // The posts page and post type archives: a shared link needs a description and an
+            // image, or Facebook, LinkedIn, iMessage and Slack show a bare title (3.8.25).
+            $posts_page             = Title_Engine::posts_page_id();
+            $tags['og:type']        = 'website';
+            $tags['og:title']       = ( $posts_page ? get_post_meta( $posts_page, '_jat_search_intel_social_title', true ) : '' ) ?: wp_get_document_title();
+            $tags['og:description'] = ( $posts_page ? get_post_meta( $posts_page, '_jat_search_intel_social_description', true ) : '' ) ?: $this->current_description();
+            $tags['og:url']         = $this->current_canonical();
+            if ( ! $tags['og:url'] ) {
+                if ( is_home() && $posts_page ) {
+                    $tags['og:url'] = get_permalink( $posts_page );
+                } elseif ( is_post_type_archive() ) {
+                    $tags['og:url'] = get_post_type_archive_link( (string) get_query_var( 'post_type' ) );
+                }
             }
+            $tags = array_merge( $tags, $this->og_image_tags( $posts_page ? $this->get_og_image( $posts_page ) : $this->get_default_og_image() ) );
         }
 
         foreach ( $tags as $property => $content ) {
@@ -512,6 +528,15 @@ class SEO_Manager {
             $image                       = $this->get_term_image( $term );
             if ( $image ) {
                 $tags['twitter:image'] = $image;
+            }
+        } elseif ( is_front_page() || is_home() || is_archive() ) {
+            $posts_page                  = Title_Engine::posts_page_id();
+            $tags['twitter:title']       = is_front_page() && ! $posts_page ? get_bloginfo( 'name' ) : ( ( $posts_page ? get_post_meta( $posts_page, '_jat_search_intel_social_title', true ) : '' ) ?: wp_get_document_title() );
+            $tags['twitter:description'] = ( $posts_page ? get_post_meta( $posts_page, '_jat_search_intel_social_description', true ) : '' ) ?: $this->current_description();
+            $image                       = $posts_page ? $this->get_og_image( $posts_page ) : $this->get_default_og_image();
+            if ( $image ) {
+                $tags['twitter:image']     = $image['url'];
+                $tags['twitter:image:alt'] = $image['alt'];
             }
         }
 
@@ -604,26 +629,46 @@ class SEO_Manager {
             }
         }
 
-        // Fallback to default OG image setting (v1.1)
-        if ( ! empty( $this->settings['default_og_image'] ) ) {
+        return $this->get_default_og_image();
+    }
+
+    /**
+     * The site's default social image (setting), else the knowledge logo; [] when neither is set.
+     * Width and height come from the Media Library when the image is there.
+     */
+    private function get_default_og_image(): array {
+        foreach ( [ 'default_og_image', 'knowledge_logo' ] as $key ) {
+            $url = (string) ( $this->settings[ $key ] ?? '' );
+            if ( '' === $url ) {
+                continue;
+            }
+            $attachment_id = attachment_url_to_postid( $url );
+            $meta          = $attachment_id ? wp_get_attachment_metadata( $attachment_id ) : [];
             return [
-                'url'    => $this->settings['default_og_image'],
-                'width'  => 1200,
-                'height' => 630,
-                'alt'    => $this->settings['site_name'] ?: get_bloginfo( 'name' ),
+                'url'    => $url,
+                'width'  => $meta['width'] ?? 1200,
+                'height' => $meta['height'] ?? 630,
+                'alt'    => ( $attachment_id ? get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) : '' ) ?: ( $this->settings['site_name'] ?: get_bloginfo( 'name' ) ),
             ];
         }
-
-        // Fallback to knowledge logo
-        if ( ! empty( $this->settings['knowledge_logo'] ) ) {
-            return [
-                'url'    => $this->settings['knowledge_logo'],
-                'width'  => 1200,
-                'height' => 630,
-                'alt'    => $this->settings['site_name'],
-            ];
-        }
-
         return [];
+    }
+
+    /**
+     * og:image tags for an image from get_og_image() / get_default_og_image().
+     *
+     * @param array $image Image data or [].
+     * @return array<string, mixed>
+     */
+    private function og_image_tags( array $image ): array {
+        if ( ! $image ) {
+            return [];
+        }
+        return [
+            'og:image'        => $image['url'],
+            'og:image:width'  => $image['width'],
+            'og:image:height' => $image['height'],
+            'og:image:alt'    => $image['alt'],
+        ];
     }
 }

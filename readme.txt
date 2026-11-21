@@ -4,7 +4,7 @@ Tags: seo, schema, llms-txt, ai-search, redirects
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.8.24
+Stable tag: 3.8.25
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -262,6 +262,9 @@ Sends an HTTP HEAD request to each external URL linked from your content to chec
 
 == Changelog ==
 
+= 3.8.25 =
+* Fixed: a shared link to the blog page or a post type archive (such as a list of guides or events) now shows a description and an image in Facebook, LinkedIn, X, iMessage and Slack previews, instead of a bare title. The blog page uses its own social image or featured image; archives use the default social image. The blog page's Social title and description now apply too.
+
 = 3.8.24 =
 * Improved: SoftwareApplication schema (Schema tab, type "Software") now falls back to the post title when App name is empty, as its help text promised, instead of printing nothing. It also gives the page URL and a new "Store and download pages" field (one URL per line, such as itch.io, Steam, GitHub or an app store) as sameAs, so games and apps are tied to their store listings.
 
@@ -455,6 +458,9 @@ Every feature other SEO plugins sell in their premium plans, free.
 Earlier releases are listed in CHANGELOG.md in the development repository.
 
 == Upgrade Notice ==
+
+= 3.8.25 =
+Link previews for the blog page and archives now include a description and an image.
 
 = 3.8.24 =
 Software schema now uses the post title when App name is empty and can link store and download pages (itch.io, Steam, app stores).

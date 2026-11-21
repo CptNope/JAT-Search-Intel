@@ -6,6 +6,19 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.8.25] — 2026-11-21
+
+Found while checking link previews for a site launch announcement (oberdorferteam.com).
+
+### Fixed
+- The posts page and post type archives printed `og:title`, `og:url` and `twitter:card` with no description or image, so a shared link to a blog or archive page showed a bare title. They now print `og:description` and `twitter:description` (the same text as the meta description, after `jat_search_intel_meta_description`), and an image: the posts page's own social image or featured image, else the default social image, else the knowledge logo, with `og:image:width`, `og:image:height`, `og:image:alt`, `twitter:image` and `twitter:image:alt`.
+- The posts page's Social title and Social description fields now apply to its Open Graph and X tags.
+- A front page that lists posts gets the default social image and the meta description in its social tags.
+- The default social image's width, height and alt come from the Media Library when the image is there (they were always 1200×630 and the site name).
+
+### Changed
+- `SEO_Manager::current_description()` (public) returns the current view's meta description; `render_meta_tags()` uses it.
+
 ## [3.8.24] — 2026-11-19
 
 Found while marking up the itch.io games on jeremyanderson.tech.
