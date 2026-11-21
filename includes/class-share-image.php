@@ -179,10 +179,13 @@ class Share_Image {
 			return null;
 		}
 
-		$mime   = (string) get_post_mime_type( $attachment_id );
-		$width  = (int) ( $meta['width'] ?? 0 );
-		$height = (int) ( $meta['height'] ?? 0 );
-		if ( self::source_is_fine( $mime, $width, $height, (int) filesize( $attached ) ) ) {
+		// The post's MIME type is the upload's; the file WordPress serves may be a WebP
+		// a theme wrote in its place, so judge each file by its own extension.
+		$post_mime = (string) get_post_mime_type( $attachment_id );
+		$mime      = self::mime_from_url( $source ) ?: $post_mime;
+		$width     = (int) ( $meta['width'] ?? 0 );
+		$height    = (int) ( $meta['height'] ?? 0 );
+		if ( self::source_is_fine( self::mime_from_url( $attached ) ?: $post_mime, $width, $height, (int) filesize( $attached ) ) ) {
 			return null;
 		}
 

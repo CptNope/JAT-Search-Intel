@@ -4,7 +4,7 @@ Tags: seo, schema, llms-txt, ai-search, redirects
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.8.27
+Stable tag: 3.8.28
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -262,6 +262,9 @@ Sends an HTTP HEAD request to each external URL linked from your content to chec
 
 == Changelog ==
 
+= 3.8.28 =
+* Fixed: a JPEG upload whose full size the theme saved as WebP was shared as that WebP instead of a JPEG link-preview copy.
+
 = 3.8.27 =
 * Fixed: posts and pages now print og:image:type and og:image:secure_url like the blog page and archives do, and leave out an image size that is unknown.
 
@@ -465,6 +468,9 @@ Every feature other SEO plugins sell in their premium plans, free.
 Earlier releases are listed in CHANGELOG.md in the development repository.
 
 == Upgrade Notice ==
+
+= 3.8.28 =
+Link previews also get a JPEG copy when the theme stored the image as WebP.
 
 = 3.8.27 =
 Posts and pages print the preview image's type, as archives already do.

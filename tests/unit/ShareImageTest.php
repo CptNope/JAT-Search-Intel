@@ -147,6 +147,33 @@ class ShareImageTest extends TestCase {
 		$this->assertStringEndsWith( '/logo-share.png', $image['url'] );
 	}
 
+	public function test_webp_served_for_a_jpeg_upload_gets_a_jpeg_copy(): void {
+		global $si_test_state;
+		// A JPEG upload whose full size a theme wrote as WebP: post MIME says JPEG, file is WebP.
+		$file = $this->dir . '/wilds.webp';
+		file_put_contents( $file, 'RIFF....WEBPVP8 ' );
+		$si_test_state['attached_files'][14]  = $file;
+		$si_test_state['mime_types'][14]      = 'image/jpeg';
+		$si_test_state['attachment_meta'][14] = [ 'width' => 1200, 'height' => 630 ];
+		$saved = new \ArrayObject();
+		$si_test_state['image_editor'] = static function ( $path ) use ( $saved ) {
+			return new class( $saved ) {
+				private $saved;
+				public function __construct( $saved ) { $this->saved = $saved; }
+				public function get_size() { return [ 'width' => 1200, 'height' => 630 ]; }
+				public function resize( $w, $h, $c ) { $this->saved[] = 'resize'; }
+				public function set_quality( $q ) {}
+				public function save( $dest, $mime ) { $this->saved[] = $mime; file_put_contents( $dest, 'jpg' ); return [ 'path' => $dest, 'file' => basename( $dest ), 'width' => 1200, 'height' => 630, 'mime-type' => $mime ]; }
+			};
+		};
+
+		$image = Share_Image::for_attachment( 14 );
+		unset( $si_test_state['image_editor'] );
+
+		$this->assertSame( [ 'image/jpeg' ], $saved->getArrayCopy() );
+		$this->assertStringEndsWith( '/wilds-share.jpg', $image['url'] );
+	}
+
 	public function test_unknown_url_keeps_url_without_dimensions(): void {
 		$image = Share_Image::for_url( 'https://cdn.example.org/card.png', 'Card' );
 		$this->assertSame( 'https://cdn.example.org/card.png', $image['url'] );

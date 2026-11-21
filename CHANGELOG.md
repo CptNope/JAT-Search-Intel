@@ -6,6 +6,11 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.8.28] — 2026-11-21
+
+### Fixed
+- `Share_Image::create()` judged the served file by the attachment's post MIME type. When a theme writes a JPEG upload's full size as WebP, the post still says `image/jpeg`, so a small WebP passed as "a JPEG that can be shared as it is". Files are now judged by their own extension.
+
 ## [3.8.27] — 2026-11-21
 
 ### Fixed
