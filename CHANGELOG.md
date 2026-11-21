@@ -6,6 +6,11 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.8.29] — 2026-11-21
+
+### Fixed
+- LinkedIn titled shared links with WordPress's oEmbed response (the bare post title, such as "Home") instead of `og:title`. `oembed_response_data` now carries the same title as `og:title`: the Social title, else the SEO title. Runs when Open Graph output is on. Found with LinkedIn's Post Inspector on oberdorferteam.com.
+
 ## [3.8.28] — 2026-11-21
 
 ### Fixed

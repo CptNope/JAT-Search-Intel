@@ -4,7 +4,7 @@ Tags: seo, schema, llms-txt, ai-search, redirects
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.8.28
+Stable tag: 3.8.29
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -262,6 +262,9 @@ Sends an HTTP HEAD request to each external URL linked from your content to chec
 
 == Changelog ==
 
+= 3.8.29 =
+* Fixed: links shared on LinkedIn now show the page's SEO or social title instead of the bare WordPress page title (for example \"Home\"). LinkedIn reads WordPress's embed data before the Open Graph title; that data now carries the same title.
+
 = 3.8.28 =
 * Fixed: a JPEG upload whose full size the theme saved as WebP was shared as that WebP instead of a JPEG link-preview copy.
 
@@ -468,6 +471,9 @@ Every feature other SEO plugins sell in their premium plans, free.
 Earlier releases are listed in CHANGELOG.md in the development repository.
 
 == Upgrade Notice ==
+
+= 3.8.29 =
+LinkedIn link previews use the SEO title instead of the bare page title.
 
 = 3.8.28 =
 Link previews also get a JPEG copy when the theme stored the image as WebP.
