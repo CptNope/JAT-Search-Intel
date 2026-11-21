@@ -269,6 +269,23 @@ class MetaOutputTest extends TestCase {
         $this->assertStringContainsString( 'https://example.com/default.jpg', $output );
     }
 
+    public function test_open_graph_on_blog_page_has_an_image(): void {
+        global $si_test_state;
+        $si_test_state['conditionals'] = [ 'is_singular' => false, 'is_home' => true ];
+        $seo = $this->make_seo( [ 'default_og_image' => 'https://example.com/default.jpg' ] );
+        ob_start();
+        $seo->render_open_graph();
+        $seo->render_twitter_card();
+        $output = ob_get_clean();
+        $si_test_state['conditionals'] = [];
+
+        $this->assertStringContainsString( '<meta property="og:image" content="https://example.com/default.jpg"', $output );
+        $this->assertStringContainsString( '<meta name="twitter:image" content="https://example.com/default.jpg"', $output );
+        $this->assertStringContainsString( 'og:image:type" content="image/jpeg"', $output );
+        // Size unknown for an outside URL, so none is claimed.
+        $this->assertStringNotContainsString( 'og:image:width', $output );
+    }
+
     // ── Twitter Card ────────────────────────────────────────────────────
 
     public function test_twitter_card_type_output(): void {

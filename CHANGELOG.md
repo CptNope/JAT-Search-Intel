@@ -6,6 +6,18 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.8.25] — 2026-11-21
+
+Found on jeremyanderson.tech, where shared links showed no picture in messaging apps: the default image was a 1.1 MB PNG announced as 1200×630 (it is 1536×1024), posts used WebP featured images, and the blog page had no image at all.
+
+### Added
+- `Share_Image`: a link-preview copy of an image, at most 1200 px on its long side, saved as JPEG (or PNG when the source has transparency) and recorded as the `jat-search-intel-share` size in the attachment's metadata, so WordPress deletes it with the image. A JPEG of 300 KB or less that is already 1200 px or smaller is used as it is. The copy keeps its format even when a theme maps JPEG and PNG output to WebP. It is made when a featured or social image is set, or on the first request that needs it (one request at a time). `jat_search_intel_share_image` returning false keeps original images.
+- `og:image:type` and `og:image:secure_url`.
+
+### Fixed
+- The blog page, post-type archives and date or author archives printed no `og:image` or `twitter:image`. They now use the posts page's own image when the blog is a page, else the default social image. The blog page also gets an `og:description`.
+- The default social image and the logo fallback were always declared as 1200×630. Dimensions now come from the image itself, and are left out when unknown.
+
 ## [3.8.24] — 2026-11-19
 
 Found while marking up the itch.io games on jeremyanderson.tech.
