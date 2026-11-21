@@ -67,6 +67,12 @@ class SEO_Manager {
         // Filter document title
         add_filter( 'pre_get_document_title', [ $this, 'filter_title' ], 20 );
         add_filter( 'document_title_separator', [ $this, 'filter_separator' ] );
+
+        // Make link-preview copies when an image is chosen, not on the first share.
+        if ( ! empty( $settings['enable_og'] ) || ! empty( $settings['enable_twitter'] ) ) {
+            add_action( 'added_post_meta', [ Share_Image::class, 'on_meta_change' ], 10, 4 );
+            add_action( 'updated_post_meta', [ Share_Image::class, 'on_meta_change' ], 10, 4 );
+        }
     }
 
     /**
@@ -433,7 +439,7 @@ class SEO_Manager {
             $tags['og:url']         = is_wp_error( $link ) ? '' : $link;
             $image                  = $this->get_term_image( $term );
             if ( $image ) {
-                $tags['og:image'] = $image;
+                $tags = array_merge( $tags, $this->og_image_tags( Share_Image::for_url( $image, (string) $term->name ) ) );
             }
         } elseif ( is_archive() || is_home() ) {
             // The posts page and post type archives: a shared link needs a description and an
@@ -494,7 +500,7 @@ class SEO_Manager {
             $tags['twitter:description'] = $social_desc ?: $this->get_description( $post_id );
 
             $twitter_image = (string) get_post_meta( $post_id, '_jat_search_intel_twitter_image', true );
-            $image         = $twitter_image ? [ 'url' => $twitter_image, 'alt' => '' ] : $this->get_og_image( $post_id );
+            $image         = $twitter_image ? Share_Image::for_url( $twitter_image ) : $this->get_og_image( $post_id );
             if ( $image ) {
                 $tags['twitter:image']     = $image['url'];
                 $tags['twitter:image:alt'] = $image['alt'];
@@ -527,7 +533,7 @@ class SEO_Manager {
             $tags['twitter:description'] = Term_SEO::get( $term_id, 'social_description' ) ?: $this->get_term_description( $term );
             $image                       = $this->get_term_image( $term );
             if ( $image ) {
-                $tags['twitter:image'] = $image;
+                $tags['twitter:image'] = Share_Image::for_url( $image )['url'];
             }
         } elseif ( is_front_page() || is_home() || is_archive() ) {
             $posts_page                  = Title_Engine::posts_page_id();
@@ -599,33 +605,30 @@ class SEO_Manager {
      * Get Open Graph image data for a post.
      */
     private function get_og_image( int $post_id ): array {
+        $alt_fallback = $this->get_title( $post_id );
+
         // Check for social image override (v1.1), then legacy OG image
         $custom_image = get_post_meta( $post_id, '_jat_search_intel_social_image', true );
         if ( ! $custom_image ) {
             $custom_image = get_post_meta( $post_id, '_jat_search_intel_og_image', true );
         }
         if ( $custom_image ) {
-            $attachment_id = attachment_url_to_postid( $custom_image );
-            $meta          = wp_get_attachment_metadata( $attachment_id );
-            return [
-                'url'    => $custom_image,
-                'width'  => $meta['width'] ?? 1200,
-                'height' => $meta['height'] ?? 630,
-                'alt'    => get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ?: $this->get_title( $post_id ),
-            ];
+            $image = Share_Image::for_url( (string) $custom_image );
+            if ( '' === $image['alt'] ) {
+                $image['alt'] = $alt_fallback;
+            }
+            return $image;
         }
 
         // Fallback to featured image
         $thumbnail_id = get_post_thumbnail_id( $post_id );
         if ( $thumbnail_id ) {
-            $image = wp_get_attachment_image_src( $thumbnail_id, 'full' );
+            $image = Share_Image::for_attachment( (int) $thumbnail_id );
             if ( $image ) {
-                return [
-                    'url'    => $image[0],
-                    'width'  => $image[1],
-                    'height' => $image[2],
-                    'alt'    => get_post_meta( $thumbnail_id, '_wp_attachment_image_alt', true ) ?: $this->get_title( $post_id ),
-                ];
+                if ( '' === $image['alt'] ) {
+                    $image['alt'] = $alt_fallback;
+                }
+                return $image;
             }
         }
 
@@ -634,7 +637,7 @@ class SEO_Manager {
 
     /**
      * The site's default social image (setting), else the knowledge logo; [] when neither is set.
-     * Width and height come from the Media Library when the image is there.
+     * A Media Library image is shared as its link-preview copy (Share_Image) with its real size.
      */
     private function get_default_og_image(): array {
         foreach ( [ 'default_og_image', 'knowledge_logo' ] as $key ) {
@@ -642,14 +645,11 @@ class SEO_Manager {
             if ( '' === $url ) {
                 continue;
             }
-            $attachment_id = attachment_url_to_postid( $url );
-            $meta          = $attachment_id ? wp_get_attachment_metadata( $attachment_id ) : [];
-            return [
-                'url'    => $url,
-                'width'  => $meta['width'] ?? 1200,
-                'height' => $meta['height'] ?? 630,
-                'alt'    => ( $attachment_id ? get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) : '' ) ?: ( $this->settings['site_name'] ?: get_bloginfo( 'name' ) ),
-            ];
+            $image = Share_Image::for_url( $url );
+            if ( '' === $image['alt'] ) {
+                $image['alt'] = ( $this->settings['site_name'] ?? '' ) ?: get_bloginfo( 'name' );
+            }
+            return $image;
         }
         return [];
     }
@@ -661,14 +661,24 @@ class SEO_Manager {
      * @return array<string, mixed>
      */
     private function og_image_tags( array $image ): array {
-        if ( ! $image ) {
+        if ( empty( $image['url'] ) ) {
             return [];
         }
-        return [
-            'og:image'        => $image['url'],
-            'og:image:width'  => $image['width'],
-            'og:image:height' => $image['height'],
-            'og:image:alt'    => $image['alt'],
-        ];
+        $tags = [ 'og:image' => $image['url'] ];
+        if ( 0 === strpos( (string) $image['url'], 'https://' ) ) {
+            $tags['og:image:secure_url'] = $image['url'];
+        }
+        if ( ! empty( $image['type'] ) ) {
+            $tags['og:image:type'] = $image['type'];
+        }
+        // Only real dimensions: a wrong size makes some apps crop or skip the image.
+        if ( ! empty( $image['width'] ) && ! empty( $image['height'] ) ) {
+            $tags['og:image:width']  = $image['width'];
+            $tags['og:image:height'] = $image['height'];
+        }
+        if ( ! empty( $image['alt'] ) ) {
+            $tags['og:image:alt'] = $image['alt'];
+        }
+        return $tags;
     }
 }

@@ -805,7 +805,19 @@ function attachment_url_to_postid( string $url ): int {
 }
 
 function wp_get_attachment_metadata( int $attachment_id ): array {
-    return [ 'width' => 1200, 'height' => 630 ];
+    global $si_test_state;
+    return $si_test_state['attachment_meta'][ $attachment_id ] ?? [ 'width' => 1200, 'height' => 630 ];
+}
+
+function wp_update_attachment_metadata( int $attachment_id, array $data ): bool {
+    global $si_test_state;
+    $si_test_state['attachment_meta'][ $attachment_id ] = $data;
+    return true;
+}
+
+function get_post_mime_type( $post = null ) {
+    global $si_test_state;
+    return $si_test_state['mime_types'][ (int) $post ] ?? 'image/jpeg';
 }
 
 function get_post_types( $args = [], $output = 'names' ) {
@@ -1453,7 +1465,8 @@ function wp_attachment_is_image( $post = null ): bool {
 }
 
 function get_attached_file( int $attachment_id ): string {
-	return '/uploads/image-' . $attachment_id . '.jpg';
+	global $si_test_state;
+	return $si_test_state['attached_files'][ $attachment_id ] ?? '/uploads/image-' . $attachment_id . '.jpg';
 }
 
 function wp_basename( string $path, string $suffix = '' ): string {
@@ -1900,5 +1913,22 @@ if ( ! function_exists( 'do_blocks' ) ) {
 			$out .= $type && $type->is_dynamic() ? (string) call_user_func( $type->render_callback, $block['attrs'], $block['innerHTML'] ) : $block['innerHTML'];
 		}
 		return $out;
+	}
+}
+
+// ── Image editor (Share_Image tests set $si_test_state['image_editor'] to a factory) ──
+
+if ( ! function_exists( 'wp_get_image_editor' ) ) {
+	function wp_get_image_editor( string $path, array $args = [] ) {
+		global $si_test_state;
+		$factory = $si_test_state['image_editor'] ?? null;
+		return $factory ? $factory( $path ) : new WP_Error( 'image_no_editor', 'No editor' );
+	}
+}
+
+if ( ! function_exists( 'wp_get_original_image_path' ) ) {
+	function wp_get_original_image_path( int $attachment_id ) {
+		global $si_test_state;
+		return $si_test_state['original_files'][ $attachment_id ] ?? false;
 	}
 }

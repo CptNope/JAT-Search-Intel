@@ -283,7 +283,9 @@ class MetaOutputTest extends TestCase {
 
         $this->assertStringContainsString( '<meta property="og:description" content="Guides to every town." />', $output );
         $this->assertStringContainsString( '<meta property="og:image" content="https://example.com/share.jpg" />', $output );
-        $this->assertStringContainsString( 'og:image:width', $output );
+        // Not in the Media Library, so its size is unknown and none is claimed.
+        $this->assertStringNotContainsString( 'og:image:width', $output );
+        $this->assertStringContainsString( '<meta property="og:image:type" content="image/jpeg" />', $output );
         $this->assertStringContainsString( '<meta property="og:url" content="https://example.com/guide/" />', $output );
         $this->assertStringContainsString( '<meta name="twitter:image" content="https://example.com/share.jpg" />', $output );
         $this->assertStringContainsString( '<meta name="twitter:description" content="Guides to every town." />', $output );
