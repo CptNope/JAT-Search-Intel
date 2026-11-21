@@ -85,7 +85,8 @@ class SEO_Manager {
         if ( ! is_object( $post ) || empty( $post->ID ) ) {
             return $data;
         }
-        $title = (string) get_post_meta( (int) $post->ID, '_jat_search_intel_social_title', true ) ?: $this->get_title( (int) $post->ID );
+        $id    = $post->ID;
+        $title = (string) get_post_meta( $id, '_jat_search_intel_social_title', true ) ?: $this->get_title( $id );
         if ( '' !== $title ) {
             $data['title'] = $title;
         }
