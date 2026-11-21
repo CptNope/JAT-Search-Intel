@@ -308,6 +308,19 @@ class MetaOutputTest extends TestCase {
         $this->assertStringContainsString( 'og:description', $output );
     }
 
+    public function test_oembed_title_uses_seo_title(): void {
+        global $si_test_state;
+        $si_test_state['post_meta'][1]['_jat_search_intel_title'] = 'Worcester Real Estate | Example';
+        $seo  = $this->make_seo();
+        $data = $seo->filter_oembed_data( [ 'title' => 'Home', 'type' => 'rich' ], (object) [ 'ID' => 1 ] );
+        $this->assertSame( 'Worcester Real Estate | Example', $data['title'] );
+        $this->assertSame( 'rich', $data['type'] );
+
+        $si_test_state['post_meta'][1]['_jat_search_intel_social_title'] = 'Shared title';
+        $data = $seo->filter_oembed_data( [ 'title' => 'Home' ], (object) [ 'ID' => 1 ] );
+        $this->assertSame( 'Shared title', $data['title'] );
+    }
+
     // ── Twitter Card ────────────────────────────────────────────────────
 
     public function test_twitter_card_type_output(): void {

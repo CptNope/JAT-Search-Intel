@@ -58,6 +58,9 @@ class SEO_Manager {
 
         if ( ! empty( $settings['enable_og'] ) ) {
             add_action( 'wp_head', [ $this, 'render_open_graph' ], 4 );
+            // LinkedIn (and other oEmbed consumers) take the title from WordPress's oEmbed
+            // response, which is the bare post title ("Home"), before og:title.
+            add_filter( 'oembed_response_data', [ $this, 'filter_oembed_data' ], 10, 2 );
         }
 
         if ( ! empty( $settings['enable_twitter'] ) ) {
@@ -73,6 +76,27 @@ class SEO_Manager {
             add_action( 'added_post_meta', [ Share_Image::class, 'on_meta_change' ], 10, 4 );
             add_action( 'updated_post_meta', [ Share_Image::class, 'on_meta_change' ], 10, 4 );
         }
+    }
+
+    /**
+     * Give oEmbed responses the same title as og:title (Social title, else the SEO title), so a
+     * link shared on LinkedIn reads like it does on Facebook and X instead of the bare post title.
+     *
+     * @param array    $data oEmbed response data.
+     * @param \WP_Post $post Post being embedded.
+     * @return array
+     */
+    public function filter_oembed_data( $data, $post ): array {
+        $data = (array) $data;
+        if ( ! is_object( $post ) || empty( $post->ID ) ) {
+            return $data;
+        }
+        $id    = $post->ID;
+        $title = (string) get_post_meta( $id, '_jat_search_intel_social_title', true ) ?: $this->get_title( $id );
+        if ( '' !== $title ) {
+            $data['title'] = $title;
+        }
+        return $data;
     }
 
     /**
