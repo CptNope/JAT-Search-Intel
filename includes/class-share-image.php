@@ -89,7 +89,7 @@ class Share_Image {
 			'url'    => $full[0],
 			'width'  => (int) $full[1],
 			'height' => (int) $full[2],
-			'type'   => (string) ( get_post_mime_type( $attachment_id ) ?: self::mime_from_url( $full[0] ) ),
+			'type'   => get_post_mime_type( $attachment_id ) ?: self::mime_from_url( $full[0] ),
 			'alt'    => $alt,
 		];
 	}
