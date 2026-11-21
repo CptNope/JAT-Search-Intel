@@ -180,4 +180,21 @@ class ShareImageTest extends TestCase {
 		$this->assertSame( 0, $image['width'] );
 		$this->assertSame( 'image/png', $image['type'] );
 	}
+
+	public function test_local_url_outside_media_library_gets_dimensions(): void {
+		if ( ! defined( 'WP_CONTENT_DIR' ) ) {
+			define( 'WP_CONTENT_DIR', sys_get_temp_dir() . '/si-content' );
+		}
+		if ( ! function_exists( 'content_url' ) ) {
+			eval( 'function content_url( $path = "" ) { return "https://example.com/wp-content" . $path; }' );
+		}
+		$dir = WP_CONTENT_DIR . '/themes/t';
+		@mkdir( $dir, 0777, true );
+		// A 1x1 PNG, so the test needs no image library.
+		file_put_contents( $dir . '/share.png', base64_decode( 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==' ) );
+		$image = Share_Image::for_url( 'https://example.com/wp-content/themes/t/share.png?v=2', 'Card' );
+		@unlink( $dir . '/share.png' );
+		$this->assertSame( 1, $image['width'] );
+		$this->assertSame( 1, $image['height'] );
+	}
 }

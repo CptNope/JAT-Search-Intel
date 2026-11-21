@@ -6,6 +6,11 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.8.30] — 2026-11-21
+
+### Fixed
+- A share image on the site but outside the Media Library (for example one shipped in the theme and set as the default social image) printed no `og:image:width` or `og:image:height` after 3.8.26, so Facebook could show no image on the first share of a page. `Share_Image::for_url()` now reads the size from the file when the URL is on this site.
+
 ## [3.8.29] — 2026-11-21
 
 ### Fixed

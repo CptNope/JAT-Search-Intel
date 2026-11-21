@@ -45,13 +45,37 @@ class Share_Image {
 				return $image;
 			}
 		}
+		list( $width, $height ) = self::local_size( $url );
 		return [
 			'url'    => $url,
-			'width'  => 0,
-			'height' => 0,
+			'width'  => $width,
+			'height' => $height,
 			'type'   => self::mime_from_url( $url ),
 			'alt'    => $alt,
 		];
+	}
+
+	/**
+	 * Width and height of an image on this site that is not in the Media Library, such as a
+	 * share image shipped with the theme. Facebook shows an image on the very first share only
+	 * when og:image:width and og:image:height are given. [0, 0] when it is elsewhere or unreadable.
+	 *
+	 * @param string $url Image URL.
+	 * @return array{0:int,1:int}
+	 */
+	private static function local_size( string $url ): array {
+		$url  = (string) strtok( $url, '?#' );
+		$path = '';
+		if ( defined( 'WP_CONTENT_DIR' ) && function_exists( 'content_url' ) && str_starts_with( $url, content_url( '/' ) ) ) {
+			$path = WP_CONTENT_DIR . '/' . substr( $url, strlen( content_url( '/' ) ) );
+		} elseif ( str_starts_with( $url, site_url( '/' ) ) ) {
+			$path = ABSPATH . substr( $url, strlen( site_url( '/' ) ) );
+		}
+		if ( '' === $path || str_contains( $path, '..' ) || '' === self::mime_from_url( $url ) || ! is_readable( $path ) ) {
+			return [ 0, 0 ];
+		}
+		$size = function_exists( 'wp_getimagesize' ) ? wp_getimagesize( $path ) : @getimagesize( $path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+		return is_array( $size ) ? [ (int) $size[0], (int) $size[1] ] : [ 0, 0 ];
 	}
 
 	/**
