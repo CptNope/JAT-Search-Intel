@@ -398,13 +398,7 @@ class SEO_Manager {
             $tags['og:url']         = $this->current_canonical() ?: get_permalink( $post_id );
 
             // Featured image
-            $image = $this->get_og_image( $post_id );
-            if ( $image ) {
-                $tags['og:image']        = $image['url'];
-                $tags['og:image:width']  = $image['width'];
-                $tags['og:image:height'] = $image['height'];
-                $tags['og:image:alt']    = $image['alt'];
-            }
+            $tags = array_merge( $tags, $this->og_image_tags( $this->get_og_image( $post_id ) ) );
 
             if ( 'article' === $tags['og:type'] ) {
                 $tags['article:published_time'] = get_the_date( 'c', $post_id );

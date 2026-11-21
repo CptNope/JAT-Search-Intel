@@ -267,6 +267,8 @@ class MetaOutputTest extends TestCase {
 
         $this->assertStringContainsString( 'og:image', $output );
         $this->assertStringContainsString( 'https://example.com/default.jpg', $output );
+        $this->assertStringContainsString( '<meta property="og:image:type" content="image/jpeg" />', $output );
+        $this->assertStringContainsString( '<meta property="og:image:secure_url" content="https://example.com/default.jpg" />', $output );
     }
 
     public function test_open_graph_post_type_archive_has_description_and_image(): void {

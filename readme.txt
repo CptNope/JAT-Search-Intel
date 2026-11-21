@@ -4,7 +4,7 @@ Tags: seo, schema, llms-txt, ai-search, redirects
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.8.26
+Stable tag: 3.8.27
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -262,6 +262,9 @@ Sends an HTTP HEAD request to each external URL linked from your content to chec
 
 == Changelog ==
 
+= 3.8.27 =
+* Fixed: posts and pages now print og:image:type and og:image:secure_url like the blog page and archives do, and leave out an image size that is unknown.
+
 = 3.8.26 =
 * Improved: link previews show their image in more apps. Each shared image now has a light copy made for link previews: at most 1200 px wide, saved as JPEG (PNG when it has transparency), so WhatsApp, iMessage, LinkedIn and others show it even when the original is a large PNG or a WebP. The copy is made when the image is chosen and is deleted with the image.
 * Fixed: preview images were announced as 1200×630 when their real size was unknown. Image tags now give the real size, or none, plus og:image:type and og:image:secure_url.
@@ -462,6 +465,9 @@ Every feature other SEO plugins sell in their premium plans, free.
 Earlier releases are listed in CHANGELOG.md in the development repository.
 
 == Upgrade Notice ==
+
+= 3.8.27 =
+Posts and pages print the preview image's type, as archives already do.
 
 = 3.8.26 =
 Shared links show their preview image in more apps: light JPEG copies of large PNG and WebP images.

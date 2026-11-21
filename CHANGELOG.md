@@ -6,6 +6,11 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.8.27] — 2026-11-21
+
+### Fixed
+- Singular views built their image tags by hand and missed `og:image:type` and `og:image:secure_url`; they now use `og_image_tags()` like every other view.
+
 ## [3.8.26] — 2026-11-21
 
 Found on jeremyanderson.tech, where shared links showed no picture in messaging apps: the default image was a 1.1 MB PNG declared as 1200×630 (it is 1536×1024), and posts used WebP featured images.
