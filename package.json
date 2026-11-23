@@ -30,7 +30,7 @@
     "@wordpress/icons": "^20.0.0"
   },
   "devDependencies": {
-    "@playwright/test": "^1.65.0",
+    "@playwright/test": "^1.65.1",
     "@wordpress/env": "^12.1.0",
     "@wordpress/scripts": "^37.1.0",
     "stylelint": "^17.4.0",
