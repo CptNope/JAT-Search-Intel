@@ -125,6 +125,22 @@ class SitemapOutputTest extends TestCase {
         $this->assertStringContainsString( '<changefreq>daily</changefreq>', $xml );
     }
 
+    public function test_static_front_page_is_listed_once(): void {
+        global $si_test_state;
+        $si_test_state['options']['show_on_front'] = 'page';
+        $si_test_state['options']['page_on_front'] = 501;
+        $si_test_state['posts'][501]      = [ 'ID' => 501, 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Home', 'post_name' => 'home', 'post_content' => '', 'post_modified' => '2026-11-01 00:00:00', 'post_modified_gmt' => '2026-11-01 00:00:00', 'post_date' => '2026-11-01 00:00:00' ];
+        $si_test_state['permalinks'][501] = 'https://example.com/';
+        $sitemap = $this->make_sitemap();
+        $method  = new ReflectionMethod( $sitemap, 'generate_sitemap' );
+        $method->setAccessible( true );
+        $xml = $method->invoke( $sitemap, 'page', 1 );
+        unset( $si_test_state['options']['show_on_front'], $si_test_state['options']['page_on_front'], $si_test_state['posts'][501], $si_test_state['permalinks'][501] );
+
+        $this->assertSame( 1, substr_count( $xml, '<loc>https://example.com/</loc>' ) );
+        $this->assertStringContainsString( '<priority>1.0</priority>', $xml );
+    }
+
     public function test_sitemap_has_image_namespace(): void {
         $sitemap = $this->make_sitemap();
         $method  = new ReflectionMethod( $sitemap, 'generate_sitemap' );

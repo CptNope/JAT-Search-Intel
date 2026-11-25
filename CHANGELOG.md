@@ -6,6 +6,11 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.8.31] — 2026-11-25
+
+### Fixed
+- With a static front page, the page sitemap listed the home URL twice: once as a synthetic entry and once as the front page itself. It is now listed once, as the front page, with its lastmod, images and priority 1.0. Sites showing latest posts on the front keep the synthetic entry. Found in an SEO audit of oberdorferteam.com.
+
 ## [3.8.30] — 2026-11-21
 
 ### Fixed

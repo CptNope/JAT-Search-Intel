@@ -295,8 +295,12 @@ class Sitemap {
         $max_urls = $this->settings['sitemap_max_urls'] ?? 2000;
         $offset   = ( $page - 1 ) * $max_urls;
 
-        // Add homepage for page type, page 1
-        if ( 'page' === $post_type && 1 === $page ) {
+        // A static front page is listed once, as itself (with its lastmod and images) at priority
+        // 1.0. Before 3.8.31 the home URL was also added on its own, so it appeared twice.
+        $front_id = 'page' === get_option( 'show_on_front' ) ? (int) get_option( 'page_on_front' ) : 0;
+
+        // Add homepage for page type, page 1, when no page is the front page
+        if ( 'page' === $post_type && 1 === $page && ! $front_id ) {
             $xml .= '<url>' . "\n";
             $xml .= '  <loc>' . esc_url( home_url( '/' ) ) . '</loc>' . "\n";
             $xml .= '  <changefreq>daily</changefreq>' . "\n";
@@ -330,7 +334,7 @@ class Sitemap {
             if ( '' === $loc ) {
                 continue;
             }
-            $priority   = ( 'page' === $post_type ) ? '0.8' : '0.6';
+            $priority   = $front_id && $post->ID === $front_id ? '1.0' : ( ( 'page' === $post_type ) ? '0.8' : '0.6' );
             $changefreq = $this->get_changefreq( $post );
 
             $xml .= '<url>' . "\n";
