@@ -321,6 +321,18 @@ class MetaOutputTest extends TestCase {
         $this->assertSame( 'Shared title', $data['title'] );
     }
 
+    public function test_posts_page_noindex_field_applies(): void {
+        global $si_test_state;
+        $si_test_state['conditionals']              = [ 'is_singular' => false, 'is_home' => true ];
+        $si_test_state['options']['page_for_posts'] = 7;
+        $si_test_state['post_meta'][7]['_jat_search_intel_noindex'] = '1';
+        $directives = $this->make_seo()->get_robots_directives();
+        $si_test_state['conditionals'] = [];
+        unset( $si_test_state['options']['page_for_posts'], $si_test_state['post_meta'][7] );
+
+        $this->assertContains( 'noindex', $directives );
+    }
+
     // ── Twitter Card ────────────────────────────────────────────────────
 
     public function test_twitter_card_type_output(): void {

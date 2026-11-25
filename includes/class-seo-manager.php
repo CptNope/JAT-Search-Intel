@@ -358,8 +358,9 @@ class SEO_Manager {
     public function get_robots_directives(): array {
         $directives = [];
 
-        if ( is_singular() ) {
-            $post_id = get_queried_object_id();
+        // The posts page is not singular, but its page carries the editor's robots fields (3.8.32).
+        $post_id = is_singular() ? get_queried_object_id() : Title_Engine::posts_page_id();
+        if ( $post_id ) {
             $noindex = get_post_meta( $post_id, '_jat_search_intel_noindex', true );
             $nofollow = get_post_meta( $post_id, '_jat_search_intel_nofollow', true );
 
