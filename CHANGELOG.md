@@ -6,6 +6,11 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.8.32] — 2026-11-25
+
+### Fixed
+- The posts page ignored its own Noindex and Nofollow fields: robots directives were read only on singular views, and the posts page is not one. They now apply there too (the sitemap already left a noindexed posts page out). Found on oberdorferteam.com, whose Journal is kept out of search until its first article.
+
 ## [3.8.31] — 2026-11-25
 
 ### Fixed
