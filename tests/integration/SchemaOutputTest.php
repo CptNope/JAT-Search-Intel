@@ -199,6 +199,15 @@ class SchemaOutputTest extends TestCase {
         $this->assertEquals( 'Schema Test Post', $schema['headline'] );
     }
 
+    public function test_article_schema_uses_seo_description(): void {
+        global $si_test_state;
+        $si_test_state['post_meta'][1]['_jat_search_intel_description'] = 'Design &amp; development, without the agency cost.';
+
+        $schema = $this->make_schema()->get_singular_schema( 1 );
+
+        $this->assertSame( 'Design & development, without the agency cost.', $schema['description'] );
+    }
+
     public function test_article_schema_has_url(): void {
         $mgr    = $this->make_schema();
         $schema = $mgr->get_singular_schema( 1 );

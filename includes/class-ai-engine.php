@@ -24,6 +24,9 @@ class AI_Engine {
     /** @var string Transient key for rate-limit tracking. */
     private const RATE_LIMIT_KEY = 'jat_search_intel_ai_rate_limit';
 
+    /** Length of a rate-limit window, in seconds. */
+    private const RATE_LIMIT_WINDOW = 60;
+
     /** @var string Option key for lifetime token usage. */
     private const TOKEN_USAGE_KEY = 'jat_search_intel_ai_token_usage';
 
@@ -317,11 +320,29 @@ class AI_Engine {
         if ( 'ollama' === $this->get_active_provider() ) {
             return false;
         }
-        $data = get_transient( self::RATE_LIMIT_KEY );
-        if ( false === $data ) {
+        $data = $this->rate_limit_window();
+        if ( null === $data ) {
             return false;
         }
-        return ( $data['count'] ?? 0 ) >= $this->get_rate_limit();
+        return $data['count'] >= $this->get_rate_limit();
+    }
+
+    /**
+     * The current 60-second rate-limit window, or null when none is open.
+     *
+     * @return array{count:int, start:int}|null
+     */
+    private function rate_limit_window(): ?array {
+        $data = get_transient( self::RATE_LIMIT_KEY );
+        if ( ! is_array( $data ) ) {
+            return null;
+        }
+        // Windows saved before 3.8.34 have no start time; treat them as just opened.
+        $start = (int) ( $data['start'] ?? time() );
+        if ( time() - $start >= self::RATE_LIMIT_WINDOW ) {
+            return null;
+        }
+        return [ 'count' => (int) ( $data['count'] ?? 0 ), 'start' => $start ];
     }
 
     /**
@@ -332,20 +353,18 @@ class AI_Engine {
         if ( 'ollama' === $this->get_active_provider() ) {
             return;
         }
-        $data = get_transient( self::RATE_LIMIT_KEY );
-        if ( false === $data ) {
+        $data = $this->rate_limit_window();
+        if ( null === $data ) {
             // Start a new 60-second window.
-            set_transient( self::RATE_LIMIT_KEY, [ 'count' => 1 ], 60 );
+            set_transient( self::RATE_LIMIT_KEY, [ 'count' => 1, 'start' => time() ], self::RATE_LIMIT_WINDOW );
             return;
         }
-        // Increment count without renewing the TTL.
-        $data['count'] = ( $data['count'] ?? 0 ) + 1;
-        $GLOBALS['wpdb']->update(
-            $GLOBALS['wpdb']->options,
-            [ 'option_value' => maybe_serialize( $data ) ],
-            [ 'option_name' => '_transient_' . self::RATE_LIMIT_KEY ]
-        );
-        wp_cache_set( self::RATE_LIMIT_KEY, $data, 'transient' );
+        // Count the request and keep the window's end where it was. Before 3.8.34 the count
+        // was written with wp_cache_set() and no expiry, so with a persistent object cache the
+        // window never closed and AI requests stayed blocked once the limit was reached.
+        ++$data['count'];
+        $remaining = max( 1, self::RATE_LIMIT_WINDOW - ( time() - $data['start'] ) );
+        set_transient( self::RATE_LIMIT_KEY, $data, $remaining );
     }
 
     /**

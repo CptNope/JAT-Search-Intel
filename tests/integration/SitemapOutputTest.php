@@ -75,6 +75,16 @@ class SitemapOutputTest extends TestCase {
         $this->assertSame( '2', $gen->invoke( $sitemap ) );
     }
 
+    public function test_saving_a_published_post_retires_cached_sitemaps(): void {
+        $sitemap = $this->make_sitemap();
+        $gen     = new ReflectionMethod( $sitemap, 'cache_generation' );
+        $gen->setAccessible( true );
+
+        $sitemap->invalidate_for_post( 1 );
+
+        $this->assertSame( '1', $gen->invoke( $sitemap ) );
+    }
+
     // ── Sitemap index ───────────────────────────────────────────────────
 
     public function test_sitemap_index_has_post_sitemap(): void {

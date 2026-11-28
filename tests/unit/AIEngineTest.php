@@ -174,6 +174,51 @@ class AIEngineTest extends TestCase {
         $this->assertTrue( $ai->is_rate_limited() );
     }
 
+    /**
+     * With a persistent object cache the transient stub keeps values forever, like a cache
+     * entry written without an expiry. A window older than 60 seconds must still close.
+     */
+    public function test_rate_limit_window_closes_after_sixty_seconds(): void {
+        global $si_test_state;
+        $si_test_state['transients'] = [
+            'jat_search_intel_ai_rate_limit' => [ 'count' => 31, 'start' => time() - 61 ],
+        ];
+
+        $ai = $this->make();
+        $this->assertFalse( $ai->is_rate_limited() );
+    }
+
+    public function test_record_request_keeps_window_start(): void {
+        global $si_test_state;
+        $start = time() - 20;
+        $si_test_state['transients'] = [
+            'jat_search_intel_ai_rate_limit' => [ 'count' => 5, 'start' => $start ],
+        ];
+
+        $ai     = $this->make( [ 'ai_provider' => 'openai' ] );
+        $record = new ReflectionMethod( $ai, 'record_request' );
+        $record->setAccessible( true );
+        $record->invoke( $ai );
+
+        $saved = $si_test_state['transients']['jat_search_intel_ai_rate_limit'];
+        $this->assertSame( 6, $saved['count'] );
+        $this->assertSame( $start, $saved['start'] );
+    }
+
+    public function test_record_request_opens_new_window_after_expiry(): void {
+        global $si_test_state;
+        $si_test_state['transients'] = [
+            'jat_search_intel_ai_rate_limit' => [ 'count' => 99, 'start' => time() - 120 ],
+        ];
+
+        $ai     = $this->make( [ 'ai_provider' => 'openai' ] );
+        $record = new ReflectionMethod( $ai, 'record_request' );
+        $record->setAccessible( true );
+        $record->invoke( $ai );
+
+        $this->assertSame( 1, $si_test_state['transients']['jat_search_intel_ai_rate_limit']['count'] );
+    }
+
     // ── Token budget ────────────────────────────────────────────────────
 
     public function test_get_token_budget_default_unlimited(): void {

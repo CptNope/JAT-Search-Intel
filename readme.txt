@@ -4,7 +4,7 @@ Tags: seo, schema, llms-txt, ai-search, redirects
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.8.33
+Stable tag: 3.8.34
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -262,6 +262,11 @@ Sends an HTTP HEAD request to each external URL linked from your content to chec
 
 == Changelog ==
 
+= 3.8.34 =
+* Fixed: the structured data for pages now uses your SEO description instead of the first words of the page.
+* Fixed: on hosts with a persistent object cache, the AI rate limit no longer stays on for good once it is reached.
+* Improved: autosaves and revisions no longer clear the sitemap and schema map caches, saving database writes while you edit.
+
 = 3.8.33 =
 * Fixed: on hosts with a persistent object cache (Redis, Memcached), a newly published post or page now shows in the sitemap straight away instead of up to 12 hours later.
 
@@ -483,6 +488,9 @@ Every feature other SEO plugins sell in their premium plans, free.
 Earlier releases are listed in CHANGELOG.md in the development repository.
 
 == Upgrade Notice ==
+
+= 3.8.34 =
+AI tools no longer stay rate-limited on sites with an object cache.
 
 = 3.8.33 =
 New posts reach the sitemap at once on sites with an object cache.

@@ -265,7 +265,7 @@ class Schema_Manager {
             $post        = get_post( $post_id );
             $description = $post ? ( Content_Guard::excerpt( $post ) ?: wp_trim_words( wp_strip_all_tags( strip_shortcodes( Content_Guard::content( $post ) ) ), 30, '...' ) ) : '';
         }
-        return wp_strip_all_tags( $description );
+        return trim( html_entity_decode( wp_strip_all_tags( $description ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
     }
 
     /**
@@ -578,7 +578,9 @@ class Schema_Manager {
             '@type'            => $type,
             '@id'              => get_permalink( $post_id ) . '#' . strtolower( $type ),
             'headline'         => get_the_title( $post_id ),
-            'description'      => wp_trim_words( wp_strip_all_tags( Content_Guard::content( $post ) ), 30, '...' ),
+            // The SEO description, as in the WebPage node and the meta tags; the main entity is merged
+            // into the WebPage node for pages, so a content excerpt here used to replace it (3.8.34).
+            'description'      => $this->get_description( $post_id ),
             'url'              => get_permalink( $post_id ),
             'mainEntityOfPage' => [
                 '@type' => 'WebPage',

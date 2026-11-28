@@ -49,8 +49,8 @@ class Sitemap {
         add_filter( 'wp_sitemaps_enabled', '__return_false' );
 
         // Cache invalidation on content changes
-        add_action( 'save_post', [ $this, 'invalidate_cache' ] );
-        add_action( 'delete_post', [ $this, 'invalidate_cache' ] );
+        add_action( 'save_post', [ $this, 'invalidate_for_post' ] );
+        add_action( 'delete_post', [ $this, 'invalidate_for_post' ] );
         add_action( 'created_term', [ $this, 'invalidate_cache' ] );
         add_action( 'edited_term', [ $this, 'invalidate_cache' ] );
         add_action( 'delete_term', [ $this, 'invalidate_cache' ] );
@@ -81,6 +81,21 @@ class Sitemap {
      */
     private function cache_generation(): string {
         return (string) get_option( self::GENERATION_OPTION, '0' );
+    }
+
+    /**
+     * Invalidate the sitemaps when a post is saved or deleted, skipping revisions,
+     * autosaves and auto-drafts: none of them can change a sitemap, and the block
+     * editor saves them often while someone is writing.
+     *
+     * @param int $post_id Post ID.
+     */
+    public function invalidate_for_post( $post_id ): void {
+        $post_id = (int) $post_id;
+        if ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) || 'auto-draft' === get_post_status( $post_id ) ) {
+            return;
+        }
+        $this->invalidate_cache();
     }
 
     /**
