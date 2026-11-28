@@ -263,6 +263,7 @@ Sends an HTTP HEAD request to each external URL linked from your content to chec
 == Changelog ==
 
 = 3.8.34 =
+* Fixed: the structured data for pages now uses your SEO description instead of the first words of the page.
 * Fixed: on hosts with a persistent object cache, the AI rate limit no longer stays on for good once it is reached.
 * Improved: autosaves and revisions no longer clear the sitemap and schema map caches, saving database writes while you edit.
 
