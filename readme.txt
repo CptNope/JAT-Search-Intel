@@ -4,7 +4,7 @@ Tags: seo, schema, llms-txt, ai-search, redirects
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.8.32
+Stable tag: 3.8.33
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -262,6 +262,9 @@ Sends an HTTP HEAD request to each external URL linked from your content to chec
 
 == Changelog ==
 
+= 3.8.33 =
+* Fixed: on hosts with a persistent object cache (Redis, Memcached), a newly published post or page now shows in the sitemap straight away instead of up to 12 hours later.
+
 = 3.8.32 =
 * Fixed: the Noindex and Nofollow settings on the page chosen as the blog (posts) page now take effect on that page.
 
@@ -480,6 +483,9 @@ Every feature other SEO plugins sell in their premium plans, free.
 Earlier releases are listed in CHANGELOG.md in the development repository.
 
 == Upgrade Notice ==
+
+= 3.8.33 =
+New posts reach the sitemap at once on sites with an object cache.
 
 = 3.8.32 =
 The blog page's Noindex setting now works.

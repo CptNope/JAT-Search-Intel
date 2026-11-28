@@ -71,10 +71,30 @@ class Sitemap {
     }
 
     /**
+     * Option holding the sitemap cache generation. It is part of every cache key, so raising
+     * it retires every cached sitemap at once.
+     */
+    private const GENERATION_OPTION = 'jat_search_intel_sitemap_generation';
+
+    /**
+     * The current sitemap cache generation.
+     */
+    private function cache_generation(): string {
+        return (string) get_option( self::GENERATION_OPTION, '0' );
+    }
+
+    /**
      * Invalidate all sitemap transient caches.
+     *
+     * With a persistent object cache (Redis, Memcached) transients never reach the options
+     * table, so deleting rows there cleared nothing and a new post stayed out of the sitemap
+     * for up to CACHE_TTL. Raising the generation changes every cache key, which works with
+     * either store; the rows are still deleted so sites without an object cache don't keep
+     * stale copies until they expire.
      */
     public function invalidate_cache(): void {
         global $wpdb;
+        update_option( self::GENERATION_OPTION, (string) ( (int) $this->cache_generation() + 1 ), false );
         $like        = $wpdb->esc_like( '_transient_jat_search_intel_sitemap_' ) . '%';
         $like_timeout = $wpdb->esc_like( '_transient_timeout_jat_search_intel_sitemap_' ) . '%';
         $wpdb->query(
@@ -172,7 +192,7 @@ class Sitemap {
 
         // The settings that shape the sitemaps are part of the key, so changing them
         // (for example adding a post type) shows at once, even with a persistent object cache.
-        $cache_key = 'jat_search_intel_sitemap_' . $type . '_' . $page . '_' . $this->settings_hash();
+        $cache_key = 'jat_search_intel_sitemap_' . $type . '_' . $page . '_' . $this->settings_hash() . '_' . $this->cache_generation();
         $cached    = get_transient( $cache_key );
 
         if ( false !== $cached ) {
@@ -748,7 +768,7 @@ class Sitemap {
 
         $types = array_values( array_filter( array_map( 'sanitize_key', explode( ',', (string) $atts['post_types'] ) ), 'post_type_exists' ) );
         $limit = max( 1, min( 2000, absint( $atts['limit'] ) ) );
-        $key   = 'jat_search_intel_sitemap_html_' . md5( implode( ',', $types ) . '|' . $limit );
+        $key   = 'jat_search_intel_sitemap_html_' . md5( implode( ',', $types ) . '|' . $limit . '|' . $this->cache_generation() );
 
         $cached = get_transient( $key );
         if ( false !== $cached ) {
