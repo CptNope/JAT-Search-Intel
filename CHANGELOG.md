@@ -6,6 +6,11 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.8.33] — 2026-11-28
+
+### Fixed
+- With a persistent object cache (Redis, Memcached), saving a post did not clear the cached sitemaps: transients live in the object cache there, and `invalidate_cache()` only deleted rows from the options table. A new post stayed out of its sitemap for up to 12 hours. The cache keys now carry a generation number that saving raises, so every cached sitemap (XML and the HTML sitemap shortcode) is retired at once with either store. Found when a new service page on jeremyanderson.tech was missing from `sitemap-service.xml` on Cloudways.
+
 ## [3.8.32] — 2026-11-25
 
 ### Fixed

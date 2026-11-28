@@ -47,6 +47,34 @@ class SitemapOutputTest extends TestCase {
         ];
     }
 
+    // ── Cache invalidation ──────────────────────────────────────────────
+
+    /**
+     * With a persistent object cache, transients are not rows in the options table, so the
+     * SQL delete in invalidate_cache() removes nothing (the test stub's query() does nothing
+     * either). Saving a post must still retire the cached sitemap.
+     */
+    public function test_invalidate_cache_retires_cached_sitemap_with_object_cache(): void {
+        global $si_test_state;
+        $sitemap = $this->make_sitemap();
+        $hash    = new ReflectionMethod( $sitemap, 'settings_hash' );
+        $hash->setAccessible( true );
+        $gen     = new ReflectionMethod( $sitemap, 'cache_generation' );
+        $gen->setAccessible( true );
+
+        $key_before = 'jat_search_intel_sitemap_post_1_' . $hash->invoke( $sitemap ) . '_' . $gen->invoke( $sitemap );
+        $si_test_state['transients'][ $key_before ] = '<urlset>stale</urlset>';
+
+        $sitemap->invalidate_cache();
+
+        $key_after = 'jat_search_intel_sitemap_post_1_' . $hash->invoke( $sitemap ) . '_' . $gen->invoke( $sitemap );
+        $this->assertNotSame( $key_before, $key_after );
+        $this->assertFalse( get_transient( $key_after ) );
+
+        $sitemap->invalidate_cache();
+        $this->assertSame( '2', $gen->invoke( $sitemap ) );
+    }
+
     // ── Sitemap index ───────────────────────────────────────────────────
 
     public function test_sitemap_index_has_post_sitemap(): void {
