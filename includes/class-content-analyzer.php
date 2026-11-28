@@ -199,7 +199,7 @@ class Content_Analyzer {
             'seo_score'       => $this->get_seo_score( $post_id, $content, $title, $keyword, $description, $text, $word_count ),
             'aeo_score'       => $this->get_aeo_score( $post_id, $content, $text, $word_count ),
             'geo_score'       => $this->get_geo_score( $post_id, $content, $text, $word_count ),
-            'readability'     => $this->get_readability_score( $text ),
+            'readability'     => $this->get_readability_score( self::readability_text( $content ) ),
             'word_count'      => $word_count,
             'keyword_data'    => $keyword ? $this->get_keyword_analysis( $text, $content, $title, $keyword, $description ) : null,
             'content_checks'  => $this->get_content_checks( $post_id, $content, $text, $word_count ),
@@ -575,6 +575,28 @@ class Content_Analyzer {
     }
 
     /**
+     * Plain text for readability scoring.
+     *
+     * Each heading, list item, paragraph and table cell ends a sentence, as it does for a
+     * reader, even without a full stop. Before 3.8.35 the tags were simply stripped, so a list
+     * of features or a run of headings counted as one long sentence and pages built from lists
+     * and cards scored near zero. Code is left out: it isn't prose.
+     *
+     * @param string $content HTML content.
+     * @return string
+     */
+    public static function readability_text( string $content ): string {
+        $html = (string) preg_replace( '#<(script|style|pre|code|svg|noscript)\b[^>]*>.*?</\1>#is', ' ', $content );
+        $html = (string) preg_replace( '#</(h[1-6]|li|p|td|th|dt|dd|figcaption|blockquote|summary|caption)>#i', '$0. ', $html );
+        $html = (string) preg_replace( '#<br\s*/?>#i', '. ', $html );
+        $text = html_entity_decode( wp_strip_all_tags( $html ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+        // A block that already ended with punctuation, or held no words, adds no sentence.
+        $text = (string) preg_replace( '/([.!?:;])(\s*\.)+(?=\s|$)/u', '$1', $text );
+        $text = (string) preg_replace( '/(^|\s)(\.\s*)+(?=\s|$)/u', '$1', $text );
+        return trim( (string) preg_replace( '/\s+/u', ' ', $text ) );
+    }
+
+    /**
      * Flesch-Kincaid readability analysis.
      */
     public function get_readability_score( string $text ): array {
@@ -582,7 +604,9 @@ class Content_Analyzer {
             return [ 'score' => 0, 'grade' => 'N/A', 'label' => __( 'No content to analyze', 'jat-search-intel' ) ];
         }
 
-        $sentences   = max( preg_match_all( '/[.!?]+/', $text ), 1 );
+        // A full stop inside a version number, price or domain (3.8, $1.50, example.com) isn't a
+        // sentence end; only punctuation followed by a space or the end of the text is.
+        $sentences   = max( preg_match_all( '/[.!?]+(?=\s|$)/u', $text ), 1 );
         $words       = max( str_word_count( $text ), 1 );
         $syllables   = $this->count_syllables( $text );
 

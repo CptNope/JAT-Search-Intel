@@ -6,6 +6,11 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.8.35] — 2026-11-28
+
+### Fixed
+- Readability scored pages built from headings, lists, cards and tables far too low (often 0–10): the HTML was stripped to one run of text, so a heading and the paragraph after it, or a whole list without full stops, counted as a single sentence. `Content_Analyzer::readability_text()` now ends a sentence at each heading, paragraph, list item, table cell, caption and line break, drops code, SVG and scripts, and the sentence count ignores full stops inside numbers and domains (`3.8.34`, `example.com`). On jeremyanderson.tech the Projects page went from 8.9 to about 38 with no change in its wording. Existing scores update when content is rescored (Bulk Tools or `wp jat-search-intel rescore`).
+
 ## [3.8.34] — 2026-11-28
 
 ### Fixed
