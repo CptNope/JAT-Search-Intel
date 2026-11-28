@@ -189,6 +189,33 @@ class ContentAnalyzerTest extends TestCase {
         $this->assertEquals( 0, $result['score'] );
     }
 
+    public function test_readability_text_ends_sentences_at_blocks(): void {
+        $html = '<h2>Features</h2><ul><li>Offline maps</li><li>Solar power.</li></ul><p>It runs anywhere</p>';
+
+        $this->assertSame( 'Features. Offline maps. Solar power. It runs anywhere.', Content_Analyzer::readability_text( $html ) );
+    }
+
+    public function test_readability_text_drops_code_and_empty_blocks(): void {
+        $html = '<p>Run the command.</p><pre><code>npm install --save some-really-long-package-name</code></pre><p></p><p>Done.</p>';
+
+        $this->assertSame( 'Run the command. Done.', Content_Analyzer::readability_text( $html ) );
+    }
+
+    public function test_full_stops_inside_numbers_and_domains_are_not_sentence_ends(): void {
+        $result = $this->analyzer->get_readability_score( 'Version 3.8.34 is on example.com now. Get it today.' );
+
+        $this->assertSame( 2, $result['sentence_count'] );
+    }
+
+    public function test_list_page_is_not_scored_as_one_sentence(): void {
+        $items = str_repeat( '<li>Fast pages for local shops</li>', 12 );
+        $text  = Content_Analyzer::readability_text( '<h2>What you get</h2><ul>' . $items . '</ul>' );
+        $score = $this->analyzer->get_readability_score( $text );
+
+        $this->assertSame( 13, $score['sentence_count'] );
+        $this->assertGreaterThan( 60, $score['score'] );
+    }
+
     // ── Word count ──────────────────────────────────────────────────────
 
     public function test_word_count_strips_html(): void {
