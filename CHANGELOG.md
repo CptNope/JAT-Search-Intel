@@ -6,6 +6,14 @@ This project adheres to [Semantic Versioning](https://semver.org/) and follows t
 
 ---
 
+## [3.8.34] — 2026-11-28
+
+### Fixed
+- With a persistent object cache, the AI rate limit never reset once reached: each request rewrote the counter with `wp_cache_set()` and no expiry, so the 60-second window never closed and every AI feature answered "rate limited" until the cache was flushed. The window now records when it opened and is saved with `set_transient()` for the time it has left, which works with either store.
+
+### Changed
+- Revisions, autosaves and auto-drafts no longer clear the sitemap cache or bump the schema map version. The schema map version is an autoloaded option, so each autosave also rewrote the cached copy of every autoloaded option.
+
 ## [3.8.33] — 2026-11-28
 
 ### Fixed

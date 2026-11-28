@@ -73,8 +73,17 @@ class Schema_Map {
 
 	/**
 	 * Invalidate cached feeds when content changes.
+	 *
+	 * @param int $post_id Post saved or deleted (0 when called directly).
 	 */
-	public static function bump_version(): void {
+	public static function bump_version( $post_id = 0 ): void {
+		$post_id = (int) $post_id;
+		// Revisions, autosaves and auto-drafts never appear in the map. Skipping them saves a
+		// write to an autoloaded option, which also refreshes the cached copy of every autoloaded
+		// option, each time the block editor autosaves.
+		if ( $post_id && ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) || 'auto-draft' === get_post_status( $post_id ) ) ) {
+			return;
+		}
 		update_option( self::VERSION_OPTION, uniqid( '', true ), true );
 	}
 
